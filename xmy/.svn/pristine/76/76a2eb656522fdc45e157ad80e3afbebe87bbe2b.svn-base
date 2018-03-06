@@ -1,0 +1,10 @@
+#mail.host=smtp.qiye.163.com
+mail.host=smtp.mxhichina.com
+mail.transport.protocol=smtp
+mail.smtp.auth=true
+mail.charset=utf-8
+#mail.sendemail=noreply@ppgtechnology.com
+mail.sendemail=noreply@time-cost.com
+
+mail.top=d
+mail.footer=d

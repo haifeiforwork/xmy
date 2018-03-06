@@ -1,0 +1,61 @@
+/**
+ * 
+ */
+	$(function() {
+		loadData(2);
+	});
+
+contentTag = $("#content");
+
+	Date.prototype.toLocaleString = function() {
+	    return this.getFullYear() + "-" + (this.getMonth() + 1) + "-" + this.getDate() + "         " + this.getHours() + ":" + this.getMinutes() + ":" + this.getSeconds();
+	};
+	
+	$(".pull-left").click(function() {
+		location.href = "mine/center";
+	});
+	
+	callback = function(data) {
+		$.each(data, function(index, value) {
+			one = $("<div class='weui-form-preview__bd'></div>");
+			moneyPoints = $("<div class='weui-form-preview__item'><label class='weui-form-preview__label'>积分</label><span class='weui-form-preview__value'></span></div>");
+			spendType = $("<div class='weui-form-preview__item'><label class='weui-form-preview__label'>类型</label><span class='weui-form-preview__value'></span></div>");
+			statuss = $("<div class='weui-form-preview__item'><label class='weui-form-preview__label'>状态</label><span class='weui-form-preview__value'></span></div>");
+			remarks = $("<div class='weui-form-preview__item'><label class='weui-form-preview__label'>备注</label><span class='weui-form-preview__value'></span></div>");
+			creatTime = $("<div class='weui-form-preview__item'><label class='weui-form-preview__label'>创建时间</label><span class='weui-form-preview__value'></span></div>");
+			moneyPoints.children("span").html(value.moneyPoint);
+			if(value.spendType == 1)
+				spendType.children("span").html("获得");
+			else if(value.spendType == 2)
+				spendType.children("span").html("花费");
+			statuss.children("span").html("有效");
+			remarks.children("span").html(value.remarks);
+			time = new Date(value.creatTime);
+			timeStr = time.toLocaleString();
+			creatTime.children("span").html(timeStr);
+			
+			one.append(moneyPoints);
+			one.append(spendType);
+			one.append(statuss);
+			one.append(remarks);
+			one.append(creatTime);
+			
+			contentTag.append(one);
+		});
+		
+			
+	}
+			
+	loadData = function(type) {
+		$.ajax({
+			url : 'user/getUserBillOrPointFlow',
+			type : 'post',
+			data : {'type' : type},
+			dataType : 'json',
+			success : function(data) {
+				callback(data.obj);
+			}
+		});
+	}
+
+	

@@ -1,0 +1,24 @@
+/**
+ * 
+ */
+
+require(["common"], function() {
+	
+	$("img").click(function() {
+		$.ajax({
+			url : 'mine/changeAvatar',
+			data : {'imgPatho' : $(this).attr("trueSrc")},
+			type : 'post',
+			dataType : 'json',
+			success : function(data) {
+				location.href = "mine/center";
+			},
+			error : function(msg) {
+				$.alert("服务器繁忙", function() {
+					location.href = "mine/center";
+				});
+			}
+		});
+	});
+	
+});

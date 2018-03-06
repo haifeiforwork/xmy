@@ -1,0 +1,14 @@
+package com.zfj.xmy.goods.persistence.wap.dao;
+
+import java.util.List;
+
+import com.zfj.xmy.goods.persistence.wap.pojo.dto.GoodsQueryVo;
+import com.zfj.xmy.goods.persistence.wap.pojo.dto.GoodsVo;
+
+public interface GoodsVoExMapper {
+	
+	List<GoodsVo> findGoodsByUserId(Long id);
+	
+	List<GoodsVo> findGoodsByUserIdAndCategoryName(GoodsQueryVo vo);
+	
+}

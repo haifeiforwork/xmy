@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.config.persistence.dao.CommonLimitActivityExMapper" >
+  		
+ 	<resultMap  id="ActivityGoodsResultMap" type="com.zfj.xmy.config.persistence.pojo.LimitActivityGoodsDir">
+		<id column="activityId" property="activityId" jdbcType="BIGINT" />
+		<result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+		<result column="limit_num" property="limitNum" jdbcType="INTEGER" />
+		<result column="all_num" property="allNum" jdbcType="INTEGER" />
+	    <result column="complete_num" property="completeNum" jdbcType="INTEGER" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	</resultMap>
+  	
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.Goods" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="short_name" property="shortName" jdbcType="VARCHAR" />
+    <result column="full_name" property="fullName" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="brand_id" property="brandId" jdbcType="BIGINT" />
+    <result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+    <result column="brand_code" property="brandCode" jdbcType="VARCHAR" />
+    <result column="supplier_id" property="supplierId" jdbcType="BIGINT" />
+    <result column="supplier_name" property="supplierName" jdbcType="VARCHAR" />
+    <result column="supplier_code" property="supplierCode" jdbcType="VARCHAR" />
+    <result column="supply_strategy" property="supplyStrategy" jdbcType="INTEGER" />
+    <result column="unit_id" property="unitId" jdbcType="BIGINT" />
+    <result column="unit_name" property="unitName" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="remark_num" property="remarkNum" jdbcType="VARCHAR" />
+    <result column="alarm_num" property="alarmNum" jdbcType="INTEGER" />
+    <result column="weight" property="weight" jdbcType="VARCHAR" />
+    <result column="cost_price" property="costPrice" jdbcType="DECIMAL" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="market_price" property="marketPrice" jdbcType="DECIMAL" />
+    <result column="phone_price" property="phonePrice" jdbcType="DECIMAL" />
+    <result column="vip_price" property="vipPrice" jdbcType="DECIMAL" />
+    <result column="market" property="market" jdbcType="INTEGER" />
+    <result column="area" property="area" jdbcType="VARCHAR" />
+    <result column="is_putway" property="isPutway" jdbcType="INTEGER" />
+    <result column="is_sale" property="isSale" jdbcType="INTEGER" />
+    <result column="is_search" property="isSearch" jdbcType="INTEGER" />
+    <result column="is_delivery" property="isDelivery" jdbcType="INTEGER" />
+    <result column="des" property="des" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="BIGINT" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="is_desmodel" property="isDesmodel" jdbcType="INTEGER" />
+    <result column="is_recycle" property="isRecycle" jdbcType="INTEGER" />
+    <result column="category_id" property="categoryId" jdbcType="VARCHAR" />
+    <result column="category_code" property="categoryCode" jdbcType="VARCHAR" />
+    <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="putway_time" property="putwayTime" jdbcType="TIMESTAMP" />
+    <result column="outway_time" property="outwayTime" jdbcType="TIMESTAMP" />
+    <result column="standard" property="standard" jdbcType="VARCHAR" />
+    <result column="default_buynum" property="defaultBuynum" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="img_path" property="imgPath" jdbcType="VARCHAR" />
+    <result column="wm_id" property="wmId" jdbcType="BIGINT" />
+    <result column="is_ud" property="isUd" jdbcType="INTEGER" />
+    <result column="sum_deal" property="sumDeal" jdbcType="INTEGER" />
+    <result column="sum_comment" property="sumComment" jdbcType="INTEGER" />
+    <result column="is_China" property="isChina" jdbcType="INTEGER" />
+    <result column="keyword" property="keyword" jdbcType="VARCHAR" />
+    <result column="points" property="points" jdbcType="INTEGER" />
+    <result column="storage_method" property="storageMethod" jdbcType="VARCHAR" />
+    <result column="pack_method" property="packMethod" jdbcType="VARCHAR" />
+  </resultMap>
+  	
+  	
+  	
+  	<!--@author hexw 查询活动商品  -->
+	<select id="findActivityGoods" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="ActivityGoodsResultMap">
+		select  a.limit_id activityId,a.limit_num limitNum,a.all_num allNum,a.complete_num completeNum,b.id goodsId,b.name name
+		from limit_goods a
+		INNER JOIN goods b on  a.goods_id = b.id
+		LEFT JOIN watermark_image c on  b.wm_id = c.id
+		<if test="_parameter != null" >
+		  <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null" >
+		  order by ${orderByClause}
+		</if>
+	</select>
+  	
+  	<!-- 查询用户参与活动的次数    @auther  hexw -->
+	<select id="countLimitAcivity" parameterType="com.appdev.db.common.CriteriaParameter" resultType="Integer">
+			select count(DISTINCT(a.id)) from `order` a LEFT JOIN order_goods b on a.id = b.order_id
+			<if test="_parameter != null" ><include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	</select>
+	
+	
+	<!-- 查询用户购买同一个活动商品的数量    @auther  hexw -->
+	<select id="countLimitAcivityGoodsNum" parameterType="com.appdev.db.common.CriteriaParameter" resultType="Integer">
+			select b.num from `order` a 
+			LEFT JOIN order_goods b on a.id = b.order_id
+			<if test="_parameter != null" ><include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	</select>
+	
+	<!-- 查询用户购买同一个活动商品的    @auther  hexw -->
+	<select id="countLimitAcivityGoods" parameterType="com.appdev.db.common.CriteriaParameter" resultType="Integer">
+			select count(b.id) from `order` a 
+			LEFT JOIN order_goods b on a.id = b.order_id
+			<if test="_parameter != null" ><include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	</select>
+	
+	
+	<!-- 上线活动 不包含跨境专区和企业定制的商品 -->
+   <select id="findOnlineActivityGoods" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap" >
+		select g.* from goods g 
+		INNER JOIN goods_category gc on g.id = gc.goods_id
+		inner join term_data td on gc.cid = td.id 
+		inner join term_data parenttd on td.parent_id = parenttd.id and  parenttd.name !='跨境专区' and parenttd.name != '企业定制'
+	   <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	   <if test="orderByClause != null" >
+	     order by ${orderByClause}
+	   </if>
+  </select>
+  
+  <!-- 上线活动 不包含跨境专区和企业定制的商品 -->
+   <select id="findOnlineActivityGoodsByGoodsId" resultMap="BaseResultMap" >
+		select g.* from goods g 
+		INNER JOIN goods_category gc on g.id = gc.goods_id
+		inner join term_data td on gc.cid = td.id 
+		inner join term_data parenttd on td.parent_id = parenttd.id and  parenttd.name !='跨境专区' and parenttd.name != '企业定制'
+	   <if test="id != null" >
+	      where g.id=#{id}
+	    </if>
+   </select>
+	
+</mapper>

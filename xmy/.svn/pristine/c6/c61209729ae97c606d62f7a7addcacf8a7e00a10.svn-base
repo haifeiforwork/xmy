@@ -1,0 +1,41 @@
+package com.zfj.xmy.goods.persistence.app.pojo.dto;
+
+public class AppGoodsInDto {
+	private Integer orderMethod;//排序方式
+	private String  goodsName;//商品名称
+	private Long twoTypeId;//二级分类id
+	private Long participleId;//分词id
+	private Integer isDelivery;//是否支持全国配送 0; 是 1：否
+	
+	public Integer getIsDelivery() {
+		return isDelivery;
+	}
+	public void setIsDelivery(Integer isDelivery) {
+		this.isDelivery = isDelivery;
+	}
+	public Integer getOrderMethod() {
+		return orderMethod;
+	}
+	public void setOrderMethod(Integer orderMethod) {
+		this.orderMethod = orderMethod;
+	}
+	public String getGoodsName() {
+		return goodsName;
+	}
+	public void setGoodsName(String goodsName) {
+		this.goodsName = goodsName;
+	}
+	public Long getTwoTypeId() {
+		return twoTypeId;
+	}
+	public void setTwoTypeId(Long twoTypeId) {
+		this.twoTypeId = twoTypeId;
+	}
+	public Long getParticipleId() {
+		return participleId;
+	}
+	public void setParticipleId(Long participleId) {
+		this.participleId = participleId;
+	}
+	
+}

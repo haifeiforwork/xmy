@@ -1,0 +1,120 @@
+package com.zfj.xmy.common.service.impl;
+
+import java.util.List;
+
+import org.apache.ibatis.session.RowBounds;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.CollectionUtil;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.persistence.dao.JiguangPushLabelMapper;
+import com.zfj.xmy.common.persistence.dao.JiguangPushUserLabelMapper;
+import com.zfj.xmy.common.persistence.pojo.JiguangPushLabel;
+import com.zfj.xmy.common.persistence.pojo.JiguangPushUserLabel;
+import com.zfj.xmy.common.service.CommonPushLabelService;
+
+@Service
+public class CommonPushLabelServiceImpl implements CommonPushLabelService {
+
+	@Autowired
+	private JiguangPushLabelMapper jiguangPushLabelMapper;
+	
+	@Autowired
+	private JiguangPushUserLabelMapper jiguangPushUserLabelMapper;
+	
+	@Override
+	public List<JiguangPushLabel> getJiguangPushLabelList(CriteriaParameter para, PageBean pageBean) {
+		
+		return jiguangPushLabelMapper.selectByExampleAndPage(para, pageBean.getRowBounds());
+	}
+
+
+	@Override
+	public void addLabel(String labelName) {
+		if (StringUtil.isEmpty(labelName)) {
+			throw new BusinessException("标签名不能为空");
+		}
+		JiguangPushLabel jiguangPushLabel = new JiguangPushLabel();
+		jiguangPushLabel.setLabel(labelName);
+		jiguangPushLabel.setCreateTimestamp(DateUtil.date());
+		jiguangPushLabelMapper.insertSelective(jiguangPushLabel);
+	}
+
+
+	@Override
+	public void modifyLabel(Long id, String labelName) {
+		if (StringUtil.isEmpty(labelName)) {
+			throw new BusinessException("标签名不能为空");
+		}
+		JiguangPushLabel jiguangPushLabel = jiguangPushLabelMapper.selectByPrimaryKey(id);	
+		if (ObjectUtil.isNull(jiguangPushLabel)) {
+			throw new BusinessException("标签不存在");
+		}
+		jiguangPushLabel.setLabel(labelName);
+		jiguangPushLabelMapper.updateByPrimaryKey(jiguangPushLabel);
+	}
+
+
+	@Override
+	public void delLabel(Long id) {
+		if (ObjectUtil.isNull(id)) {
+			throw new BusinessException("请选择要删除的标签");
+		}
+		jiguangPushLabelMapper.deleteByPrimaryKey(id);
+	}
+	
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void bindLabelToUser(Long userid,Long labelid) {
+		if (ObjectUtil.isNull(userid)) {
+			throw new BusinessException("请选择添加的用户");
+		}
+		if (ObjectUtil.isNull(labelid)) {
+			throw new BusinessException("请选择添加的标签");
+		}
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		
+		//1.检查是否添加过
+		criteria.equalTo("user_id", userid);
+		criteria.equalTo("label_id", labelid);
+		List<JiguangPushUserLabel> jiguangPushUserLabels = jiguangPushUserLabelMapper.selectByExample(parameter);
+		if (CollectionUtil.isNotEmpty(jiguangPushUserLabels)) {
+			throw new BusinessException("已经添加过了");
+		}
+		
+		//2.添加标签给用户
+		JiguangPushUserLabel jiguangPushUserLabel = new JiguangPushUserLabel();
+		jiguangPushUserLabel.setCreateTimestamp(DateUtil.date());
+		jiguangPushUserLabel.setLabelId(labelid+"");
+		jiguangPushUserLabel.setUserId(userid);
+		jiguangPushUserLabelMapper.insertSelective(jiguangPushUserLabel);
+	}
+
+
+	@Override
+	public List<JiguangPushLabel> getJiguangPushLabelList(String search,
+			PageBean pageBean) {
+		CriteriaParameter para = new CriteriaParameter();
+		Criteria criteria = para.createCriteria();
+		if (!StringUtil.isEmpty(search)) {
+			criteria.like("label", "%"+search+"%");
+		}
+		return getJiguangPushLabelList(para,pageBean);
+	}
+	
+	@Override
+	public List<JiguangPushLabel> getAllJiguangPushLabelList() {
+		CriteriaParameter para = new CriteriaParameter();
+		return jiguangPushLabelMapper.selectByExample(para);
+	}
+}

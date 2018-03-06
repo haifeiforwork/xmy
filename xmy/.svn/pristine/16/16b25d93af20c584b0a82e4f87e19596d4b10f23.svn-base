@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.order.persistence.cms.dao.OrderExcleMapper" >
+<resultMap id="BaseResultMap" type="com.zfj.xmy.order.persistence.cms.pojo.dto.OrderExcleDto" >
+    <result column="no" property="no" jdbcType="VARCHAR" />
+    <result column="pay_type" property="payType" jdbcType="INTEGER" />
+    <result column="pay" property="pay" jdbcType="DECIMAL" />
+    <result column="actual" property="autal" jdbcType="DECIMAL" />
+    <result column="total" property="total" jdbcType="DECIMAL" />
+    <result column="create_time" property="caretDate" jdbcType="CHAR" />
+    <result column="business_remark" property="remark" jdbcType="VARCHAR" />
+    <result column="coupon_id" property="couponId" jdbcType="BIGINT" />
+    <result column="chanid" property="trable" jdbcType="INTEGER" />
+  </resultMap>
+  
+  <!-- 根据时间段查询已经发货的订单信息 -->
+	<select id="findOrderExcleDto" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+		select o.id,o.create_time,o.ship_status,o.pay_type,o.no,o.total,o.pay,o.actual,tp.chanid,tp.tranmoney from `order` o LEFT JOIN trade_production tp ON o.id=tp.business_order_id 
+		<if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		order by id desc
+	</select>
+</mapper>

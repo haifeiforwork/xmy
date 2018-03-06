@@ -1,0 +1,15 @@
+require(["common"],function(){
+	
+	var orderId = $("#orderId").val() ;
+	
+	//后退
+	$(".pull-left").click(function() {
+		window.history.back(-1) ;
+	});
+	
+	//加载信息
+	/*$.commonAjax(orderId,"order/logisticsContent/"+orderId,"text",function(data){
+		$(".container").html(data) ;
+	}) ;*/
+	
+});

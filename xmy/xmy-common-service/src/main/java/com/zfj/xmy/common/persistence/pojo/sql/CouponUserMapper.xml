@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.CouponUserMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.CouponUser" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="coupon_id" property="couponId" jdbcType="BIGINT" />
+    <result column="receive_time" property="receiveTime" jdbcType="TIMESTAMP" />
+    <result column="use_time" property="useTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="paper_coupon_code" property="paperCouponCode" jdbcType="VARCHAR" />
+    <result column="coupon_no" property="couponNo" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, coupon_id, receive_time, use_time, `status`, `type`, paper_coupon_code, 
+    coupon_no
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from coupon_user
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from coupon_user
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from coupon_user
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from coupon_user
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update coupon_user
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.couponId != null" >
+        coupon_id = #{record.couponId,jdbcType=BIGINT},
+      </if>
+      <if test="record.receiveTime != null" >
+        receive_time = #{record.receiveTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.useTime != null" >
+        use_time = #{record.useTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.status != null" >
+        `status` = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.type != null" >
+        `type` = #{record.type,jdbcType=INTEGER},
+      </if>
+      <if test="record.paperCouponCode != null" >
+        paper_coupon_code = #{record.paperCouponCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.couponNo != null" >
+        coupon_no = #{record.couponNo,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update coupon_user
+    set id = #{record.id,jdbcType=BIGINT},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      coupon_id = #{record.couponId,jdbcType=BIGINT},
+      receive_time = #{record.receiveTime,jdbcType=TIMESTAMP},
+      use_time = #{record.useTime,jdbcType=TIMESTAMP},
+      `status` = #{record.status,jdbcType=INTEGER},
+      `type` = #{record.type,jdbcType=INTEGER},
+      paper_coupon_code = #{record.paperCouponCode,jdbcType=VARCHAR},
+      coupon_no = #{record.couponNo,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from coupon_user
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from coupon_user
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.CouponUser" useGeneratedKeys="true" keyProperty="id" >
+    insert into coupon_user (user_id, coupon_id, receive_time, 
+      use_time, `status`, `type`, 
+      paper_coupon_code, coupon_no)
+    values (#{userId,jdbcType=BIGINT}, #{couponId,jdbcType=BIGINT}, #{receiveTime,jdbcType=TIMESTAMP}, 
+      #{useTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, 
+      #{paperCouponCode,jdbcType=VARCHAR}, #{couponNo,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.CouponUser" useGeneratedKeys="true" keyProperty="id" >
+    insert into coupon_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="couponId != null" >
+        coupon_id,
+      </if>
+      <if test="receiveTime != null" >
+        receive_time,
+      </if>
+      <if test="useTime != null" >
+        use_time,
+      </if>
+      <if test="status != null" >
+        `status`,
+      </if>
+      <if test="type != null" >
+        `type`,
+      </if>
+      <if test="paperCouponCode != null" >
+        paper_coupon_code,
+      </if>
+      <if test="couponNo != null" >
+        coupon_no,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="couponId != null" >
+        #{couponId,jdbcType=BIGINT},
+      </if>
+      <if test="receiveTime != null" >
+        #{receiveTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="useTime != null" >
+        #{useTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="paperCouponCode != null" >
+        #{paperCouponCode,jdbcType=VARCHAR},
+      </if>
+      <if test="couponNo != null" >
+        #{couponNo,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.CouponUser" >
+    update coupon_user
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="couponId != null" >
+        coupon_id = #{couponId,jdbcType=BIGINT},
+      </if>
+      <if test="receiveTime != null" >
+        receive_time = #{receiveTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="useTime != null" >
+        use_time = #{useTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        `type` = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="paperCouponCode != null" >
+        paper_coupon_code = #{paperCouponCode,jdbcType=VARCHAR},
+      </if>
+      <if test="couponNo != null" >
+        coupon_no = #{couponNo,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.CouponUser" >
+    update coupon_user
+    set user_id = #{userId,jdbcType=BIGINT},
+      coupon_id = #{couponId,jdbcType=BIGINT},
+      receive_time = #{receiveTime,jdbcType=TIMESTAMP},
+      use_time = #{useTime,jdbcType=TIMESTAMP},
+      `status` = #{status,jdbcType=INTEGER},
+      `type` = #{type,jdbcType=INTEGER},
+      paper_coupon_code = #{paperCouponCode,jdbcType=VARCHAR},
+      coupon_no = #{couponNo,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

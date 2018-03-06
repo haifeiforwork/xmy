@@ -1,0 +1,31 @@
+package com.zfj.xmy.activity.persistence.pc.pojo.dto;
+
+import java.io.Serializable;
+import java.util.List;
+
+import com.zfj.xmy.common.persistence.pojo.CategoryWordSeg;
+import com.zfj.xmy.common.persistence.pojo.TermData;
+
+public class PcDownColumDto extends TermData implements Serializable{
+	private List<PcDownColumDto> childTermData;//子栏目
+	
+	private List<CategoryWordSeg> childCategory;//分词
+	
+	public List<CategoryWordSeg> getChildCategory() {
+		return childCategory;
+	}
+
+	public void setChildCategory(List<CategoryWordSeg> childCategory) {
+		this.childCategory = childCategory;
+	}
+
+	public List<PcDownColumDto> getChildTermData() {
+		return childTermData;
+	}
+
+	public void setChildTermData(List<PcDownColumDto> childTermData) {
+		this.childTermData = childTermData;
+	}
+
+	
+}

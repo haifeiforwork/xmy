@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zfj.xmy.goods.persistence.pc.dao.PcWrodExMapper">
+<!-- 查询商品的二级分类下的分词的父级名称并去重复 -->
+<select id="findTowName" parameterType="com.appdev.db.common.CriteriaParameter" resultType="String">
+		select distinct word_seg from category_word_seg <if test="_parameter != null" >
+		     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+</select>
+</mapper>

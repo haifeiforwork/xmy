@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.ActivityQuestionMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.ActivityQuestion" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="activity_id" property="activityId" jdbcType="BIGINT" />
+    <result column="activity_question" property="activityQuestion" jdbcType="VARCHAR" />
+    <result column="answer_a" property="answerA" jdbcType="VARCHAR" />
+    <result column="answer_b" property="answerB" jdbcType="VARCHAR" />
+    <result column="answer_c" property="answerC" jdbcType="VARCHAR" />
+    <result column="answer_d" property="answerD" jdbcType="VARCHAR" />
+    <result column="true_answer" property="trueAnswer" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, activity_id, activity_question, answer_a, answer_b, answer_c, answer_d, true_answer
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from activity_question
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from activity_question
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from activity_question
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from activity_question
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update activity_question
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.activityId != null" >
+        activity_id = #{record.activityId,jdbcType=BIGINT},
+      </if>
+      <if test="record.activityQuestion != null" >
+        activity_question = #{record.activityQuestion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.answerA != null" >
+        answer_a = #{record.answerA,jdbcType=VARCHAR},
+      </if>
+      <if test="record.answerB != null" >
+        answer_b = #{record.answerB,jdbcType=VARCHAR},
+      </if>
+      <if test="record.answerC != null" >
+        answer_c = #{record.answerC,jdbcType=VARCHAR},
+      </if>
+      <if test="record.answerD != null" >
+        answer_d = #{record.answerD,jdbcType=VARCHAR},
+      </if>
+      <if test="record.trueAnswer != null" >
+        true_answer = #{record.trueAnswer,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update activity_question
+    set id = #{record.id,jdbcType=BIGINT},
+      activity_id = #{record.activityId,jdbcType=BIGINT},
+      activity_question = #{record.activityQuestion,jdbcType=VARCHAR},
+      answer_a = #{record.answerA,jdbcType=VARCHAR},
+      answer_b = #{record.answerB,jdbcType=VARCHAR},
+      answer_c = #{record.answerC,jdbcType=VARCHAR},
+      answer_d = #{record.answerD,jdbcType=VARCHAR},
+      true_answer = #{record.trueAnswer,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from activity_question
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from activity_question
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.ActivityQuestion" useGeneratedKeys="true" keyProperty="id" >
+    insert into activity_question (activity_id, activity_question, answer_a, 
+      answer_b, answer_c, answer_d, 
+      true_answer)
+    values (#{activityId,jdbcType=BIGINT}, #{activityQuestion,jdbcType=VARCHAR}, #{answerA,jdbcType=VARCHAR}, 
+      #{answerB,jdbcType=VARCHAR}, #{answerC,jdbcType=VARCHAR}, #{answerD,jdbcType=VARCHAR}, 
+      #{trueAnswer,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.ActivityQuestion" useGeneratedKeys="true" keyProperty="id" >
+    insert into activity_question
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="activityId != null" >
+        activity_id,
+      </if>
+      <if test="activityQuestion != null" >
+        activity_question,
+      </if>
+      <if test="answerA != null" >
+        answer_a,
+      </if>
+      <if test="answerB != null" >
+        answer_b,
+      </if>
+      <if test="answerC != null" >
+        answer_c,
+      </if>
+      <if test="answerD != null" >
+        answer_d,
+      </if>
+      <if test="trueAnswer != null" >
+        true_answer,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="activityId != null" >
+        #{activityId,jdbcType=BIGINT},
+      </if>
+      <if test="activityQuestion != null" >
+        #{activityQuestion,jdbcType=VARCHAR},
+      </if>
+      <if test="answerA != null" >
+        #{answerA,jdbcType=VARCHAR},
+      </if>
+      <if test="answerB != null" >
+        #{answerB,jdbcType=VARCHAR},
+      </if>
+      <if test="answerC != null" >
+        #{answerC,jdbcType=VARCHAR},
+      </if>
+      <if test="answerD != null" >
+        #{answerD,jdbcType=VARCHAR},
+      </if>
+      <if test="trueAnswer != null" >
+        #{trueAnswer,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.ActivityQuestion" >
+    update activity_question
+    <set >
+      <if test="activityId != null" >
+        activity_id = #{activityId,jdbcType=BIGINT},
+      </if>
+      <if test="activityQuestion != null" >
+        activity_question = #{activityQuestion,jdbcType=VARCHAR},
+      </if>
+      <if test="answerA != null" >
+        answer_a = #{answerA,jdbcType=VARCHAR},
+      </if>
+      <if test="answerB != null" >
+        answer_b = #{answerB,jdbcType=VARCHAR},
+      </if>
+      <if test="answerC != null" >
+        answer_c = #{answerC,jdbcType=VARCHAR},
+      </if>
+      <if test="answerD != null" >
+        answer_d = #{answerD,jdbcType=VARCHAR},
+      </if>
+      <if test="trueAnswer != null" >
+        true_answer = #{trueAnswer,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.ActivityQuestion" >
+    update activity_question
+    set activity_id = #{activityId,jdbcType=BIGINT},
+      activity_question = #{activityQuestion,jdbcType=VARCHAR},
+      answer_a = #{answerA,jdbcType=VARCHAR},
+      answer_b = #{answerB,jdbcType=VARCHAR},
+      answer_c = #{answerC,jdbcType=VARCHAR},
+      answer_d = #{answerD,jdbcType=VARCHAR},
+      true_answer = #{trueAnswer,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.OrderPathMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.OrderPath" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="order_id" property="orderId" jdbcType="BIGINT" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="change_content" property="changeContent" jdbcType="VARCHAR" />
+    <result column="change_time" property="changeTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_id, user_name, change_content, change_time
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from order_path
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from order_path
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from order_path
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from order_path
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update order_path
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.orderId != null" >
+        order_id = #{record.orderId,jdbcType=BIGINT},
+      </if>
+      <if test="record.userName != null" >
+        user_name = #{record.userName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.changeContent != null" >
+        change_content = #{record.changeContent,jdbcType=VARCHAR},
+      </if>
+      <if test="record.changeTime != null" >
+        change_time = #{record.changeTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update order_path
+    set id = #{record.id,jdbcType=BIGINT},
+      order_id = #{record.orderId,jdbcType=BIGINT},
+      user_name = #{record.userName,jdbcType=VARCHAR},
+      change_content = #{record.changeContent,jdbcType=VARCHAR},
+      change_time = #{record.changeTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from order_path
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from order_path
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.OrderPath" useGeneratedKeys="true" keyProperty="id" >
+    insert into order_path (order_id, user_name, change_content, 
+      change_time)
+    values (#{orderId,jdbcType=BIGINT}, #{userName,jdbcType=VARCHAR}, #{changeContent,jdbcType=VARCHAR}, 
+      #{changeTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.OrderPath" useGeneratedKeys="true" keyProperty="id" >
+    insert into order_path
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >
+        order_id,
+      </if>
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="changeContent != null" >
+        change_content,
+      </if>
+      <if test="changeTime != null" >
+        change_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >
+        #{orderId,jdbcType=BIGINT},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="changeContent != null" >
+        #{changeContent,jdbcType=VARCHAR},
+      </if>
+      <if test="changeTime != null" >
+        #{changeTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.OrderPath" >
+    update order_path
+    <set >
+      <if test="orderId != null" >
+        order_id = #{orderId,jdbcType=BIGINT},
+      </if>
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="changeContent != null" >
+        change_content = #{changeContent,jdbcType=VARCHAR},
+      </if>
+      <if test="changeTime != null" >
+        change_time = #{changeTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.OrderPath" >
+    update order_path
+    set order_id = #{orderId,jdbcType=BIGINT},
+      user_name = #{userName,jdbcType=VARCHAR},
+      change_content = #{changeContent,jdbcType=VARCHAR},
+      change_time = #{changeTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,37 @@
+package com.zfj.xmy.quartz.job;
+
+import java.util.Map;
+
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.quartz.QuartzJobBean;
+
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.service.CommonPushUtilService;
+import com.zfj.xmy.util.PushUtil;
+
+/**
+ * 
+ * 极光推送定时任务
+ * @author wy
+ *
+ */
+public class JiguangPushQuartz extends QuartzJobBean {
+
+	@Autowired
+	private CommonPushUtilService commonPushUtilService;
+	
+	@Override
+	protected void executeInternal(JobExecutionContext context)
+			throws JobExecutionException {
+		// TODO Auto-generated method stub
+		Map<String, Object> map = context.getJobDetail().getJobDataMap();
+		String msg = (String) map.get("msg");
+		if (!StringUtil.isEmpty(msg)) {
+			commonPushUtilService.Push(msg);
+		}
+		
+	}
+
+}

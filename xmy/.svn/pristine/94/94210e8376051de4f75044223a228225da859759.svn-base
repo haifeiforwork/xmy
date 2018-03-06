@@ -1,0 +1,73 @@
+package com.zfj.xmy.activity.service.common.impl;  
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.xmy.activity.service.common.BuyAndPresentService;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.BuyAndPresentMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.pojo.BuyAndPresent;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+
+/** 
+ * @Title: BuyAndPresentServiceImpl.java 
+ * @Package com.zfj.xmy.activity.service.common.impl 
+ * @Description: 
+ * @author hexw
+ * @date 2017年11月14日 上午9:54:29 
+ */
+@Service
+public class BuyAndPresentServiceImpl extends BaseService implements BuyAndPresentService  {
+	
+	@Autowired
+	private BuyAndPresentMapper buyAndPresentMapper;
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	/**
+	 * 定时修改买即赠活动的上下架状态
+	 * @return void    
+	 * Date:2017年11月14日 上午9:56:26 
+	 * @author hexw
+	 */
+	@Override
+	public void updateBuyAndPresentActivityGoodsPutway(){
+		// 1. 查询买即赠活动
+		ReqData reqData = new ReqData();
+		reqData.putValue("status", SystemConstant.BUYANDPRSENT.USERING, SystemConstant.REQ_PARAMETER_EQ);
+		List<BuyAndPresent> list = buyAndPresentMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (BuyAndPresent buyAndPresent : list) {
+		// 2. 查询活动是否开始
+			Long nowDate = new Date().getTime();
+			if(buyAndPresent.getStartTime().getTime() <= nowDate && buyAndPresent.getEndTime().getTime() > nowDate) { //活动已开始
+				updateGoodsPutway(buyAndPresent.getMainGoodsIds(),SystemConstant.GoodsConstant.PUTWAY);
+			} else { // 活动未开始 或 已结束
+				updateGoodsPutway(buyAndPresent.getMainGoodsIds(),SystemConstant.GoodsConstant.NOT_PUTWAY);
+			}
+		}
+	}
+	
+	public void updateGoodsPutway(String idStr,Integer status){
+		String [] idArry = idStr.split("\\,");
+		for (String id : idArry) {
+			Goods goods = goodsMapper.selectByPrimaryKey(Long.parseLong(id));
+			goods.setIsPutway(status);
+			goods.setUpdateTime(new Date());
+			goodsMapper.updateByPrimaryKeySelective(goods);
+		}
+	}
+	
+	
+}
+  

@@ -1,0 +1,18 @@
+header{height: 50px;}
+header .header-top-bg{background-color: #DFDFDF;}
+header .header-top .pull-center{height: 50px;}
+header .header-top .pull-center input{display: none;height: 35px;width: 70%;margin-left: -10%;border-radius: 35px;border:0;padding: 0 20px;font-size: 0.7rem;color: #348811;line-height: 35px;position: relative;top: -2px;}
+header .header-top .pull-center input::-webkit-input-placeholder{color:#348811;}
+.content{bottom: 0;top: 51px;}
+
+/*第一块每日秒杀*/
+.self-pannel{margin-top: 0;}
+.self-pannel:after, .self-pannel:before{position: static}
+.self-pannel .weui-media-box:before{left: 0;}
+.self-pannel .weui-media-box{padding: 15px 10px;}
+.self-pannel .weui-media-box_appmsg .weui-media-box__hd{width: 90px;height: 90px;}
+.self-pannel .weui-media-box__desc{color: #333;height: 32px;margin-bottom: 15px;font-size: 0.7rem;color: #1F1F1F;}
+.self-pannel .price{color: #FA222F;font-size: 0.7rem;}
+.self-pannel .sale-say{font-size: 0.6rem;color: #666;position: relative}
+.self-pannel .sale-say .sale{margin-right: 10%;}
+.self-pannel .sale-say img{position: absolute;right: 0;width: 25px;height: 25px;top: -6px;}

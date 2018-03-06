@@ -1,0 +1,612 @@
+package com.zfj.xmy.wap.web.controller.index;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.xiaoleilu.hutool.http.HttpUtil;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.xiaoleilu.hutool.util.RandomUtil;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.base.encryption.MD5Utils;
+import com.zfj.base.enu.BaseProp;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.log.LogExp;
+import com.zfj.base.util.collection.CollectionExtUtils;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.UUIDUtil;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.UserAddrees;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.pay.persistence.pojo.vo.LaunchPayGoodsVo;
+import com.zfj.xmy.pay.service.pay.PayBase;
+import com.zfj.xmy.pay.service.pay.impl.PayBaseImpl;
+import com.zfj.xmy.pay.service.pay.vo.WxPayConfigVo;
+import com.zfj.xmy.user.persistence.dao.UserInfoExMapper;
+import com.zfj.xmy.user.persistence.pojo.dto.app.UserRegisterInDto;
+import com.zfj.xmy.user.service.common.UserService;
+import com.zfj.xmy.user.service.wap.WapSmsLogService;
+import com.zfj.xmy.user.service.wap.WapUserService;
+import com.zfj.xmy.util.EmailUtil;
+import com.zfj.xmy.util.QQLogin;
+import com.zfj.xmy.wap.web.common.AjaxResult;
+import com.zfj.xmy.wap.web.common.QQLoginDto;
+import com.zfj.xmy.wap.web.common.SessionInfo;
+import com.zfj.xmy.wap.web.common.ValidateCodeGenerator;
+import com.zfj.xmy.wap.web.controller.BaseController;
+
+@RequestMapping("/index")
+@Controller
+public class IndexController extends BaseController{
+	
+	@Autowired
+	private WapUserService wapUserService;
+	@Autowired
+	private UserInfoMapper userInfoMapper;
+	@Autowired
+	private WapSmsLogService wapSmsLogService;
+	@Autowired
+	private UserInfoExMapper userInfoExMapper;
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private PayBase payBase;
+	
+	//qq登录
+	private static String callbackurl = BaseProp.BASE.getValue("QQ_LOGIN_CALLBACKURL");
+	private static String appid = BaseProp.BASE.getValue("QQ_LOGIN_APPID");
+	private static String appkey = BaseProp.BASE.getValue("QQ_LOGIN_APPKEY");
+	//微信登录
+	private static String wxCallBackUrl = BaseProp.BASE.getValue("WECHAT_LOGIN_CALLBACKURL");
+	private static String wxAppid = BaseProp.BASE.getValue("WECHAT_LOGIN_APPID");
+	private static String wxAppkey = BaseProp.BASE.getValue("WECHAT_LOGIN_SECRET");
+		
+	@RequestMapping("/validateCode")
+	public void getValidateCode(HttpServletRequest req, HttpServletResponse res) {
+		ValidateCodeGenerator code = new ValidateCodeGenerator();
+		res.setContentType("image/png");
+		try {
+			SessionInfo info = SessionInfo.get() == null ? new SessionInfo() : SessionInfo.get();
+			info.setImgValidateCode(code.getCode());
+			req.getSession().setAttribute("wap_session", info);
+			logger.info("图片验证码已存入session>--------------" + code.getCode());
+			code.write(res.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 用户登录
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/login")
+	public ModelAndView login(User user, HttpServletRequest request, HttpServletResponse response, @RequestParam(defaultValue="/mine/center", value="requestUri") String requestUri,String goodsId){
+		User usr = null ;
+		UserInfo userInfo = null;
+		List<UserAddrees> address = null;
+		//User user = new User();
+		if(!ObjectUtils.isEmpty(goodsId)){
+			requestUri="/home/home?goodsId="+goodsId;
+		}
+		request.setAttribute("requestUri",requestUri) ;
+		if(!StringUtil.isEmpty(user.getName()) && !StringUtil.isEmpty(user.getPassword())){
+			try {
+				usr = wapUserService.login(user) ;
+				userInfo = wapUserService.queryInfo(usr);
+				address = wapUserService.queryAddress(usr);
+				wapUserService.updateLastLoginDate(usr);
+			} catch (Exception e) {
+				e.printStackTrace() ;
+				request.setAttribute("msg",e instanceof BusinessException ? e.getMessage() : "系统内部繁忙") ;
+				return new ModelAndView(SystemConstant.XMYWAP.LOGIN) ;
+			}
+			setWapSessionInfo(usr);
+			setWapSessionInfo(userInfo);
+			setWapSessionInfo(address);
+		}else{
+			return new ModelAndView(SystemConstant.XMYWAP.LOGIN);
+		}
+		return new ModelAndView("redirect:" + requestUri) ;
+	}
+	
+	/**
+	 * 处理获取openId的过程
+	 */
+	@RequestMapping("/qqLogin")
+	public String qqLogin(HttpServletRequest req, QQLoginDto dto) {
+		if(null != dto.getCode()) {
+			Map<String,Object> params = new LinkedHashMap<String, Object>();
+			params.put("grant_type", "authorization_code");
+			params.put("client_id", appid);
+			params.put("client_secret", appkey);
+			params.put("code", dto.getCode());
+			params.put("state", new Date().getTime());
+			params.put("redirect_uri", callbackurl);
+			String tokenAndExpires = HttpUtil.get("https://graph.qq.com/oauth2.0/token", params);
+			
+			String respData = HttpUtil.get("https://graph.qq.com/oauth2.0/me?" + tokenAndExpires);
+			logger.info("返回数据:" + respData + "    ***********************************************************");
+			respData = respData.substring(respData.indexOf("(") + 1, respData.indexOf(")"));
+			logger.info("处理后的返回数据:" + respData + "***********************************************************");
+			JSONObject respObj = new JSONObject(respData);
+			String openId = respObj.getStr("openid");
+			
+			/**
+			 * 获取 unionid
+			 */
+			String unionid = QQLogin.qqGetUnionid(openId);
+			
+			if(StringUtil.isEmpty(openId))throw new BusinessException("无法获取openid");
+			if(StringUtil.isEmpty(unionid))throw new BusinessException("无法获取unionid");
+			
+			
+			
+			//登录
+			User user2 = wapUserService.getUserByQQunionid(unionid);
+			if(user2 != null) {
+				UserInfo info = wapUserService.queryInfo(user2);
+				List<UserAddrees> queryAddress = wapUserService.queryAddress(user2);
+				SessionInfo sessionInfo = new SessionInfo();
+				sessionInfo.setUserId(user2.getId());
+				sessionInfo.setUserName(user2.getName());
+				sessionInfo.setUser(user2);
+				sessionInfo.setUserInfo(info);
+				sessionInfo.setUserAddress(queryAddress);
+				user2.setLastLoginTime(new Date());
+				req.getSession().setAttribute("wap_session", sessionInfo);
+			} else {
+				//获得该qq用户的昵称头像等信息 并插入新用户
+				JSONObject qqUserInfo = reqQQInfo(tokenAndExpires.substring(tokenAndExpires.indexOf("=") + 1, tokenAndExpires.indexOf("&")), (String) openId, appid);
+				user2 = new User();
+				String gender = "男";
+				String nick = "";
+				if(Integer.parseInt(qqUserInfo.getStr("ret")) >= 0) {
+					nick = qqUserInfo.getStr("nickname");
+					gender = qqUserInfo.getStr("gender");
+					user2.setName(nick);
+				} else {
+					user2.setName(UUIDUtil.generateToken());
+				}
+				String name = null;
+				while(!wapUserService.checkIfUserNameIsUnique(name = RandomUtil.randomString(7))) {}
+				user2.setName(name);
+				user2.setQqOpenid(openId);
+				user2.setQqUnionid(unionid);
+				user2.setCreateTime(new Date());
+				user2.setLastLoginTime(new Date());
+				wapUserService.add(user2);
+				user2 = wapUserService.getUser(openId);
+				UserInfo info = new UserInfo();
+				info.setId(user2.getId());
+				info.setRealName(nick);
+				info.setAvatar("defaultheadimg.png");
+				info.setUpdateTime(new Date());
+				info.setSex("男".equals(gender) ? 0 : 1);
+				wapUserService.add(info);
+				
+				info = wapUserService.queryInfo(user2);
+				List<UserAddrees> queryAddress = wapUserService.queryAddress(user2);
+				SessionInfo sessionInfo = new SessionInfo();
+				sessionInfo.setUserId(user2.getId());
+				sessionInfo.setUserName(user2.getName());
+				sessionInfo.setUser(user2);
+				sessionInfo.setUserInfo(info);
+				sessionInfo.setUserAddress(queryAddress);
+				req.getSession().setAttribute("wap_session", sessionInfo);
+			}
+			
+			return "redirect:/mine/center";
+			
+		}
+		throw new BusinessException("不知道是什么问题");
+	}
+	
+	public JSONObject reqQQInfo(String accessToken, String openId, String appId) {
+		Map<String,Object> params = new LinkedHashMap<String, Object>();
+		params.put("access_token", accessToken);
+		params.put("openid", openId);
+		params.put("oauth_consumer_key", appId);
+		String respData = HttpUtil.get("https://graph.qq.com/user/get_user_info", params);
+		logger.info("获得qq用户信息>>>>>>>>>>>>>>>>>>>>>>>>: " + respData);
+		return new JSONObject(respData);
+	}
+	
+	/**
+	 * 跳转用户注册页面
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/registerPage")
+	public ModelAndView registerPage(HttpServletRequest request, HttpServletResponse response){
+		
+		return new ModelAndView(SystemConstant.XMYWAP.REGISTER);
+	}
+	
+	/**
+	 * 验证手机号码是否被注册
+	 * @param request
+	 * @param response
+	 * @param phone
+	 * @return
+	 */
+	@RequestMapping("/checkPhone")
+	@ResponseBody
+	public RespData checkPhone(HttpServletRequest request, HttpServletResponse response, String phone, String validateCode, String password){
+		
+		SessionInfo info = SessionInfo.get() == null ? new SessionInfo() : SessionInfo.get();
+		
+		RespData res = new RespData();
+		
+		boolean validation = false;
+		if((validateCode == null || validateCode.trim().length() == 0) 
+				&& SessionInfo.get() != null && SessionInfo.get().getUserId() != null 
+				&& password != null && password.trim().length() > 0) {
+			String md5Pwd = MD5Utils.encodeString(password);
+			if(SessionInfo.get().getUser().getPassword().equals(md5Pwd)) {
+				validation = true;
+			}
+		} else {
+			if(validateCode != null && validateCode.trim().length() > 0 && validateCode.toLowerCase().equals(info.getImgValidateCode().toLowerCase())) {
+				validation = true;
+			}
+		}
+		
+		if(!validation) {
+			res.setResultCode(250);
+			return res;
+		}
+		
+		//1、验证该手机号码是否已经被注册
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		criteria.equalTo("mobile_phone",phone) ;
+		List<UserInfo> uList = userInfoMapper.selectByExample(parameter) ;
+		if(!CollectionExtUtils.isEmpty(uList)){
+			LogExp.error(logger,"该手机号码已经被注册");
+			throw new BusinessException("该手机号码已经被注册");
+		}
+		wapSmsLogService.limitSmsCount(phone, 1);
+		//2、发送短信
+		wapSmsLogService.sendMessage(phone) ;
+		res.setResultCode(RespData.CODE_SUCCESS);
+		
+		return res;
+	}
+	
+	@RequestMapping("/findBack")
+	@ResponseBody
+	public AjaxResult findBack(UserRegisterInDto dto) {
+		wapSmsLogService.checkCode(dto.getMobilePhone(), dto.getCode());
+		userService.retrievePass(dto);
+		return new AjaxResult(1, "修改成功", null);
+	}
+	
+	/**
+	 * 供找回密码使用的发送短信
+	 *@author cj
+	 * @param phone
+	 * @return
+	 */
+	@RequestMapping("/sendSms")
+	@ResponseBody
+	public AjaxResult sendSms(String phone) {
+		wapSmsLogService.limitSmsCount(phone, 1);
+		wapSmsLogService.sendMessage(phone);
+		return new AjaxResult(1, "发送成功", null);
+	}
+	
+	/**
+	 * 随机获取6位数字
+	 * @param num
+	 * @return
+	 */
+	private String generateRandom(int num) {
+		if (0 > num)
+			return "";
+		Random random = new Random();
+		StringBuilder buffer = new StringBuilder();
+		for (int i = 0; i < num; i++) {
+			buffer.append(random.nextInt(9));
+		}
+		return buffer.toString();
+	}
+	
+	@RequestMapping("/sendEmail")
+	@ResponseBody
+	public AjaxResult sendEmail(HttpServletRequest req, String email) {
+		SessionInfo sessionInfo = SessionInfo.get();
+		if(sessionInfo == null)
+			return new AjaxResult(-1, "请登录", null);
+		if(email == null || email.trim().length() == 0)
+			return new AjaxResult(0, "请输入邮箱", null);
+		if(!StringUtil.isMatch("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$", email))
+			return new AjaxResult(0, "邮箱格式错误", null);
+		Integer emailCount = userInfoExMapper.getEmailCount(email);
+		if(emailCount > 0)
+			return new AjaxResult(0, "邮箱已绑定", null);
+		String code = generateRandom(6);
+		sessionInfo.setEmailValidationCode(code);
+		sessionInfo.setEmail(email);
+		req.getSession().setAttribute("wap_session", sessionInfo);
+		String str="亲爱的用户:"+System.getProperty("line.separator")+
+				"您好！"+System.getProperty("line.separator")+System.getProperty("line.separator")+
+				"您正在香满圆进行邮箱验证，本次请求的验证码为:"+System.getProperty("line.separator")+System.getProperty("line.separator")+code+System.getProperty("line.separator")+
+				"<font color=\"#9B9B9B\">(为了保障您帐号的安全性，请勿将验证码告诉给他人。)</font>"+System.getProperty("line.separator")+
+				"香满圆";
+		EmailUtil.sendEmail(email, "邮箱验证码", str);
+		return new AjaxResult(1, "验证码已发送至:" + email, null);
+	}
+	
+	@RequestMapping("/bindEmail")
+	@ResponseBody
+	public AjaxResult checkEmail(HttpServletRequest req, String code, String email) {
+		SessionInfo sessionInfo = SessionInfo.get();
+		String emailValidationCode = sessionInfo.getEmailValidationCode();
+		if(code.equals(emailValidationCode) && email.equals(sessionInfo.getEmail())) {
+			sessionInfo.getUserInfo().setEmail(email);
+			Integer result = wapUserService.updateUserInfo(sessionInfo.getUserInfo());
+			req.getSession().setAttribute("wap_session", sessionInfo);
+			return new AjaxResult(result, null, null);
+		} else {
+			return new AjaxResult(0, "验证码错误", null);
+		}
+	}
+	
+	/**
+	 * 判断验证码是否正确
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/checkCode")
+	@ResponseBody
+	public RespData checkCode(HttpServletRequest request, HttpServletResponse response, String code, String phone){
+		
+		RespData res = new RespData();
+		try {
+			wapSmsLogService.checkCode(phone,code);
+		} catch (Exception e) {
+			e.printStackTrace() ;
+			res.setResultCode(RespData.CODE_FAILURE);
+			return res;
+		}
+		res.setResultCode(RespData.CODE_SUCCESS);
+		
+		return res;
+	}
+	
+	@RequestMapping("/bindPhone")
+	@ResponseBody
+	public AjaxResult bindPhone(String phone, String code) {
+		try {
+			SessionInfo sessionInfo = SessionInfo.get();
+			wapSmsLogService.checkCode(phone, code);
+			UserInfo userInfo = sessionInfo.getUserInfo();
+			userInfo.setMobilePhone(phone);
+			Integer result = wapUserService.updateUserInfo(userInfo);
+			return new AjaxResult(result, null, null);
+		} catch(BusinessException be) {
+			return new AjaxResult(0, "验证码错误", null);
+		} catch(NullPointerException nulle) {
+			return new AjaxResult(-1, "未登录", null);
+		} catch(Exception e) {
+			return new AjaxResult(0, "绑定失败", null);
+		}
+	}
+	
+	/**
+	 * 用户注册
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/register")
+	@ResponseBody
+	public boolean register(HttpServletRequest request, HttpServletResponse response, User user, String validateCode){
+		
+/*		SessionInfo info = SessionInfo.get();
+		String sysValidateCode = info.getImgValidateCode();
+		if(validateCode == null || !validateCode.toLowerCase().equals(sysValidateCode.toLowerCase())) {
+			request.setAttribute("regInfo", "验证码错误");
+			return new ModelAndView("index/login");
+		}*/
+		
+		user = wapUserService.saveUser(user);
+		UserInfo userInfo = wapUserService.queryInfo(user);
+		setWapSessionInfo(user);
+		setWapSessionInfo(userInfo);
+		
+		return true;
+	}
+	
+	/*@RequestMapping("/mine/doLogout")
+	@ResponseBody
+	public RespData logout(Long id) {
+		
+	}*/
+	
+	/**
+	 * 找回密码页面
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/findBackPassword")
+	public ModelAndView findBackPassword(HttpServletRequest request, HttpServletResponse response, User user){
+		
+		try {
+			user = wapUserService.saveUser(user) ;
+			//注册成功之后立即登录
+		} catch (Exception e) {
+			e.printStackTrace() ;
+			request.setAttribute("msg", e instanceof BusinessException ? e.getMessage() : "用户注册失败");
+			return new ModelAndView(SystemConstant.XMYWAP.REGISTER) ;
+		}
+		
+		return new ModelAndView(SystemConstant.XMYWAP.LOGIN);
+	}
+	
+	//private static String appid1 = "wxe41266d25245a434";
+	//private static String secret = "ce2a29301a6d8a483542d2cd907fb2f8";
+	
+	@RequestMapping("/weChat/{flag}")
+	public ModelAndView weChat(String code,LaunchPayGoodsVo launchVo, HttpServletRequest request, @PathVariable(name="flag",required=true) String flag){
+		
+		//WxPayConfigVo wxPayConfigVo = payBase.getPayConfigObject(PayBaseImpl.TRADETYPE_WX_JSAPI, WxPayConfigVo.class);
+		String url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URL&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect";
+		//String redirectUrl = "https://m.xmyb2b.com/index/weChatRedirect";
+		url = url.replace("APPID", wxAppid);
+		String state = "" ;
+		if("pay".equals(flag)){
+			state = launchVo.getOrderid() + "," + launchVo.getPayAmount() ;
+		}
+		url = url.replace("STATE", state);
+		try {
+			url = url.replace("REDIRECT_URL", URLEncoder.encode(wxCallBackUrl, "utf-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ModelAndView("redirect:" + url);
+	}
+	
+	/**
+	 * 微信授权回调
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping("/weChatRedirect")
+	public ModelAndView weChatRedirect(HttpServletRequest request, HttpServletResponse response){
+		
+		//WxPayConfigVo wxPayConfigVo = payBase.getPayConfigObject(PayBaseImpl.TRADETYPE_WX_JSAPI, WxPayConfigVo.class);
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>entering wechat rediret url<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+		String url= "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code" ;
+		String code = request.getParameter("code");
+		String state = request.getParameter("state");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>state:" + state);
+		url = url.replace("APPID", wxAppid);
+		url = url.replace("SECRET", wxAppkey);
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>APPID:" + wxAppid + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>wxAppkey:" +wxAppkey);
+		url = url.replace("CODE", code);
+		String retStr = HttpUtil.get(url);
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>retStr:" + retStr);
+		JSONObject rejo = new JSONObject(retStr);
+		String openid = rejo.getStr("openid");
+		String token = rejo.getStr("access_token");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>openid:" + openid);
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>token:" + token);
+		if(StringUtil.isEmpty(state)){
+			return new ModelAndView("redirect:/index/weChatLogin?openid=" + openid + "&token=" + token);
+		}else{
+			System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>state:" + state);
+			state += "," + openid ;
+			return new ModelAndView("redirect:/payment/wxJsapi?state=" + state);
+		}
+		
+	}
+	
+	/**
+	 * 用户微信登录
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/weChatLogin")
+	public ModelAndView weChatLogin(HttpServletRequest request, HttpServletResponse response){
+		//查询unionId的请求路径
+		String weChatInfoReqUrl = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>进入获取unionId");
+		String openid = request.getParameter("openid");
+		String token = request.getParameter("token");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>openid:" + openid + ">>>>>>>>>>>>>>>>>>>>>>token:" +token);
+		if(StringUtil.isEmpty(openid) || StringUtil.isEmpty(token)){
+			request.setAttribute("msg", "微信授权失败");
+			return new ModelAndView(SystemConstant.XMYWAP.LOGIN);
+		}
+		
+		weChatInfoReqUrl = weChatInfoReqUrl.replace("ACCESS_TOKEN", token);
+		weChatInfoReqUrl = weChatInfoReqUrl.replace("OPENID", openid);
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>weChatInfoReqUrl:" + weChatInfoReqUrl);
+		String reqResult = HttpUtil.get(weChatInfoReqUrl);
+		JSONObject reqData = new JSONObject(reqResult);
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>reqData:" + reqData);
+		String unionId = reqData.getStr("unionid");
+		String username = reqData.getStr("nickname");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>unionId:" + unionId);
+		if(StringUtil.isEmpty(unionId)) {
+			throw new BusinessException("请求参数错误");
+		}
+		
+		User user = wapUserService.findUserByUnionId(unionId);
+		SessionInfo sessionInfo = new SessionInfo();
+		if(user != null){
+			UserInfo userInfo = wapUserService.queryInfo(user);
+			if(StringUtil.isEmpty(userInfo.getRealName())){
+				userInfo.setRealName(username);
+				wapUserService.updateUserInfo(userInfo);
+			}
+			sessionInfo.setUserInfo(userInfo);
+			sessionInfo.setUser(user);
+			sessionInfo.setUserId(user.getId());
+		}else{
+			User user1=new User();
+			String name = null;
+			while(!wapUserService.checkIfUserNameIsUnique(name = RandomUtil.randomString(7))) {}
+			user1.setName(name);
+			user1.setStatus(0);
+			user1.setWechatUnionid(unionId);
+			user1.setWechatOpenid(openid);
+			user1.setLastLoginTime(new Date());
+			user1.setCreateTime(new Date());
+			user1.setWechatUnionid(unionId);
+			UserInfo userInfo=new UserInfo();
+			wapUserService.add(user1);
+			//List<User> findWeChatOpenid = wapUserService.findWeChatOpenid(openid);
+			userInfo.setRealName(username);
+			userInfo.setId(user1.getId());
+			userInfo.setUpdateTime(new Date());
+			wapUserService.add(userInfo);
+			sessionInfo.setUserId(user1.getId());
+			sessionInfo.setUserName(user1.getName());
+			sessionInfo.setUser(user1);
+			sessionInfo.setUserInfo(userInfo);
+		}
+		request.getSession().setAttribute("wap_session", sessionInfo);
+		
+		return new ModelAndView("redirect:/mine/center");
+	}
+	
+	public PayBase getPayBase() {
+		return payBase;
+	}
+
+	public void setPayBase(PayBase payBase) {
+		this.payBase = payBase;
+	}
+	
+}

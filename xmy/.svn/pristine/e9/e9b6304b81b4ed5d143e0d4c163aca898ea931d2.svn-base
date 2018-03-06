@@ -1,0 +1,41 @@
+package com.zfj.xmy.common.persistence.dao;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.session.RowBounds;
+
+public interface CouponMapper {
+    int countByExample(CriteriaParameter example);
+
+    int deleteByExample(CriteriaParameter example);
+
+    List<Coupon> selectByExampleWithBLOBs(CriteriaParameter example);
+
+    List<Coupon> selectByExample(CriteriaParameter example);
+
+    int updateByExampleSelective(@Param("record") Coupon record, @Param("example") CriteriaParameter example);
+
+    int updateByExampleWithBLOBs(@Param("record") Coupon record, @Param("example") CriteriaParameter example);
+
+    int updateByExample(@Param("record") Coupon record, @Param("example") CriteriaParameter example);
+
+    List<Coupon> selectByExampleWithBLOBsAndPage(CriteriaParameter example, RowBounds rowBound);
+
+    List<Coupon> selectByExampleAndPage(CriteriaParameter example, RowBounds rowBound);
+
+    int deleteByPrimaryKey(Long id);
+
+    int insert(Coupon record);
+
+    int insertSelective(Coupon record);
+
+    Coupon selectByPrimaryKey(Long id);
+
+    int updateByPrimaryKeySelective(Coupon record);
+
+    int updateByPrimaryKeyWithBLOBs(Coupon record);
+
+    int updateByPrimaryKey(Coupon record);
+}

@@ -1,0 +1,97 @@
+package com.zfj.xmy.common.service.impl;
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.PresentCouponActivityMapper;
+import com.zfj.xmy.common.persistence.pojo.PresentCouponActivity;
+import com.zfj.xmy.common.persistence.pojo.app.AppCouponInDto;
+import com.zfj.xmy.common.service.CommonCouponService;
+import com.zfj.xmy.common.service.CommonPresentCouponActivityService;
+
+@Service
+public class CommonPresentCouponActivityServiceImpl extends BaseService implements CommonPresentCouponActivityService  {
+
+	@Autowired
+	private PresentCouponActivityMapper presentCouponActivityMapper;
+	
+	@Autowired
+	private CommonCouponService commonCouponService ;
+	
+	
+	@Override
+	public void presentCoupon(Long userId){
+		if (ObjectUtil.isNotNull(userId)) {
+			// 1. 查询赠送优惠券活动 (开启状态，且在活动范围内的)
+			ReqData reqData = new ReqData();
+			reqData.putValue("status", SystemConstant.PRESENTCOUPONACTIVITY.OPEN_STATUS, SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("begin_time", DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss"),  SystemConstant.REQ_PARAMETER_LE);
+			reqData.putValue("end_time", DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss"),  SystemConstant.REQ_PARAMETER_GE);
+			List<PresentCouponActivity> list = presentCouponActivityMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			PresentCouponActivity couponActivity = new PresentCouponActivity();
+			if (list.size() == 0) throw new  BusinessException(4,"未查询到活动");
+			// 2. 取出赠送的优惠券
+			couponActivity= list.get(0);
+			String couponStr = 	couponActivity.getCouponId();
+			if (userId <= couponActivity.getUid()) throw new BusinessException(5,"不是新用户注册");
+			if (StringUtil.isEmpty(couponStr)) throw new BusinessException(6,"未查询到赠送优惠券");
+			try {
+				String[] idArray = couponStr.split("\\,") ;
+				// 3. 送出优惠券
+				for (String id : idArray) {
+					AppCouponInDto couponDto = new AppCouponInDto();
+					couponDto.setId(Long.parseLong(id));
+					couponDto.setUserId(userId);
+					commonCouponService.toReceiveCoupon(couponDto, true);
+					//commonPushUtilService.Push(userId, onlineActvivty.getPresentCouponDes());
+				}
+			} catch (Exception e) {
+			    e.printStackTrace();
+				throw new BusinessException(7,"赠送优惠券失败");
+			}
+			
+		}
+	}
+	
+	@Override
+	public void presentCouponLogin(Long userId){
+		if (ObjectUtil.isNotNull(userId)) {
+			// 1. 查询赠送优惠券活动 (开启状态，且在活动范围内的)
+			ReqData reqData = new ReqData();
+			reqData.putValue("status", SystemConstant.PRESENTCOUPONACTIVITY.OPEN_STATUS, SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("begin_time", DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss"),  SystemConstant.REQ_PARAMETER_LE);
+			reqData.putValue("end_time", DateUtil.format(new Date(),"yyyy-MM-dd HH:mm:ss"),  SystemConstant.REQ_PARAMETER_GE);
+			List<PresentCouponActivity> list = presentCouponActivityMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			PresentCouponActivity couponActivity = new PresentCouponActivity();
+			if (list.size() > 0){
+				// 2. 取出赠送的优惠券
+				couponActivity= list.get(0);
+				String couponStr = 	couponActivity.getCouponId();
+				if (userId > couponActivity.getUid()){
+					if (!StringUtil.isEmpty(couponStr)){
+						String[] idArray = couponStr.split("\\,") ;
+						// 3. 送出优惠券
+						for (String id : idArray) {
+							AppCouponInDto couponDto = new AppCouponInDto();
+							couponDto.setId(Long.parseLong(id));
+							couponDto.setUserId(userId);
+							commonCouponService.toReceiveCouponLogin(couponDto, true);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+}

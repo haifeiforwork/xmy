@@ -1,0 +1,4 @@
+.wrap{font-size:0.7rem;color:#333;padding:10px;background:#FFF;}
+.wrap .item-title{}
+.wrap .item-after{font-szie:0.6rem;color:#999;}
+.wrap-content{margin-top:0.5rem;color:#666}

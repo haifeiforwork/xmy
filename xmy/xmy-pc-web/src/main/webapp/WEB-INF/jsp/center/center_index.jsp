@@ -1,0 +1,116 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>个人信息</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/center/center_index.css">
+  </head>
+  
+  <body>
+    <%@include file="/WEB-INF/jsp/commons/nav/nav_personal.jsp" %>
+    <div class="content">
+	<div class="w-1250">
+		<%@include file="/WEB-INF/jsp/commons/nav/personal_left_menu.jsp" %>
+		<div class="content-right">
+			<div class="personal">
+				<div class="personal-details">
+					<div class="personal-details-img"><img src="resource/commons/images/cstars/${empty userinfo.avatar?'defaultheadimg.png':userinfo.avatar }"/></div>
+					<div class="personal-details-details">
+						<p class="user-phone">手机绑定 : <span>${userinfo.mobilePhone }</span></p>
+						<p class="user-phone">绑定邮箱 : <span>${userinfo.email }</span></p>
+						<div class="uesr-safety"><div class="email">账户安全 : </div><div class="email-del"><div class="plan"></div></div><span class="rank">${level }</span></div>
+					</div>
+				</div>
+				<div class="all-orders">
+					<ul class="all-orders-ul">
+						<li class="all-orders-li">
+							<a href="order/myOrder/1/1?set=3" style="text-decoration:none;"><img src="resource/commons/images/dfk.png"/>
+							<p>待付款<span class="money">${list[0]}</span></p></a>
+						</li>
+						<li class="all-orders-li">
+							<a href="order/myOrder/3/1?set=3" style="text-decoration:none;"><img src="resource/commons/images/dsh.png"/>
+							<p>待收货<span class="money">${list[1]}</span></p></a>
+						</li>
+						<li class="all-orders-li">
+							<a href="order/myOrder/2/1?set=3" style="text-decoration: none;"><img src="resource/commons/images/shipments.png" style="width:48px;height:48px;margin:6px auto 6px;"/>
+							<p>待发货<span class="money">${list[2]}</span></p></a>
+						</li>
+						<li class="all-orders-li">
+							<a href="order/myOrder/4/1?set=3" style="text-decoration: none;"><img src="resource/commons/images/dpj.png"/>
+							<p>待评价<span class="money">${list[3]}</span></p></a>
+						</li>
+					</ul>
+				</div>
+				<div class="balance-del">
+					<div class="balance-del-left">
+					
+						<p class="money"><fmt:formatNumber type="number" value="${empty userinfo.balance?0:userinfo.balance }" pattern="0.00" maxFractionDigits="2"></fmt:formatNumber></p>
+						<p class="detail"><i class="iconfont">&#xe60a;</i>余额（元）</p>
+					</div>
+					<div class="balance-del-right">
+						<p class="money">${empty userinfo.accPoints?0:userinfo.accPoints }</p>
+						<p class="detail"><i class="iconfont">&#xe60a;</i>可用积分</p>
+					</div>
+				</div>
+			</div>
+			<div class="guess">
+				<div class="guess-left">
+					<div class="title">猜你喜欢</div>
+					<ul class="guess-left-ul">
+					<c:forEach items="${guess }" var="guess" begin="0" end ="7">
+						<li class="guess-left-li">
+							<a href="goods/${guess.id}/0/0">
+								<img:imghandle w="148" imgurl="${guess.imgPath }" h="148"  cl="shop-img"></img:imghandle>
+								<p class="text">${guess.name }</p>
+								<p class="money">￥${guess.price }</p>
+							</a>
+						</li>
+					</c:forEach>
+					</ul>
+				</div>
+				<div class="guess-right">
+					<div class="title">会员推荐</div>
+					<ul class="guess-right-ul">
+						<c:forEach items="${vipRecommend }" var="guess" begin="0" end ="2">
+							<li class="guess-right-li">
+								<c:if test="${guess.type==1 }"><a href="${guess.data}"><img src="${guess.imgPath }"/></a></c:if>
+	     						<c:if test="${guess.type==0 }"><a href="goods/${guess.data }/0/0"><img src="${guess.imgPath }"/></a></c:if>
+							</li>
+						</c:forEach>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--内容部分完-->
+<div class="floatleft">
+	<ul class="floatleft-ul">
+		<li class="floatleft-li"><span class="cart"><img src="resource/commons/images/left-cart.jpg"/></span><p>购物车</p></li>
+		<li class="floatleft-li"><span class="floatleft-img"><img src="resource/commons/images/sc.png"/></span></li>
+		<li class="floatleft-li"><span class="floatleft-img"><img src="resource/commons/images/wd.png"/></span></li>
+		<li class="floatleft-li"><span class="floatleft-img"><img src="resource/commons/images/c.png"/></span></li>
+		<li class="floatleft-li"><span class="floatleft-img"><img src="resource/commons/images/QQ.png"/></span></li>
+	</ul>
+	<ul class="floatleft-bottom-ul">
+		<li class="floatleft-bottom-li"><span class="floatleft-img"><img src="resource/commons/images/dh.jpg"/></span></li>
+		<li class="floatleft-bottom-li ewm">
+			<span class="floatleft-img"><img src="resource/commons/images/ewm.jpg"/></span>
+			<div class="pop-up">
+				<div class="app">
+					<div class="img"><img src="resource/commons/images/erweima.jpg"/></div><p class="text">扫码下载APP<br/>新人专享<span>8元</span>优惠券</p>
+				</div>
+				<div class="app yd">
+					<div class="img"><img src="resource/commons/images/erweima.jpg"/></div><p class="text">扫码进入移动端</p>
+				</div>
+			</div>
+		</li>
+		<li class="floatleft-bottom-li return-top"><span><i class="iconfont">&#xe629;</i></span><p>返回顶部</p></li>
+	</ul>
+</div>
+    
+    <%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %>
+  </body>
+</html>

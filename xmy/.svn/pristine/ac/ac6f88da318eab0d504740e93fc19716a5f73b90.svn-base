@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.TradeProductionMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.TradeProduction" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="chanid" property="chanid" jdbcType="VARCHAR" />
+    <result column="tranflowno" property="tranflowno" jdbcType="VARCHAR" />
+    <result column="happenmoney" property="happenmoney" jdbcType="DOUBLE" />
+    <result column="tranmoney" property="tranmoney" jdbcType="DOUBLE" />
+    <result column="created" property="created" jdbcType="TIMESTAMP" />
+    <result column="transtate" property="transtate" jdbcType="VARCHAR" />
+    <result column="noticestate" property="noticestate" jdbcType="VARCHAR" />
+    <result column="trantime" property="trantime" jdbcType="TIMESTAMP" />
+    <result column="flowno" property="flowno" jdbcType="VARCHAR" />
+    <result column="flowtype" property="flowtype" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, chanid, tranflowno, happenmoney, tranmoney, created, transtate, noticestate, 
+    trantime, flowno, flowtype
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from trade_production
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from trade_production
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from trade_production
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from trade_production
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update trade_production
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.chanid != null" >
+        chanid = #{record.chanid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tranflowno != null" >
+        tranflowno = #{record.tranflowno,jdbcType=VARCHAR},
+      </if>
+      <if test="record.happenmoney != null" >
+        happenmoney = #{record.happenmoney,jdbcType=DOUBLE},
+      </if>
+      <if test="record.tranmoney != null" >
+        tranmoney = #{record.tranmoney,jdbcType=DOUBLE},
+      </if>
+      <if test="record.created != null" >
+        created = #{record.created,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.transtate != null" >
+        transtate = #{record.transtate,jdbcType=VARCHAR},
+      </if>
+      <if test="record.noticestate != null" >
+        noticestate = #{record.noticestate,jdbcType=VARCHAR},
+      </if>
+      <if test="record.trantime != null" >
+        trantime = #{record.trantime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.flowno != null" >
+        flowno = #{record.flowno,jdbcType=VARCHAR},
+      </if>
+      <if test="record.flowtype != null" >
+        flowtype = #{record.flowtype,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update trade_production
+    set id = #{record.id,jdbcType=BIGINT},
+      chanid = #{record.chanid,jdbcType=VARCHAR},
+      tranflowno = #{record.tranflowno,jdbcType=VARCHAR},
+      happenmoney = #{record.happenmoney,jdbcType=DOUBLE},
+      tranmoney = #{record.tranmoney,jdbcType=DOUBLE},
+      created = #{record.created,jdbcType=TIMESTAMP},
+      transtate = #{record.transtate,jdbcType=VARCHAR},
+      noticestate = #{record.noticestate,jdbcType=VARCHAR},
+      trantime = #{record.trantime,jdbcType=TIMESTAMP},
+      flowno = #{record.flowno,jdbcType=VARCHAR},
+      flowtype = #{record.flowtype,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from trade_production
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from trade_production
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.TradeProduction" useGeneratedKeys="true" keyProperty="id" >
+    insert into trade_production (chanid, tranflowno, happenmoney, 
+      tranmoney, created, transtate, 
+      noticestate, trantime, flowno, 
+      flowtype)
+    values (#{chanid,jdbcType=VARCHAR}, #{tranflowno,jdbcType=VARCHAR}, #{happenmoney,jdbcType=DOUBLE}, 
+      #{tranmoney,jdbcType=DOUBLE}, #{created,jdbcType=TIMESTAMP}, #{transtate,jdbcType=VARCHAR}, 
+      #{noticestate,jdbcType=VARCHAR}, #{trantime,jdbcType=TIMESTAMP}, #{flowno,jdbcType=VARCHAR}, 
+      #{flowtype,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.TradeProduction" useGeneratedKeys="true" keyProperty="id" >
+    insert into trade_production
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="chanid != null" >
+        chanid,
+      </if>
+      <if test="tranflowno != null" >
+        tranflowno,
+      </if>
+      <if test="happenmoney != null" >
+        happenmoney,
+      </if>
+      <if test="tranmoney != null" >
+        tranmoney,
+      </if>
+      <if test="created != null" >
+        created,
+      </if>
+      <if test="transtate != null" >
+        transtate,
+      </if>
+      <if test="noticestate != null" >
+        noticestate,
+      </if>
+      <if test="trantime != null" >
+        trantime,
+      </if>
+      <if test="flowno != null" >
+        flowno,
+      </if>
+      <if test="flowtype != null" >
+        flowtype,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="chanid != null" >
+        #{chanid,jdbcType=VARCHAR},
+      </if>
+      <if test="tranflowno != null" >
+        #{tranflowno,jdbcType=VARCHAR},
+      </if>
+      <if test="happenmoney != null" >
+        #{happenmoney,jdbcType=DOUBLE},
+      </if>
+      <if test="tranmoney != null" >
+        #{tranmoney,jdbcType=DOUBLE},
+      </if>
+      <if test="created != null" >
+        #{created,jdbcType=TIMESTAMP},
+      </if>
+      <if test="transtate != null" >
+        #{transtate,jdbcType=VARCHAR},
+      </if>
+      <if test="noticestate != null" >
+        #{noticestate,jdbcType=VARCHAR},
+      </if>
+      <if test="trantime != null" >
+        #{trantime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="flowno != null" >
+        #{flowno,jdbcType=VARCHAR},
+      </if>
+      <if test="flowtype != null" >
+        #{flowtype,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.TradeProduction" >
+    update trade_production
+    <set >
+      <if test="chanid != null" >
+        chanid = #{chanid,jdbcType=VARCHAR},
+      </if>
+      <if test="tranflowno != null" >
+        tranflowno = #{tranflowno,jdbcType=VARCHAR},
+      </if>
+      <if test="happenmoney != null" >
+        happenmoney = #{happenmoney,jdbcType=DOUBLE},
+      </if>
+      <if test="tranmoney != null" >
+        tranmoney = #{tranmoney,jdbcType=DOUBLE},
+      </if>
+      <if test="created != null" >
+        created = #{created,jdbcType=TIMESTAMP},
+      </if>
+      <if test="transtate != null" >
+        transtate = #{transtate,jdbcType=VARCHAR},
+      </if>
+      <if test="noticestate != null" >
+        noticestate = #{noticestate,jdbcType=VARCHAR},
+      </if>
+      <if test="trantime != null" >
+        trantime = #{trantime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="flowno != null" >
+        flowno = #{flowno,jdbcType=VARCHAR},
+      </if>
+      <if test="flowtype != null" >
+        flowtype = #{flowtype,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.TradeProduction" >
+    update trade_production
+    set chanid = #{chanid,jdbcType=VARCHAR},
+      tranflowno = #{tranflowno,jdbcType=VARCHAR},
+      happenmoney = #{happenmoney,jdbcType=DOUBLE},
+      tranmoney = #{tranmoney,jdbcType=DOUBLE},
+      created = #{created,jdbcType=TIMESTAMP},
+      transtate = #{transtate,jdbcType=VARCHAR},
+      noticestate = #{noticestate,jdbcType=VARCHAR},
+      trantime = #{trantime,jdbcType=TIMESTAMP},
+      flowno = #{flowno,jdbcType=VARCHAR},
+      flowtype = #{flowtype,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.goods.persistence.wap.dao.WapShoppingCartExMapper">
+	
+	<update id="updateGoodsNum" parameterType="com.zfj.xmy.goods.persistence.wap.pojo.dto.ShoppingGoodsUpdateDto">
+		update shopping_cart set num = #{num} where user_id = #{userId} and goods_id = #{goodsId} 
+	</update>
+	
+</mapper>

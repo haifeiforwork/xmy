@@ -1,0 +1,166 @@
+package com.zfj.xmy.goods.service.pc;
+
+import java.util.List;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.common.persistence.pojo.Comment;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.PcGoodsSeting;
+import com.zfj.xmy.common.persistence.pojo.TermData;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcAdDto;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcGoodsDir;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcGoodsDto;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcGoodsPath;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcOrderDto;
+/**
+ * @author lij
+ */
+public interface PcGoodsService {
+	
+	/**
+	 * @param goodsId
+	 * @return Goods
+	 * @author lij
+	 * @date 2017年7月31日 下午2:20:17
+	 * 查询单个商品详细信息
+	 */
+	PcGoodsDto getGoodsDetail(long goodsId,Integer typeId,Long activityId);
+	/**
+	 * @param id
+	 * @return List<CommentOutDto>
+	 * @author lij
+	 * @date 2017年7月31日 下午8:48:42
+	 * 查询商品的全部评论
+	 */
+	List<Comment> findCommentByGoodsId(long id,PageBean pageBean) ;
+	/**
+	 * @param id
+	 * @param pageBean
+	 * @return Order
+	 * @author lij
+	 * @date 2017年8月1日 下午2:36:13
+	 * 查询商品的购买记录
+	 */
+	List<PcOrderDto> findNewDealByGoodsId(long id,PageBean pageBean);
+	/**
+	 * @param id
+	 * @return List<TermData>
+	 * @author lij
+	 * @date 2017年8月1日 下午4:12:49
+	 * 查商品的父级分类下的所有二级分类
+	 */
+	List<TermData> findGoodsLikeTtype(long id);
+	/**
+	 * @return List<Goods>
+	 * @author lij
+	 * @date 2017年8月1日 下午5:05:11
+	 * 查询总销售排行的前2的商品
+	 */
+	List<Goods> findAllSealTopGoods();
+	/**
+	 * @return List<Goods>
+	 * @author lij
+	 * @date 2017年8月1日 下午5:40:34
+	 * 查询分类销售排行的前2的商品
+	 */
+	List<Goods> findTypeSealTopGoods(long id);
+	/**
+	 * 查询商品是否属于跨境商品
+	 * @param goodsId
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年8月11日 下午2:27:24
+	 */
+	boolean findGoodsIsOut(String goodsId);
+	/**
+	 * @return List<Goods>
+	 * @author lij
+	 * @date 2017年8月14日 下午8:28:46
+	 * 查询最新上架商品的
+	 */
+	List<Goods> findNewPutwayGoods(PageBean pageBean);
+	/**
+	 * @param type
+	 * @param pageBean
+	 * @return List<PcGoodsSeting>
+	 * @author 根据要求查询设置的商品信息（如：热卖商品，热销商品，新品上架等）
+	 * @date 2017年8月16日 上午9:39:21
+	 */
+	List<PcGoodsSeting> findGoodsSeting(Integer type,PageBean pageBean);
+	/**
+	 * @return List<String>
+	 * @author zhangh
+	 * @date 2017年8月18日 上午10:28:46
+	 * 根据一级分类id查询二级分类
+	 */
+	List<TermData> findBorder(String name);
+	/**
+	 * @return List<PcGoodsDir>
+	 * @author zhangh
+	 * @date 2017年8月18日 上午10:28:46
+	 * 查询跨境分类商品
+	 */
+	List<PcGoodsDir> findBorderGoods(String name);
+	/**
+	 * @return List<PcGoodsDir>
+	 * @author zhangh
+	 * @date 2017年8月18日 上午10:28:46
+	 * 查询分类广告
+	 */
+	PcAdDto findAd(long categoryId);
+	/**
+	 * @return List<PcGoodsDir>
+	 * @author zhangh
+	 * @date 2017年8月22日 上午9:28:46
+	 * 分页查询全国配送
+	 */
+	void findNation(PageBean pageBean,String sort);
+	
+	/**
+	 * 查询商品路径
+	 * @param wordSegId
+	 * @param categoryId
+	 * @return    
+	 * @return PcGoodsPath    
+	 * Date:2017年8月27日 下午6:06:00 
+	 * @author hexw
+	 */
+	PcGoodsPath findPcGoodsPath(long wordSegId, long categoryId);
+	
+	/**
+	 * @return List<Goods>
+	 * @author zhangh
+	 * @date 2017年8月28日 上午9:28:46
+	 * 查询足迹商品
+	 */
+	List<Goods> findBrowseGoods(long userId);
+	
+	/**
+	 * 查询企业定制商品 主图  只取前两张
+	 * @param goodsId
+	 * @return    
+	 * @return List<String>    
+	 * Date:2017年9月29日 下午5:52:05 
+	 * @author hexw
+	 */
+	List<String> findCustomizationImg(long goodsId);
+	
+	/**
+	 * 查询订单商品里是否包含不支持全过配送的商品
+	 * @param goodsIds
+	 * @return    
+	 * @return int    
+	 * Date:2017年10月17日 上午11:23:53 
+	 * @author hexw
+	 */
+	int findNotIsDelivery(String goodsIds);
+	
+	/**
+	 * 猜你喜欢 随机查询商品
+	 * @return    
+	 * @return List<Goods>    
+	 * Date:2017年10月24日 下午9:48:03 
+	 * @author hexw
+	 */
+	List<Goods> findYouLike(PageBean pageBean);
+}

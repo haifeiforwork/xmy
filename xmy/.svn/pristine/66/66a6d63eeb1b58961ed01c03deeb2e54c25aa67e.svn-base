@@ -1,0 +1,678 @@
+package com.zfj.xmy.wap.web.controller.shopping;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.base.util.web.WebUtil;
+import com.zfj.xmy.activity.service.cms.CouponService;
+import com.zfj.xmy.activity.service.pc.PcCouponService;
+import com.zfj.xmy.common.CommonVo;
+import com.zfj.xmy.common.FreightUtil;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.PointsGoods;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCart;
+import com.zfj.xmy.common.persistence.pojo.UserAddrees;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.common.service.CommonLimitActivityService;
+import com.zfj.xmy.common.service.OnLineActivityService;
+import com.zfj.xmy.freight.vo.FreightGoods;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsDir;
+import com.zfj.xmy.goods.persistence.wap.pojo.dto.ShoppingGoodsUpdateDto;
+import com.zfj.xmy.goods.service.app.AppGoodsService;
+import com.zfj.xmy.goods.service.app.AppShoppingCartService;
+import com.zfj.xmy.goods.service.pc.PcGoodsService;
+import com.zfj.xmy.goods.service.wap.WapShoppingCartService;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcCartDto;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcDateTime;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcGoodsDto;
+import com.zfj.xmy.order.service.pc.PcOrderService;
+import com.zfj.xmy.order.service.pc.PcShoppingCartService;
+import com.zfj.xmy.order.service.pc.ShoppingCartService;
+import com.zfj.xmy.order.service.wap.WapOrderService;
+import com.zfj.xmy.user.persistence.wap.dto.ShoppingCartOutDto;
+import com.zfj.xmy.user.service.pc.PcUserAddressService;
+import com.zfj.xmy.user.service.pc.PcUserService;
+import com.zfj.xmy.user.service.wap.WapShoppingCardService;
+import com.zfj.xmy.wap.web.common.AjaxResult;
+import com.zfj.xmy.wap.web.common.SessionInfo;
+
+/**
+ * 购物车控制层
+ * @author cj
+ * @createDate 2017年10月24日
+ *
+ */
+@Controller
+@RequestMapping("/shopping")
+public class ShoppingController {
+	
+	@Autowired
+	private PcShoppingCartService pcShoppingCartService;
+	@Autowired
+	private ShoppingCartService cartService;
+	@Autowired
+	private PcOrderService orderService;
+	@Autowired
+	private PcUserAddressService userAddressService;
+	@Autowired
+	private PcCouponService pcCouponSrevice;
+	@Autowired
+	private PcUserService pcUserService;
+	@Autowired
+	private UserInfoMapper userInfoMapper;
+	@Autowired
+	private PcGoodsService pcGoodsService;
+	@Autowired
+	private CouponService couponService;
+	@Autowired
+	private WapShoppingCardService shoppingCardService;
+	@Autowired
+	private CommonLimitActivityService commonLimitActivityService;
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	@Autowired
+	private AppGoodsService appGoodsService;
+	@Autowired
+	private WapShoppingCartService wapShoppingCartService;
+	@Autowired
+	private OnLineActivityService onLineActivityService;
+	@Autowired
+	private WapOrderService wapOrderService;
+	@Autowired
+	private AppShoppingCartService appShoppingCartService;
+	
+	
+	/**购物车页面*/
+	private final static String SHOPPING = "shopping/shopping"; 
+	/**确认订单页面*/
+	private final static String CONFIRM_SHOPPING = "shopping/confirm_shopping"; 
+	/**收货列表页面*/
+	private final static String ADDRESS_SHOPPING = "shopping/address_shopping"; 
+	/**添加或修改收货列表页面*/
+	private final static String ADD_ADDRESS_SHOPPING = "shopping/add_address_shopping";
+	/**优惠券列表页面*/
+	private final static String COUPON_SHOPPING = "shopping/coupon";
+	/**模块标识*/
+	private final static String MODEL = "model";
+	
+	@RequestMapping("/getShoppingCartCount")
+	@ResponseBody
+	public AjaxResult getShoppingCartCount(HttpServletRequest req) {
+		SessionInfo sessionInfo = SessionInfo.get();
+		if(sessionInfo == null) {
+			Cookie[] cookies = req.getCookies();
+			long count = 0;
+			for(Cookie cookie : cookies) {
+				try {
+					Long name = Long.parseLong(cookie.getName());
+					count += Long.parseLong(cookie.getValue());
+				} catch(Exception e) {
+					continue;
+				}
+			}
+			return new AjaxResult(1, null, new ShoppingCartOutDto(null, count));
+		}
+		Long id = sessionInfo.getUserId();
+		ShoppingCartOutDto count = shoppingCardService.findCountByUserId(id);
+		return new AjaxResult(1, null, count);
+	}
+	
+	/**
+	 * 添加进购物车
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/addShopping")
+	@ResponseBody
+	public RespData addShopping(HttpServletRequest request, HttpServletResponse response, Integer goodsNum, ShoppingCart shopping){
+		
+		RespData respData = new RespData();
+		SessionInfo sessionInfo = SessionInfo.get();
+		if(shopping.getNum() == null) {
+			shopping.setNum(goodsNum);
+		}
+		Integer data = 0;
+		PcCartDto cartDto = new PcCartDto();
+		cartDto.setGoodsId(shopping.getGoodsId());
+		cartDto.setCartNum(shopping.getNum());
+		if(shopping.getActId() != null) {
+			PointsGoods pointsGoods = pcShoppingCartService.getPointsGoodsByActId(shopping.getActId(), shopping.getGoodsId());
+			shopping.setActivityPoints(pointsGoods.getPoints());
+			shopping.setActId(pointsGoods.getId().intValue());
+		}
+		if(ObjectUtils.isEmpty(sessionInfo)){//未登录用户添加购物车
+			List<PcGoodsDto> shoppingCart = cartService. findChooseGoods(shopping.getGoodsId().toString());
+			if(shoppingCart.size() > 0){
+				shoppingCart.get(0).getCartNum();
+				cartDto.setCartNum(shoppingCart.get(0).getCartNum() + shopping.getNum());
+			}
+			cartService.addShoppingCart(cartDto, response);
+		}else{//已登录用户添加到购物车
+			List<ShoppingCart>  list = new ArrayList<ShoppingCart>();
+			list.add(shopping);
+			//pcShoppingCartService.addShoppingCart(sessionInfo.getUserId(), goodsId, goodsNum);
+			appShoppingCartService.addGoodsToShoppingCart(list,sessionInfo.getUserId());
+		}
+		respData.setData(data);
+		
+		return respData;
+	}
+	
+	/**
+	 * @param request
+	 * @param shoppingCart
+	 * @return Integer 
+	 * @author lij
+	 * @date 2017年10月14日 下午3:18:22
+	 */
+	@RequestMapping("/addActivityShopping")
+	@ResponseBody
+	public RespData addActivityShopping(HttpServletRequest request,ShoppingCart shoppingCart){
+		
+		RespData respData = new RespData();
+		Integer result = 0;
+		SessionInfo sessionInfo = SessionInfo.get();
+		shoppingCart.setUserId(sessionInfo.getUserId());
+		shoppingCart.setCreateTime(new Date());
+		//查询商品详细信息
+		AppGoodsDir goodsDetail = appGoodsService.getGoodsDetails(shoppingCart.getGoodsId(),shoppingCart.getActivityId(),shoppingCart.getActivityType(),sessionInfo.getUserId());
+		shoppingCart.setActivityPrice(goodsDetail.getActivityPrice());
+		if(ObjectUtil.isNotNull(shoppingCart.getActivityType()) && shoppingCart.getActivityType() == 0) { //买即赠商品
+			pcShoppingCartService.addActivityCart(shoppingCart); 
+		} else {
+			ShoppingCart cart = pcShoppingCartService.findShoppingCart(shoppingCart.getUserId(), shoppingCart.getGoodsId(),shoppingCart.getActivityId());
+			if (ObjectUtil.isNotNull(cart)) {  //如果购物车已存在该活动商品 只判断添加商品的个数 是否超过了限制的个数
+				result = pcShoppingCartService.checkActivityGoodsNum(shoppingCart.getActivityId(), shoppingCart.getGoodsId(), shoppingCart.getNum()+cart.getNum());
+				if (result == 0) {
+					pcShoppingCartService.addActivityCart(shoppingCart); 
+				} 
+			} else {  //新增商品 即判断 参与次数 也判断商品数量
+				result =  commonLimitActivityService.checkLimitActivity(shoppingCart);
+				if (result == 0) {
+					pcShoppingCartService.addActivityCart(shoppingCart); 
+				}
+			}
+		}
+		respData.setData(result);
+		
+		return respData;
+	}
+	
+	/**
+	 * 更新购物车单项商品的数量
+	 */
+	@RequestMapping("/updateNum")
+	@ResponseBody
+	public AjaxResult updateNum(HttpServletRequest req, HttpServletResponse res, ShoppingGoodsUpdateDto dto) {
+		if(dto.getUserId() != null)
+			return AjaxResult.faild("不支持的参数类型");
+		if(dto.getGoodsId() == null || dto.getNum() == null)
+			return new AjaxResult(0, "请传入商品id和数量", null);
+		SessionInfo sessionInfo = SessionInfo.get();
+		if(null != sessionInfo && null != sessionInfo.getUser().getId()) {
+			//已登录，操作表
+			dto.setUserId(sessionInfo.getUser().getId());
+			Integer updateNum = wapShoppingCartService.updateNum(dto);
+			return new AjaxResult(updateNum, "已执行更新", null);
+		} else {
+			//未登录，操作cookies
+			Cookie[] cookies = req.getCookies();
+			for(Cookie c : cookies ) {
+				if(c.getName().equals(dto.getGoodsId() + "")) {
+					c.setValue(dto.getNum() + "");
+					c.setPath("/");
+					c.setMaxAge(24 * 60 * 60);
+					res.addCookie(c);
+					return new AjaxResult(1, "已执行更新", null);
+				}
+			}
+			return new AjaxResult(0, "无此记录", null);
+		}
+	}
+	
+	/**
+	 * @param goodsId
+	 * @param goodsNum
+	 * @return Integer
+	 * 积分商品添加到购物车
+	 */
+	@RequestMapping("/addPointsShopping")
+	public Integer addPointsCart(Long goodsId, Integer goodsNum, Integer points, Integer actId,HttpServletResponse response){
+		
+		SessionInfo sessionInfo = SessionInfo.get();
+		Integer isDel = 0;
+		PcCartDto cartDto = new PcCartDto();
+		cartDto.setGoodsId(goodsId);
+		cartDto.setCartNum(goodsNum);
+		cartDto.setPoints(points);
+		int result = pcShoppingCartService.checkPointGoods(Long.parseLong(actId.toString()),sessionInfo.getUserId(), goodsId, goodsNum); //判断购买的商品数量是否符合活动规则
+		if (result == 1) {
+			isDel = 2;  //超过了活动的限购
+		}else {
+			pcShoppingCartService.addPointsShoppingCart(sessionInfo.getUserId(), goodsId, goodsNum,points,actId);
+		}
+		
+		return isDel;
+	}
+	
+	/**
+	 * 购物车列表
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/shopping")
+	public ModelAndView shopping(HttpServletRequest request, HttpServletResponse response){
+		
+		SessionInfo sessionInfo = SessionInfo.get();
+		List<PcGoodsDto> findShoppingCartByUserId = null;
+		if(ObjectUtils.isEmpty(sessionInfo)){//未登录
+			request.setAttribute("islogin",1);
+			findShoppingCartByUserId = cartService.findUnLoadShoppingCart(null);
+		}else{//登录
+			request.setAttribute("islogin",0);
+			findShoppingCartByUserId = pcShoppingCartService.findShoppingCartByUserId(sessionInfo.getUserId());
+		}
+		request.setAttribute("shoppingCart", findShoppingCartByUserId);
+		request.setAttribute("couponData", cartService.findCoupon(findShoppingCartByUserId));
+		request.setAttribute(MODEL, "shopping");
+		request.setAttribute("sessionInfo", sessionInfo);
+		return new ModelAndView(SHOPPING);
+	}
+	
+	/**
+	 * 确认购买商品
+	 * @param request
+	 * @param response
+	 * @param goodsId
+	 * @return
+	 */
+	@RequestMapping("/confirmShopping")
+	public ModelAndView confirmShopping(HttpServletRequest request, HttpServletResponse response, String goodsId){
+		
+		SessionInfo sessionInfo = SessionInfo.get();
+		BigDecimal sumPrice = new BigDecimal("0.00");
+		BigDecimal salePrice = new BigDecimal("0.00");
+		BigDecimal postPrice = new BigDecimal("0.00");
+		int accPoints=0;//用户拥有的积分
+		int sumPoints=0;
+		int out = 0;//是否包含跨境商品 0:包含跨境商品 1:不包含跨境商品
+		int isDelivery = 0; //是否包含不支持全国配送的商品
+		String ids="0"+","+goodsId;//跨境商品IDs类型不对修改
+		List<UserAddrees> findAddressByUserId = null;//用户地址
+		List<Coupon> couponList = null;//用户优惠卷
+		List<PcGoodsDto> shoppingCart = null;//购物车商品
+		Integer temp=0;
+		HttpSession session = WebUtil.getSession() ;
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			shoppingCart = cartService.findChooseGoods(goodsId);
+		}else{
+			//1.查询出用户的所有收货地址
+			findAddressByUserId = userAddressService.findAddressByUserId(sessionInfo.getUserId());//获取用户地址
+			couponList = pcCouponSrevice.findCouponByUserId(sessionInfo.getUserId());//获取用户优惠卷信息
+			shoppingCart = wapOrderService.getShippingCart(sessionInfo.getUserId(),goodsId);//获取用户购物车信息
+			
+			//优惠券判断
+			Double total = (double) 0;
+			Date today = new Date();
+			long todayMills = today.getTime();
+			for(PcGoodsDto dto : shoppingCart) {
+				total += dto.getSumPrice().doubleValue();
+			}
+			
+			/*for(Coupon c : couponList) {
+				long start = c.getEffectiveStartTime().getTime();
+				long end = c.getEffectiveEndTime().getTime();
+				if(todayMills < start || todayMills >= end || c.getQuota() >= total) {
+					couponList.remove(c);
+					continue;
+				}
+			}*/
+			
+			//获取用户积分（历史数据，没有userinfo记录，此处报空指针）
+			UserInfo userInfo=userInfoMapper.selectByPrimaryKey(sessionInfo.getUserId());
+			if(userInfo!=null && userInfo.getAccPoints() != null){
+			    accPoints = userInfo.getAccPoints();
+			}else{
+			    accPoints = 0;
+			}
+		}
+		//2.获取当前日期开始的后五天的时间
+		List<PcDateTime> pcDateTime = orderService.getPcDateTime();
+		//3.获取发票类容
+		List<String> invoice = orderService.getInvoice();
+		//计算订单总价格
+		for (PcGoodsDto pcGoodsDto : shoppingCart) {
+			if(pcGoodsDto.getSumPoints()==null||pcGoodsDto.getSumPoints()==0){
+				sumPrice = sumPrice.add(pcGoodsDto.getSumPrice());
+			}
+			if(sessionInfo!=null&&(pcGoodsDto.getSumPoints()!=null && pcGoodsDto.getSumPoints()!=0)){
+				sumPoints=sumPoints+pcGoodsDto.getSumPoints();
+			}
+		}
+		//明天的日期时间(默认选中指定配送时间为明天)
+		String tomarror = DateUtil.tomorrow().toString().substring(8, 10);
+		//查询是否包含跨境商品
+		boolean findGoodsIsOut = pcGoodsService.findGoodsIsOut(ids);
+		if(!findGoodsIsOut){
+			out = 1;//不包含跨境商品
+		}
+		salePrice = sumPrice;
+		if(findAddressByUserId != null && findAddressByUserId.size() > 0){
+			List<FreightGoods> freightList = new ArrayList<FreightGoods>() ;
+			for(PcGoodsDto goods : shoppingCart){
+				Goods g = new Goods();
+				FreightGoods freight = new FreightGoods();
+				g.setId(goods.getId());
+				freight.setGoods(goods);
+				freight.setNum(goods.getCartNum());
+				freightList.add(freight);
+			}
+			Double weight = FreightUtil.getWeightByGoods(freightList);
+			UserAddrees userAddress = findAddressByUserId.get(0);
+			if(sessionInfo != null && sessionInfo.getUserId() != null){
+				BigDecimal saleMoney = wapOrderService.changeActivityPrice(request, findAddressByUserId.get(0), shoppingCart, sessionInfo.getUserId()).setScale(2,BigDecimal.ROUND_HALF_UP);
+				request.setAttribute("saleMoney", saleMoney.setScale(2,BigDecimal.ROUND_HALF_UP));
+				salePrice = sumPrice.subtract(saleMoney);
+			}
+			postPrice = FreightUtil.getFreight(userAddress.getProvince(),userAddress.getArea(),weight,salePrice) ;
+		}
+		if(sumPrice.doubleValue() < 0) sumPrice = new BigDecimal(0.00);
+		Date today = new Date() ;
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(today);
+		cal.add(Calendar.DAY_OF_YEAR, 1);
+		
+		isDelivery = pcGoodsService.findNotIsDelivery(goodsId);
+		request.setAttribute("toomarror", tomarror);
+		request.setAttribute("sumPrice", sumPrice);
+		request.setAttribute("salePrice", salePrice);
+		request.setAttribute("sumPoints", sumPoints);
+		request.setAttribute("postPrice", postPrice);
+		request.setAttribute("accPoints", accPoints);
+		request.setAttribute("cartList", shoppingCart);
+		request.setAttribute("couponList", couponList);
+		request.setAttribute("invoiceList", invoice);
+		request.setAttribute("dateList", pcDateTime);
+		request.setAttribute("userAddress", findAddressByUserId);
+		request.setAttribute("out",out);
+		request.setAttribute("isDelivery", isDelivery);
+		request.setAttribute("nextDay", DateUtil.format(cal.getTime(), new SimpleDateFormat("yyyy-MM-dd")));
+		request.setAttribute("today", DateUtil.format(today, new SimpleDateFormat("yyyy-MM-dd")));
+		request.setAttribute("nowLong", DateUtil.format(today, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")));
+		request.setAttribute("sessionInfo", sessionInfo);
+		return new ModelAndView(CONFIRM_SHOPPING);
+	}
+	
+	/**
+	 * 活动打折后价格
+	 * @Description 
+	 * @return
+	 * @Author cj
+	 * @Date 2017年11月2日上午3:30:07
+	 */
+	/*private BigDecimal changeActivityPrice(HttpServletRequest request, SessionInfo sessionInfo, UserAddrees userAddress, List<PcGoodsDto> shoppingCart){
+		
+		BigDecimal sumSalePrice = new BigDecimal(0.00); 
+		if (!ObjectUtils.isEmpty(sessionInfo) && sessionInfo.getUserId() != null) {
+			Double sale = 0.0;
+			Integer integer = onLineActivityService.checkUserOrders(sessionInfo.getUserId());//判断用户是否符合条件
+			if(integer>0){
+				Integer chekActiviDate = onLineActivityService.chekActiviDate();//判断时间是否属于活动时间
+				if(chekActiviDate>0){
+					//8.8折
+					sale = 0.12;
+					Integer cqDate = onLineActivityService.chekCqActiviDate();//判断是否是重庆活动时间
+					if(cqDate>0){
+						//重庆活动时间
+						if("重庆市".equals(userAddress.getProvince()) || "重庆".equals(userAddress.getProvince())){
+							//6.8折
+							sale = 0.32;
+						}
+					}
+					for(PcGoodsDto goods : shoppingCart){
+						//查询是否包含跨境商品
+						boolean online = commonGoodsService.findOnlineActivityGoods(goods.getId());
+						if(online){
+							BigDecimal goodsPrice = goods.getPhonePrice().multiply(new BigDecimal(goods.getCartNum()));
+							BigDecimal saleMoney = goodsPrice.multiply(new BigDecimal(sale));
+							if(saleMoney.doubleValue() >= 68) sumSalePrice = sumSalePrice.add(new BigDecimal(68));
+							else sumSalePrice = sumSalePrice.add(saleMoney);
+						}
+					}
+				}
+			}
+		}
+		
+		return sumSalePrice;
+	}*/
+	
+	/**
+	 * 查找用户收货地址列表
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/addressShopping")
+	public ModelAndView addressShopping(HttpServletRequest request, HttpServletResponse response, UserAddrees userAddrees , String flag){
+		
+		SessionInfo sessionInfo = SessionInfo.get();
+		List<UserAddrees> findAddressByUserId = null ;
+		//查询出用户的所有收货地址
+		if(!ObjectUtils.isEmpty(sessionInfo)){
+			//用户登录时
+			findAddressByUserId = userAddressService.findAddressByUserId(sessionInfo.getUserId());//获取用户地址
+		}else{
+			//用户未登录时
+			if(!StringUtil.isEmpty(userAddrees.getAddress()) && !StringUtil.isEmpty(userAddrees.getName())
+					&& !StringUtil.isEmpty(userAddrees.getArea()) && !StringUtil.isEmpty(userAddrees.getProvince())
+					&& !StringUtil.isEmpty(userAddrees.getCity()) && !StringUtil.isEmpty(userAddrees.getMobilePhone())){
+					findAddressByUserId = new ArrayList<UserAddrees>();
+					findAddressByUserId.add(userAddrees);
+			}else{
+				if("saveOrUpdate".equals(flag)){//判断是否从添加页面跳转过来
+					throw new BusinessException("address is not complete : 收货地址不完善");
+				}
+			}
+		}
+		request.setAttribute("addressList", findAddressByUserId);
+		
+		return new ModelAndView(ADDRESS_SHOPPING);
+	}
+	
+	/**
+	 * 跳转添加或修改新地址页面
+	 * @param request
+	 * @param response
+	 * @param addressId
+	 * @return
+	 */
+	@RequestMapping("/addAddressShopping")
+	public ModelAndView addAddressShopping(HttpServletRequest request, HttpServletResponse response, UserAddrees userAddrees){
+		
+		request.setAttribute("userAddress", userAddrees);
+		
+		return new ModelAndView(ADD_ADDRESS_SHOPPING);
+	}
+	
+	/**
+	 * 保存或修改地址
+	 * @param request
+	 * @param response
+	 * @param userAddrees
+	 * @return
+	 */
+	@RequestMapping("/saveOrUpdateAddress")
+	public ModelAndView saveOrUpdateAddress(HttpServletRequest request, HttpServletResponse response, UserAddrees userAddrees){
+		
+		SessionInfo sessionInfo = SessionInfo.get();
+		userAddrees.setUserId(sessionInfo.getUserId());
+		if(userAddrees.getId() == null){
+			userAddressService.addUserAddrees(userAddrees);
+		}else{
+			userAddressService.updateAddrees(userAddrees);
+		}
+			
+		return new ModelAndView("redirect:/shopping/addressShopping") ;
+	}
+	
+	/**
+	 * 删除地址
+	 * @param request
+	 * @param response
+	 * @param userAddrees
+	 * @return
+	 */
+	@RequestMapping("/deleteAddress")
+	public ModelAndView deleteAddress(HttpServletRequest request, HttpServletResponse response, UserAddrees userAddrees){
+		
+		if(userAddrees.getId() != null){
+			userAddressService.deleteAddrees(userAddrees.getId());
+		}
+			
+		return new ModelAndView("redirect:/shopping/addressShopping") ;
+	}
+	
+	/**
+	 * 选择地址
+	 * @param request
+	 * @param response
+	 * @param userAddrees
+	 * @return
+	 */
+	@RequestMapping("/chooseAddress")
+	@ResponseBody
+	public RespData chooseAddress(HttpServletRequest request, HttpServletResponse response, String goodsId, String province, String area , CommonVo commonVo){
+		
+		RespData respData = new RespData();
+		Map<String,Object> map = countPrice(request, response, goodsId, province, area , commonVo);
+		respData.setData(map);
+		
+		return respData;
+	}
+	
+	/**
+	 * 重新计算商品价格
+	 * @param request
+	 * @param response
+	 * @param goodsId
+	 * @param province
+	 * @param area
+	 * @param commonVo
+	 * @return
+	 */
+	private Map<String,Object> countPrice(HttpServletRequest request, HttpServletResponse response, String goodsId, String province, String area , CommonVo commonVo){
+		SessionInfo sessionInfo = SessionInfo.get();
+		Map<String, Object> map = new HashMap<String,Object>();
+		BigDecimal sumPrice = new BigDecimal("0.00");
+		BigDecimal saleMoney = new BigDecimal("0.00");
+		List<PcGoodsDto> shoppingCart = null;//购物车商品
+		List<Coupon> couponList = null ;
+		//查询出用户选择的商品
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			shoppingCart = cartService.findChooseGoods(goodsId);
+		}else{
+			shoppingCart = orderService.getShippingCart(sessionInfo.getUserId(),goodsId);//获取用户购物车信息
+		}
+		//计算订单总价格
+		for (PcGoodsDto pcGoodsDto : shoppingCart) {
+			if(pcGoodsDto.getSumPoints()==null||pcGoodsDto.getSumPoints()==0){
+				sumPrice = sumPrice.add(pcGoodsDto.getSumPrice());
+			}
+		}
+		if(sessionInfo != null && sessionInfo.getUserId() != null){
+			UserAddrees userAddress = new UserAddrees();
+			userAddress.setProvince(province);
+			saleMoney = wapOrderService.changeActivityPrice(request, userAddress, shoppingCart, sessionInfo.getUserId()).setScale(2,RoundingMode.HALF_UP);
+			sumPrice = sumPrice.subtract(saleMoney).setScale(2,RoundingMode.HALF_UP);
+			couponList = pcCouponSrevice.findCouponByUserId(sessionInfo.getUserId());//获取用户优惠卷信息
+		}
+		
+		if(sumPrice.doubleValue() < 0) sumPrice = new BigDecimal(0.00);
+		Double weight = FreightUtil.getWeightByGoods(commonVo.getFreightGoodsList());
+		BigDecimal postPrice = FreightUtil.getFreight(province,area,weight,sumPrice) ;
+		map.put("postPrice", postPrice.doubleValue());
+		map.put("sumPrice", sumPrice);
+		map.put("saleMoney", saleMoney);
+		map.put("couponList", couponList);
+		return map;
+	}
+	
+	@RequestMapping("/delete")
+	@ResponseBody
+	public RespData delete(HttpServletRequest request,String[] goodsId,HttpServletResponse response){
+		RespData respData =new RespData();
+		SessionInfo sessionInfo=SessionInfo.get();
+		PcCartDto cartDto = new PcCartDto();
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			for (int i = 0; i < goodsId.length; i++) {
+				cartDto.setGoodsId(Long.parseLong(goodsId[i]));
+				cartService.deleteShoppingCart(cartDto, response);
+			}
+		}else{
+			for (int i = 0; i < goodsId.length; i++) {
+				cartService.deletGoods(goodsId[i], sessionInfo.getUserId(), response);
+			}
+		}
+		return respData;
+	}
+	
+	@RequestMapping("/toLogin")
+	public void toLogin(String backurl){
+	}
+	
+	/**
+	 * 加载优惠券列表
+	 * @param request
+	 * @param response
+	 * @param goodsId
+	 * @param province
+	 * @param area
+	 * @param commonVo
+	 * @return
+	 */
+	@RequestMapping("/findCouponList")
+	public ModelAndView findCouponList(HttpServletRequest request, HttpServletResponse response, String goodsId, String province, String area , CommonVo commonVo){
+		
+		SessionInfo sessionInfo = SessionInfo.get();
+		Map<String,Object> map = countPrice(request, response, goodsId, province, area , commonVo);
+		List<Coupon> couponList = null;
+		if(!ObjectUtils.isEmpty(sessionInfo)){
+			couponList = pcCouponSrevice.findCouponByUserId(sessionInfo.getUserId());//获取用户优惠卷信息
+			request.setAttribute("couponList", couponList);
+		}
+		request.setAttribute("nowLong", DateUtil.format(new Date(), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")));
+		request.setAttribute("salePrice", map.get("sumPrice"));
+		
+		return new ModelAndView(COUPON_SHOPPING);
+	}
+	
+}

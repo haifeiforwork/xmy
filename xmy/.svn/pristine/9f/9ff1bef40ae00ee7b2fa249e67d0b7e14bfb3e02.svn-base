@@ -1,0 +1,652 @@
+package com.zfj.xmy.goods.service.pc.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.DateUtils;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.AdImageMapper;
+import com.zfj.xmy.common.persistence.dao.AdInfoMapper;
+import com.zfj.xmy.common.persistence.dao.BrowsedGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.BuyAndPresentMapper;
+import com.zfj.xmy.common.persistence.dao.CategoryWordSegMapper;
+import com.zfj.xmy.common.persistence.dao.CommentMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsCategoryMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsImageMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsSpecCategoryMapper;
+import com.zfj.xmy.common.persistence.dao.LimitActivityMapper;
+import com.zfj.xmy.common.persistence.dao.LimitGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.PcGoodsSetingMapper;
+import com.zfj.xmy.common.persistence.dao.TermDataMapper;
+import com.zfj.xmy.common.persistence.pojo.AdImage;
+import com.zfj.xmy.common.persistence.pojo.AdInfo;
+import com.zfj.xmy.common.persistence.pojo.BrowsedGoods;
+import com.zfj.xmy.common.persistence.pojo.BuyAndPresent;
+import com.zfj.xmy.common.persistence.pojo.CategoryWordSeg;
+import com.zfj.xmy.common.persistence.pojo.Comment;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.GoodsCategory;
+import com.zfj.xmy.common.persistence.pojo.GoodsImage;
+import com.zfj.xmy.common.persistence.pojo.GoodsSpecCategory;
+import com.zfj.xmy.common.persistence.pojo.LimitActivity;
+import com.zfj.xmy.common.persistence.pojo.LimitGoods;
+import com.zfj.xmy.common.persistence.pojo.PcGoodsSeting;
+import com.zfj.xmy.common.persistence.pojo.TermData;
+import com.zfj.xmy.common.persistence.pojo.app.CommonActivityGoodsOutDto;
+import com.zfj.xmy.common.persistence.pojo.app.CommonActvivtyGoodsInDto;
+import com.zfj.xmy.common.service.CommonActivityService;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.common.service.CommonLimitActivityService;
+import com.zfj.xmy.goods.persistence.pc.dao.PcGoodsExMapper;
+import com.zfj.xmy.goods.persistence.pc.dao.PcOrderExMapper;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcAdDto;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcGoodsDir;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcGoodsDto;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcGoodsPath;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcOrderDto;
+import com.zfj.xmy.goods.service.pc.PcGoodsService;
+@Service
+public class PcGoodsServiceImpl extends BaseService implements PcGoodsService {
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Autowired
+	private PcGoodsExMapper goodsExMapper;
+	
+	@Autowired
+	private GoodsImageMapper imageMapper;
+	
+	@Autowired
+	private CommentMapper commentMapper ;
+	
+	@Autowired
+	private PcOrderExMapper orderExMapper;
+	
+	@Autowired
+	private TermDataMapper termDataMapper;
+	
+	@Autowired
+	private GoodsCategoryMapper goodsCategoryMapper;
+	
+	@Autowired
+	private PcGoodsService goodsService;
+	
+	@Autowired
+	private PcGoodsSetingMapper setingMapper;
+	
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	@Autowired
+	private LimitActivityMapper activityMapper;
+	
+	@Autowired
+	private LimitGoodsMapper limitGoodsMapper;
+	
+	@Autowired
+	private AdImageMapper adImageMapper;
+	
+	@Autowired
+	private AdInfoMapper adInfoMapper;
+	
+	@Autowired
+	private CategoryWordSegMapper categoryWordSegMapper;
+	
+	@Autowired
+	private BuyAndPresentMapper andPresentMapper;
+	
+	@Autowired
+	private GoodsSpecCategoryMapper goodsSpecCategoryMapper;
+	
+	@Autowired
+	private BrowsedGoodsMapper browsedGoodsMapper;
+	
+	@Autowired
+	private CommonActivityService commonActivityService;
+	
+	@Autowired
+	private CommonLimitActivityService commonLimitActivityService;
+	
+	private final static int VID=2;
+	//全国配送
+	private final static int IS_DELIVERY=0;
+	
+	/**
+	 * 查询单个商品的详细信息
+	 */
+	@Override
+	public PcGoodsDto getGoodsDetail(long goodsId,Integer typeId,Long activityId) {
+		List<String> images = new ArrayList<String>();//用于存放商品多个图片路径
+		GoodsSpecCategory goodsSpecCategory=null;
+		ReqData reqData = new ReqData();
+		reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+		//1.实体的对象描述
+		PcGoodsDto goodsDto = goodsExMapper.selectByPrimaryKey(goodsId);
+		//2.查询商品的关联图片
+		List<GoodsImage> imageList = imageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (GoodsImage goodsImage : imageList) {
+			images.add(goodsImage.getPath());
+		}
+		if (images.size() > 0) {
+			goodsDto.setImageList(images);
+		}
+		goodsDto.setImgPath(commonGoodsService.getFirstGoodsImg(goodsDto.getId()));
+		//3.查询相关联的商品规格
+		goodsDto.setGoodsstandards(selectRelevanceGoods(goodsDto.getCode()));
+		//4.查询商品所属的分类
+		List<GoodsCategory> selectByExample = goodsCategoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		GoodsCategory goodsCategory = selectByExample.get(0);
+		TermData child = termDataMapper.selectByPrimaryKey(goodsCategory.getCid());
+		TermData parent = termDataMapper.selectByPrimaryKey(child.getParentId());
+		if(parent!=null){
+	        goodsDto.setFirstTypeName(parent.getName());
+	        goodsDto.setDescriptionImg(parent.getDescriptionImg());
+		}
+		goodsDto.setScendTypeName(child.getName());
+		//4.1查询三级分类名称
+		reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+		List<GoodsSpecCategory> selectByExample2 = goodsSpecCategoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if(!ObjectUtils.isEmpty(selectByExample2)){
+			goodsSpecCategory = selectByExample2.get(0);
+			CategoryWordSeg selectByPrimaryKey = categoryWordSegMapper.selectByPrimaryKey(goodsSpecCategory.getSpecCategoryId());
+			if (ObjectUtil.isNotNull(selectByPrimaryKey)) {
+				goodsDto.setThirdTypeName(selectByPrimaryKey.getWordSeg());
+			}
+		}
+		//5.查询该商品是否有参加活动
+		if(typeId!=-1 && activityId != 0){
+			goodsDto.setActivityType(typeId);
+			goodsDto.setActivityId(activityId);
+			if(typeId.equals(SystemConstant.ACTIVITY.BYU_AND_PRESENT_ACTIVITY)){
+				//买即赠
+				if(activityId!=0){
+					BuyAndPresent present = andPresentMapper.selectByPrimaryKey(activityId);
+					goodsDto.setActivityName(present.getName());
+					goodsDto.setEndTime(present.getEndTime());
+					goodsDto.setLimitNum(present.getGiftCount());
+					goodsDto.setAcitivityPrice(goodsDto.getPrice());
+					String giftGoodsIds = present.getGiftGoodsIds();
+					String[] split = giftGoodsIds.split(",");
+					String prenid=split[0];
+					Goods prentGoods = goodsMapper.selectByPrimaryKey(Long.valueOf(prenid));
+					//reqData.putValue("id", prenid, SystemConstant.REQ_PARAMETER_EQ);
+					goodsDto.setPrentsentName(prentGoods.getName());
+				
+				}
+			}else if(typeId.equals(SystemConstant.ACTIVITY.PROMOTION_ACTIVITY)){
+				//专题促销活动
+				CommonActvivtyGoodsInDto inDto = new CommonActvivtyGoodsInDto();
+				inDto.setActivityType(typeId);
+				inDto.setActivityId(activityId);
+				inDto.setGoodsId(goodsId);
+				CommonActivityGoodsOutDto dto = commonActivityService.getActivityGoodsDto(inDto);
+				goodsDto.setAcitivityPrice(dto.getActivityPrice());
+				goodsDto.setSealNum(dto.getGoodsResidueNum());//剩余的活动商品数量
+				goodsDto.setLimitNum(dto.getGoodsLimitNum());
+			}else if(typeId.equals(SystemConstant.ACTIVITY.LIMIT_ACTIVITY)){
+				//限时限量活动
+				LimitActivity activity = activityMapper.selectByPrimaryKey(activityId);
+				goodsDto.setActivityName(activity.getName());
+				goodsDto.setActivityType(activity.getType());
+				reqData.putValue("limit_id", activityId, SystemConstant.REQ_PARAMETER_EQ);
+				reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+				List<LimitGoods> limitGoods = limitGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				LimitGoods liGoods = limitGoods.get(0);
+				goodsDto.setAcitivityPrice(liGoods.getPrice());
+				goodsDto.setSealNum(liGoods.getAllNum() -liGoods.getCompleteNum());//剩余的活动商品数量
+				goodsDto.setLimitNum(liGoods.getLimitNum());
+				if (SystemConstant.LIMITACTIVITY.PROMOTIONS == activity.getType()) { // 专题促销活动
+					goodsDto.setEndTime(activity.getEndTime());
+				} else {
+					goodsDto.setEndTime(DateUtils.getEndDayOfWeek());
+				}
+				if (SystemConstant.LIMITACTIVITY.FREEZING ==  activity.getType()) { //冰点价
+					goodsDto.setFreezingActivityTime(DateUtils.getMothAndDay(liGoods.getActivityTime())); //冰点价商品水印图标 12月12日
+				}
+				goodsDto.setWaterImg(activity.getImgPath());
+			} 
+		} else {
+			boolean isLimitActivityGoods = commonLimitActivityService.checkGoodsIsLimitActivityGoods(goodsId); //判断是否是限时限量商品
+			if (isLimitActivityGoods) {
+				throw new BusinessException("传入参数错误"); 
+			}
+		}
+		
+		return goodsDto;
+	}
+	
+	@Override
+	public List<String> findCustomizationImg(long goodsId){
+		List<String> images = new ArrayList<String>();//用于存放商品多个图片路径
+		ReqData reqData = new ReqData();
+		reqData.putValue("goods_id",goodsId, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.setSortname("seq");
+		reqData.setSortorder("asc");
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(2);
+		List<GoodsImage> imageList = imageMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData),pageBean.getRowBounds());
+		for (GoodsImage goodsImage : imageList) {
+			images.add(goodsImage.getPath());
+		}
+		return images;
+	}
+	
+	
+	/**
+	 * 商品关联查询
+	 * @param code
+	 * @return    
+	 * @return List<Map<String,Object>>    
+	 * Date:2017年7月27日 下午2:22:40 
+	 * @author hexw
+	 */
+	public List<Map<String,Object>> selectRelevanceGoods(String code){
+		/**
+		 * 1、商品关联的规则：商品编码12位，从左到右前面10位相同的进行关联
+		 */
+		ReqData reqData = new ReqData();
+		reqData.putValue("left(code,"+SystemConstant.RelevanceGoods.GOODS_CODE_SUBSTR+")", code.substring(0, SystemConstant.RelevanceGoods.GOODS_CODE_SUBSTR), SystemConstant.REQ_PARAMETER_EQ);
+		List<Goods> list = goodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		List<Map<String, Object>> listMap = new ArrayList<Map<String, Object >>();
+		if (list.size() > 0) {
+			for (Goods goods : list) {
+				if (!StringUtil.isEmpty(goods.getStandard()) && SystemConstant.GoodsConstant.PUTWAY.equals(goods.getIsPutway())) {
+					Map<String, Object> map = new  HashMap<String, Object>();
+					map.put("goodId", goods.getId());
+					map.put("standard", goods.getStandard());
+					listMap.add(map);
+				}
+			}
+		}
+		return listMap;
+	}
+	/**
+	 * 分页查询商品的评论
+	 */
+	@Override
+	public List<Comment> findCommentByGoodsId(long id, PageBean pageBean) {
+		ReqData reqData = new ReqData();
+		reqData.putValue("goods_id", id, SystemConstant.REQ_PARAMETER_EQ);
+		List<Comment> selectByExampleAndPage = commentMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		return selectByExampleAndPage;
+	}
+	/**
+	 * 分页查询商品的购买记录
+	 */
+	@Override
+	public List<PcOrderDto> findNewDealByGoodsId(long id, PageBean pageBean) {
+		ReqData reqData = new ReqData();
+		reqData.putValue("og.goods_id", id, SystemConstant.REQ_PARAMETER_EQ);
+		List<PcOrderDto> list = orderExMapper.findGoodsDeal(ReqUtil.reqParameterToCriteriaParameter(reqData),pageBean.getRowBounds());
+		return list;
+	}
+	/**
+	 * 查询该商品父级分类下的所有二级分类
+	 */
+	@Override
+	public List<TermData> findGoodsLikeTtype(long id) {
+		ReqData reqData = new ReqData() ;
+		//1.查询出该商品对应的二级分类的id
+		reqData.putValue("goods_id", id, SystemConstant.REQ_PARAMETER_EQ);
+		List<GoodsCategory> selectByExample = goodsCategoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		GoodsCategory goodsCategory = selectByExample.get(0);
+		reqData.clearValue();
+		//2.查询出二级分类的全部信息(父级id)
+		TermData termData = termDataMapper.selectByPrimaryKey(goodsCategory.getCid());
+		//3.查询出该父级ID下的所有二级分类
+		reqData.putValue("parent_id", termData.getParentId(), SystemConstant.REQ_PARAMETER_EQ);
+		List<TermData> termDataList = termDataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return termDataList;
+	}
+	/**
+	 * 查询全部商品的销售排行的前2个商品
+	 */
+	@Override
+	public List<Goods> findAllSealTopGoods() {
+		ReqData reqData = new ReqData();
+		/*String goodsIds = "0";
+		List<Integer> findGoodsDeal = goodsExMapper.findGoodsDeal();
+		for (int i = 0; i < findGoodsDeal.size(); i++) {
+			goodsIds += "," + findGoodsDeal.get(i);
+		}*/
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(2);
+		reqData.setSortname("sum_deal");
+		reqData.setSortorder("desc");
+		reqData.putValue("is_putway", SystemConstant.GoodsConstant.PUTWAY, SystemConstant.REQ_PARAMETER_EQ);
+		List<Goods> selectByExample = goodsMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		for (Goods goods : selectByExample) {
+			goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+		}
+		return selectByExample;
+	}
+	/**
+	 * 查询分类商品销售的前2个商品
+	 */
+	@Override
+	public List<Goods> findTypeSealTopGoods(long id) {
+		ReqData reqData = new ReqData();
+		String termIds = "0";
+		String goodsId = "0";
+		String topGoods = "0";
+		List<TermData> termData = goodsService.findGoodsLikeTtype(id);
+		for (TermData termData2 : termData) {
+			termIds += ","+termData2.getId();
+		}
+		reqData.putValue("cid", termIds, SystemConstant.REQ_PARAMETER_IN);
+		List<GoodsCategory> goodsList = goodsCategoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (GoodsCategory goodsCategory : goodsList) {
+			goodsId += ","+goodsCategory.getGoodsId();
+		}
+		reqData.clearValue();
+		reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_IN);
+		List<Integer> typeGoods = goodsExMapper.findTypeGoodsDeal(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (int i = 0; i < typeGoods.size(); i++) {
+			topGoods += "," + typeGoods.get(i);
+		}
+		reqData.clearValue();
+		reqData.putValue("id", topGoods, SystemConstant.REQ_PARAMETER_IN);
+		reqData.setSortname("id");
+		reqData.setSortorder("desc");
+		List<Goods> selectByExample = goodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (Goods goods : selectByExample) {
+			goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+		}
+		return selectByExample;
+	}
+	/**
+	 * 查询商品是否属于跨境商品
+	 */
+	@Override
+	public boolean findGoodsIsOut(String goodsId) {
+		boolean flag = false;
+		//1.查询商品的二级分类
+		ReqData reqData = new ReqData();
+		reqData.putValue("a.id", goodsId, SystemConstant.REQ_PARAMETER_IN);
+		List<String> findGoodsIsOut = goodsExMapper.findGoodsIsOut(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (String string : findGoodsIsOut) {
+			if(string.indexOf(SystemConstant.TERMDATA.ACROSSBORDERS)!=-1){
+				flag = true;
+			}
+		}
+		return flag;
+	}
+	
+	/**
+	 * 查询订单商品是否含有不支持全国配送的商品
+	 */
+	@Override
+	public int findNotIsDelivery(String goodsIds) {
+		int result = 1;
+		String[] goodId = goodsIds.split("\\,");
+		for (String id : goodId) {
+			Goods goods = goodsMapper.selectByPrimaryKey(Long.parseLong(id));
+			if (ObjectUtil.isNotNull(goods)) {
+				if (ObjectUtil.isNotNull(goods.getIsDelivery()) && goods.getIsDelivery() == 1 ){
+					result=0;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 查询商品
+	 */
+	@Override
+	public List<Goods> findNewPutwayGoods(PageBean pageBean) {
+		ReqData reqData = new ReqData();
+		reqData.setSortname("code");
+		reqData.setSortorder("desc");
+		List<Goods> selectByExample = goodsMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		for (Goods goods : selectByExample) {
+			if (StringUtil.isEmpty(commonGoodsService.getFirstGoodsImg(goods.getId()))) {
+				goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+			} 
+		}
+		return selectByExample;
+	}
+	/**
+	 * 查询配置商品
+	 */
+	@Override
+	public List<PcGoodsSeting> findGoodsSeting(Integer type, PageBean pageBean) {
+		ReqData reqData = new ReqData();
+		reqData.putValue("type", type, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.setSortname("id");
+		reqData.setSortorder("desc");
+		List<PcGoodsSeting> selectByExampleAndPage = setingMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		for (PcGoodsSeting pcGoodsSeting : selectByExampleAndPage) {
+			Goods goods = goodsMapper.selectByPrimaryKey(pcGoodsSeting.getGoodsId());
+			if (ObjectUtil.isNotNull(goods)) {
+				pcGoodsSeting.setGoodsName(goods.getName());
+				pcGoodsSeting.setGoodsPrice(goods.getPrice());
+				pcGoodsSeting.setStandard(goods.getStandard());
+				pcGoodsSeting.setGoodsImage(commonGoodsService.getFirstGoodsImg(goods.getId()));
+			}
+		}
+		return selectByExampleAndPage;
+	}
+
+	@Override
+	public List<TermData> findBorder(String name) {
+		ReqData reqData=new ReqData();
+		reqData.putValue("name", name,SystemConstant.REQ_PARAMETER_EQ);
+		List<TermData> tm=termDataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		
+		reqData.putValue("vid", VID,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("parent_id", tm.get(0).getId(),SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("status", SystemConstant.SYS_USER.STATUS_START,SystemConstant.REQ_PARAMETER_EQ);
+		List<TermData> list=termDataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return list;
+	}
+
+	@Override
+	public List<PcGoodsDir> findBorderGoods(String name) {
+		ReqData reqData=new ReqData();
+		List<PcGoodsDir> boder=new ArrayList<PcGoodsDir>();
+		reqData.putValue("category_name", name,SystemConstant.REQ_PARAMETER_CN);
+		List<Goods> list=goodsExMapper.findBorderGoods(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for(Goods goods:list){
+			reqData.clearValue();
+			reqData.putValue("goods_id", goods.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			PcGoodsDir goodsDir=new PcGoodsDir();
+			goodsDir.setGoodsId(goods.getId());
+			goodsDir.setGoodsName(goods.getName());
+			String img = "";
+			if (name.contains("购物卡")) {
+				img = commonGoodsService.getCustomizationImage(goodsDir.getGoodsId());
+			} else {
+				img=commonGoodsService.getFirstGoodsImg(goodsDir.getGoodsId());
+			}
+			if(StringUtil.isEmpty(img)){
+				img="resource/commons/images/defaultgoods.jpg";
+			}
+			goodsDir.setImgPath(img);
+			goodsDir.setPrice(goods.getPrice());
+			boder.add(goodsDir);
+		}
+		return boder;
+	}
+
+	@Override
+	public PcAdDto findAd(long category_id) {
+		PcAdDto adDto=new PcAdDto();
+		ReqData reqData=new ReqData();
+		reqData.putValue("category_id", category_id,SystemConstant.REQ_PARAMETER_EQ);
+		List<AdInfo> ad=adInfoMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		TermData termData=termDataMapper.selectByPrimaryKey(category_id);
+		if(ad.size()>0){
+			reqData.clearValue();
+			reqData.putValue("ad_id", ad.get(0).getId(),SystemConstant.REQ_PARAMETER_EQ);
+			adDto.setCategory_Name(termData.getName());
+			adDto.setId(ad.get(0).getId());
+			adDto.setCategory_id(category_id);
+			adDto.setImg(adImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData)).get(0).getImgPath());
+			adDto.setName(ad.get(0).getName());
+			adDto.setData(adImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData)).get(0).getData());
+			adDto.setType(adImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData)).get(0).getType());
+		}
+		return adDto;
+	}
+
+	@Override
+	public void findNation(PageBean pageBean,String sort) {
+		ReqData reqData=new ReqData();
+		List<PcGoodsDto> goods=new ArrayList<PcGoodsDto>();
+		reqData.putValue("is_delivery",IS_DELIVERY,SystemConstant.REQ_PARAMETER_EQ);
+		if(sort!=null&&sort.trim()!=""){
+			reqData.setSortname(sort);
+			reqData.setSortorder("desc");
+		}
+		List<Goods> list=goodsMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		for(Goods gd:list){
+			PcGoodsDto pcgoods=new PcGoodsDto();
+			pcgoods.setId(gd.getId());
+			pcgoods.setName(gd.getName());
+			pcgoods.setSumComment(gd.getSumComment());
+			pcgoods.setSumDeal(gd.getSumDeal());
+			String img=commonGoodsService.getFirstGoodsImg(pcgoods.getId());
+			if(StringUtil.isEmpty(img)){
+				img="resource/commons/images/defaultgoods.jpg";
+			}
+			pcgoods.setImgPath(img);
+			pcgoods.setPrice(gd.getPrice());
+			goods.add(pcgoods);
+		}
+		pageBean.setData(goods);
+		int count=goodsMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		pageBean.setTotalCount(count);
+	}
+	
+	@Override
+	public PcGoodsPath findPcGoodsPath(long wordSegId,long categoryId){
+		PcGoodsPath pcGoods = new PcGoodsPath();
+		CategoryWordSeg categoryWordSeg = categoryWordSegMapper.selectByPrimaryKey(wordSegId);  //商品所属分词
+		if (ObjectUtil.isNotNull(categoryWordSeg)) {
+			pcGoods.setWordSeg(categoryWordSeg.getWordSeg());
+			pcGoods.setWordSegId(wordSegId);
+		}
+		TermData termData = termDataMapper.selectByPrimaryKey(categoryId); //二级分类
+		if (ObjectUtil.isNotNull(termData)) {
+			pcGoods.setCategory(termData.getName());
+			pcGoods.setCategoryId(categoryId);
+			if (termData.getParentId() != 0) {
+				TermData parent = termDataMapper.selectByPrimaryKey(termData.getParentId()); //一级分类
+				if (ObjectUtil.isNotNull(parent)) {
+					pcGoods.setParentCategory(parent.getName());
+				}
+			}
+		}
+		return pcGoods;
+	}
+	
+	@Override
+	public List<Goods> findBrowseGoods(long userId) {
+		ReqData reqData=new ReqData();
+		reqData.putValue("user_id", userId,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.setSortname("browsed_time");
+		reqData.setSortorder("DESC LIMIT 3");
+		
+		List<Goods> list=new ArrayList<Goods>();
+		List<BrowsedGoods> browsedGoods=browsedGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for(BrowsedGoods browsedGood:browsedGoods){
+			list.add(goodsMapper.selectByPrimaryKey(browsedGood.getGoodsId()));
+		}
+		for (Goods goods : list) {
+			goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+		}
+		return list;
+	}
+	
+	/**
+	 * 猜你喜欢 随机取商品
+	 * @return    
+	 * @return List<Goods>    
+	 * Date:2017年10月24日 下午9:46:39 
+	 * @author hexw
+	 */
+	@Override
+	public List<Goods> findYouLike(PageBean pageBean){
+		int pageIndex = new Random().nextInt(20) + 1;
+		pageBean.setPageIndex(pageIndex);
+		ReqData reqData = new ReqData();
+		reqData.putValue("is_putway", SystemConstant.GoodsConstant.PUTWAY, SystemConstant.REQ_PARAMETER_EQ);
+		List<Goods> list = goodsMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		if (list.size() > 0) {
+		    Iterator<Goods> it = list.iterator();  
+		    while(it.hasNext()){  
+		    	Goods goods = it.next(); 
+		    	goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+		        if(StringUtil.isEmpty(goods.getImgPath())){    //排除没有图片的商品
+		            it.remove();  
+		        }  
+		     } 
+		}
+		return list;
+	}
+	/**
+	 * 查询根据分类猜你喜欢的商品
+	 */
+	@Override
+	public List<Goods> findLike(PageBean pageBean) {
+		List<Goods> list = new ArrayList<>();
+		Integer size = pageBean.getPageSize();
+		ReqData reqData = new ReqData();
+		reqData.putValue("parent_id", 0, SystemConstant.REQ_PARAMETER_GT);
+		reqData.putValue("vid", 2, SystemConstant.REQ_PARAMETER_EQ);
+		List<TermData> example = termDataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		for(int i=0;list.size()<size;i++){
+			int index = new Random().nextInt(40);
+			reqData.putValue("category_name", example.get(index).getName(), SystemConstant.REQ_PARAMETER_CN);
+			reqData.putValue("is_putway", SystemConstant.GoodsConstant.PUTWAY, SystemConstant.REQ_PARAMETER_EQ);
+			List<Goods> list2 = goodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			if(!ObjectUtils.isEmpty(list2)){
+				Goods goods = list2.get(new Random().nextInt(list2.size()));
+				goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+				list.add(goods);
+			}
+			
+		}
+		return list;
+	}
+	
+	@Override
+	public AdImage getGalleryImage(){
+		AdImage adImage = new AdImage();
+		ReqData reqData = new ReqData();
+		reqData.putValue("name", "pc首页画廊图", SystemConstant.REQ_PARAMETER_EQ);
+		List<AdInfo> list = adInfoMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if (list.size() > 0) {
+			reqData.clearValue();
+			reqData.putValue("ad_id", list.get(0).getId(), SystemConstant.REQ_PARAMETER_EQ);
+			List<AdImage> images = adImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			if (images.size() > 0) {
+				adImage = images.get(0);
+			}
+		}
+		return adImage;
+	}
+}

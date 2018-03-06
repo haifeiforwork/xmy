@@ -1,0 +1,199 @@
+layui.use(["pager","form","upload","laydate","layer"],function(){
+	var tool = layui.tool ,$ = layui.jquery ,pager = layui.pager ,laydate=layui.laydate;
+	var form = layui.form(), layer = layui.layer ;
+	/*$("#page").hide();*/
+	/*console.log(tool.getFullDate(new Date())) ;
+	console.log(pager.reqSerialize("#myForm","id desc")) ;*/
+//	pager.load({
+//		url:"list_page",//order/list
+//		sort:"id desc",
+//		selector:"#myForm"
+//	},function(data){
+//		$("#mytable").html(data) ;
+//		form.render() ;
+//	}) ;
+	
+//	form.on('checkbox(allChoose)', function(data){
+//	    var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]');
+//	    child.each(function(index, item){
+//	      item.checked = data.elem.checked;
+//	    });
+//	    form.render('checkbox');
+//	  });
+	
+//	$("#btnDel").click(function(){
+//		var id=0;
+//		$(".t-checkbox").each(function(){
+//			id+=","+$(this).val();
+//		})
+//		if(id==0){
+//		   tool.warning("您未选中要删除的商品！")
+//		   return false;
+//		}
+//		layui.use(["pager"],function(){
+//			var tool = layui.tool;
+//			tool.confirm("您确定要删除这些商品吗？",function(){
+//				$.ajax({
+//					url:"delPcGood?ids="+id,
+//					type:"post",
+//					success:function(data){
+//						window.location.href="pcgoodslist";
+//					}
+//				})
+//			}) ;
+//		})
+//	})
+	//选择商品	 	
+//	$('#btnAdd').on('click', function(){
+//	   var type = $("#sel").val();
+//	   if(type == ""){
+//		   tool.warning("您为选择需要设置的类型！")
+//		   return false;
+//	   }
+//	   var idStr = "0";
+//	   var index = layer.open({
+//		   type: 2,
+//		   title: '请选择商品的分类',
+//		   shadeClose: true,
+//		   area: ['60%', '80%'],
+//		   content: 'limitActivity/goodsList',
+//		   btn: ['确定', '取消'],
+//		   btnAlign: 'c',
+//		   yes:function(index, layero){  //获取选择分类的值
+//			   var body = layer.getChildFrame('body', index);
+//			   var tt = body.find("tbody input[type='checkbox']");
+//			   tt.each(function(index, item){
+//				 if( item.checked ){
+//					 //idStr = idStr+","+$(this).data("id");
+//					 add(type,$(this).data("id"))
+//				 }
+//			   });
+//			   tool.info("添加成功！")
+//			   window.location.href="pcgoodslist";
+//			   layer.close(index); 
+//		   },
+//		   btn2:function(index, layero){
+//			   layer.close(index); 
+//		   }
+//	   })
+//	});
+	$("body").on("click","#btnAdd", function(){
+		console.log(5555);
+		   var form = '<form id="AddForm">'
+			              + '<div class="layui-form-item">'
+							  + '<label class="layui-form-label">开始时间</label>'
+							  + '<div class="layui-input-block">'
+							  	+ '<input class="layui-input" id="time"  name="time" placeholder="请选择通知的开始时间" onclick="layui.laydate({elem: this, istime: true, format: \'YYYY-MM-DD hh:mm:ss\'})">'
+							  + '</div>'
+							  + '<label class="layui-form-label">推送信息</label>'
+							  + '<div class="layui-input-block">'
+							  	+ '<textarea rows="3" cols="10" class="layui-textarea" id="message" ></textarea>'
+							  + '</div>'
+						  +	'</div>'
+					  + '</form>'
+		   var index = layer.open({
+			   type: 1,
+			   title: '添加定时推送消息',
+			   shadeClose: true,
+			   area: ['30%', '40%'],
+			   content: form,
+			   btn: ['确定添加', '取消'],
+			   btnAlign: 'c',
+			   yes:function(index, layero){  //
+				   var time = $("#time").val();
+				   var msg = $("#message").val();
+				   try {
+					   if (!time) {
+					       throw "请选择推送时间";
+					   }
+					   if (!msg) {
+						   throw "请填写推送内容";
+					   }
+				   } catch (e) {
+					  tool.error(e);
+					  return;
+				   }
+				  
+				   $.post("push/add",{time:time,msg:msg},function(data){
+					   if(data.resultCode == 200){
+						   tool.info("添加成功！")
+						   window.location.href="push/list";
+						   layer.close(index); 
+					   }else {
+						   tool.error("添加失败！"+data.data);
+					   }
+				   });
+				   
+			   },
+			   btn2:function(index, layero){
+				   layer.close(index); 
+			   }
+		   })
+		  
+		});
+	//立即推送
+	$("body").on("click","#btn-push-now", function(){
+										var form = '<form id="pushForm">'
+												+ '<div class="layui-form-item">'
+												+ '<label class="layui-form-label">推送信息</label>'
+												+ '<div class="layui-input-block">'
+												+ '<textarea rows="3" cols="10" class="layui-textarea" id="push-message" ></textarea>'
+												+ '</div>' + '</div>'
+												+ '</form>'
+										var index = layer
+												.open({
+													type : 1,
+													title : '立即推送消息',
+													shadeClose : true,
+													area : [ '30%', '40%' ],
+													content : form,
+													btn : [ '确定推送', '取消' ],
+													btnAlign : 'c',
+													yes : function(index,
+															layero) { //
+														var msg = $("#push-message").val();
+														try {
+															if (!msg) {
+																throw "请填写推送内容";
+															}
+														} catch (e) {
+															tool.error(e);
+															return;
+														}
+														$.post("push/push",{msg : msg},
+																		function(
+																				data) {
+																			if (data.resultCode == 200) {
+																				tool.info("推送成功！");
+																				layer.close(index);
+																			} else {
+																				tool.error("推送失败！"+ data.data);
+																			}
+																		});
+
+													},
+													btn2 : function(index,
+															layero) {
+														layer.close(index);
+													}
+												})
+	});
+	//删除
+	$("body").on("click",".del-btn", function(){
+		var jobName = $(this).attr("data-jobName");
+		var triggerName = $(this).attr("data-triggerName");
+		tool.confirm("您确定要删除这个定时推送吗？",function(){
+			$.get("push/del",{jobName:jobName,triggerName:triggerName},function(data){
+				if(data.resultCode == 200){
+					   tool.info("删除成功！")
+					   window.location.href="push/list";
+					   layer.close(index); 
+				   }else {
+					   tool.error("删除失败！"+data.data);
+				   }
+			});
+		}) ;
+	});
+}) ;
+
+

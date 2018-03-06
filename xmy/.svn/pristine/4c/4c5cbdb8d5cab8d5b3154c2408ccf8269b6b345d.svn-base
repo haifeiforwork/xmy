@@ -1,0 +1,19 @@
+package com.zfj.xmy.order.service.common;
+
+import com.xiaoleilu.hutool.json.JSONObject;
+
+public interface CommonOrderService {
+
+	/**
+	 * 获取订单物流信息
+	 * @param orderId
+	 * @return
+	 * @Description 
+	 * @date 2017年10月10日  下午4:33:26
+	 * @author wy
+	 * 2017
+	 * @return JSONObject
+	 */
+	JSONObject getOrderLogisticsInfo(Long orderId);
+
+}

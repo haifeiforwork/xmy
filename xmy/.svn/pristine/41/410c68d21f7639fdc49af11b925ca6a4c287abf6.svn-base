@@ -1,0 +1,322 @@
+package com.zfj.xmy.cms.web.controller.push;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.xmy.cms.web.controller.BaseController;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.persistence.pojo.JiguangPushLabel;
+import com.zfj.xmy.common.service.CommonPushLabelService;
+import com.zfj.xmy.common.service.CommonPushUtilService;
+import com.zfj.xmy.quartz.dto.PushReturnDto;
+import com.zfj.xmy.user.service.common.UserInfoService;
+
+@RequestMapping("/push")
+@RestController
+public class PushController extends BaseController {
+
+	@Autowired
+	private CommonPushUtilService commonPushUtilService;
+	
+	@Autowired
+	private CommonPushLabelService commonPushLabelService;
+	
+	@Autowired
+	private UserInfoService userInfoService;
+	
+	/**
+	 * 定时推送列表页面
+	 * @return
+	 * @Description 
+	 * @date 2017年12月20日  下午4:46:58
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/list")
+	public ModelAndView list(HttpServletRequest request){
+		List<PushReturnDto> returnDtos = commonPushUtilService.queryAllPush();
+		request.setAttribute("pushs", returnDtos);
+		return new ModelAndView("/push/push_list");
+	}
+	
+	
+	
+	/**
+	 * 定时推送列表数据测试
+	 * @param request
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  上午9:13:25
+	 * @author wy
+	 * 2018
+	 * @return RespData
+	 */
+	@RequestMapping("/listJson")
+	public RespData listjson(HttpServletRequest request){
+		
+		RespData respData = new RespData();
+		try {
+			List<PushReturnDto> returnDtos = commonPushUtilService.queryAllPush();
+			respData.setData(returnDtos);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "查询失败");
+		}
+		return respData;
+	}
+	
+	/**
+	 * 添加推送定时任务
+	 * @param request
+	 * @param msg
+	 * @param addTimestamp
+	 * @return
+	 * @Description 
+	 * @date 2017年12月20日  下午4:51:31
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/add")
+	public RespData add(HttpServletRequest request,
+			@RequestParam(value="msg",required=true) String msg,
+			@RequestParam(value="time",required=true) String triggerTimeStr){
+		
+		RespData respData = new RespData();
+		try {
+			Date triggerTime = DateUtil.parse(triggerTimeStr);
+			commonPushUtilService.addPush(msg, triggerTime);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "添加失败");
+		}
+		return respData;
+	}
+	
+	/**
+	 * 立即广播推送
+	 * @param request
+	 * @param msg
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  上午9:13:55
+	 * @author wy
+	 * 2018
+	 * @return RespData
+	 */
+	@RequestMapping("/push")
+	public RespData push(HttpServletRequest request,
+			@RequestParam(value="msg",required=true) String msg){
+		
+		RespData respData = new RespData();
+		try {
+			commonPushUtilService.Push(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "推送失败");
+		}
+		return respData;
+	}
+	
+	/**
+	 * 删除定时推送任务
+	 * @param request
+	 * @param jobName
+	 * @param triggerName
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  上午9:14:20
+	 * @author wy
+	 * 2018
+	 * @return RespData
+	 */
+	@RequestMapping("/del")
+	public RespData del(HttpServletRequest request,
+			@RequestParam(value="jobName",required=true) String jobName,
+			@RequestParam(value="triggerName",required=true) String triggerName){
+		
+		RespData respData = new RespData();
+		try {
+			commonPushUtilService.delPush(jobName, triggerName);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "删除失败");
+		}
+		return respData;
+	}
+	
+	/**
+	 * 推送标签管理
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  下午2:54:14
+	 * @author wy
+	 * 2018
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/labelList")
+	public ModelAndView labellist(){
+		
+		return new ModelAndView("/push/push_label_list");
+	}
+			
+	
+	/**
+	 * 推送标签管理数据
+	 * @param request
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  上午10:18:25
+	 * @author wy
+	 * 2018
+	 * @param pageIndex 
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/labelList/{pageIndex}")
+	public ModelAndView labelList(HttpServletRequest request,
+			@PathVariable("pageIndex") Integer pageIndex){
+		//List<PushReturnDto> returnDtos = commonPushUtilService.queryAllPush();
+	//	request.setAttribute("pushs", returnDtos);
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(pageIndex);
+		
+		CriteriaParameter parameter = new CriteriaParameter();
+		List<JiguangPushLabel> jiguangPushLabels = commonPushLabelService.getJiguangPushLabelList(parameter, pageBean);
+		request.setAttribute("labels", jiguangPushLabels);
+		
+		return new ModelAndView("/push/push_label_list_page");
+	}
+	
+	/**
+	 * 添加推送标签
+	 * @param request
+	 * @param labelName
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  下午2:55:29
+	 * @author wy
+	 * 2018
+	 * @return RespData
+	 */
+	@RequestMapping("/addLabel")
+	public RespData addLabel(HttpServletRequest request,
+			@RequestParam(value="label",required=true) String labelName){
+		
+		RespData respData = new RespData();
+		try {
+			commonPushLabelService.addLabel(labelName);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "添加失败");
+		}
+		return respData;
+	}
+	/**
+	 * 修改推送标签
+	 * @param request
+	 * @param id
+	 * @param labelName
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  下午3:45:06
+	 * @author wy
+	 * 2018
+	 * @return RespData
+	 */
+	@RequestMapping("/modifyLabel")
+	public RespData modifyLabel(HttpServletRequest request,
+			@RequestParam(value="id",required=true) Long id,
+			@RequestParam(value="label",required=true) String labelName){
+		
+		RespData respData = new RespData();
+		try {
+			commonPushLabelService.modifyLabel(id,labelName);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "修改失败");
+		}
+		return respData;
+	}
+	/**
+	 * 删除推送标签
+	 * @param request
+	 * @param id
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  下午3:46:52
+	 * @author wy
+	 * 2018
+	 * @return RespData
+	 */
+	@RequestMapping("/delLabel")
+	public RespData delLabel(HttpServletRequest request,
+			@RequestParam(value="id",required=true) Long id){
+		
+		RespData respData = new RespData();
+		try {
+			commonPushLabelService.delLabel(id);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "删除失败");
+		}
+		return respData;
+	}
+	
+	/**
+	 * 用户推送标签管理
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  下午4:55:23
+	 * @author wy
+	 * 2018
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/userlabelList")
+	public ModelAndView userlabellist(){
+		
+		return new ModelAndView("/push/push_user_label_list");
+	}
+	
+	/**
+	 * 用户推送标签管理数据
+	 * @param request
+	 * @param pageIndex
+	 * @return
+	 * @Description 
+	 * @date 2018年1月8日  下午4:56:16
+	 * @author wy
+	 * 2018
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/userlabelList/{pageIndex}")
+	public ModelAndView userlabelList(HttpServletRequest request,
+			ReqData reqData,
+			@PathVariable("pageIndex") Integer pageIndex){
+		
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(pageIndex);
+		
+		reqData2Params(reqData) ;
+		userInfoService.findUserInfo(reqData, pageBean);
+		request.setAttribute("pageCount",pageBean.getTotalPage()) ;
+		request.setAttribute("userList", pageBean.getData());
+		
+		return new ModelAndView("/push/push_user_label_list_page");
+	}
+}

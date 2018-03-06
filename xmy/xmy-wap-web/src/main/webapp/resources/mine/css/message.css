@@ -1,0 +1,10 @@
+@CHARSET "UTF-8";
+        header .header-top{border-bottom: 1px solid #C3C3C3;}
+        .content{bottom: 0;}
+        .list .weui-cells{background-color: #fff;margin: 0;background-color: #F0F0F0;}
+        .list .weui-cell{padding: 13px 10px;border-bottom: 1px solid #E5E5E5;background-color: #fff;font-size:0.7rem; coloe:#333;}
+        .list .weui-cell .item-title{font-size:0.75rem;color:#000;}
+        .list .weui-cell .item-sub{color:#666;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;overflow: hidden;width:100%;}
+        .list .weui-cell .item-after{font-size:0.6rem;color:#999;text-align:right;}
+        .weui-cells:after, .weui-cells:before{display: none;}
+        .weui-cell:before{left: 0;}

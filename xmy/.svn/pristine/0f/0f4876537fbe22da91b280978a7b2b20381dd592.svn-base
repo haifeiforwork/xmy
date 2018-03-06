@@ -1,0 +1,387 @@
+package com.zfj.xmy.user.service.wap.impl;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.appdev.db.common.pojo.LogicType;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.commons.mini.constant.BaseConstant;
+import com.zfj.base.encryption.MD5Utils;
+import com.zfj.base.log.LogExp;
+import com.zfj.base.util.collection.CollectionExtUtils;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.CommonUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.UUIDUtil;
+import com.zfj.xmy.common.persistence.dao.ShoppingCardMapper;
+import com.zfj.xmy.common.persistence.dao.SmsLogMapper;
+import com.zfj.xmy.common.persistence.dao.UserAddreesMapper;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.dao.UserMapper;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCard;
+import com.zfj.xmy.common.persistence.pojo.SmsLog;
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.UserAddrees;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.user.service.wap.WapUserService;
+
+@Service
+public class WapUserSerivceImpl extends BaseService implements WapUserService{
+	
+	@Autowired
+	private UserInfoMapper userInfoMapper ;
+	@Autowired
+	private UserAddreesMapper userAddressMapper;
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private SmsLogMapper smsLogMapper;
+	@Autowired
+	private ShoppingCardMapper shoppingCardMapper;
+	
+	
+	@Override
+	public User login(User user) {
+		if(StringUtil.isEmpty(user.getName()) || StringUtil.isEmpty(user.getPassword())){
+			LogExp.error(logger,"用户名或者密码不能为空") ;
+		}
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		boolean isEmail = CommonUtil.checkEmail(user.getName()) ;
+		boolean isMobilePhone = CommonUtil.checkMobilePhone(user.getName()) ;
+		User old = null ;
+		if(isEmail || isMobilePhone){
+			if(isEmail){
+				//邮箱登录
+				criteria.equalTo("email",user.getName()) ;
+			}else{
+				//手机号登录
+				criteria.equalTo("mobile_phone",user.getName()) ;
+			}
+			List<UserInfo> uiList = userInfoMapper.selectByExample(parameter) ;
+			CommonUtil.validEmpty(uiList,"用户名或者密码不正确") ;
+			old = userMapper.selectByPrimaryKey(uiList.get(0).getId()) ;
+		}else{
+			//用户名登录
+			criteria.equalTo("name",user.getName()) ;
+			List<User> usrList = userMapper.selectByExample(parameter) ;
+			CommonUtil.validEmpty(usrList,"用户名或者密码不正确") ;
+			old = usrList.get(0) ;
+		}
+		if(!MD5Utils.encodeString(user.getPassword()).equals(old.getPassword())){
+			LogExp.error(logger,"用户名或者密码不正确") ;
+		}
+		if(SystemConstant.USER.STATUS_DISABLE.equals(old.getStatus())){
+			LogExp.error(logger,"您已经被停用，请联系管理员") ;
+		}
+		
+		return old ;
+	}
+	
+	@Override
+	public Boolean checkCode(String key){
+		
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		criteria.equalTo("mobile_phone",key) ;
+		List<UserInfo> uiList = userInfoMapper.selectByExample(parameter) ;
+		if(!CollectionExtUtils.isEmpty(uiList)){
+			return false ;
+		}else{
+			return true ;
+		}
+		
+	}
+
+	@Override
+	public User saveUser(User user) {
+		
+		//1、空验证及格式验证
+		CommonUtil.validEmpty(user.getName(),"用户名不能为空") ;
+		if(!CommonUtil.checkEmail(user.getName()) && !CommonUtil.checkMobilePhone(user.getName())){
+			LogExp.error(logger, "用户名格式不正确") ;
+		}
+		CommonUtil.validEmpty(user.getPassword(),"登录密码不能为空") ;
+		CommonUtil.validEmpty(user.getName(),"手机号码不能为空") ;
+		CommonUtil.validEmpty(user.getName(),"手机验证码不能为空") ;
+		//3、校验手机号码是否被注册
+		boolean isExist = validUserNameOrMobilePhone(user.getName(),1) ;
+		if(!isExist){
+			LogExp.error(logger,"该手机号码已经被注册") ;
+		}
+		//4、校验用户名是否已经存在
+		isExist = validUserNameOrMobilePhone(user.getName(),0) ;
+		if(!isExist){
+			LogExp.error(logger,"该用户名已经被注册") ;
+		}
+		//5、注册用户
+		Date curr = new Date() ;
+		User users = new User() ;
+		users.setName(user.getName()) ;
+		users.setPassword(MD5Utils.encodeString(user.getPassword())) ;
+		users.setCreateTime(curr) ;
+		users.setStatus(BaseConstant.STATUS_ENABLE) ;
+		users.setAppToken(UUIDUtil.generateToken());
+		users.setAppTokenExpire(DateUtil.lastMonth());
+		userMapper.insertSelective(users) ;
+		UserInfo userInfo = new UserInfo() ; 
+		userInfo.setId(users.getId()) ;
+		userInfo.setMobilePhone(users.getName()) ;
+		userInfo.setUpdateTime(curr) ;
+		userInfoMapper.insertSelective(userInfo) ;
+		
+		return user; 
+	}
+	
+	@Override
+	public boolean validUserNameOrMobilePhone(String key, Integer type) {
+		if(0 != type && 1 != type){
+			return false ;
+		}
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		if(0 == type){//验证用户名是否已经存在
+			criteria.equalTo("name",key) ;
+			List<User> uList = userMapper.selectByExample(parameter) ;
+			if(!CollectionExtUtils.isEmpty(uList)){
+				return false ;
+			}
+		}else{//验证手机号码
+			criteria.equalTo("mobile_phone",key) ;
+			List<UserInfo> uiList = userInfoMapper.selectByExample(parameter) ;
+			if(!CollectionExtUtils.isEmpty(uiList)){
+				return false ;
+			}
+		}
+		return true ;
+	}
+
+	@Override
+	public UserInfo queryInfo(User user) {
+		Long userId = user.getId();
+		CriteriaParameter example = new CriteriaParameter("id", userId);
+		List<UserInfo> resultList = userInfoMapper.selectByExample(example);
+		if(0 != resultList.size()) {
+			UserInfo userInfo = resultList.get(0);
+			String avatar = userInfo.getAvatar();
+			if(!StringUtil.isEmpty(avatar)) {
+				avatar = avatar.replace("commons/", "common/");
+				avatar = avatar.replace("resource/", "resources/");
+				userInfo.setAvatar(avatar);
+			}
+			return resultList.get(0);
+		}
+		return null;
+	}
+
+	/**
+	 * 根据用户查询地址
+	 */
+	@Override
+	public List<UserAddrees> queryAddress(User user) {
+		CriteriaParameter example = new CriteriaParameter("user_id", user.getId());
+		example.and(LogicType.AND).equalTo("type", 0);
+		List<UserAddrees> list = userAddressMapper.selectByExample(example);
+		logger.info("用户地址共有:---->" + list.size());
+		return list;
+	}
+	
+	/**
+	 * 根据id查询用户
+	 */
+	@Override
+	public User getUser(Long id) {
+		User selectByPrimaryKey = userMapper.selectByPrimaryKey(id);
+		return selectByPrimaryKey;
+	}
+	
+	@Override
+	public User getUser(String openId) {
+		CriteriaParameter cri = new CriteriaParameter();
+		cri.and(LogicType.AND).equalTo("qq_openid", openId);
+		List<User> selectByExample = userMapper.selectByExample(cri);
+		if(selectByExample != null && selectByExample.size() > 0)
+			return selectByExample.get(0);
+		return null;
+	}
+	
+	/**
+	 * 设置最后修改时间
+	 */
+	@Override
+	public void updateLastModifyDate(UserInfo info) {
+		Date date = new Date();
+		info.setUpdateTime(date);
+		userInfoMapper.updateByPrimaryKey(info);
+	}
+	
+	/**
+	 * 设置最后登录时间
+	 */
+	@Override
+	public void updateLastLoginDate(User user) {
+		Date date = new Date();
+		user.setLastLoginTime(date);
+		userMapper.updateByPrimaryKey(user);
+	}
+
+	
+	/**
+	 * 根据id，性别修改userinfo
+	 */
+	@Override
+	public int updateSex(Long id, Integer sex) {
+		try {
+			CommonUtil.validEmpty(id, "用户id不能为空");
+			CommonUtil.validEmpty(sex, "性别不能为空");
+		} catch(Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		UserInfo info = userInfoMapper.selectByPrimaryKey(id);
+		info.setSex(sex);
+		updateLastModifyDate(info);
+		return userInfoMapper.updateByPrimaryKey(info);
+	}
+	
+	/**
+	 * 根据id，和nick（昵称）修改昵称
+	 */
+	@Override
+	public int updateNick(Long id, String nick) {
+		try {
+			CommonUtil.validEmpty(id, "用户id不能为空");
+			CommonUtil.validEmpty(nick, "昵称不能为空");
+		} catch(Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		UserInfo userInfo = userInfoMapper.selectByPrimaryKey(id);
+		userInfo.setRealName(nick);
+		int result = userInfoMapper.updateByPrimaryKey(userInfo);
+		updateLastModifyDate(userInfoMapper.selectByPrimaryKey(id));
+		return result;
+	}
+	
+	/**
+	 * 根据id， 座机号修改座机号
+	 */
+	@Override
+	public int updatePhone(Long id, String phone) {
+		CommonUtil.validEmpty(id, "用户id不能为空");
+		CommonUtil.validEmpty(phone, "座机号不能为空");
+		if(!StringUtil.isMatch("^[0-9]*$", phone))
+			return -1;
+		UserInfo info = userInfoMapper.selectByPrimaryKey(id);
+		info.setPhone(phone);
+		int result = userInfoMapper.updateByPrimaryKey(info);
+		return result;
+	}
+	
+	/**
+	 * 根据id， 日期修改生日
+	 */
+	@Override
+	public int updateBirthday(Long id, Date birthday) {
+		try {
+			CommonUtil.validEmpty(id, "用户id不能为空");
+			CommonUtil.validEmpty(birthday, "日期不能为空");
+		} catch(Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		UserInfo info = userInfoMapper.selectByPrimaryKey(id);
+		info.setBirthday(birthday);
+		int result = userInfoMapper.updateByPrimaryKey(info);
+		return result;
+	}
+
+	@Override
+	public int modifyPassword(User user, String old, String neu, String re) {
+		if(!MD5Utils.encodeString(old).equals(user.getPassword())) {
+			return -1;
+		}
+		if(!neu.equals(re)) {
+			return -2;
+		}
+		user.setPassword(MD5Utils.encodeString(neu));
+		return userMapper.updateByPrimaryKey(user);
+	}
+	
+	@Override
+	public boolean limitSmsCount(String mobilePhone,int min) {
+		// 根据条件查询验证码信息
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("mobile_phone", mobilePhone);
+		parameter.setOrderByClause(" create_timestamp desc ");
+		List<SmsLog> smsList = smsLogMapper.selectByExample(parameter);
+		if (!CollectionUtils.isEmpty(smsList)) {
+			SmsLog smsLog = smsList.get(0);
+			// 校验短信时间在N分钟内只能获取一次
+			if (new Date().getTime() - smsLog.getCreateTimestamp().getTime() < min * 60 * 1000) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 0:手机号空 1：全部完成  -1:手机号不正确 -2:太频繁 -3:系统错误
+	 */
+	@Override
+	public Integer sendSms(String phone) {
+		if(StringUtil.isEmpty(phone)) {
+			return 0;
+		}
+		if(!CommonUtil.checkMobilePhone(phone)) {
+			return -1;
+		}
+		if(!limitSmsCount(phone, 1)) {
+			return -2;
+		}
+		
+//		SendSMSUtil.sendFullSMS(phone, content);
+		return -3;
+	}
+
+	@Override
+	public Integer updateUserInfo(UserInfo userInfo) {
+		return userInfoMapper.updateByPrimaryKey(userInfo);
+	}
+
+	@Override
+	public Integer updateUser(User user2) {
+		return userMapper.updateByPrimaryKey(user2);
+	}
+
+	@Override
+	public Integer add(User user2) {
+		return userMapper.insert(user2);
+	}
+
+	@Override
+	public Integer add(UserInfo userInfo) {
+		return userInfoMapper.insert(userInfo);
+	}
+
+	@Override
+	public List<User> findWeChatOpenid(String openId) {
+		ReqData reqData = new ReqData();
+		reqData.putValue("wechat_openid", openId, SystemConstant.REQ_PARAMETER_EQ);
+		return  userMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		//return userMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+	}
+	
+}

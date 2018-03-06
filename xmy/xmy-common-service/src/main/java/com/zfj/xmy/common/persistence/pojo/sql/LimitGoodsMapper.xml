@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.LimitGoodsMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.LimitGoods" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="limit_id" property="limitId" jdbcType="BIGINT" />
+    <result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="limit_num" property="limitNum" jdbcType="INTEGER" />
+    <result column="all_num" property="allNum" jdbcType="INTEGER" />
+    <result column="complete_num" property="completeNum" jdbcType="INTEGER" />
+    <result column="activity_time" property="activityTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, limit_id, goods_id, code, price, limit_num, all_num, complete_num, activity_time
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from limit_goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from limit_goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from limit_goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from limit_goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update limit_goods
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.limitId != null" >
+        limit_id = #{record.limitId,jdbcType=BIGINT},
+      </if>
+      <if test="record.goodsId != null" >
+        goods_id = #{record.goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="record.code != null" >
+        code = #{record.code,jdbcType=VARCHAR},
+      </if>
+      <if test="record.price != null" >
+        price = #{record.price,jdbcType=DECIMAL},
+      </if>
+      <if test="record.limitNum != null" >
+        limit_num = #{record.limitNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.allNum != null" >
+        all_num = #{record.allNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.completeNum != null" >
+        complete_num = #{record.completeNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.activityTime != null" >
+        activity_time = #{record.activityTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update limit_goods
+    set id = #{record.id,jdbcType=BIGINT},
+      limit_id = #{record.limitId,jdbcType=BIGINT},
+      goods_id = #{record.goodsId,jdbcType=BIGINT},
+      code = #{record.code,jdbcType=VARCHAR},
+      price = #{record.price,jdbcType=DECIMAL},
+      limit_num = #{record.limitNum,jdbcType=INTEGER},
+      all_num = #{record.allNum,jdbcType=INTEGER},
+      complete_num = #{record.completeNum,jdbcType=INTEGER},
+      activity_time = #{record.activityTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from limit_goods
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from limit_goods
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.LimitGoods" useGeneratedKeys="true" keyProperty="id" >
+    insert into limit_goods (limit_id, goods_id, code, 
+      price, limit_num, all_num, 
+      complete_num, activity_time)
+    values (#{limitId,jdbcType=BIGINT}, #{goodsId,jdbcType=BIGINT}, #{code,jdbcType=VARCHAR}, 
+      #{price,jdbcType=DECIMAL}, #{limitNum,jdbcType=INTEGER}, #{allNum,jdbcType=INTEGER}, 
+      #{completeNum,jdbcType=INTEGER}, #{activityTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.LimitGoods" useGeneratedKeys="true" keyProperty="id" >
+    insert into limit_goods
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="limitId != null" >
+        limit_id,
+      </if>
+      <if test="goodsId != null" >
+        goods_id,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="limitNum != null" >
+        limit_num,
+      </if>
+      <if test="allNum != null" >
+        all_num,
+      </if>
+      <if test="completeNum != null" >
+        complete_num,
+      </if>
+      <if test="activityTime != null" >
+        activity_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="limitId != null" >
+        #{limitId,jdbcType=BIGINT},
+      </if>
+      <if test="goodsId != null" >
+        #{goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="limitNum != null" >
+        #{limitNum,jdbcType=INTEGER},
+      </if>
+      <if test="allNum != null" >
+        #{allNum,jdbcType=INTEGER},
+      </if>
+      <if test="completeNum != null" >
+        #{completeNum,jdbcType=INTEGER},
+      </if>
+      <if test="activityTime != null" >
+        #{activityTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.LimitGoods" >
+    update limit_goods
+    <set >
+      <if test="limitId != null" >
+        limit_id = #{limitId,jdbcType=BIGINT},
+      </if>
+      <if test="goodsId != null" >
+        goods_id = #{goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="code != null" >
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="limitNum != null" >
+        limit_num = #{limitNum,jdbcType=INTEGER},
+      </if>
+      <if test="allNum != null" >
+        all_num = #{allNum,jdbcType=INTEGER},
+      </if>
+      <if test="completeNum != null" >
+        complete_num = #{completeNum,jdbcType=INTEGER},
+      </if>
+      <if test="activityTime != null" >
+        activity_time = #{activityTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.LimitGoods" >
+    update limit_goods
+    set limit_id = #{limitId,jdbcType=BIGINT},
+      goods_id = #{goodsId,jdbcType=BIGINT},
+      code = #{code,jdbcType=VARCHAR},
+      price = #{price,jdbcType=DECIMAL},
+      limit_num = #{limitNum,jdbcType=INTEGER},
+      all_num = #{allNum,jdbcType=INTEGER},
+      complete_num = #{completeNum,jdbcType=INTEGER},
+      activity_time = #{activityTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

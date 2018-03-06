@@ -1,0 +1,43 @@
+package com.zfj.xmy.oa.impl;  
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.oa.XmyOaGoodsService;
+import com.zfj.xmy.oa.dto.OaGoodsDto;
+
+/** 
+ * @Title: XmyOaGoodsServiceImpl.java 
+ * @Package com.zfj.xmy.oa.manager 
+ * @Description: 
+ * @author hexw
+ * @date 2018年1月15日 下午3:27:16 
+ */
+@Service
+public class XmyOaGoodsServiceImpl extends BaseService implements XmyOaGoodsService {
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Override
+	public void xmyOaUpdateGoods(OaGoodsDto dto){
+		if (ObjectUtil.isNotNull(dto)) {
+			Goods goods = goodsMapper.selectByPrimaryKey(dto.getGoodsId());
+			if (ObjectUtil.isNotNull(goods)) {
+				goods.setName(dto.getNewName());
+				goods.setStandard(dto.getNewStandard());
+				goods.setMarketPrice(dto.getNewMarketPrice());
+				goods.setCostPrice(dto.getNewCostPrice());
+				goods.setPrice(dto.getNewPrice());
+				goodsMapper.updateByPrimaryKeySelective(goods);
+			}
+		}
+	}
+	
+	
+}
+  

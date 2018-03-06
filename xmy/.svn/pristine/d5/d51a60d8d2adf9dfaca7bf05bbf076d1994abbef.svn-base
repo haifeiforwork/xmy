@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.TermDataMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.TermData" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="parent_id" property="parentId" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="vid" property="vid" jdbcType="BIGINT" />
+    <result column="sn" property="sn" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="weight" property="weight" jdbcType="INTEGER" />
+    <result column="icon" property="icon" jdbcType="VARCHAR" />
+    <result column="is_show" property="isShow" jdbcType="INTEGER" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="app_icon" property="appIcon" jdbcType="VARCHAR" />
+    <result column="app_on_icon" property="appOnIcon" jdbcType="VARCHAR" />
+    <result column="pc_backgroud_img" property="pcBackgroudImg" jdbcType="VARCHAR" />
+    <result column="background_img_url" property="backgroundImgUrl" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.zfj.xmy.common.persistence.pojo.TermData" extends="BaseResultMap" >
+    <result column="des" property="des" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, parent_id, `name`, vid, sn, `status`, weight, icon, is_show, url, app_icon, app_on_icon, 
+    pc_backgroud_img, background_img_url
+  </sql>
+  <sql id="Blob_Column_List" >
+    des
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from term_data
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from term_data
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleWithBLOBsAndPage" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from term_data
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from term_data
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from term_data
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from term_data
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update term_data
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.parentId != null" >
+        parent_id = #{record.parentId,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null" >
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.vid != null" >
+        vid = #{record.vid,jdbcType=BIGINT},
+      </if>
+      <if test="record.sn != null" >
+        sn = #{record.sn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
+        `status` = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.weight != null" >
+        weight = #{record.weight,jdbcType=INTEGER},
+      </if>
+      <if test="record.icon != null" >
+        icon = #{record.icon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isShow != null" >
+        is_show = #{record.isShow,jdbcType=INTEGER},
+      </if>
+      <if test="record.url != null" >
+        url = #{record.url,jdbcType=VARCHAR},
+      </if>
+      <if test="record.appIcon != null" >
+        app_icon = #{record.appIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.appOnIcon != null" >
+        app_on_icon = #{record.appOnIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.pcBackgroudImg != null" >
+        pc_backgroud_img = #{record.pcBackgroudImg,jdbcType=VARCHAR},
+      </if>
+      <if test="record.backgroundImgUrl != null" >
+        background_img_url = #{record.backgroundImgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.des != null" >
+        des = #{record.des,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update term_data
+    set id = #{record.id,jdbcType=BIGINT},
+      parent_id = #{record.parentId,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      vid = #{record.vid,jdbcType=BIGINT},
+      sn = #{record.sn,jdbcType=VARCHAR},
+      `status` = #{record.status,jdbcType=INTEGER},
+      weight = #{record.weight,jdbcType=INTEGER},
+      icon = #{record.icon,jdbcType=VARCHAR},
+      is_show = #{record.isShow,jdbcType=INTEGER},
+      url = #{record.url,jdbcType=VARCHAR},
+      app_icon = #{record.appIcon,jdbcType=VARCHAR},
+      app_on_icon = #{record.appOnIcon,jdbcType=VARCHAR},
+      pc_backgroud_img = #{record.pcBackgroudImg,jdbcType=VARCHAR},
+      background_img_url = #{record.backgroundImgUrl,jdbcType=VARCHAR},
+      des = #{record.des,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update term_data
+    set id = #{record.id,jdbcType=BIGINT},
+      parent_id = #{record.parentId,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      vid = #{record.vid,jdbcType=BIGINT},
+      sn = #{record.sn,jdbcType=VARCHAR},
+      `status` = #{record.status,jdbcType=INTEGER},
+      weight = #{record.weight,jdbcType=INTEGER},
+      icon = #{record.icon,jdbcType=VARCHAR},
+      is_show = #{record.isShow,jdbcType=INTEGER},
+      url = #{record.url,jdbcType=VARCHAR},
+      app_icon = #{record.appIcon,jdbcType=VARCHAR},
+      app_on_icon = #{record.appOnIcon,jdbcType=VARCHAR},
+      pc_backgroud_img = #{record.pcBackgroudImg,jdbcType=VARCHAR},
+      background_img_url = #{record.backgroundImgUrl,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from term_data
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from term_data
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.TermData" useGeneratedKeys="true" keyProperty="id" >
+    insert into term_data (parent_id, `name`, vid, 
+      sn, `status`, weight, 
+      icon, is_show, url, 
+      app_icon, app_on_icon, pc_backgroud_img, 
+      background_img_url, des)
+    values (#{parentId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{vid,jdbcType=BIGINT}, 
+      #{sn,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{weight,jdbcType=INTEGER}, 
+      #{icon,jdbcType=VARCHAR}, #{isShow,jdbcType=INTEGER}, #{url,jdbcType=VARCHAR}, 
+      #{appIcon,jdbcType=VARCHAR}, #{appOnIcon,jdbcType=VARCHAR}, #{pcBackgroudImg,jdbcType=VARCHAR}, 
+      #{backgroundImgUrl,jdbcType=VARCHAR}, #{des,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.TermData" useGeneratedKeys="true" keyProperty="id" >
+    insert into term_data
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="parentId != null" >
+        parent_id,
+      </if>
+      <if test="name != null" >
+        `name`,
+      </if>
+      <if test="vid != null" >
+        vid,
+      </if>
+      <if test="sn != null" >
+        sn,
+      </if>
+      <if test="status != null" >
+        `status`,
+      </if>
+      <if test="weight != null" >
+        weight,
+      </if>
+      <if test="icon != null" >
+        icon,
+      </if>
+      <if test="isShow != null" >
+        is_show,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="appIcon != null" >
+        app_icon,
+      </if>
+      <if test="appOnIcon != null" >
+        app_on_icon,
+      </if>
+      <if test="pcBackgroudImg != null" >
+        pc_backgroud_img,
+      </if>
+      <if test="backgroundImgUrl != null" >
+        background_img_url,
+      </if>
+      <if test="des != null" >
+        des,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="parentId != null" >
+        #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="vid != null" >
+        #{vid,jdbcType=BIGINT},
+      </if>
+      <if test="sn != null" >
+        #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="weight != null" >
+        #{weight,jdbcType=INTEGER},
+      </if>
+      <if test="icon != null" >
+        #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="isShow != null" >
+        #{isShow,jdbcType=INTEGER},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="appIcon != null" >
+        #{appIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="appOnIcon != null" >
+        #{appOnIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="pcBackgroudImg != null" >
+        #{pcBackgroudImg,jdbcType=VARCHAR},
+      </if>
+      <if test="backgroundImgUrl != null" >
+        #{backgroundImgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="des != null" >
+        #{des,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.TermData" >
+    update term_data
+    <set >
+      <if test="parentId != null" >
+        parent_id = #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="vid != null" >
+        vid = #{vid,jdbcType=BIGINT},
+      </if>
+      <if test="sn != null" >
+        sn = #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="weight != null" >
+        weight = #{weight,jdbcType=INTEGER},
+      </if>
+      <if test="icon != null" >
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="isShow != null" >
+        is_show = #{isShow,jdbcType=INTEGER},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="appIcon != null" >
+        app_icon = #{appIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="appOnIcon != null" >
+        app_on_icon = #{appOnIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="pcBackgroudImg != null" >
+        pc_backgroud_img = #{pcBackgroudImg,jdbcType=VARCHAR},
+      </if>
+      <if test="backgroundImgUrl != null" >
+        background_img_url = #{backgroundImgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="des != null" >
+        des = #{des,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.zfj.xmy.common.persistence.pojo.TermData" >
+    update term_data
+    set parent_id = #{parentId,jdbcType=BIGINT},
+      `name` = #{name,jdbcType=VARCHAR},
+      vid = #{vid,jdbcType=BIGINT},
+      sn = #{sn,jdbcType=VARCHAR},
+      `status` = #{status,jdbcType=INTEGER},
+      weight = #{weight,jdbcType=INTEGER},
+      icon = #{icon,jdbcType=VARCHAR},
+      is_show = #{isShow,jdbcType=INTEGER},
+      url = #{url,jdbcType=VARCHAR},
+      app_icon = #{appIcon,jdbcType=VARCHAR},
+      app_on_icon = #{appOnIcon,jdbcType=VARCHAR},
+      pc_backgroud_img = #{pcBackgroudImg,jdbcType=VARCHAR},
+      background_img_url = #{backgroundImgUrl,jdbcType=VARCHAR},
+      des = #{des,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.TermData" >
+    update term_data
+    set parent_id = #{parentId,jdbcType=BIGINT},
+      `name` = #{name,jdbcType=VARCHAR},
+      vid = #{vid,jdbcType=BIGINT},
+      sn = #{sn,jdbcType=VARCHAR},
+      `status` = #{status,jdbcType=INTEGER},
+      weight = #{weight,jdbcType=INTEGER},
+      icon = #{icon,jdbcType=VARCHAR},
+      is_show = #{isShow,jdbcType=INTEGER},
+      url = #{url,jdbcType=VARCHAR},
+      app_icon = #{appIcon,jdbcType=VARCHAR},
+      app_on_icon = #{appOnIcon,jdbcType=VARCHAR},
+      pc_backgroud_img = #{pcBackgroudImg,jdbcType=VARCHAR},
+      background_img_url = #{backgroundImgUrl,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

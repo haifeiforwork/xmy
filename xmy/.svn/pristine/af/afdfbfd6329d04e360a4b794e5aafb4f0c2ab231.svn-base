@@ -1,0 +1,193 @@
+package com.zfj.xmy.order.service.cms;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.SysUser;
+import com.zfj.xmy.order.persistence.cms.pojo.dto.OrderExcleDto;
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto;
+/**
+ * 
+ * @author ljie
+ *
+ */
+public interface OrderService{
+	/**
+	 * 
+	 * @param pageBean
+	 * @param reqData void
+	 * @author ljie
+	 * @date 2017年6月16日 下午4:07:26
+	 * @Description:分页查询全部订单，也可根据条件分页查询
+	 */
+	void findAllorders(PageBean pageBean,ReqData reqData);
+	
+	/**
+	 * 
+	 * @param reqData
+	 * @return int
+	 * @author ljie
+	 * @date 2017年6月16日 下午4:08:37
+	 * 根据条件查询订单总条数
+	 */
+	int findAllorderCount(ReqData reqData);
+	
+	/**
+	 * 
+	 * @param reqData
+	 * @return Order
+	 * @author ljie
+	 * @date 2017年6月16日 下午4:09:40
+	 * 根据条件查询单个订单
+	 */
+	Order getOrder(ReqData reqData);
+	
+	/**
+	 * 
+	 * @param reqData
+	 * @param order
+	 * @return int
+	 * @author ljie
+	 * @date 2017年6月16日 下午4:10:14
+	 * 根据修改后新的订单，修改订单
+	 */
+	int updateOneOrdeStatus(ReqData reqData,Order order);
+	
+	/**
+	 * 
+	 * @param reqData
+	 * @return List<Order>
+	 * @author ljie
+	 * @date 2017年6月16日 下午4:11:03
+	 * 根据条件差全部订单返回订单集合
+	 */
+	List<Order> findAll(ReqData reqData);
+	/**
+	 * @param reqData
+	 * @param order
+	 * @param status
+	 * @param sysUser void
+	 * @author lij
+	 * @date 2017年7月12日 下午7:57:37
+	 * 修改单个订单信息
+	 */
+	void updateOneStatus(ReqData reqData,Order order,int status,SysUser sysUser);
+	/**
+	 * @param reqData
+	 * @param orderIds
+	 * @param status
+	 * @param sysUser void
+	 * @author lij
+	 * @date 2017年7月12日 下午8:06:57
+	 * 批量修改订单状态并添加订单轨迹
+	 */
+	void updateAllStatus(ReqData reqData,String orderIds,int status,SysUser sysUser);
+	/**
+	 * @param reqData
+	 * @param order
+	 * @param sysUser void
+	 * @author lij
+	 * @date 2017年7月12日 下午8:18:33
+	 * 修改配送人信息并添加到订单轨迹
+	 */
+	void updateConsignee(ReqData reqData,Order order,SysUser sysUser);
+	/**
+	 * @param reqData
+	 * @param order
+	 * @param sysUser void
+	 * @author lij
+	 * @date 2017年7月14日 下午4:30:19
+	 * 修改配送方式
+	 */
+	void updateDeliveryMethod(ReqData reqData,Order order,SysUser sysUser);
+	/**
+	 * 修改订单发票信息 
+	 * @param reqData
+	 * @param order
+	 * @param sysUser void
+	 * @author lij
+	 * @date 2017年10月27日 下午2:39:32
+	 */
+	void updateInvoice(ReqData reqData,Order order,SysUser sysUser);
+	/**
+	 * 修改订单总金额
+	 * @param sysUser
+	 * @param orderId
+	 * @param total void
+	 * @author lij
+	 * @date 2017年10月27日 下午4:12:31
+	 */
+	void updateOrderTotal(SysUser sysUser,Long orderId,BigDecimal total);
+	
+	/**
+	 * @param reqData
+	 * @param order
+	 * @param sysUser void
+	 * @author lij
+	 * @date 2017年7月14日 下午4:30:33
+	 * 扩展订单时间
+	 */
+	void updateOrderDate(ReqData reqData,Order order,SysUser sysUser);
+	/**
+	 * @param reqData
+	 * @param order
+	 * @param orderIds
+	 * @param sysUser void
+	 * @author lij
+	 * @date 2017年7月14日 下午4:30:51
+	 * 批量扩展供货时间
+	 */
+	void updateAllOrderDate(ReqData reqData,Order order,String orderIds,SysUser sysUser);
+	/**
+	 * @param reqData
+	 * @param orderIds
+	 * @param deliveryId
+	 * @param sysUser
+	 * @return List<Order>
+	 * @author lij
+	 * @date 2017年7月14日 下午4:31:11
+	 * 订单发货（即配置配送人）
+	 */
+	List<Order> updateOrderDelivery(ReqData reqData,String orderIds,long deliveryId,SysUser sysUser,String sendContent,String isSendMessge);
+	/**
+	 * @param reqData
+	 * @param orderIds
+	 * @param sysUser
+	 * @param isDel
+	 * @return List<Order>
+	 * @author lij
+	 * @date 2017年7月14日 下午4:31:56
+	 * 批量作废订单
+	 */
+	List<Order> delteOrders(ReqData reqData,String orderIds,SysUser sysUser,int isDel);
+	
+	/**
+	 * @param reqData
+	 * @return List<OrderDto>
+	 * @author ***
+	 * @date 2017年7月19日 下午2:49:48
+	 * 根据条件查询扩展订单信息（包含订单商品的信息）
+	 */
+	List<OrderDto> findOrderDto(ReqData reqData);
+	
+	/**
+	 * 查询优惠券
+	 * @param id
+	 * @return    
+	 * @return Coupon    
+	 * Date:2017年11月4日 上午10:41:44 
+	 * @author hexw
+	 */
+	Coupon getCoupon(Long id);
+	/**
+	 * 统计订单总数
+	 * @return List<OrderExcleDto>
+	 * @author ***
+	 * @date 2017年12月20日 下午2:55:42
+	 */
+	List<OrderExcleDto> getExcleOrder(String beginTime,String endTime);
+}

@@ -1,0 +1,41 @@
+require(["common"],function(){
+	$(".refer").click(function(){
+		var number = /^\d*$/, price = /^\d*\.?\d*$/ ;
+		if(!$("#no").val()){
+			$.alert("请输入订单号") ;
+			return ;
+		}else{
+			if(!number.test($("#no").val())){
+				$.alert("输入订单号不正确") ;
+				$("#no").val("") ;
+				return ;
+			}
+		}
+		if(!$("#refundMoney").val()){
+			$.alert("请输入退款金额") ;
+			$("#refundMoney").val("") ;
+			return ;
+		}else{
+			if(!price.test($("#refundMoney").val())){
+				$.alert("输入退款金额不正确") ;
+				return ;
+			}
+		}
+		if(!$("#returnReason").val()){
+			$.alert("请输入退款说明") ;
+			return ;
+		}
+		var refundMoney={refundMoney:$("#refundMoney").val(),url:window.location.href,no:$("#no").val(),returnReason:$("#returnReason").val()};
+		$.ajax({
+			url:"order/applyRefund",
+			type:"post",
+			data:refundMoney,
+			success:function(data){
+				$.alert(data.data);
+			}
+		})
+	})
+	$(".pull-left").click(function(){
+		window.location.href="gotoPage/mine/center";
+	});
+});

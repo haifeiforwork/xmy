@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="sqlcriteria.util">
+	<sql id="Example_Where_Clause">
+		<where>
+			<foreach collection="oredCriteria" item="criteria" separator="and">
+				<if test="criteria.valid">
+					<trim prefix="(" suffix=")" prefixOverrides="and|or">
+						<foreach collection="criteria.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									${criterion.andValue} ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									${criterion.andValue} ${criterion.condition}
+									#{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									${criterion.andValue} ${criterion.condition}
+									#{criterion.value}
+									and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									${criterion.andValue} ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem"
+										open="(" close=")" separator=",">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+
+	<sql id="Update_By_Example_Where_Clause">
+		<where>
+			<foreach collection="example.oredCriteria" item="criteria"
+				separator="and">
+				<if test="criteria.valid">
+					<trim prefix="(" suffix=")" prefixOverrides="and|or">
+						<foreach collection="criteria.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									${criterion.andValue} ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									${criterion.andValue} ${criterion.condition}
+									#{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									${criterion.andValue} ${criterion.condition}
+									#{criterion.value}
+									and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									${criterion.andValue} ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem"
+										open="(" close=")" separator=",">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	
+	<!-- author:dengq：为满足多条件赋值 -->
+	<sql id="Custom_Where_Clause">
+		<if test="parameter != null">
+			<where>
+				<foreach collection="parameter.oredCriteria" item="criteria" separator="and">
+					<if test="criteria.valid">
+						<trim prefix="(" suffix=")" prefixOverrides="and|or">
+							<foreach collection="criteria.criteria" item="criterion">
+								<choose>
+									<when test="criterion.noValue">
+										${criterion.andValue} ${criterion.condition}
+									</when>
+									<when test="criterion.singleValue">
+										${criterion.andValue} ${criterion.condition}
+										#{criterion.value}
+									</when>
+									<when test="criterion.betweenValue">
+										${criterion.andValue} ${criterion.condition}
+										#{criterion.value}
+										and
+										#{criterion.secondValue}
+									</when>
+									<when test="criterion.listValue">
+										${criterion.andValue} ${criterion.condition}
+										<foreach collection="criterion.value" item="listItem"
+											open="(" close=")" separator=",">
+											#{listItem}
+										</foreach>
+									</when>
+								</choose>
+							</foreach>
+						</trim>
+					</if>
+				</foreach>
+			</where>
+		</if>
+	</sql>
+</mapper>

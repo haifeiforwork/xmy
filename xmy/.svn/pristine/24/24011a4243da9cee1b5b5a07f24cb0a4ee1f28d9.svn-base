@@ -1,0 +1,47 @@
+#SERVER_PATH=http\://192.168.0.15:8080
+#SERVER_PATH=http://wx.cqzfj.com/sg
+APP_NAME=\u9999\u6EE1\u56ED\u7BA1\u7406\u7CFB\u7EDF
+APP_VERSION=0.1
+APP_PATH=http\://127.0.0.1/xmy-cms
+#login redirect address
+APP_REDIRECT_PATH=/login
+#0:no limit
+IMAGE_MAX_SIZE=0
+
+
+JPUSH_APPKEY=99b64d40ce4fc95173aaf02b
+JPUSH_MASTERSECRET=e53b5eef89308127cd2e5635
+
+#### jpush config start #
+
+
+
+#### openim config start #
+
+OPENIM_APPKEY=24602319
+OPENIM_APPSECRET=d9cba3f4ea0ea63d1b1e88ce7297073a
+OPENIM_CUSTOMTAOBAOID=tzdsxl
+
+#### openim config end #
+
+
+#### wechat login config start #
+
+
+#WECHAT_LOGIN_APPID=wxe41266d25245a434
+#WECHAT_LOGIN_SECRET=ce2a29301a6d8a483542d2cd907fb2f8
+
+# zfj id s
+WECHAT_LOGIN_CALLBACKURL=http\://wx.cqzfj.com/xmy-wap-web/index/weChat
+WECHAT_LOGIN_APPID=wxce00950c9d412207
+WECHAT_LOGIN_SECRET=848295ffbf2a447912a4938e7591c28b
+
+#### wechat login config end #
+
+#### qq login config start #
+
+QQ_LOGIN_CALLBACKURL=http://wx.cqzfj.com/xmy-wap-web/index/qqLogin
+QQ_LOGIN_APPID=101368018
+QQ_LOGIN_APPKEY=382aab70aed68dd3f42301e6a42a7916
+
+#### qq login config end #

@@ -1,0 +1,32 @@
+package com.zfj.xmy.wap.web.common;
+
+public class HeadJudger {
+	
+	private static final String[] WAP_HEADERS = new String[]{"iphone", "android", "samsung", "ios", "nokia"};
+	
+	private static final String[] DESKTOP_HEADERS = new String[]{"windows", "macintosh"};
+	
+	public static boolean IsWap(String header) {
+		for(int i = 0; i < WAP_HEADERS.length; ++i) {
+			if(header.indexOf(WAP_HEADERS[i]) > 0)
+				return true;
+		}
+		return false;
+	}
+	
+	public static boolean IsDesktop(String header) {
+		for(int i = 0; i < DESKTOP_HEADERS.length; ++i) {
+			if(header.indexOf(DESKTOP_HEADERS[i]) > 0)
+				return true;
+		}
+		return false;
+	}
+	
+	public static void main(String[] args) {
+		String agent = "Mozilla/5.0 (Linux; Android 7.0; HUAWEI NXT-AL10 Build/HUAWEINXT-AL10) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Mobile Safari/537.36";
+		agent = agent.toLowerCase();
+		System.out.println(agent);
+		System.out.println(IsDesktop(agent));
+	}
+	
+}

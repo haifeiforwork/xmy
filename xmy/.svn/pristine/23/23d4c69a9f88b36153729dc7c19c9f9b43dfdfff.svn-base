@@ -1,0 +1,129 @@
+package com.zfj.xmy.goods.service.pc.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.elasticsearch.common.lucene.search.Queries;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
+import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import com.zfj.xmy.elasticsearch.document.GoodsDoc;
+import com.zfj.xmy.elasticsearch.persistence.pojo.NativeSearchQueryParameter;
+import com.zfj.xmy.elasticsearch.service.GoodsDocService;
+import com.zfj.xmy.goods.service.pc.PcElasticGoodsService;
+import com.zfj.xmy.util.DataPage;
+@Service
+public class PcElasticGoodsServiceImpl implements PcElasticGoodsService {
+	@Autowired
+	private GoodsDocService goodsDocService;
+	
+	@Autowired
+	private ElasticsearchTemplate elasticsearchTemplate;
+	
+	@Override
+	public DataPage<GoodsDoc> searchGoods(Integer orderMethod, String goodsName, Integer pageIndex,boolean priceOrder,Integer mainLand,String wordSeg,
+			Integer beginPrice,Integer endPrice,String typeName) {
+		NativeSearchQueryParameter nqb = new NativeSearchQueryParameter();
+		nqb.setPageSize(20);
+		//nqb.setKey(goodsName);
+		nqb.setPageIndex(pageIndex);
+		switch (orderMethod) {
+		case 0://默认排序
+			
+			break;
+		case 1://人气排序
+			nqb.setOrder("sumComment", SortOrder.DESC.toString());
+			break;
+		case 2://销量排序
+			nqb.setOrder("sumDeal", SortOrder.DESC.toString());
+			break;
+		case 3://价格排序
+			if(priceOrder){
+				nqb.setOrder("price", SortOrder.DESC.toString());
+			}else{
+				nqb.setOrder("price", SortOrder.ASC.toString());
+			}
+			break;
+		case 4://新品排序
+			nqb.setOrder("publishTime", SortOrder.DESC.toString());
+			break;
+		default:
+			
+			break;
+		}
+		
+		NativeSearchQueryBuilder nsq = nqb.getNativeSearchQueryBuilder() ;
+		String esql="";
+		if(ObjectUtils.isEmpty(goodsName)){
+			esql+="fullName:* *";
+		}else{
+			String newName = goodsName.replaceAll("/", "");
+			esql+="(fullName:"+newName+" keywords:"+newName+")";
+		}
+		if(!mainLand.equals(1)){//全国配送
+			esql+=" AND mainLand:"+mainLand+"";
+		}
+		if(!ObjectUtils.isEmpty(typeName)){
+			String newTypeName = typeName.replaceAll("/", "");
+			String[] split = newTypeName.split(",");
+			for (String string : split) {
+				esql+=" AND wordSeg:*"+string+"*";
+			}
+		}
+		if(!ObjectUtils.isEmpty(wordSeg)){
+			String[] split = wordSeg.split(",");
+			for (String string : split) {
+				if(!"undefined".equals(string)){
+					String newStr = string.replaceAll("/", "");
+					esql+=" AND wordSeg:*"+newStr+"*";
+				}
+			}
+		}
+		if(!ObjectUtils.isEmpty(beginPrice)){
+			esql+=" AND price:>"+beginPrice*100;
+		}
+		if(!ObjectUtils.isEmpty(endPrice)){
+			esql+=" AND price:<"+endPrice*100;
+		}
+		QueryStringQueryBuilder queryStringQuery = QueryBuilders.queryStringQuery(esql);
+		//分词筛选
+		//MatchQueryBuilder matchQuery = QueryBuilders.matchQuery("wordSeg", wordSeg);
+		nsq.withQuery(queryStringQuery);
+		return new DataPage<>(elasticsearchTemplate.queryForPage(nsq.build(),GoodsDoc.class));
+	}
+
+	@Override
+	public List<String> searchTopGoods(String goodsName) {
+		NativeSearchQueryParameter nqb = new NativeSearchQueryParameter();
+		nqb.setPageSize(10);
+		NativeSearchQueryBuilder nsq = nqb.getNativeSearchQueryBuilder() ;
+		String esSql ="keywords:*"+goodsName+"*";
+		//WildcardQueryBuilder wildcardQuery = QueryBuilders.wildcardQuery("keywords", "*"+goodsName+"*");
+		QueryStringQueryBuilder queryStringQuery = QueryBuilders.queryStringQuery(esSql);
+		nsq.withQuery(queryStringQuery);
+		AggregatedPage<GoodsDoc> queryForPage = elasticsearchTemplate.queryForPage(nsq.build(), GoodsDoc.class);
+		List<GoodsDoc> content = queryForPage.getContent();
+		List<String> listkey = new ArrayList<>();
+		for (GoodsDoc goodsDoc : content) {
+			if(!listkey.contains(goodsDoc.getKeywords().trim())){
+				listkey.add(goodsDoc.getKeywords().trim());
+			}
+		}
+		return listkey;
+	}
+	
+	
+
+}

@@ -1,0 +1,44 @@
+package com.zfj.xmy.user.persistence.pojo.dto.common;
+
+/**
+ * cms 绑定推送标签用户列表
+ * @author wy
+ *
+ */
+public class PushLabelUserDto {
+
+	/**
+	 * 用户表name
+	 */
+	private String name;
+	/**
+	 * 用户id
+	 */
+	
+	private Long userid;
+	/**
+	 * 手机号
+	 */
+	private String mobilePhone;
+	
+	public Long getUserid() {
+		return userid;
+	}
+	public void setUserid(Long userid) {
+		this.userid = userid;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getMobilePhone() {
+		return mobilePhone;
+	}
+	public void setMobilePhone(String mobilePhone) {
+		this.mobilePhone = mobilePhone;
+	}
+	
+	
+}

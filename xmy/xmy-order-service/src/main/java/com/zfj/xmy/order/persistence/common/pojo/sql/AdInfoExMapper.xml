@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.order.persistence.common.dao.AdInfoExMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.order.persistence.common.pojo.dto.AdInfoDto" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="is_category" property="isCategory" jdbcType="INTEGER" />
+    <result column="position_id" property="positionId" jdbcType="BIGINT" />
+    <result column="category_id" property="categoryId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+     <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+     <result column="img_path" property="imgPath" jdbcType="VARCHAR" />
+    <result column="imgNum" property="imgNum" jdbcType="INTEGER" />
+    <result column="positionName" property="positionName" jdbcType="VARCHAR" />
+    <result column="showWays" property="showWays" jdbcType="INTEGER" />
+    <result column="weight" property="weight" jdbcType="INTEGER" />
+  </resultMap>
+   <resultMap id="BaseResultMap2" type="com.zfj.xmy.order.persistence.common.pojo.dto.AdInfoDto" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="category_id" property="categoryId" jdbcType="BIGINT" />
+    <result column="img_path" property="imgPath" jdbcType="VARCHAR" />
+    <result column="data" property="data" jdbcType="VARCHAR" />
+    <result column="adImageId" property="adImageId" jdbcType="BIGINT" />
+      
+  </resultMap>
+  
+	<select id="findAdInfo" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+		select a.*,b.name category_name,c.img_num imgNum,c.name positionName  from ad_info a 
+		LEFT JOIN  term_data b on a.category_id = b.id and b.vid=2 
+		LEFT JOIN  ad_position c on a.position_id = c.id   
+		<if test="_parameter != null" >
+		     <include refid="sqlcriteria.util.Example_Where_Clause" />
+		   </if>
+		   <if test="orderByClause != null" >
+		     order by ${orderByClause}
+		   </if>
+	</select>
+	
+	<select id="getAdInfo" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+		select  a.*, b.name categoryName,c.img_num imgNum , c.show_ways showWays ,c.name positionName
+		from ad_info a
+		LEFT JOIN term_data b on a.category_id = b.id and b.vid=2
+		LEFT JOIN ad_position c on a.position_id =c.id 
+		<if test="_parameter != null" >
+		     <include refid="sqlcriteria.util.Example_Where_Clause" />
+		   </if>
+		   <if test="orderByClause != null" >
+		     order by ${orderByClause}
+		   </if>
+	</select>
+	<select id="getAdInfoImage" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap2">
+SELECT
+	a.id,a.category_id,a.name ,c.id adImageId,c.img_path,c.data
+FROM
+	ad_info a
+INNER JOIN ad_image c ON (c.ad_id = a.id AND a.type = 2)
+		<if test="_parameter != null" >
+		     <include refid="sqlcriteria.util.Example_Where_Clause" />
+		   </if>
+		   <if test="orderByClause != null" >
+		     order by ${orderByClause}
+		   </if>
+	</select>
+
+</mapper>  

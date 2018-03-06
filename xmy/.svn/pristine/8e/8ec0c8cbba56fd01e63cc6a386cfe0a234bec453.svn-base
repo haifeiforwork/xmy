@@ -1,0 +1,16 @@
+package com.zfj.xmy.activity.service.common.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.zfj.xmy.activity.service.common.CommonCouponService;
+import com.zfj.xmy.common.persistence.dao.CouponUserMapper;
+
+@Service
+public class CommonCouponServiceImpl implements CommonCouponService {
+
+	@Autowired
+	private CouponUserMapper couponUserMapper;
+	
+	
+}

@@ -1,0 +1,30 @@
+.navigation .navigation-left .left-chunk3 ul .L-index:after{content: "";display: block;width: 0px;height: 0px;border: none;}
+.category *{-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+.category .text-center{text-align: center;}
+.category .add-theme-color{color: #359812;}
+.category-title{width: 100%;background-color: #FFF;height: 58px;line-height: 58px;padding-left: 20px;margin-bottom: 18px;font-weight: 600;color: #525354}
+.category-content{background-color: #FFF;border: 1px solid #ddd;padding: 20px;position: relative;min-height: 485px;color: #666;}
+.safe-check{border: none;}
+.input-group{width: 100%;margin-bottom: 20px;}
+.input-group .label{width: 10%;text-align: right;float: left;height: 34px;line-height: 33px;font-size: 14px;}
+.input-group .label3{width: 23.5%}
+.input-group .item-input{width: 88%;margin-left: 2%;float: left}
+.input-group .item-input3{width: 74.5%}
+.input-group .item-input .default{width: 235px;border: 1px solid #ddd;height: 33px;padding-left: 10px;}
+.btn-group .btn-default{border: 1px solid #ddd;margin-right: 10px;color: #525354;border-radius: 3px;background-color: #FFF;outline: none;font-family: "微软雅黑", "黑体", arial;}
+.btn-group .btn-theme3{padding: 8px 63px;color: #FFF;border: none;background-color: #358912;border-radius: 0;}
+.add-distance3{width: 74.5%;margin: 20px 0 0 25.5%;}
+.step-all{width: 70%;margin: 0 auto;margin-bottom: 80px;}
+.step-all .step{width: 45%;position: relative;font-size: 14px;float: left;}
+.step-all .last-step{width: 10%}
+.step-all .step .step1{background:url("../../commons/images/step1.png") no-repeat;}
+.step-all .step .step2{background:url("../../commons/images/step2.png") no-repeat;}
+.step-all .step .iconn{width: 30px;height: 30px;line-height: 29px;text-align: center;color: #FFF;margin-left: 14px;}
+.step-all .step .line{width: 80%;height: 3px;position: absolute;top: 13px;left: 18%;background-color: #b5b5b5;}
+.step-all .step .line-active{background-color: #359812;}
+.step-all .step p{margin-top: 3px;}
+.step-all .step p.change{position: relative;left: -11px;}
+.step-all .last-step p{padding-left: 15px;}
+
+.lsatstep{width:70%;margin:0 auto;background:#E6FDEC;text-align:center;height:200px;line-height:200px;font-size:18px;color:#333;}
+.lsatstep i{color:#7cc151;font-size:26px;position:relative;top:2px;}

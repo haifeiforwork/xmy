@@ -1,0 +1,147 @@
+package com.zfj.xmy.pay.service.payconfig.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.xiaoleilu.hutool.json.JSONArray;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.persistence.dao.PayConfigMapper;
+import com.zfj.xmy.common.persistence.dao.TradeChannelsMapper;
+import com.zfj.xmy.common.persistence.pojo.PayConfig;
+import com.zfj.xmy.common.persistence.pojo.TradeChannels;
+import com.zfj.xmy.pay.service.pay.PayConstant;
+import com.zfj.xmy.pay.service.payconfig.PayConfigService;
+import com.zfj.xmy.quartz.dto.PushReturnDto;
+import com.zfj.xmy.redis.TokenManager;
+/**
+ * 支付配置类
+ * @author wy
+ *
+ */
+@Service
+public class PayConfigServiceImpl implements PayConfigService {
+
+	@Autowired
+	private PayConfigMapper payConfigMapper;
+	
+	@Autowired
+	private TokenManager tokenManager;
+	
+	@Autowired
+	private TradeChannelsMapper tradeChannelsMapper;
+	
+	@Override
+	public List<PayConfig> findPayConfigByPayType(Integer paytype){
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("pay_type", paytype);
+		return payConfigMapper.selectByExample(parameter);
+	}
+
+	@Override
+	public List<PayConfig> findAllPayConfig(){
+		CriteriaParameter parameter = new CriteriaParameter();
+		parameter.setOrderByClause("pay_type desc");
+		return payConfigMapper.selectByExample(parameter);
+	}
+	
+	@Override
+	public List<TradeChannels> findAllTradeChannelsMapper(){
+		CriteriaParameter parameter = new CriteriaParameter();
+		parameter.setOrderByClause("cCode desc");
+		return tradeChannelsMapper.selectByExample(parameter);
+	}
+	
+
+	@Override
+	public String findPayConfigByPayTypeToJsonStr(Integer payType) {
+		List<PayConfig> payConfigs = findPayConfigByPayType(payType);
+		JSONObject jsonObject = new JSONObject();
+		for (PayConfig payConfig : payConfigs) {
+			jsonObject.put(payConfig.getKe(), payConfig.getVal());
+		}
+		String json = jsonObject.toString();
+		
+		return json;
+	}
+	
+	
+	@Override
+	public String reloadPayConfig(Integer payType){
+		String json = findPayConfigByPayTypeToJsonStr(payType);
+		tokenManager.setKey(PayConstant.PAY_CONSTANT.PAY_TYPE + payType, json);
+		return json;
+	}
+
+
+	@Override
+	public String getPayConfig(Integer payType) {
+		String json = tokenManager.get(PayConstant.PAY_CONSTANT.PAY_TYPE + payType);
+		if (StringUtil.isEmpty(json)) {
+			return reloadPayConfig(payType);
+		}
+		return json;
+	}
+
+	
+
+	@Override
+	public String getPayConfigByMerchantType(int merchantType) {
+		String json = tokenManager.get(PayConstant.PAY_CONSTANT.MERCHANT_TYPE + merchantType);
+		if (StringUtil.isEmpty(json)) {
+			return reloadPayConfigMerchantType(merchantType);
+		}
+		return json;
+	}
+
+
+	private String reloadPayConfigMerchantType(int merchantType) {
+		String json = findPayConfigByMerchantTypeToJsonStr(merchantType);
+		tokenManager.setKey(PayConstant.PAY_CONSTANT.MERCHANT_TYPE + merchantType, json);
+		return json;
+	}
+
+
+	private String findPayConfigByMerchantTypeToJsonStr(int merchantType) {
+		List<PayConfig> payConfigs = findPayConfigByMerchantType(merchantType);
+		JSONObject jsonObject = new JSONObject();
+		for (PayConfig payConfig : payConfigs) {
+			jsonObject.put(payConfig.getKe(), payConfig.getVal());
+		}
+		String json = jsonObject.toString();
+		
+		return json;
+	}
+
+
+	private List<PayConfig> findPayConfigByMerchantType(int merchantType) {
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("merchant_type", merchantType);
+		return payConfigMapper.selectByExample(parameter);
+	}
+
+	@Override
+	public void modify(String form,Integer paytype) {
+		//name 为 表id,value 为val 字段
+		//1.更新数据库
+		JSONArray jsonArray = new JSONArray(form);
+		for (int i = 0; i < jsonArray.size(); i++) {
+			JSONObject jsonObject = jsonArray.getJSONObject(i);
+			PayConfig payConfig = new PayConfig();
+			payConfig.setId(jsonObject.getLong("name"));
+			payConfig.setVal(jsonObject.getStr("value"));
+			payConfigMapper.updateByPrimaryKeySelective(payConfig);
+		}
+		
+		//2.更新redis配置
+	    this.reloadPayConfig(paytype);
+	}
+
+	
+}

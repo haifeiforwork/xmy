@@ -1,0 +1,242 @@
+package com.zfj.xmy.wap.web.controller.payment;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.base.util.web.WebUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.order.service.common.PayService;
+import com.zfj.xmy.order.service.pc.PcOrderService;
+import com.zfj.xmy.order.service.wap.WapOrderService;
+import com.zfj.xmy.pay.persistence.pojo.vo.LaunchPayGoodsVo;
+import com.zfj.xmy.user.service.wap.WapUserService;
+import com.zfj.xmy.wap.web.common.SessionInfo;
+
+/**
+ * 支付
+ * @author cj
+ * @createDate 2017年11月6日
+ *
+ */
+@Controller
+@RequestMapping("/payment")
+public class PaymentController {
+	
+	@Autowired
+	private PayService payService;
+	@Autowired
+	private PcOrderService orderService;
+	@Autowired
+	private WapOrderService wapOrderService;
+	@Autowired
+	private WapUserService userService;
+	
+	private final static String WX_PAYMENT = "payment/wx_payment";
+	
+	@InitBinder
+	public void dateBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy/MM/dd aHH:mm:ss"), true));
+	}
+	
+	@RequestMapping("/paySuccess")
+	public String success(String no, String gateWay, Long orderId, ModelMap model) {
+		Order order = null;
+		if(orderId != null && orderId != 0) {
+			order = wapOrderService.findOrderById(orderId);
+		} else if(no != null && no.trim().length() != 0 ) {
+			order = wapOrderService.findOrderByNo(no);
+		}
+		if(order == null) {
+			return "mine/center";
+		}
+		
+		Integer status = order.getStatus();
+		
+		
+		model.addAttribute("status", status);
+		model.addAttribute("no", order.getNo());
+		model.addAttribute("gateWay", gateWay);
+		model.addAttribute("total", order.getTotal());
+		model.addAttribute("createTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(order.getCreateTime()));
+		model.addAttribute("pay", order.getPay());
+		model.addAttribute("actual", order.getActual());
+		return "order/paySuccess";
+	}
+	
+	/**
+	 * 支付
+	 * @param request
+	 * @param response
+	 * @param launchPayGoodsVo
+	 * @return
+	 */
+	@RequestMapping("/payment/{payType}")
+	@ResponseBody
+	public Object payment(HttpServletRequest request, HttpServletResponse response, LaunchPayGoodsVo launchPayGoodsVo,
+			@PathVariable(name="payType",required=true) Integer payType){
+		
+		SessionInfo sessionInfo = SessionInfo.get();
+		Long userId = 0L;
+		String ip = WebUtil.getRealIp();
+		String x = request.getHeader("x-forwarded-for");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>real-ip" + x);
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>HeaderNames" + request.getHeaderNames());
+		Long orderid = Long.parseLong(launchPayGoodsVo.getOrderid());
+		Order order = orderService.findOrderByOrderId(orderid);
+		
+		if(order != null){
+			if(order.getStatus() != 1){
+				throw new BusinessException("请勿重复提交订单");
+			}
+			if(payType == 5){
+				RespData resp = new RespData();
+				if(sessionInfo == null || sessionInfo.getUserId() == null){
+					orderService.updateOrder(Long.valueOf(launchPayGoodsVo.getOrderid()), payType, launchPayGoodsVo.getPayAmount(), (long) 0);
+				} else {
+					userId =  sessionInfo.getUserId();
+					orderService.updateOrder(Long.valueOf(launchPayGoodsVo.getOrderid()), payType, launchPayGoodsVo.getPayAmount(),userId);
+				}
+				order = orderService.findOrderByOrderId(orderid);
+				resp.setData(order);
+				resp.setResultCode(RespData.CODE_SUCCESS);
+				return resp;
+			}else{
+				RespData resp = new RespData();
+				if(payType == 11) {
+					userId= sessionInfo.getUserId();
+					
+					//订单金额
+					BigDecimal total = order.getTotal();
+					//用户余额
+					BigDecimal userBalance = wapOrderService.getUserBalance(userId);
+					//希望支付的金额
+					BigDecimal payAmount = launchPayGoodsVo.getPayAmount();
+					//剩余
+					BigDecimal left = new BigDecimal(0.00);
+					if(total.compareTo(payAmount) == -1) {
+						throw new BusinessException("支付金额不能大于订单金额");
+					}
+					if(total.compareTo(payAmount) != 0) {
+						throw new BusinessException("金额不足");
+					}
+					if(userBalance.compareTo(payAmount) == 1) {
+						Double restMoney = userBalance.doubleValue() - payAmount.doubleValue();
+						left = new BigDecimal(restMoney);
+					}
+					if(left.compareTo(new BigDecimal(0.00)) != 0) {
+						order.setPay(payAmount);
+						//order = wapOrderService.updateOrder(order);
+						Integer result = userService.updateBalance(userId, payAmount);
+						if(result == 0) {
+							throw new BusinessException("交易失败");
+						} else {
+							order.setStatus(2);
+							order.setShipStatus(3);
+							wapOrderService.updateOrder(order);
+							resp.setData("success");
+							return resp;
+						}
+					} else {
+						throw new BusinessException("余额不足");
+					}
+				}
+				if(sessionInfo == null || sessionInfo.getUserId() == null){
+					if(launchPayGoodsVo.getPayAmount() != null && launchPayGoodsVo.getPayAmount().doubleValue() > 0){
+						throw new BusinessException(100,"SESSION_LOST");
+					}
+				}else{
+					userId = sessionInfo.getUserId();
+				}
+				//String ip = WebUtil.getRealIp();
+				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>aaaaaaaaaaaaaaaa" + ip.split(",")[0]);
+				launchPayGoodsVo.setPaytype(payType);
+				launchPayGoodsVo.setClientIp(ip.split(",")[0]);
+				Object returnStr = payService.beforebuyGoods(launchPayGoodsVo,userId);
+				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>returnStr" + returnStr);
+				if(returnStr == null) {//只用余额支付
+					resp.setData("success");
+					return resp;
+				}
+				return returnStr;
+			}
+		}
+		throw new BusinessException("该订单不存在");
+	}
+	
+	
+	/**
+	 * 微信公众号支付
+	 * @param request
+	 * @param response
+	 * @param launchPayGoodsVo
+	 * @return
+	 */
+	@RequestMapping("/wxJsapi")
+	public ModelAndView wxJsapi(HttpServletRequest request, HttpServletResponse response, LaunchPayGoodsVo launchPayGoodsVo){
+		
+		SessionInfo sessionInfo = SessionInfo.get();
+		String state = request.getParameter("state");
+		if(!StringUtil.isEmpty(state)){
+			String[] param = state.split(",");
+			launchPayGoodsVo.setOrderid(param[0]);
+			launchPayGoodsVo.setPayAmount(new BigDecimal(param[1]));
+			launchPayGoodsVo.setWxOpenid(param[2]);
+		}
+		Long userId = 0L;
+		Long orderid = Long.parseLong(launchPayGoodsVo.getOrderid());
+		Order order = orderService.findOrderByOrderId(orderid);
+		if(order != null){
+			if(order.getStatus() != 1){
+				request.setAttribute("payState", "100");
+			}else{
+				if(sessionInfo == null || sessionInfo.getUserId() == null){
+					if(launchPayGoodsVo.getPayAmount() != null && launchPayGoodsVo.getPayAmount().doubleValue() > 0){
+						return new ModelAndView(SystemConstant.XMYWAP.LOGIN);
+					}else if(StringUtil.isEmpty(launchPayGoodsVo.getWxOpenid())){
+						return new ModelAndView("redirect:/index/weChat/pay?orderid=" + launchPayGoodsVo.getOrderid() + "&payAmount=" + (launchPayGoodsVo.getPayAmount() == null ? 0 : launchPayGoodsVo.getPayAmount()));
+					}
+				}else{
+					userId = sessionInfo.getUserId();
+					if(StringUtil.isEmpty(sessionInfo.getUser().getWechatOpenid()) && StringUtil.isEmpty(launchPayGoodsVo.getWxOpenid())){
+						return new ModelAndView("redirect:/index/weChat/pay?orderid=" + launchPayGoodsVo.getOrderid() + "&payAmount=" + (launchPayGoodsVo.getPayAmount() == null ? 0 : launchPayGoodsVo.getPayAmount()));
+					}
+					if(StringUtil.isEmpty(launchPayGoodsVo.getWxOpenid()))
+						launchPayGoodsVo.setWxOpenid(sessionInfo.getUser().getWechatOpenid());
+				}
+				String ip = WebUtil.getRealIp();
+				launchPayGoodsVo.setPaytype(0);
+				launchPayGoodsVo.setClientIp(ip.split(",")[0]);
+				Object returnStr = payService.beforebuyGoods(launchPayGoodsVo,userId);
+				if(returnStr == null) {//只用余额支付
+					request.setAttribute("payState", "200");
+				}
+				request.setAttribute("map", returnStr);
+			}
+		}else{
+			request.setAttribute("payState", "-99");
+		}
+		request.setAttribute("orderId", launchPayGoodsVo.getOrderid());
+		
+		return new ModelAndView("payment/wx_payment");
+	}
+	
+}

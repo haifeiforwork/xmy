@@ -1,0 +1,60 @@
+package com.zfj.xmy.activity.service.cms.impl;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.activity.persistence.cms.dao.ShoppingCardExMapper;
+import com.zfj.xmy.activity.persistence.cms.pojo.dto.ShoppingCardDto;
+import com.zfj.xmy.activity.service.cms.ShoppingCardService;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.ShoppingCardMapper;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCard;
+
+@Service
+public class ShoppingCardServiceImpl implements ShoppingCardService{
+	@Autowired
+	private ShoppingCardExMapper shoppingCardExMapper;
+	
+	@Autowired
+	private ShoppingCardMapper shoppingCardMapper;
+	/**
+	 * 分页查询商品信息
+	 */
+	@Override
+	public List<ShoppingCardDto> findAllShoppingCard(ReqData reqData, PageBean pageBean) {
+		List<ShoppingCardDto> list = shoppingCardExMapper.findShoppingCard(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		pageBean.setTotalCount(shoppingCardExMapper.countTotalShoppingCard(ReqUtil.reqParameterToCriteriaParameter(reqData)));
+		return list;
+	}
+	
+	/**
+	 * 根据用户ID查询改用户所有绑定的购物卡
+	 */
+	@Override
+	public List<ShoppingCard> findShoppingCardByUserId(Long userId) {
+		ReqData reqData = new  ReqData();
+		reqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+		List<ShoppingCard> selectByExample = shoppingCardMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return selectByExample;
+	}
+	/**
+	 * 修改
+	 */
+	@Override
+	public void updateShoppingCard(Long id, Integer type, BigDecimal money) {
+		ShoppingCard oldCard = shoppingCardMapper.selectByPrimaryKey(id);
+		if (type == SystemConstant.userSpendPoints.SPEND_TYPE_SAVE) {//存入余额
+			oldCard.setBalance(oldCard.getBalance().add(money));//+ userSpendPoints.getMoneyPoint());
+		} else {
+			oldCard.setBalance(oldCard.getBalance().subtract(money));//- userSpendPoints.getMoneyPoint());
+		}
+		shoppingCardMapper.updateByPrimaryKey(oldCard);
+	}
+	
+}

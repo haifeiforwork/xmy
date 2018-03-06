@@ -1,0 +1,44 @@
+header .header-top{border-bottom: 1px solid #C3C3C3;}
+.list .weui-media-box{background-color: #fff;padding: 10px 10px;border-bottom: 1px solid #f0f0f0;}
+.list .weui-media-box .weui-media-box__hd{height: 4rem;width: 4rem;margin-right: 10px;}
+.list .weui-media-box .weui-media-box__bd{height: 4rem;font-size: 0.7rem;color: #444;}
+.list .weui-media-box .weui-media-box__bd .weui-media-box__desc{-webkit-line-clamp:5;color: #444;line-height: 1rem;}
+.list .weui-media-box .weui-cell__ft{font-size: 0.6rem;color: #999;height: 4rem;}
+.list .weui-media-box .weui-cell__ft .money{color: #444;font-size: 0.7rem;}
+.weui-media-box:before{display: none;}
+.address{margin:0;margin-top: 0.25rem;}
+.weui-cells:after, .weui-cells:before, .weui-cell:before{display: none;}
+.address .weui-cell{padding: 10px 10px 10px 5px;border-bottom: 1px solid #f0f0f0;}
+.address .weui-cell.add{padding: 10px;}
+.address .weui-cell .weui-cell__hd img{width: 1.2rem;height: 1.2rem;}
+.address .weui-cell .weui-cell__bd{font-size: 0.7rem;color: #444;}
+.address .weui-cell .weui-cell__bd .consignee .phone{float: right;}
+.address .weui-cell .weui-cell__bd .del{margin-top: 0.25rem;line-height: 1rem;}
+.address .weui-cell .weui-cell__bd.bz{height: 3rem;}
+.address .weui-cell .weui-cell__ft input{width: 100%;text-align: right;font-size: 0.65rem;color: #444;border:0;position: relative;top: -0.1rem;}
+.address .weui-cell .weui-cell__ft textarea{width: 100%;height: 3rem;text-align: right;font-size: 0.65rem;color: #444;border:0;resize:none;}
+.chunk{background-color: #fff;padding: 10px;margin-top: 0.25rem;}
+.chunk .weui-form-preview__item .weui-form-preview__label{font-size: 0.7rem;color: #444;}
+.chunk .weui-form-preview__item .weui-form-preview__value{font-size: 0.7rem;color: #D50401;}
+.chunk .weui-form-preview__item .weui-form-preview__value.gray{color: #999;}
+footer .row{height: 100%;width: 100%;background-color: #fff;}
+footer .row .ly-65{width: 65%;float: left;height: 100%;line-height: 55px;border-top: 1px solid #f0f0f0;padding: 0 10px;text-align: right;font-weight: 600;}
+footer .row .ly-65 span{color: #D50401;}
+footer .row .ly-35{width: 35%;float: left;height: 100%;line-height: 55px;text-align: center;background-color: #348811;color: #fff;font-size: 0.8rem;}
+.picker-calendar-year-picker .icon-only{margin-top: 0.8rem;}
+.picker-calendar-month-picker .icon-only{margin-top: 0.8rem;}
+      /*  2017-11-3*/
+#tiket-pop{z-index: 2000;}
+#tiket-pop .weui-popup__modal{font-size: 0.7rem;}
+#tiket-pop .modal-bd{width: 100%;height: 100%;position: absolute;bottom: 30px;overflow-y: auto;padding-top: 30px;}
+#tiket-pop .qx-line{position: fixed;bottom: 0;width: 100%;height: 30px;text-align: center;}
+#tiket-pop .qx-line img{width: 20px;height: 20px;}
+.nav-list{overflow: hidden;background-color: #FFF;margin-bottom: 0.5rem;padding: 0.5rem;}
+.nav-list .nav-item{display: inline-block;margin-right: 0.5rem}
+.nav-list .nav-item .check-circle{width: 20px;height: 20px;border: 1px solid #ddd;border-radius: 50%;margin-right: 0.2rem;display: inline-block;position: relative;top: 0.2rem;}
+.nav-list .nav-item.active .check-circle{background: url("../images/xz.png") no-repeat;background-size: 100% 100%;border: none;}
+.nav-content{background-color: #FFF;padding: 0.5rem}
+.nav-content>div:last-child{display: none;}
+.nav-content .nav-content-input{background-color: #f0f0f0;height: 1.7em;line-height: 1.7em;padding-left: 0.3rem;}
+.nav-content .weui-cell__hd{width: 4.5rem;}
+.weui-dialog__btn{color:#3cc51f}

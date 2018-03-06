@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.UserSpendPointsMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.UserSpendPoints" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="money_point" property="moneyPoint" jdbcType="DECIMAL" />
+    <result column="no" property="no" jdbcType="VARCHAR" />
+    <result column="spend_type" property="spendType" jdbcType="INTEGER" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="creat_time" property="creatTime" jdbcType="TIMESTAMP" />
+    <result column="console" property="console" jdbcType="VARCHAR" />
+    <result column="is_del" property="isDel" jdbcType="INTEGER" />
+    <result column="sign" property="sign" jdbcType="INTEGER" />
+    <result column="days" property="days" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, `type`, money_point, `no`, spend_type, remarks, creat_time, console, 
+    is_del, sign, `days`
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from user_spend_points
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from user_spend_points
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from user_spend_points
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from user_spend_points
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update user_spend_points
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.type != null" >
+        `type` = #{record.type,jdbcType=INTEGER},
+      </if>
+      <if test="record.moneyPoint != null" >
+        money_point = #{record.moneyPoint,jdbcType=DECIMAL},
+      </if>
+      <if test="record.no != null" >
+        `no` = #{record.no,jdbcType=VARCHAR},
+      </if>
+      <if test="record.spendType != null" >
+        spend_type = #{record.spendType,jdbcType=INTEGER},
+      </if>
+      <if test="record.remarks != null" >
+        remarks = #{record.remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="record.creatTime != null" >
+        creat_time = #{record.creatTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.console != null" >
+        console = #{record.console,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isDel != null" >
+        is_del = #{record.isDel,jdbcType=INTEGER},
+      </if>
+      <if test="record.sign != null" >
+        sign = #{record.sign,jdbcType=INTEGER},
+      </if>
+      <if test="record.days != null" >
+        `days` = #{record.days,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update user_spend_points
+    set id = #{record.id,jdbcType=BIGINT},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      `type` = #{record.type,jdbcType=INTEGER},
+      money_point = #{record.moneyPoint,jdbcType=DECIMAL},
+      `no` = #{record.no,jdbcType=VARCHAR},
+      spend_type = #{record.spendType,jdbcType=INTEGER},
+      remarks = #{record.remarks,jdbcType=VARCHAR},
+      creat_time = #{record.creatTime,jdbcType=TIMESTAMP},
+      console = #{record.console,jdbcType=VARCHAR},
+      is_del = #{record.isDel,jdbcType=INTEGER},
+      sign = #{record.sign,jdbcType=INTEGER},
+      `days` = #{record.days,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from user_spend_points
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from user_spend_points
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.UserSpendPoints" useGeneratedKeys="true" keyProperty="id" >
+    insert into user_spend_points (user_id, `type`, money_point, 
+      `no`, spend_type, remarks, 
+      creat_time, console, is_del, 
+      sign, `days`)
+    values (#{userId,jdbcType=BIGINT}, #{type,jdbcType=INTEGER}, #{moneyPoint,jdbcType=DECIMAL}, 
+      #{no,jdbcType=VARCHAR}, #{spendType,jdbcType=INTEGER}, #{remarks,jdbcType=VARCHAR}, 
+      #{creatTime,jdbcType=TIMESTAMP}, #{console,jdbcType=VARCHAR}, #{isDel,jdbcType=INTEGER}, 
+      #{sign,jdbcType=INTEGER}, #{days,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.UserSpendPoints" useGeneratedKeys="true" keyProperty="id" >
+    insert into user_spend_points
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="type != null" >
+        `type`,
+      </if>
+      <if test="moneyPoint != null" >
+        money_point,
+      </if>
+      <if test="no != null" >
+        `no`,
+      </if>
+      <if test="spendType != null" >
+        spend_type,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="creatTime != null" >
+        creat_time,
+      </if>
+      <if test="console != null" >
+        console,
+      </if>
+      <if test="isDel != null" >
+        is_del,
+      </if>
+      <if test="sign != null" >
+        sign,
+      </if>
+      <if test="days != null" >
+        `days`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="moneyPoint != null" >
+        #{moneyPoint,jdbcType=DECIMAL},
+      </if>
+      <if test="no != null" >
+        #{no,jdbcType=VARCHAR},
+      </if>
+      <if test="spendType != null" >
+        #{spendType,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="creatTime != null" >
+        #{creatTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="console != null" >
+        #{console,jdbcType=VARCHAR},
+      </if>
+      <if test="isDel != null" >
+        #{isDel,jdbcType=INTEGER},
+      </if>
+      <if test="sign != null" >
+        #{sign,jdbcType=INTEGER},
+      </if>
+      <if test="days != null" >
+        #{days,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.UserSpendPoints" >
+    update user_spend_points
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        `type` = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="moneyPoint != null" >
+        money_point = #{moneyPoint,jdbcType=DECIMAL},
+      </if>
+      <if test="no != null" >
+        `no` = #{no,jdbcType=VARCHAR},
+      </if>
+      <if test="spendType != null" >
+        spend_type = #{spendType,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="creatTime != null" >
+        creat_time = #{creatTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="console != null" >
+        console = #{console,jdbcType=VARCHAR},
+      </if>
+      <if test="isDel != null" >
+        is_del = #{isDel,jdbcType=INTEGER},
+      </if>
+      <if test="sign != null" >
+        sign = #{sign,jdbcType=INTEGER},
+      </if>
+      <if test="days != null" >
+        `days` = #{days,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.UserSpendPoints" >
+    update user_spend_points
+    set user_id = #{userId,jdbcType=BIGINT},
+      `type` = #{type,jdbcType=INTEGER},
+      money_point = #{moneyPoint,jdbcType=DECIMAL},
+      `no` = #{no,jdbcType=VARCHAR},
+      spend_type = #{spendType,jdbcType=INTEGER},
+      remarks = #{remarks,jdbcType=VARCHAR},
+      creat_time = #{creatTime,jdbcType=TIMESTAMP},
+      console = #{console,jdbcType=VARCHAR},
+      is_del = #{isDel,jdbcType=INTEGER},
+      sign = #{sign,jdbcType=INTEGER},
+      `days` = #{days,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

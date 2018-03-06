@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.activity.persistence.common.dao.ContainerExMapper" >
+
+	<resultMap id="fullContainer" type="com.zfj.xmy.activity.persistence.common.pojo.dto.WapContainerOutDto">
+		<id column="name" property="name" javaType="String" />
+		<result column="iconImg" property="iconImg" />
+		<result column="bgImg" property="bgImg" />
+		<result column="slogan" property="slogan" />
+		<result column="categoryId" property="categoryId" />
+		<collection property="containerAd" ofType="com.zfj.xmy.common.persistence.pojo.AdImage" autoMapping="true">
+			<id column="id" property="id" javaType="java.lang.Long" />
+			<result column="img_path" property="imgPath" javaType="String" />
+		</collection>
+		<collection property="goods" ofType="com.zfj.xmy.common.persistence.pojo.app.AppGoodsCondense" autoMapping="true">
+			<id column="gId" property="id" javaType="java.lang.Long" />
+		</collection>
+	</resultMap>
+	
+	<select id="checkIsLevelOne" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		select count(*) from term_data where id = #{categoryId} and parent_id = 0	
+	</select>
+	
+	<select id="findAllContainer" resultMap="fullContainer" parameterType="java.util.ArrayList">
+		SELECT DISTINCT
+			*
+		FROM
+			(
+				SELECT
+					c_a.*, g.id gId,
+					g.phone_price phonePrice,
+					g.price price,
+					g.full_name fullName
+				FROM
+					(
+						SELECT
+							c.icon_img iconImg,
+							c.category_id categoryId,
+							c.bg_img bgImg,
+							c.slogan,
+							c.`name`,
+							c.ad_id adid,
+							c.goods_ids,
+							c.weight cWeight,
+							adimage.*
+						FROM
+							(
+								SELECT
+									*
+								FROM
+									container
+								WHERE
+									id
+									<foreach collection="array" item="id" open="in (" close=")" separator=",">
+										#{id}
+									</foreach>
+							) c
+						JOIN ad_image adimage ON c.ad_id = adimage.ad_id
+					) c_a
+				JOIN goods g ON FIND_IN_SET(g.id, c_a.goods_ids)
+				AND g.is_putway = 0
+			) cag
+		JOIN (
+			SELECT
+				goods_id,
+				path imgPath
+			FROM
+				goods_image
+			GROUP BY
+				goods_id
+		) gi ON gi.goods_id = cag.gId
+		ORDER BY
+			cag.cWeight,
+			cag.weight
+	</select>
+	
+</mapper>

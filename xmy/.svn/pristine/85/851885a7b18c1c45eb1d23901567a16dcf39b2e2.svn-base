@@ -1,0 +1,56 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/common/common_tag.jsp"%>
+
+<!--制作lj-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>物流信息</title>
+    <!-- 公共css区域 -->
+    <%@ include file="/WEB-INF/jsp/common/common_css.jsp" %>
+    <!-- 公共css完区域 -->
+    <!-- 该页面应用css区域 -->
+    <link href="resources/order/css/logistics_order.css" rel="stylesheet">
+    <!-- 该页面应用css区域 -->
+</head>
+<body ontouchstart>
+<header>
+    <div class="header-top detel-border">
+        <div class="pull-left"><i class="iconfont">&#xe600;</i></div>
+        <div class="pull-center">查看物流</div>
+    </div>
+</header>
+<div class="content container">
+    <div class="item-title container-wrap add-distance2 container-white">
+        <p>承运来源 : <span>顺丰快递</span></p>
+        <p>运单编号 : <span>${logisticsNo }</span></p>
+    </div>
+    <div class="logistics">
+        <ul>
+            <li class="logistics-item">
+                <div class="left-inner col-20"><div class="circle active"></div><div class="line"></div></div>
+                <div class="right-inner col-80"><p class="item-title">${address }</p><p class="item-after">${address }</p></div>
+            </li>
+           <!--  <li class="logistics-item">
+                <div class="left-inner col-20"><div class="circle"></div><div class="line"></div></div>
+                <div class="right-inner col-80"><p class="item-title">快件已到达【重庆市】</p><p class="item-after">快件已到达【重庆市】</p></div>
+            </li>
+            <li class="logistics-item">
+                <div class="left-inner col-20"><div class="circle"></div><div class="line"></div></div>
+                <div class="right-inner col-80"><p class="item-title">快件已到达【重庆市】</p><p class="item-after">快件已到达【重庆市】</p></div>
+            </li>
+            <li class="logistics-item">
+                <div class="left-inner col-20"><div class="circle"></div><div class="line"></div></div>
+                <div class="right-inner col-80"><p class="item-title">快件已到达【重庆市】</p><p class="item-after">快件已到达【重庆市】</p></div>
+            </li> -->
+        </ul>
+    </div>
+</div>
+<!-- 公共js区域 -->
+<%@include file="/WEB-INF/jsp/common/common_js.jsp" %>
+<!-- 公共js区域完 -->
+<!-- 该页面应用js区域 -->
+
+<!-- 该页面应用js区域 -->
+</body>
+</html>

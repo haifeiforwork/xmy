@@ -1,0 +1,38 @@
+.content{bottom: 0;background:url("../images/bg-qydz@2x.png");background-size: 100%;}
+/*自定样式*/
+.clearfix {  *zoom: 1;  }
+.clearfix:before,
+.clearfix:after {  display: table;  line-height: 0;  content: "";  }
+.clearfix:after {  clear: both;  }
+.container-white{background-color: #FFF;width: 100%;}
+
+/*所有大图*/
+.banner img{width: 100%;display: block}
+.banner{position: relative;}
+.banner .more img{width: 14px;height: 14px;position: relative;top: 1px;left: -2px;display: inline-block;}
+.banner2{margin: 0.5rem 0.5rem 0;}
+.banner3{width: 50%;margin: 1.2rem auto 0.3rem;text-align:center; top: 5px;}
+ .banner3 .title-name{color: #7E4734;position: relative;}
+ .banner3 .title-name:after, .banner3 .title-name:before{content:"";display: block;position: absolute;width: 90%;height: 2px;background-color: #7e4e34;}
+ .banner3 .title-name:after{left: -110%;top: 0.5rem;}
+ .banner3 .title-name:before{right: -110%;top: 0.5rem; top: 5px}
+
+/*栅格*/
+.col-49{width: 48.5%;margin-right: 3%;float: left}
+.row4{margin: 0 0.5rem;}
+
+/*商品列表*/
+.shop-list{margin-bottom: 1rem;}
+.shop-list .col-49{padding: 0.2rem;margin-top: 0.5rem;}
+.shop-list .col-49:nth-of-type(2n){margin-right: 0;}
+.shop-list .shop-img{width:100%;display: block;margin: 0 auto;}
+.shop-list .shop-name{font-size: 0.6rem;display: -webkit-box;  -webkit-box-orient: vertical;  -webkit-line-clamp: 2;  overflow: hidden;color: #333;height: 40px;padding: 0 0.2rem;margin-top: 0.1rem;}
+.shop-list .price{font-size: 0.7rem;color: #F92129;margin-top: 0.2rem;font-weight: 600;float: left;}
+.shop-list .shop-list-foot{text-align: right;padding: 0.1rem 0.2rem;}
+.shop-list .col-33 .shop-list-foot{margin-top: -0.4rem;}
+/*列表新增*/
+.cus .shop-list .col-49{margin-top: 1.5%;width:49.25%;margin-right: 1.5%;padding: 0.2rem 0.2rem 0.1rem;}
+.cus .shop-list .shop-name{height: auto;margin-top: 0.2rem;padding: 0;}
+.cus .shop-list .price{font-weight: normal;float: none;}
+.cus .shop-list .shop-list-foot{text-align: left;padding: 0;}
+.cus .shop-list .col-49:nth-of-type(2n){margin-right: 0;}

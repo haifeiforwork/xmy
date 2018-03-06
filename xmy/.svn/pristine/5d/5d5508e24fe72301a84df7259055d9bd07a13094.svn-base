@@ -1,0 +1,30 @@
+@CHARSET "UTF-8";
+   .content{bottom: 0;}
+        /*自定样式*/
+        .container .self-cell{font-size: 0.7rem;}
+        ul{list-style-type: none;padding: 0;margin: 0;}
+        /*表单样式*/
+        .self-cell .weui-cell{padding: 10px;}
+        .recharge .weui-cell:before{left: 0;}
+        .recharge .weui-cell{padding-left: 25px;}
+        .recharge{margin-top: 0}
+        .recharge:after, .recharge:before{position: static}
+        .recharge-msg{padding-top: 0.8rem;}
+        /*placeholder的颜色*/
+        .self-cell .weui-input::-webkit-input-placeholder { /* WebKit browsers */ color:#999;  }
+        .self-cell .weui-input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */color:#999;}
+        .self-cell .weui-input::-moz-placeholder { /* Mozilla Firefox 19+ */color:#999;}
+        .self-cell .weui-input:-ms-input-placeholder { /* Internet Explorer 10+ */color:#999;}
+        .self-btn-area .weui-btn_primary{background-color: #358812;font-size: 0.75rem;line-height:1.6rem;}
+        .self-btn-area{margin: 1.5rem 1.3rem 0.3rem;}
+        /*一个自定容器*/
+        .container-wrap{font-size: 0.7rem;padding: 5px 10px;overflow: hidden}
+
+        /*所有大图*/
+        .banner img{width: 100%;display: block;}
+        .banner{position: relative;}
+
+        /*导航样式*/
+        .recharge-nav{background-color: #FFF;}
+        .recharge-nav .item{display: inline-block;width: 25%;color: #666;font-size: 0.75rem;text-align: center;padding: 0.5rem 0;}
+        .recharge-nav .active{color: #358812;border-bottom: 1px solid #358812}

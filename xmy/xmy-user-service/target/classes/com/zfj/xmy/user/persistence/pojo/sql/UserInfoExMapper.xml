@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.user.persistence.dao.UserInfoExMapper" >
+<resultMap id="userInfoDto" type="com.zfj.xmy.user.persistence.pojo.dto.UserInfoDto" >
+   <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="real_name" property="realName" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="INTEGER" />
+    <result column="birthday" property="birthday" jdbcType="TIMESTAMP" />
+    <result column="mobile_phone" property="mobilePhone" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="id_card" property="idCard" jdbcType="VARCHAR" />
+    <result column="zipcode" property="zipcode" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="balance" property="balance" jdbcType="INTEGER" />
+    <result column="acc_points" property="accPoints" jdbcType="INTEGER" />
+    <result column="total_cost" property="totalCost" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="level" property="level" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+     <result column="password" property="password" jdbcType="VARCHAR" />
+</resultMap>
+<resultMap id="pushLabelUserDto" type="com.zfj.xmy.user.persistence.pojo.dto.common.PushLabelUserDto" >
+   <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="mobile_phone" property="mobilePhone" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="label_ids" property="labels" jdbcType="VARCHAR" />
+    
+</resultMap>
+
+
+<select id="findUserInfoEx" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="userInfoDto">
+    select `user`.id ,name,status,level,create_time, real_name, sex, birthday, mobile_phone, email, phone, id_card, zipcode, remark, balance, acc_points, total_cost, update_time FROM `user` INNER JOIN user_info ON `user`.id = user_info.id
+	
+<if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" />
+   </if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+
+<!-- 推送标签页面用户列表 -->
+<select id="findPushLabelUserList" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="pushLabelUserDto">
+		SELECT
+			*
+		FROM
+			(
+				SELECT
+					USER .id AS id,
+					USER . NAME AS NAME,
+					ui.mobile_phone AS mobile_phone,
+					USER .create_time AS create_time,
+					GROUP_CONCAT(jpul.label_id) AS label_ids
+				FROM
+					`user` USER
+				INNER JOIN user_info ui ON USER .id = ui.id
+				LEFT JOIN jiguang_push_user_label jpul ON jpul.user_id = USER .id
+				GROUP BY
+					USER .id
+			) AS USER
+<if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" />
+   </if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+
+<select id="findUserInfoEx2" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="userInfoDto">
+	select password, `user`.id ,name,status,level,create_time, real_name, sex, birthday, mobile_phone, email, phone, id_card, zipcode, remark, balance, acc_points, total_cost, update_time FROM `user` INNER JOIN user_info ON `user`.id = user_info.id
+<if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" />
+   </if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+<select id="findUserInfoExNoPageBean" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="userInfoDto">
+	select password, `user`.id ,name,status,level,create_time, real_name, sex, birthday, mobile_phone, email, phone, id_card, zipcode, remark, balance, acc_points, total_cost, update_time FROM `user` INNER JOIN user_info ON `user`.id = user_info.id
+<if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" />
+   </if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+<select id="getUserInfo" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="userInfoDto">
+	select `user`.id ,name,avatar,status,level,create_time, real_name, sex, birthday, mobile_phone, email, phone, id_card, zipcode, remark, balance, acc_points, total_cost, update_time FROM `user` INNER JOIN user_info ON `user`.id = user_info.id
+<if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" />
+   </if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+
+<select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer">
+	select (count(*)) FROM `user` INNER JOIN user_info ON `user`.id = user_info.id
+<if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" />
+   </if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+
+<select id="getEmailCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+	select count(*) from user_info where email = #{email}
+</select>
+
+</mapper>

@@ -1,0 +1,427 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>开抢了</title>
+    <%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/activity/activity.css">
+    <link rel="stylesheet" type="text/css" href="resource/commons/css/foundation-datepicker.css">
+    <link rel="stylesheet" href="resource/commons/css/flexslider.css">
+  </head>
+  <body>
+   <%@include file="/WEB-INF/jsp/commons/nav/nav_homepage.jsp" %>
+   
+
+
+	<!--全屏滚动-->
+<div class="ad" style="min-width: auto;">
+	<div class="b-img">
+	<c:forEach items="${topImg }" var="item">
+		<a href="javascript:void(0)" style="background:url(https://xmyoss.oss-cn-hangzhou.aliyuncs.com/20170825shuiguowogan.png) center no-repeat;"></a>
+	</c:forEach>
+	</div>
+	<div style="position:absolute;left:50%;margin-left:-625px;top:0;width:1250px;">
+			<div class="banner-items2">
+          	 <a href="goods/${rightAdImage.data }/0/0"><img src="${rightAdImage.imgPath }" alt=""></a>
+          </div>
+		</div>	
+	<div class="b-list"></div>
+	<!--<a class="bar-left" href="#"><em></em></a><a class="bar-right" href="#"><em></em></a>-->
+</div>
+<!--end 全屏滚动-->
+<div class="container add-distance-top2" style="margin-bottom:0px;background:#EFEFEF url('resource/commons/images/page-bg.jpg') 50.2% no-repeat fixed">
+   <!-- 广告图 -->
+    <div class="list-content w-1250">
+        <div class="inner-items clearfix">
+        	<c:if test="${not empty goodsAdImg}">
+	        	<c:forEach items="${goodsAdImg }" var="item">
+	          		<div class="col-24"><a href="goods/${item.data }/0/0"><img src="${item.imgPath }" alt=""></a></div>
+	          	</c:forEach>
+        	</c:if>
+        </div>
+    </div>
+    <!-- 内容开始 -->
+    <c:if test="${not empty iceActivity}">  <!-- 冰点价 -->
+      <div class="list-content rob w-1250" id="bing">
+        <div class="rob-title clearfix">
+            <span class="robbin7"><img src="${iceActivity.icon }" alt=""></span>
+            <div class="col-50 time-pick-all" name="bing" id="bing">
+                <div class="time-pick">
+                	 <!-- 2017 9-9 -->
+                距离活动结束还有: <span class="time-item hours">23</span> 时 <span class="time-item min">59</span> 分 <span class="time-item sss">59</span> 秒
+                	 <!--end-->
+                </div> 
+            </div>
+            <div class="col-50 text-right ad-line-height">
+                <div class="time-pick-des">${iceActivity.description }</div>
+            </div>
+        </div>
+        <ul class="rob-list">
+        	<c:forEach items="${iceActivity.goodsList }" var="item" begin="0" end="5">
+        		<c:choose>
+       				<c:when test="${item.isToday == 0}">
+       					<c:if test="${item.allNum > item.completeNum }">
+		      				<a href="goods/${item.goodsId }/${iceActivity.activityType }/${iceActivity.id}?time=${item.beginTimeStr}&url=" style="text-decoration:none;color: black;">
+		      			</c:if>
+		       				<li class="list-item">
+			        		<!-- 商品日期 -->
+			        	    <div class="img-wrap">
+			                   <%--  <img src="${not empty item.goodsImg? item.goodsImg:'resource/commons/images/defaultgoods.jpg' }" alt=""> --%>
+			                    <img:imghandle w="198" imgurl="${not empty item.goodsImg? item.goodsImg:'resource/commons/images/defaultgoods.jpg' }" h="198"></img:imghandle>
+			                     <c:if test="${item.completeNum >= item.allNum  }"> 
+				                   	<div class="item-overlay">
+				                        <img src="resource/commons/images/buy-none.png" alt="" style="width:150px;margin-left: auto;margin-right:auto">
+				                    </div>
+			                   </c:if>
+			                </div>
+			                <div class="shop-name" title="${item.name }">${item.name }</div>
+			                <div class="rob-last">
+			                    <div class="left-price ${item.allNum <= item.completeNum? '':'left-price-r' } ">
+			                        <p><span class="zh-money">¥</span> <span class="left-price-choos">${item.activityPrice }</span></p>
+			                        <p><small class="left-price-small">${item.beginTimeStr }12:00</small></p>
+			                    </div>
+			                    	<c:if test="${item.allNum > item.completeNum }"> 
+										<button type="button" class="btn-rob-g btn-rob-r">立即抢购</button>
+									</c:if>
+									<c:if test="${item.allNum <= item.completeNum }">
+										<button type="button" class="btn-rob-g">立即购买</button>
+									</c:if> 
+			                </div>
+		           		 	</li>
+	           		 		<c:if test="${item.allNum > item.completeNum }">
+			      		 	 </a>
+			      		  	</c:if>
+       				</c:when>
+       				<c:otherwise>
+		       				<li class="list-item">
+			        		<!-- 商品日期 -->
+			        	    <div class="img-wrap">
+			                    <%-- <img src="${not empty item.goodsImg? item.goodsImg:'resource/commons/images/defaultgoods.jpg'  }" alt=""> --%>
+			                    <img:imghandle w="198" imgurl="${not empty item.goodsImg? item.goodsImg:'resource/commons/images/defaultgoods.jpg'  }" h="198"></img:imghandle>
+			                    <span class="xqyg"><img src="resource/commons/images/xqyg.png" alt="" ></span>
+			                </div>
+			                <div class="shop-name" title="${item.name }">${item.name }</div>
+			                <div class="rob-last">
+			                    <div class="left-price">
+			                        <p><span class="zh-money">¥</span> <span class="left-price-choos">${item.activityPrice }</span></p>
+			                        <p><small class="left-price-small">${item.beginTimeStr }12:00</small></p>
+			                    </div>
+			                    <button type="button" class="btn-rob-g">立即抢购</button>
+			                </div>
+		           		 	</li>
+       				</c:otherwise>
+        		</c:choose>
+        	</c:forEach>
+        </ul>
+    </div>
+   </c:if> 
+   
+	<c:if test="${not empty daydayActivity}"><!-- 天天特价 -->
+
+	   <div class="list-content rob rob1 w-1250" name="dayday" id="dayday">
+	        <div class="rob-title clearfix">
+	            <div class="col-50">
+	                <span class="rob1-title rob1-title1"><img src="${daydayActivity.icon }" alt=""> 天天特价</span><span class="rob1-title-small">${daydayActivity.description }</span>
+	            </div>
+	            <div class="col-50 text-right ad-line-height">
+                <span id="daydayActivityTime"></span> 
+	            </div>
+	        </div>
+	        <ul class="rob-list">
+	        	<c:forEach items="${daydayActivity.goodsList }" var="item" begin="0" end="5" >
+	        		<c:choose>
+	        			<c:when test="${item.isToday == 0}">
+	        			<c:if test="${item.allNum > item.completeNum }">
+	        				<a href="goods/${item.goodsId }/${daydayActivity.activityType }/${daydayActivity.id}?time=&url=${daydayActivity.imgPath}" style="text-decoration:none;color: black;">
+					    </c:if>   	
+					        	<li class="list-item">
+					                <div class="img-wrap">
+					                	<%-- <img src="${not empty item.goodsImg? item.goodsImg :'resource/commons/images/defaultgoods.jpg' }" alt=""> --%>
+					                	<img:imghandle w="198" imgurl="${not empty item.goodsImg? item.goodsImg :'resource/commons/images/defaultgoods.jpg' }" h="198"></img:imghandle>
+					                	<c:if test="${item.completeNum >= item.allNum  }"> 
+						                   	<div class="item-overlay">
+						                        <img src="resource/commons/images/buy-none.png" alt="" style="width:150px;margin-left: auto;margin-right:auto">
+						                    </div>
+					                   </c:if>
+					                </div>
+					                <div class="shop-name" title="${item.name }">${item.name }</div>
+					                <div class="rob-last">
+					                    <div class="left-price ${item.allNum <= item.completeNum? '':'left-price-r' }"><span class="zh-money">¥</span> <span class="left-price-choos">${item.activityPrice }</span> </div>
+						            	<c:if test="${item.allNum > item.completeNum }"> 
+											<button type="button" class="btn-rob-g btn-rob-r">立即抢购</button>
+										</c:if>
+										<c:if test="${item.allNum <= item.completeNum }">
+											<button type="button" class="btn-rob-g">立即购买</button>
+										</c:if> 
+					                </div>
+					            </li>
+					      <c:if test="${item.allNum > item.completeNum }">      
+		           			</a>
+		           		</c:if>  	
+	        			</c:when>
+	        			<c:otherwise>
+				        	<li class="list-item">
+				                <div class="img-wrap">
+				                	<%-- <img src="${item.goodsImg }" alt=""> --%>
+				                	<img:imghandle w="198" imgurl="${item.goodsImg }" h="198"></img:imghandle>
+				                	<span class="xqyg"><img src="resource/commons/images/xqyg.png" alt=""></span>
+				                </div>
+				                <div class="shop-name" title="${item.name }">${item.name }</div>
+				                <div class="rob-last">
+				                    <div class="left-price left-price-r"><span class="zh-money">¥</span> <span class="left-price-choos">${item.activityPrice }</span> </div><button type="button" class="btn-rob-g ">立即购买</button>
+				                </div>
+				            </li>
+	        			</c:otherwise>
+	        		</c:choose>
+	        	</c:forEach>
+	        </ul>
+	    </div>
+   </c:if>
+  
+  <c:if test="${not empty buyAndPresent }">
+
+   <div class="list-content rob rob1 rob2 w-1250" name="buy" id="buy">
+
+        <div class="rob-title clearfix">
+            <div class="col-50">
+                <span class="rob1-title rob1-title2"><img src="resource/commons/images/rob2.png" alt=""> 买即赠</span><span class="rob1-title-small">购买正价商品赠送精选好礼，买的多送得多哟！</span>
+            </div>
+        </div>
+        <ul class="rob-list">
+        	<c:forEach items="${buyAndPresent }" var="item" begin="0" end="2">
+	        	<li class="list-item list-item2" >
+	        	<a href="goods/${item.mainGoods.id }/${item.activityType }/${item.id}" style="text-decoration:none;color: black;display:block" class="control-list-item">
+	                <div class="p-text">
+	                <input type="hidden" value="<fmt:formatDate value="${item.endTime }" pattern="yyyy/MM/dd HH:mm:ss"/>" class="buyAndPresentEndTime"/>
+	                    距离活动结束还有 : <span class="buyAndPresentTime"></span>
+	                </div>
+	                <div class="give-buy clearfix">
+	                    <div class="img-wrap">
+	                   	<img:imghandle w="187" imgurl="${not empty item.mainGoods.imgPath? item.mainGoods.imgPath:'resource/commons/images/defaultgoods.jpg' }" h="187"></img:imghandle>
+	                    <div class="robin"><span>买</span></div></div>
+	                    <div class="img-wrap">
+	                    <img:imghandle w="187" imgurl="${not empty item.giftGoods.imgPath? item.giftGoods.imgPath:'resource/commons/images/defaultgoods.jpg' }" h="187"></img:imghandle>
+	                    <div class="robin robin2"><span>赠</span></div></div>
+	                    <div class="shop-name col-50 " title="${item.mainGoods.fullName }">${item.mainGoods.fullName }</div>
+	                    <div class="shop-name col-50" title="${item.giftGoods.fullName }">${item.giftGoods.fullName }</div>
+	                </div>
+	                <div class="rob-last">
+	                    <div class="left-price left-price-r"><span class="zh-money">¥</span> <span class="left-price-choos">${item.mainGoods.price }</span> <small class="left-price-small add-lineh">节省了${item.giftGoods.price }</small></div><button type="button" class="btn-rob-g btn-rob-r">立即购买</button>
+	                </div>
+	                 </a>   
+	            </li>
+        	</c:forEach>
+        </ul>
+    </div>
+  </c:if>
+
+    <!-- 每周特价 -->
+  <c:if test="${not empty weekActivity}">
+
+      <div class="list-content rob rob1 rob3 w-1250" name="week" id="week">
+
+        <div class="rob-title clearfix">
+            <div class="col-50">
+                <span class="rob1-title rob1-title3"><img src="${weekActivity.icon }" alt=""> 每周特价</span><span class="rob1-title-small">${weekActivity.description }</span>
+            </div>
+            <div class="col-50 text-right ad-line-height">
+                <span id="weekActivityTime"></span> 
+            </div>
+        </div>
+        <ul class="rob-list">
+        	<c:forEach items="${weekActivity.goodsList }" var="item" begin="0" end="5">
+        		<c:if test="${item.allNum > item.completeNum }">
+        		<a href="goods/${item.goodsId }/${weekActivity.activityType }/${weekActivity.id}?time=&url=${weekActivity.imgPath}" style="text-decoration:none;color: black;">
+        		</c:if>
+		           <li class="list-item">
+		                <div class="img-wrap">
+		                	<img:imghandle w="198" imgurl="${not empty item.goodsImg? item.goodsImg:'resource/commons/images/defaultgoods.jpg' }" h="198"></img:imghandle>
+			           		<c:if test="${item.completeNum >= item.allNum  }"> 
+			                   	<div class="item-overlay">
+			                        <img src="resource/commons/images/buy-none.png" alt="" style="width:150px;margin-left: auto;margin-right:auto">
+			                    </div>
+		                   </c:if>
+		                </div>
+		                <div class="shop-name" title="${item.name }">${item.name }</div>
+		                <div class="rob-last">
+		                    <div class="left-price ${item.allNum <= item.completeNum? '':'left-price-r' }"><span class="zh-money">¥</span> <span class="left-price-choos">${item.activityPrice }</span> </div>
+                    		<c:if test="${item.allNum > item.completeNum }"> 
+								<button type="button" class="btn-rob-g btn-rob-r">立即抢购</button>
+							</c:if>
+							<c:if test="${item.allNum <= item.completeNum }">
+								<button type="button" class="btn-rob-g">立即购买</button>
+							</c:if> 
+		                </div>
+		            </li>
+		        <c:if test="${item.allNum > item.completeNum }">    
+	            </a>
+	            </c:if>
+          </c:forEach>
+        </ul>
+    </div>   
+  </c:if> 
+  <!-- 整件惠 -->
+  <c:if test="${not empty woleActivity}">
+
+      <div class="list-content rob rob1 rob4 w-1250" name="all" id="all">
+        <div class="rob-title clearfix">
+            <div class="col-50">
+                <span class="rob1-title rob1-title4"><img src="${woleActivity.icon }" alt=""> 整件惠</span><span class="rob1-title-small">${woleActivity.description }</span>
+            </div>
+        </div>
+        <ul class="rob-list">
+        	<c:forEach items="${woleActivity.goodsList }" var="item">
+        		<c:if test="${item.allNum > item.completeNum }">
+        		<a href="goods/${item.goodsId }/${woleActivity.activityType }/${woleActivity.id}?time=&url=${woleActivity.imgPath}" style="text-decoration:none;color: black;">
+		        </c:if>	
+		        	<li class="list-item list-item3">
+		                <div class="img-wrap">
+		                <%-- <img src="${not empty item.goodsImg?  item.goodsImg:'resource/commons/images/defaultgoods.jpg' }" alt=""> --%>
+		                <img:imghandle w="239" imgurl="${not empty item.goodsImg?  item.goodsImg:'resource/commons/images/defaultgoods.jpg' }" h="239"></img:imghandle>
+		                <c:if test="${item.completeNum >= item.allNum  }"> 
+			                   	<div class="item-overlay">
+			                        <img src="resource/commons/images/buy-none.png" alt="" style="width:150px;margin-left: auto;margin-right:auto">
+			                    </div>
+		                 </c:if>
+		                </div>
+		                <div class="shop-name" title="${item.name }">${item.name }</div>
+		                <div class="rob-last">
+		                    <div class="left-price ${item.allNum <= item.completeNum? '':'left-price-r' }" style="width:65%;"><span class="persons-buy">团购价 : </span><span class="zh-money">¥</span> <span class="left-price-choos">${item.activityPrice }</span> </div>
+                    		<c:if test="${item.allNum > item.completeNum }"> 
+								<button type="button" class="btn-rob-g btn-rob-r" style="width:35%;">立即抢购</button>
+							</c:if>
+							<c:if test="${item.allNum <= item.completeNum }">
+								<button type="button" class="btn-rob-g" style="width:35%;">立即购买</button>
+							</c:if> 
+		                </div>
+		            </li>
+		       <c:if test="${item.allNum > item.completeNum }">   
+	            </a>
+	           </c:if> 
+        	</c:forEach>
+        </ul>
+    </div>
+  </c:if>  
+  <%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %> 
+</div>
+<%@include file="/WEB-INF/jsp/commons/nav/search_float_top.jsp" %>
+</body>
+
+<script type="text/javascript" src="resource/js/activity/activity.js"></script> 
+<script src="resource/commons/js/sli.js"></script>
+<script src="resource/js/common/menu.js"></script>
+<script type="text/javascript">
+	var twelveOfTomorrow = "${twelveOfTomorrow}"; //明天12点的时间 毫秒类型
+	var dayEnd = "${dayEnd}"; //当天的结束时间
+	var endDayOfWeek = "${endDayOfWeek}"; //本周的结束时间
+  
+    function show_time() {  //冰点价倒计时
+		var $hv = $(".hours").text();
+		var $mv = $(".min").text();
+		var $sv = $(".sss").text();
+		var timee;
+		var time_start = new Date().getTime(); //设定当前时间
+		var time_end =twelveOfTomorrow; //设定目标时间
+		// 计算时间差
+		var time_distance = time_end - time_start;
+		// 天
+		var int_day = Math.floor(time_distance / 86400000)
+		time_distance -= int_day * 86400000;
+		// 时
+		var int_hour = Math.floor(time_distance / 3600000)
+		time_distance -= int_hour * 3600000;
+		// 分
+		var int_minute = Math.floor(time_distance / 60000)
+		time_distance -= int_minute * 60000;
+		// 秒
+		var int_second = Math.floor(time_distance / 1000)
+		// 时分秒为单数时、前面加零
+		if (int_day < 10) {
+			int_day = "0" + int_day;
+		}
+		if (int_hour < 10) {
+			int_hour = "0" + int_hour;
+		}
+		if (int_minute < 10) {
+			int_minute = "0" + int_minute;
+		}
+		if (int_second < 10) {
+			int_second = "0" + int_second;
+		}
+		// 显示时间
+		$(".hours").html(int_hour);
+		$(".min").html(int_minute);
+		$(".sss").html(int_second);
+		// 设置定时器
+		timee = setTimeout("show_time()", 1000);
+		if ($hv == 0 && $mv == 0 && $sv == 0) {
+			clearTimeout(timee);
+		}
+	}
+    
+    //天天特价倒计时
+    function dayTimer(){
+    	Timer(dayEnd,"daydayActivityTime",0,0)
+    }
+	//每周特价
+	function weekDayTimer(){
+		Timer(endDayOfWeek,"weekActivityTime",0,1)
+	}
+	
+	//2017-9-9
+	function Timer(maxtime, id, callback,isWeekDay) {
+		//maxtime：时间，单位s,  id：显示计时器信息的容器id， callback：计时器结束回调， isWeekDay：是否是倒计时每周
+		var tmp
+		function CountDown() {
+			if (maxtime >= 0) {
+				var time_start = new Date().getTime(); //设定当前时间
+				var time_end =maxtime; //设定目标时间
+				// 计算时间差
+				var time_distance = time_end - time_start;
+				// 天
+				var int_day = Math.floor(time_distance / 86400000)
+				time_distance -= int_day * 86400000;
+				// 时
+				var int_hour = Math.floor(time_distance / 3600000)
+				time_distance -= int_hour * 3600000;
+				// 分
+				var int_minute = Math.floor(time_distance / 60000)
+				time_distance -= int_minute * 60000;
+				// 秒
+				var int_second = Math.floor(time_distance / 1000)
+				if (isWeekDay == 1) {
+					msg = "距离活动结束还有 : "+int_day+"天"+ int_hour + "小时" + int_minute + "分"
+					+ int_second + "秒"
+				} else {
+					msg = "距离活动结束还有 : "+ int_hour + "小时" + int_minute + "分"
+					+ int_second + "秒"
+				}
+				document.getElementById(id).innerHTML = msg;
+				maxtime -= 1;
+			} else {
+				clearInterval(timer);
+				if (typeof callback == "function")
+					callback(); //执行倒计时完成后的回调
+			}
+		}
+		var timer = setInterval(function() {
+			CountDown()
+		}, 1000);
+	}
+
+	window.onload = function() {
+		new Timer(7 * 24 * 60 * 60, 'timer1', function() {
+			document.getElementById("timer1").innerHTML = "活动结束";
+		});
+	}
+
+	$(function() {
+		show_time();
+		dayTimer();
+		weekDayTimer();
+	});
+	//2017-9-9-end
+</script>
+</html>
+

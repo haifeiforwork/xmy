@@ -1,0 +1,57 @@
+.gutter{padding: 0 94px;}
+.col-50{width: 50%;}
+.word-g-color{color: #BDBBBC!important;}
+div[class^="col"]{float: left;}
+.clearfix:before,.clearfix:after {content: "";display: block;height: 0;visibility: hidden;}
+.clearfix:after {clear: both;}
+.clearfix {zoom: 1;}/*兼容IE6/7*/
+.bg-container{background-color: #FF0000;background:url("http://img.xmy365.com/logi.png") no-repeat;background-size:100% 100%;position: relative;}
+.add-bg{height: 560px;margin-bottom: 0;}
+.login-wrap{width: 900px;margin: 0 auto;position: relative;}
+.login{width: 372px;background-color: #FFF;-webkit-box-shadow: 0 4px 7px #999;-moz-box-shadow: 0 4px 7px #999;box-shadow: 0 4px 7px #999;float: right;margin-top: 85.5px;}
+ .login .tips{position: relative;text-align: right;margin: 5px 50px 0 0 ;}
+.login .tips .inner-tips{background: url("../../commons/images/login-tips.png");background-size:100% 100%;color: #E09E34;display: inline-block;width: 135px;font-size: 12px;text-align: center;padding: 5px 0; }
+.login .tips .inner-tips i{margin-right: 5px;}
+.login .login-group{color: #BDBBBC;width: 305px;margin: 10px auto;position: relative;}
+.login .login-group input{height: 36px;width: 100%;border-radius: 1px;border: 1px solid #CCCCCC;padding-left: 30px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+.login .login-group p{font-size: 14px;margin: 4px 0;}
+.login .login-des{width: 305px;margin: 0 auto;font-size: 14px;color: #525355}
+.login .login-des .col-50 input{margin: 0 5px 0 0;position: relative;top: 2px;}
+.login .login-des .col-50:last-child{text-align: right;}
+.login .login-des .col-50 a{color: #525355;}
+.login .login-des  .color-green{color: #359812;cursor: pointer;}
+.login .login-des .col-50 a{text-decoration: none;}
+.login .login-des .login-btn{width: 100%;height: 35px;color: #FFF;background-color: #358912;border: none;border-radius: 2px;margin: 25px 0 20px;font-size: 17px;}
+.login .i-control{position: absolute;top: 27px;left: 7px;}
+.login .i-control i{font-size: 21px;}
+.login .i-control i.psword{font-size: 23px;}
+.login .i-list{padding: 10px 0 25px;}
+.login .i-list li{display: inline-block;margin:0 4px;width: 25px;}
+.login .i-list li:first-child{margin-left: 0;}
+.login .i-list li img{width: 100%;}
+.login-wrap .code-wrapp{position: absolute;bottom: -60px;left: 78px;}
+.login-wrap .code-wrapp .item-wrap{display: inline-block;width: 130px;height: 130px;margin-right: 30px;}
+.login-wrap .code-wrapp .item-wrap:last-child{margin-right: 0;}
+.login-wrap .code-wrapp .item-wrap img{width: 100%;height: 100%; }
+.login-wrap .code-wrapp .item-wrap p{font-style: italic;font-size: 16px;color: #FFF;font-weight: 600;text-align: center;font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";}
+footer .L-foot{background-color: #FFF;color: #999;}
+footer .L-foot .mt10{color: #999;}
+footer .L-foot span{color: #999;}
+
+
+/*201709291443*/
+        .login .img-code{position: relative;float: right;margin: 0 5px 0 0;cursor: pointer;width: 50px;overflow: hidden;text-align: right}
+        .login .img-code i{font-size: 50px;color: #358812;}
+        .login .scaning-login .img-code i{font-size: 47px;color: #358812;}
+        .login .tips-title{height: 18px;  line-height: 18px;  font-size: 16px;  color: #3c3c3c;  margin-top: 9px;  padding-bottom: 8px;  font-weight: 700;padding-left: 30px;}
+        .qrcode-img{margin-top: 27px;}
+        .qrcode-img img{display: block;margin: 0 auto;}
+        .qrcode-word{ overflow: hidden;  width: 148px;  margin: 30px auto 0;}
+        .qrcode-word i{ float: left;  color: #358812;  font-size: 34px;  line-height: 36px;  margin-right: 10px;}
+        .qrcode-word p{width: 98px;  line-height: 18px;  color: #6c6c6c;  font-size: 12px;  float: left;}
+        .qrcode-word a{color: #358812;text-decoration: none;}
+        .login-links{    margin-top: 20px;  overflow: hidden;  text-align: right;font-size: 12px;width: 320px;margin-bottom: 16px;}
+        .login-links a{text-decoration: none;color: #358812;margin-left: 10px;}
+        #qrcode{width:150px;height:150px;margin:0 auto;}
+         #qrcode canvas{width:100%;height:100%;}
+        /*201709291443end*/

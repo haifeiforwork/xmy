@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.ClientVersionMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.ClientVersion" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="last_ver_code" property="lastVerCode" jdbcType="VARCHAR" />
+    <result column="last_ver_name" property="lastVerName" jdbcType="VARCHAR" />
+    <result column="lowest_ver_code" property="lowestVerCode" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="android_url" property="androidUrl" jdbcType="VARCHAR" />
+    <result column="ios_url" property="iosUrl" jdbcType="VARCHAR" />
+    <result column="ios_last_ver_code" property="iosLastVerCode" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.zfj.xmy.common.persistence.pojo.ClientVersion" extends="BaseResultMap" >
+    <result column="description" property="description" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, last_ver_code, last_ver_name, lowest_ver_code, addtime, android_url, ios_url, 
+    ios_last_ver_code
+  </sql>
+  <sql id="Blob_Column_List" >
+    description
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from client_version
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from client_version
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleWithBLOBsAndPage" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from client_version
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from client_version
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from client_version
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from client_version
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update client_version
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.lastVerCode != null" >
+        last_ver_code = #{record.lastVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lastVerName != null" >
+        last_ver_name = #{record.lastVerName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lowestVerCode != null" >
+        lowest_ver_code = #{record.lowestVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.addtime != null" >
+        addtime = #{record.addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.androidUrl != null" >
+        android_url = #{record.androidUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.iosUrl != null" >
+        ios_url = #{record.iosUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.iosLastVerCode != null" >
+        ios_last_ver_code = #{record.iosLastVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.description != null" >
+        description = #{record.description,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update client_version
+    set id = #{record.id,jdbcType=BIGINT},
+      last_ver_code = #{record.lastVerCode,jdbcType=VARCHAR},
+      last_ver_name = #{record.lastVerName,jdbcType=VARCHAR},
+      lowest_ver_code = #{record.lowestVerCode,jdbcType=VARCHAR},
+      addtime = #{record.addtime,jdbcType=TIMESTAMP},
+      android_url = #{record.androidUrl,jdbcType=VARCHAR},
+      ios_url = #{record.iosUrl,jdbcType=VARCHAR},
+      ios_last_ver_code = #{record.iosLastVerCode,jdbcType=VARCHAR},
+      description = #{record.description,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update client_version
+    set id = #{record.id,jdbcType=BIGINT},
+      last_ver_code = #{record.lastVerCode,jdbcType=VARCHAR},
+      last_ver_name = #{record.lastVerName,jdbcType=VARCHAR},
+      lowest_ver_code = #{record.lowestVerCode,jdbcType=VARCHAR},
+      addtime = #{record.addtime,jdbcType=TIMESTAMP},
+      android_url = #{record.androidUrl,jdbcType=VARCHAR},
+      ios_url = #{record.iosUrl,jdbcType=VARCHAR},
+      ios_last_ver_code = #{record.iosLastVerCode,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from client_version
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from client_version
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.ClientVersion" useGeneratedKeys="true" keyProperty="id" >
+    insert into client_version (last_ver_code, last_ver_name, lowest_ver_code, 
+      addtime, android_url, ios_url, 
+      ios_last_ver_code, description)
+    values (#{lastVerCode,jdbcType=VARCHAR}, #{lastVerName,jdbcType=VARCHAR}, #{lowestVerCode,jdbcType=VARCHAR}, 
+      #{addtime,jdbcType=TIMESTAMP}, #{androidUrl,jdbcType=VARCHAR}, #{iosUrl,jdbcType=VARCHAR}, 
+      #{iosLastVerCode,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.ClientVersion" useGeneratedKeys="true" keyProperty="id" >
+    insert into client_version
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="lastVerCode != null" >
+        last_ver_code,
+      </if>
+      <if test="lastVerName != null" >
+        last_ver_name,
+      </if>
+      <if test="lowestVerCode != null" >
+        lowest_ver_code,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="androidUrl != null" >
+        android_url,
+      </if>
+      <if test="iosUrl != null" >
+        ios_url,
+      </if>
+      <if test="iosLastVerCode != null" >
+        ios_last_ver_code,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="lastVerCode != null" >
+        #{lastVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="lastVerName != null" >
+        #{lastVerName,jdbcType=VARCHAR},
+      </if>
+      <if test="lowestVerCode != null" >
+        #{lowestVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="androidUrl != null" >
+        #{androidUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="iosUrl != null" >
+        #{iosUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="iosLastVerCode != null" >
+        #{iosLastVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.ClientVersion" >
+    update client_version
+    <set >
+      <if test="lastVerCode != null" >
+        last_ver_code = #{lastVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="lastVerName != null" >
+        last_ver_name = #{lastVerName,jdbcType=VARCHAR},
+      </if>
+      <if test="lowestVerCode != null" >
+        lowest_ver_code = #{lowestVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="androidUrl != null" >
+        android_url = #{androidUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="iosUrl != null" >
+        ios_url = #{iosUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="iosLastVerCode != null" >
+        ios_last_ver_code = #{iosLastVerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.zfj.xmy.common.persistence.pojo.ClientVersion" >
+    update client_version
+    set last_ver_code = #{lastVerCode,jdbcType=VARCHAR},
+      last_ver_name = #{lastVerName,jdbcType=VARCHAR},
+      lowest_ver_code = #{lowestVerCode,jdbcType=VARCHAR},
+      addtime = #{addtime,jdbcType=TIMESTAMP},
+      android_url = #{androidUrl,jdbcType=VARCHAR},
+      ios_url = #{iosUrl,jdbcType=VARCHAR},
+      ios_last_ver_code = #{iosLastVerCode,jdbcType=VARCHAR},
+      description = #{description,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.ClientVersion" >
+    update client_version
+    set last_ver_code = #{lastVerCode,jdbcType=VARCHAR},
+      last_ver_name = #{lastVerName,jdbcType=VARCHAR},
+      lowest_ver_code = #{lowestVerCode,jdbcType=VARCHAR},
+      addtime = #{addtime,jdbcType=TIMESTAMP},
+      android_url = #{androidUrl,jdbcType=VARCHAR},
+      ios_url = #{iosUrl,jdbcType=VARCHAR},
+      ios_last_ver_code = #{iosLastVerCode,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

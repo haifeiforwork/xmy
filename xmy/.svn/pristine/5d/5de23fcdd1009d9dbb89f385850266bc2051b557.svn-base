@@ -1,0 +1,15 @@
+.weui-cells:after, .weui-cells:before, .weui-cell:before{display: none;}
+header .header-top{border-bottom: 1px solid #C3C3C3;}
+.refer{width: 100%;height: 100%;border:0;background-color: #348811;color: #fff;font-size: 0.8rem;}
+.list{margin: 0;font-size: 0.7rem;color: #444;background-color: #F0F0F0;}
+.list .weui-cell{margin-bottom: 0.5rem;background-color: #fff;padding: 13px 10px;}
+.list .weui-cell .weui-label{width: 3.8rem;}
+.list .weui-cell .weui-cell__bd input{border: 0;font-size: 0.7rem;color: #444;}
+.up-img .weui-cell{padding: 10px 10px;}
+.up-img .weui-cell .weui-uploader__title{font-size: 0.7rem;color: #444;}
+.up-img .weui-uploader__input-box:after, .weui-uploader__input-box:before{display: none;}
+.up-img .weui-uploader__input-box{border: 0;background:url(../images/up-img.png);background-size: 100% 100%;}
+  input::-webkit-input-placeholder { /* WebKit browsers */color:#cccdd0;}
+  input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */color:#cccdd0;}
+  input::-moz-placeholder { /* Mozilla Firefox 19+ */  color:#cccdd0;  }
+  input:-ms-input-placeholder { /* Internet Explorer 10+ */  color:#cccdd0;}

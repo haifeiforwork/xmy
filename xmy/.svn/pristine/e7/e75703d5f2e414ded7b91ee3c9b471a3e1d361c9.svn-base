@@ -1,0 +1,55 @@
+package com.zfj.xmy.comment.persistence.app.pojo.dto;
+
+import java.util.List;
+
+public class WapCommentOutDto {
+	
+	//星级
+	private Integer level;
+	
+	//占比
+	private Integer total;
+	
+	//评论们
+	private List<CommentOutDto> comments;
+	
+	public WapCommentOutDto() {}
+
+	/**
+	 * @param level
+	 * @param total
+	 * @param comments
+	 */
+	public WapCommentOutDto(Integer level, Integer total,
+			List<CommentOutDto> comments) {
+		super();
+		this.level = level;
+		this.total = total;
+		this.comments = comments;
+	}
+
+	public Integer getLevel() {
+		return level;
+	}
+
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
+
+	public Integer getTotal() {
+		return total;
+	}
+
+	public void setTotal(Integer total) {
+		this.total = total;
+	}
+
+	public List<CommentOutDto> getComments() {
+		return comments;
+	}
+
+	public void setComments(List<CommentOutDto> comments) {
+		this.comments = comments;
+	}
+	
+}

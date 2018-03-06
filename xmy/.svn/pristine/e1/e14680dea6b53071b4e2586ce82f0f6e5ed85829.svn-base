@@ -1,0 +1,232 @@
+package com.zfj.xmy.order.service.wap.impl;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.appdev.db.common.pojo.LogicType;
+import com.taobao.api.internal.toplink.embedded.websocket.util.StringUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.AdImageMapper;
+import com.zfj.xmy.common.persistence.dao.AdInfoMapper;
+import com.zfj.xmy.common.persistence.dao.BrowsedGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsImageMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.pojo.AdImage;
+import com.zfj.xmy.common.persistence.pojo.AdInfo;
+import com.zfj.xmy.common.persistence.pojo.BrowsedGoods;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.GoodsImage;
+import com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs;
+import com.zfj.xmy.order.persistence.app.pojo.dto.BrowsedGoodsOutDto;
+import com.zfj.xmy.order.persistence.app.pojo.dto.GuessLikeGoodsOutVO;
+import com.zfj.xmy.order.service.wap.WapBrowsedGoodsService;
+
+@Service
+public class WapBrowsedGoodsServiceImpl implements WapBrowsedGoodsService {
+	@Autowired
+	private BrowsedGoodsMapper browsedGoodsMapper;
+	
+	@Autowired
+	private GoodsImageMapper goodsImageMapper;
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Autowired
+	private AdInfoMapper adInfoMapper;
+	
+	@Autowired
+	private AdImageMapper adImageMapper;
+	
+	@Override
+	public List<BrowsedGoods> findBrowsedGoods(ReqData reqData){
+		CriteriaParameter cri = ReqUtil.reqParameterToCriteriaParameter(reqData);
+		cri.setOrderByClause(" browsed_time desc limit 8 ");
+		List<BrowsedGoods> selectByExample = browsedGoodsMapper.selectByExample(cri);
+		return selectByExample;
+	}
+	@Override
+	public List<GoodsWithBLOBs> findBrowsedGoodsWithGoods(List<BrowsedGoods> findBrowsedGoods){
+		List<GoodsWithBLOBs> collectionGoods=new ArrayList<GoodsWithBLOBs>();
+		for (BrowsedGoods browsedGood : findBrowsedGoods) {
+			   Long goodsId = browsedGood.getGoodsId();
+			   GoodsWithBLOBs selectByPrimaryKey = goodsMapper.selectByPrimaryKey(goodsId);
+			if(!ObjectUtils.isEmpty(selectByPrimaryKey)){
+				   ReqData reqDataGoodsImage=new ReqData();
+				   reqDataGoodsImage.putValue(SystemConstant.COLLECTIONGOODS.GOODS_ID, goodsId, SystemConstant.REQ_PARAMETER_EQ);
+				   List<GoodsImage> goodsImages = goodsImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqDataGoodsImage));
+				   if(goodsImages.size()>=1)
+				   selectByPrimaryKey.setImgPath(goodsImages.get(0).getPath());
+				   collectionGoods.add(selectByPrimaryKey);
+			}
+		}
+		return collectionGoods;
+	}
+	@Override
+	public void insertBrowsedGoods(BrowsedGoods browsedGoods){
+		Integer insert = browsedGoodsMapper.insert(browsedGoods);
+		if(ObjectUtils.isEmpty(insert)||insert<1){
+			//throw new XmyException("插入单条足迹失败")
+		}
+	}
+	@Override
+	public void delBrowsedGoods(Object ...id){
+		int length=id.length; 
+		Integer delCount=0;
+		for (int i = 0; i < length; i++) {
+			int deleteByPrimaryKey = browsedGoodsMapper.deleteByPrimaryKey(id[i]);
+			delCount+=deleteByPrimaryKey;
+		}
+		if(ObjectUtils.isEmpty(delCount)||delCount!=length){
+			//throw new XmyException("一部分数据删除错误")
+		}
+	}
+	@Override
+	public List<BrowsedGoodsOutDto> browsedGoodsToBrowsedGoodsDto(List<BrowsedGoods> findBrowsedGoods){
+		List<BrowsedGoodsOutDto> collectionGoods=new ArrayList<BrowsedGoodsOutDto>();
+		for (BrowsedGoods browsedGood : findBrowsedGoods) {
+			   BrowsedGoodsOutDto browsedGoodsOutDto=new BrowsedGoodsOutDto();
+			   
+			   Long goodsId = browsedGood.getGoodsId();
+			   GoodsWithBLOBs selectByPrimaryKey = goodsMapper.selectByPrimaryKey(goodsId);
+			   
+			   //计算商品图片的地址
+			   ReqData reqDataGoodsImage=new ReqData();
+			   reqDataGoodsImage.putValue(SystemConstant.COLLECTIONGOODS.GOODS_ID, goodsId, SystemConstant.REQ_PARAMETER_EQ);
+			   List<GoodsImage> goodsImages = goodsImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqDataGoodsImage));
+			   if(goodsImages.size()>=1)
+			   selectByPrimaryKey.setImgPath(goodsImages.get(0).getPath());
+			   
+			   //封装成足迹表扩展类
+			   
+			   //足迹表id
+			   browsedGoodsOutDto.setId(browsedGood.getId());
+			  //图片地址
+			   browsedGoodsOutDto.setImgPath(selectByPrimaryKey.getImgPath());
+			   //商品id
+			   browsedGoodsOutDto.setGoodsId(browsedGood.getGoodsId());
+			   //用户id
+			   browsedGoodsOutDto.setUserId(browsedGood.getUserId());
+			   //售价
+			   browsedGoodsOutDto.setPrice(selectByPrimaryKey.getPrice());
+			   //手机端销售价
+			   browsedGoodsOutDto.setPhonePrice(selectByPrimaryKey.getPhonePrice());
+			   browsedGoodsOutDto.setName(selectByPrimaryKey.getName());
+			   
+			   collectionGoods.add(browsedGoodsOutDto);
+		}
+		return collectionGoods;
+	}
+	@Override
+	public List<GuessLikeGoodsOutVO> findGuessLikeGoods(Long userId){
+		List<GuessLikeGoodsOutVO> guessLikeGoodsOutVOs=new ArrayList<>();
+		Set<String> categoryNames=new HashSet<>();
+		// 1 首先从足迹表中查询前20条足迹记录
+		CriteriaParameter para=new CriteriaParameter();
+		para.setOrderByClause("browsed_time desc limit 8 ");
+		Criteria createCriteria = para.createCriteria();
+		createCriteria.equalTo(SystemConstant.BROWSEDGOODS.USER_ID, userId);
+				// 从足迹表查出记录表
+		List<BrowsedGoods> browsedGoodsRecord = browsedGoodsMapper.selectByExample(para);
+		//如果足迹表中没有数据，就直接返回null，代表没有数据
+		if(ObjectUtils.isEmpty(browsedGoodsRecord)){
+			return null;
+		}
+				//根据记录表查出商品
+		List<GoodsWithBLOBs> browsedGoods = this.findBrowsedGoodsWithGoods(browsedGoodsRecord);
+		// 2 保存浏览商品的二级分类值
+		for (GoodsWithBLOBs goodsWithBLOBs : browsedGoods) {
+			String categoryName = goodsWithBLOBs.getCategoryName();
+			String[] split = categoryName.split(",");
+			for (int i = 0; i < split.length; i++) {
+				categoryNames.add(split[i]);
+			}
+		}
+	
+		
+		// 3 根据二级分类的值再去商品表查询
+		CriteriaParameter paraGoods=new CriteriaParameter();
+		Criteria criteriaGoods = paraGoods.createCriteria();
+		criteriaGoods.equalTo("is_putway", 0);
+		//criteriaGoods.like(SystemConstant.GoodsConstant.CATEGORY_NAME,categoryNames );
+
+		paraGoods.setOrderByClause(" update_time desc limit 8 ");
+
+		List<Goods> selectByExample = goodsMapper.selectByExample(paraGoods);
+		for (Goods goods : selectByExample) {
+			  if(goods.getIsPutway() == 1){
+				  continue ;
+			  }
+			  GuessLikeGoodsOutVO guessLikeGoods=new GuessLikeGoodsOutVO(goods.getId(),goods.getName(),goods.getPrice(),goods.getPhonePrice(),goods.getVipPrice());
+			  Long id = goods.getId();
+			  //计算商品图片的地址
+			   ReqData reqDataGoodsImage=new ReqData();
+			   reqDataGoodsImage.putValue(SystemConstant.COLLECTIONGOODS.GOODS_ID, id, SystemConstant.REQ_PARAMETER_EQ);
+			   List<GoodsImage> goodsImages = goodsImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqDataGoodsImage));
+			   if(goodsImages.size()>=1)
+				   guessLikeGoods.setImgPath(goodsImages.get(0).getPath());
+			   guessLikeGoodsOutVOs.add(guessLikeGoods);
+		}
+		return guessLikeGoodsOutVOs;
+	}
+	@Override
+	public List<GuessLikeGoodsOutVO> goodsRecommend(Long id){
+		List<GuessLikeGoodsOutVO> recommendGoods=new ArrayList<>();
+		CriteriaParameter criteriaParameter=new CriteriaParameter();
+		Criteria createCriteria = criteriaParameter.createCriteria();
+		
+		//判断前台是否传了商品的id，如果是就根据这个商品的类别再去查询相似的
+		if(!ObjectUtils.isEmpty(id)){
+			GoodsWithBLOBs selectByPrimaryKey = goodsMapper.selectByPrimaryKey(id);
+			if(!ObjectUtils.isEmpty(selectByPrimaryKey)){
+				String categoryName = selectByPrimaryKey.getCategoryName();
+				createCriteria.like("category_name", categoryName);
+			}
+		}
+		//按照上架时间降序排序
+		criteriaParameter.setOrderByClause(" putway_time desc limit 10");
+		List<Goods> selectByExample = goodsMapper.selectByExample(criteriaParameter);
+		for (Goods goods : selectByExample) {
+			GuessLikeGoodsOutVO recommend=new GuessLikeGoodsOutVO();
+			BeanUtils.copyProperties(goods, recommend);
+			recommend.setPhoneprice(goods.getPhonePrice());
+			//查找商品的图片
+			ReqData reqDataGoodsImage=new ReqData();
+			 reqDataGoodsImage.putValue(SystemConstant.COLLECTIONGOODS.GOODS_ID, recommend.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			 List<GoodsImage> goodsImages = goodsImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqDataGoodsImage));
+			 //如果商品有图片，那就取第一张  
+			 if(goodsImages.size()>=1)
+				   recommend.setImgPath(goodsImages.get(0).getPath());
+			recommendGoods.add(recommend);
+		}
+		return recommendGoods;
+	}
+	
+	@Override
+	public List<AdImage> findVipRecommend(){
+		List<AdImage> list = new ArrayList<AdImage>();
+		ReqData reqData = new ReqData();
+		reqData.putValue("name", "会员推荐", SystemConstant.REQ_PARAMETER_CN);
+		List<AdInfo> adInfoList = adInfoMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if (adInfoList.size() > 0) {
+			AdInfo adInfo = adInfoList.get(0);
+			reqData.clearValue();
+			reqData.putValue("ad_id", adInfo.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			reqData.setSortname("weight");
+			reqData.setSortorder("asc");
+			list = adImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		}
+		return list;
+	}
+}

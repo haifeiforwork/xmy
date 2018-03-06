@@ -1,0 +1,42 @@
+<%@ page language="java" pageEncoding="UTF-8" errorPage="/WEB-INF/jsp/commons/error/500.jsp"%>
+<%-- nav二级菜单公共部分 --%>
+<%@include file="/WEB-INF/jsp/commons/nav/comm_search.jsp" %>
+<style>
+	.list-li {color:white;}
+</style>
+<!-- 二级菜单及分词 -->
+<!-- 二级分类菜单及分词 -->
+<div class="dNav add-bg-theam">
+    <div class="list add-bg-theam">
+        <ul class="list-ul add-bg-theam">
+            <li class="front list-li type add-bg-theam">
+                <a href="#" class="text-center type-item">${menuData.name }</a>
+                <img src="resource/commons/images/furit.png" alt="">
+                <ul class="classify-ul" style="display:bolck">
+                	<c:forEach items="${menuData.chidleCategory }"  var="item">
+	                	<li class="type-item-child">
+	                        <h4>${item.name }<input type="hidden" value="${item.id }"></h4>
+	                        <div class="item-grand">
+	                        	<c:forEach items="${item.wordSegList }" var="wordSegItem">
+	                        		<a href="elastic/typeGoods?typeId=${item.id }&wordId=${wordSegItem.id }" data-id="${wordSegItem.id }">${wordSegItem.wordSeg }</a>
+	                        	</c:forEach>
+	                            
+	                        </div>
+	                     </li>
+                	</c:forEach>
+                    <li class="type-item-child">
+                        <a href="elastic/topGoods?oneId=${menuData.id}">更多商品>></a>
+                    </li>
+                </ul>
+            </li>
+            <a href="index"><li class="list-li">首页</li></a>
+            <a href="activity/findActivity?show=2"><li class="list-li" >开抢啦</li></a>
+            <a href="category/findCategoryGoods?id=180"><li class="list-li out-cross" >跨境专区</li></a>
+            <!-- <a href="fruits/index"><li class="list-li"  >果琳专区</li></a> -->
+            <a href="elastic/goods?goodsName=&mainLand=0&show=3"><li class="list-li" >全国配送</li></a>
+            <a href="point/pointStore?show=6"><li class="list-li">积分商城</li></a>
+            <a href="customization/index?show=7"><li class="list-li" >企业定制</li></a>
+        </ul>
+    </div>
+</div>
+

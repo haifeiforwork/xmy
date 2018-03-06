@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zfj.xmy.activity.persistence.common.dao.LimitActivityExMapper"  >
+	<resultMap  id="BaseResultMap" type="com.zfj.xmy.activity.persistence.common.pojo.dto.LimitActivityDir">
+		<id column="id" property="id" jdbcType="BIGINT" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="type" property="type" jdbcType="INTEGER" />
+	    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+	    <result column="join_condition" property="joinCondition" jdbcType="INTEGER" />
+	    <result column="limit_num" property="limitNum" jdbcType="INTEGER" />
+	    <result column="begin_time" property="beginTime" jdbcType="TIMESTAMP" />
+	    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+	    <result column="img_path" property="imgPath" jdbcType="VARCHAR" />
+	    <result column="icon" property="icon" jdbcType="VARCHAR" />
+	    <result column="description" property="description" jdbcType="VARCHAR" />
+	</resultMap>
+	
+ 	<resultMap  id="ActivityGoodsResultMap" type="com.zfj.xmy.activity.persistence.common.pojo.dto.LimitActivityGoodsDir">
+		<id column="activityId" property="activityId" jdbcType="BIGINT" />
+		<result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+		<result column="price" property="activityPrice" jdbcType="DECIMAL" />
+		<result column="limit_num" property="limitNum" jdbcType="INTEGER" />
+		<result column="all_num" property="allNum" jdbcType="INTEGER" />
+	    <result column="complete_num" property="completeNum" jdbcType="INTEGER" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="supplier_name" property="supplierName" jdbcType="VARCHAR" />
+	    <result column="unit_name" property="unitName" jdbcType="VARCHAR" />
+	    <result column="standard" property="standard" jdbcType="VARCHAR" />
+	    <result column="weight" property="weight" jdbcType="VARCHAR" />
+	    <result column="waterImg" property="waterImg" jdbcType="VARCHAR" />
+	     <result column="activity_time" property="beginTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+ 	
+ 	<!--@author hexw 查询活动  -->
+   <select id="findList" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+	  	select id,name,type,type_name,join_condition,limit_num,begin_time,end_time,img_path,icon,description from limit_activity  
+		  <if test="_parameter != null" >
+		     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+		   <if test="orderByClause != null" >
+		     order by ${orderByClause}
+		   </if>
+   </select>
+	
+	<!--@author hexw 查询活动商品  -->
+	<select id="findActivityGoods" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="ActivityGoodsResultMap">
+		select  a.limit_id activityId,a.price activityPrice,a.limit_num limitNum,a.all_num allNum,a.complete_num completeNum,a.activity_time,b.id goodsId,b.name name,b.supplier_name  supplierName,
+		b.unit_name unitName,b.standard  standard,b.weight weight,c.path waterImg
+		from limit_goods a
+		INNER JOIN goods b on  a.goods_id = b.id
+		LEFT JOIN watermark_image c on  b.wm_id = c.id
+		<if test="_parameter != null" >
+		  <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null" >
+		  order by ${orderByClause}
+		</if>
+	</select>
+	
+	<!-- 查询用户参与活动的次数    @auther  hexw -->
+	<select id="countLimitAcivity" parameterType="com.appdev.db.common.CriteriaParameter" resultType="Integer">
+			select count(DISTINCT(a.id)) from `order` a LEFT JOIN order_goods b on a.id = b.order_id
+			<if test="_parameter != null" ><include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	</select>
+	
+	
+	<!-- 查询用户购买同一个活动商品的数量    @auther  hexw -->
+	<select id="countLimitAcivityGoods" parameterType="com.appdev.db.common.CriteriaParameter" resultType="Integer">
+			select b.num from `order` a 
+			LEFT JOIN order_goods b on a.id = b.order_id
+			<if test="_parameter != null" ><include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	</select>
+</mapper>
+

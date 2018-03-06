@@ -1,0 +1,413 @@
+package com.zfj.xmy.pay.service.pay.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alipay.api.domain.QRcode;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.persistence.dao.TradeChannelsMapper;
+import com.zfj.xmy.common.persistence.dao.TradeProductionMapper;
+import com.zfj.xmy.common.persistence.pojo.TradeProduction;
+import com.zfj.xmy.pay.service.ali.Alipay;
+import com.zfj.xmy.pay.service.ali.AlipaySign;
+import com.zfj.xmy.pay.service.ali.impl.AlipayImpl;
+import com.zfj.xmy.pay.service.pay.PayBase;
+import com.zfj.xmy.pay.service.pay.PayConstant;
+import com.zfj.xmy.pay.service.pay.PayLaunch;
+import com.zfj.xmy.pay.service.pay.PayConstant.TRADE_PRODUCTION;
+import com.zfj.xmy.pay.service.pay.dto.WxPayDto;
+import com.zfj.xmy.pay.service.pay.vo.LaunchInVo;
+import com.zfj.xmy.pay.service.unionpay.UnionPayApp;
+import com.zfj.xmy.pay.service.unionpay.UnionPayGateWay;
+import com.zfj.xmy.pay.service.unionpay.UnionPayWap;
+import com.zfj.xmy.pay.service.wechat.WeChatApi;
+
+/**
+ * 发起支付类
+ * @author wy
+ *
+ */
+@Service
+public class PayLaunchImpl implements PayLaunch {
+
+	@Autowired
+	private TradeProductionMapper tradeProductionMapper;
+	
+	@Autowired
+	private WeChatApi weChatApi;
+	
+	@Autowired
+	private AlipaySign alipaySign;
+	
+	@Autowired
+	private UnionPayApp unionPayApp;
+	
+	@Autowired 
+	private UnionPayWap unionPayWap;
+	
+	@Autowired
+	private UnionPayGateWay unionPayGateWay;
+	
+	/**
+	 * 支付方式
+	 */
+	private int payType;
+	/**
+	 * 业务类型
+	 */
+	private int flowtype;
+	/**
+	 * 支付金额
+	 */
+	private Double payAmount;
+	/**
+	 * 附加数据
+	 */
+	private String attach;
+	/**
+	 * 发起人ip地址
+	 */
+	private String ip;
+	/**
+	 * 商户订单号
+	 */
+	private String ordernum;
+	/**
+	 * 支付商品标题
+	 */
+	private String subject;
+	
+	/**
+	 * 支付完成 回调地址
+	 */
+	private String notifyUrl;
+	/**
+	 * 微信openid
+	 */
+	private String openid;
+	
+	/**
+	 * 微信 wapUrl (H5方式支付需要)
+	 */
+	private String wapUrl;
+	/**
+	 * 微信 wapName (H5方式支付需要)
+	 */
+	private String wapName;
+	
+
+	
+	/**
+	 * 请求支付 微信网页端
+	 * @return
+	 * @Description 
+	 * @date 2017年8月9日  下午1:57:18
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchPayWechatWeb(){
+		//微信网页端支付
+		if (StringUtil.isEmpty(ip)) {
+			throw new BusinessException("微信支付时终端IP不能为空");
+		}
+		if (StringUtil.isEmpty(openid)) {
+			throw new BusinessException("微信网页端支付时OpenId不能为空");
+		}
+		WxPayDto tpWxPay = new WxPayDto();
+		tpWxPay.setOpenId(openid);
+		tpWxPay.setOrderId(ordernum);//交易流水号（用户订单的流水号）
+		tpWxPay.setSpbillCreateIp(ip);//终端Ip
+		tpWxPay.setTotalFee(payAmount+"");//交易金额
+		tpWxPay.setAttach(attach);//附加数据
+		tpWxPay.setBody(subject);
+		tpWxPay.setTradetype("JSAPI");
+		tpWxPay.setNotifyUrl(notifyUrl);//这里notify_url是 支付完成后微信发给该链接信息，可以判断会员是否支付成功，改变订单状态等
+		
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		return  weChatApi.getPackage(tpWxPay);
+	}
+	/**
+	 * 请求支付 微信APP端
+	 * @return
+	 * @Description 
+	 * @date 2017年8月9日  下午2:00:51
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchPayWechatApp(){
+		//请求统一下单
+		if (StringUtil.isEmpty(ip)) {
+			throw new BusinessException("微信支付时终端IP不能为空");
+		}
+		WxPayDto tpWxPay = new WxPayDto();
+		tpWxPay.setOrderId(ordernum);//交易流水号（商户订单 流水号）
+		tpWxPay.setSpbillCreateIp(ip);//终端Ip
+		tpWxPay.setTotalFee(payAmount+"");//交易金额
+		tpWxPay.setAttach(attach);//附加数据
+		tpWxPay.setBody(subject);
+		tpWxPay.setNotifyUrl(notifyUrl);//这里notify_url是 支付完成后微信发给该链接信息，可以判断会员是否支付成功，改变订单状态等
+		tpWxPay.setTradetype("APP");
+		
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		return weChatApi.getPackage(tpWxPay);
+	}
+	
+	/**
+	 * 请求支付 微信H5端
+	 * @return
+	 * @Description 
+	 * @date 2017年8月16日  下午5:15:06
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchPayWechatMweb() {
+		//请求统一下单
+		if (StringUtil.isEmpty(ip)) {
+			throw new BusinessException("微信支付时终端IP不能为空");
+		}
+		if (StringUtil.isEmpty(wapName) || StringUtil.isEmpty(wapUrl)) {
+			throw new BusinessException("微信H5支付时需要 wapName 和 wapUrl");
+		}
+		WxPayDto tpWxPay = new WxPayDto();
+		tpWxPay.setOrderId(ordernum);// 交易流水号（商户订单 流水号）
+		tpWxPay.setSpbillCreateIp(ip);// 终端Ip
+		tpWxPay.setTotalFee(payAmount + "");// 交易金额
+		tpWxPay.setAttach(attach);// 附加数据
+		tpWxPay.setBody(subject);
+		tpWxPay.setNotifyUrl(notifyUrl);// 这里notify_url是
+										// 支付完成后微信发给该链接信息，可以判断会员是否支付成功，改变订单状态等
+		tpWxPay.setTradetype("MWEB");
+
+		// 2.保存交易记录
+		saveTradeProduction(payType);
+		return weChatApi.getPackage(tpWxPay);
+	}
+	
+	/**
+	 * 请求支付 支付宝 APP
+	 * @return
+	 * @Description 
+	 * @date 2017年8月9日  下午2:01:28
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchPayAlipay(){
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		String alipayRet = alipaySign.AlipaySignOrder(ordernum, payAmount, subject, attach, notifyUrl);
+		JSONObject jo = new JSONObject();
+		jo.put("alipay", alipayRet);
+		return jo.toString();
+		
+	}
+	
+	/**
+	 * 请求支付 - 银联-手机控件支付 (消费类交易)
+	 * @return
+	 * @Description 
+	 * @date 2017年8月16日  下午3:28:27
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchUnionPayApp(){
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		return unionPayApp.AppConsume(ordernum, payAmount, subject, attach, notifyUrl);
+	}
+	
+	/**
+	 * 请求支付 - 银联-手机Wap支付 (消费类交易)
+	 * @return
+	 * @Description 
+	 * @date 2017年8月21日  上午11:24:00
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchUnionPayWap(){
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		return unionPayWap.WapConsume(ordernum, payAmount, subject, attach, notifyUrl);
+	}
+	/**
+	 * 请求支付 - 银联-网关支付 (消费类交易)
+	 * @return
+	 * @Description 
+	 * @date 2017年8月21日  下午3:38:16
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchUnionPayGateWay(){
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		return unionPayGateWay.gateWayConsume(ordernum, payAmount, subject, attach, notifyUrl);
+	}
+	
+	@Override
+	@Transactional(noRollbackFor=Exception.class)
+	public void saveTradeProduction(int paytype){
+		TradeProduction production = new TradeProduction();
+		
+		production.setChanid(paytype+"");
+		production.setCreated(DateUtil.date());
+		production.setHappenmoney(payAmount);
+		production.setTranstate(PayConstant.TRADE_PRODUCTION.TRANSTATE_PRE);
+		production.setNoticestate(PayConstant.TRADE_PRODUCTION.NOTICESTATE_PRE);
+		production.setFlowtype(flowtype+"");
+		
+		production.setFlowno(attach); //业务流水号 放到attach里
+		production.setTranflowno(ordernum);
+		
+		
+		tradeProductionMapper.insertSelective(production);
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public String launchPay(LaunchInVo launchIn) {
+		
+		//验证输入
+		if (StringUtil.isEmpty(launchIn.getOrderNum())) {
+			throw new BusinessException("商户订单号不能为空");
+		}
+		if (StringUtil.isEmpty(launchIn.getSubject())) {
+			throw new BusinessException("商品标题不能为空");
+		}
+		if (StringUtil.isEmpty(launchIn.getNotifyUrl())) {
+			throw new BusinessException("回调地址不能为空");
+		}
+		
+		this.payType = launchIn.getPayType();
+		this.payAmount = launchIn.getPayAmount() ;
+		this.attach = StringUtil.generateKey() ; //业务流水号 放到attach里
+		this.ip = launchIn.getIp() ;
+		this.ordernum = launchIn.getOrderNum();
+		
+		this.subject = launchIn.getSubject();
+		this.notifyUrl = launchIn.getNotifyUrl();
+		this.openid = launchIn.getOpenid();
+		this.flowtype = launchIn.getFlowtype();
+		this.wapName = launchIn.getWapName();
+		this.wapUrl = launchIn.getWapUrl();
+		
+		//调用
+		switch (this.payType) {
+		case PayBaseImpl.TRADETYPE_WX_JSAPI:
+			return launchPayWechatWeb();
+		case PayBaseImpl.TRADETYPE_WX_APP:
+			return launchPayWechatApp();
+		case PayBaseImpl.TRADETYPE_ALIPAY_APP:
+			return launchPayAlipay();
+		case PayBaseImpl.TRADETYPE_UNIONPAY_APP:
+			return launchUnionPayApp();
+		case PayBaseImpl.TRADETYPE_UNIONPAY_WAP:
+			return launchUnionPayWap();
+		case PayBaseImpl.TRADETYPE_UNIONPAY_GATEWAY:
+			return launchUnionPayGateWay();
+		case PayBaseImpl.TRADETYPE_WX_MWEB:
+			return launchPayWechatMweb();
+		case PayBaseImpl.TRADETYPE_WX_SCANCODE:
+			return launchPayWechatScancode();
+		case PayBaseImpl.TRADETYPE_ALIPAY_PC_WEB:
+			return launchPayAlipayPcWeb();
+		case PayBaseImpl.TRADETYPE_ALIPAY_OLD_DIRECTPAY:
+			return launchPayAlipayOldCreatedirect();
+		case PayBaseImpl.TRADETYPE_ALIPAY_WAP:
+			return launchPayAlipayWapWeb();
+		default:
+			throw new BusinessException("支付方式不正确");
+		}
+	}
+	
+	/**
+	 * 支付宝 - 电脑网站  支付
+	 * @return
+	 * @Description 
+	 * @date 2017年8月24日  下午3:14:34
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchPayAlipayPcWeb() {
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		String alipayRet = alipaySign.AlipayTradePagePay(ordernum, payAmount,
+				subject, attach, notifyUrl);
+		JSONObject jo = new JSONObject();
+		jo.put("alipay", alipayRet);
+		return jo.toString();
+	}
+	
+	private String launchPayAlipayWapWeb() {
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		String alipayRet = alipaySign.AlipayTradeWapPay(ordernum, payAmount,
+				subject, attach, notifyUrl);
+		JSONObject jo = new JSONObject();
+		jo.put("alipay", alipayRet);
+		return jo.toString();
+	}
+	
+	/**
+	 * 支付宝 老接口 即时到涨
+	 * @return
+	 * @Description 
+	 * @date 2017年8月25日  下午4:17:47
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchPayAlipayOldCreatedirect() {
+		//2.保存交易记录
+		saveTradeProduction(payType);
+		String alipayRet = alipaySign.AlipayCreatedirectPay(ordernum, payAmount,
+				subject, attach, notifyUrl);
+		JSONObject jo = new JSONObject();
+		jo.put("alipay", alipayRet);
+		return jo.toString();
+	}
+	
+	/**
+	 * 微信 扫码 支付
+	 * @return
+	 * @Description 
+	 * @date 2017年8月18日  上午11:27:17
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private String launchPayWechatScancode() {
+		// 请求统一下单
+		if (StringUtil.isEmpty(ip)) {
+			throw new BusinessException("微信支付时终端IP不能为空");
+		}
+		WxPayDto tpWxPay = new WxPayDto();
+		tpWxPay.setOrderId(ordernum);// 交易流水号（商户订单 流水号）
+		tpWxPay.setSpbillCreateIp(ip);// 终端Ip
+		tpWxPay.setTotalFee(payAmount + "");// 交易金额
+		tpWxPay.setAttach(attach);// 附加数据
+		tpWxPay.setBody(subject);
+		tpWxPay.setNotifyUrl(notifyUrl);// 这里notify_url是
+										// 支付完成后微信发给该链接信息，可以判断会员是否支付成功，改变订单状态等
+		tpWxPay.setTradetype("NATIVE");
+
+		// 2.保存交易记录
+		saveTradeProduction(payType);
+		
+		return weChatApi.getPackage(tpWxPay);
+	}
+	
+}

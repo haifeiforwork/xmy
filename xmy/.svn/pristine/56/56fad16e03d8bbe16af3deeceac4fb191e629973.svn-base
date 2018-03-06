@@ -1,0 +1,250 @@
+package com.zfj.xmy.cms.web.controller.activity;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.xmy.activity.persistence.cms.pojo.dto.PromotionGoodsDto;
+import com.zfj.xmy.activity.service.cms.PromotionService;
+import com.zfj.xmy.cms.web.controller.BaseController;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.PromotionActivity;
+import com.zfj.xmy.goods.service.cms.CmsGoodsService;
+
+/**
+ * 
+ * @Title: PromotionCountroller.java
+ * @Package package com.zfj.xmy.cms.web.controller.activity
+ * @author zhangh
+ * @date 2017年7月14日 下午2:11:50
+ * 
+ */
+
+@RequestMapping("/promotion")
+@RestController
+public class PromotionController extends BaseController{
+
+	@Autowired
+	private CmsGoodsService goodsService;
+
+	@Autowired
+	private PromotionService promotionService;
+
+	@InitBinder
+	public void initBinder(HttpServletRequest request,
+			ServletRequestDataBinder binder) throws Exception {
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(
+				new SimpleDateFormat("yyyy-MM-dd HH:mm"), true));
+	}
+
+	/**
+	 * 添加促销界面
+	 * 
+	 * @return ModelAndView
+	 * @date 2017年7月10日 下午2:15:50
+	 */
+	@RequestMapping("/toAddPromotion")
+	public ModelAndView toAddPromotion() {
+		return new ModelAndView("/activity/promotion/add_promotion");
+	}
+
+	/**
+	 * 商品列表
+	 * 
+	 * @param request
+	 * @return ModelAndView Date:2017年7月11日 上午10:55:04
+	 */
+	@RequestMapping("/goodsList")
+	public ModelAndView goodsList(HttpServletRequest request,ReqData reqData) {
+		PageBean pageBean = new PageBean();
+		reqData2Params(reqData);
+		reqData.putValue("is_putway", 0, SystemConstant.REQ_PARAMETER_EQ);
+		goodsService.selectGoodsAndPage(reqData, pageBean);
+		request.setAttribute("totalPage",pageBean.getTotalPage()) ;
+		return new ModelAndView("/activity/promotion/goods_list");
+	}
+
+	@RequestMapping("/goodsList/{pageIndex}")
+	public ModelAndView goodsList(@PathVariable("pageIndex") Integer pageIndex,
+			HttpServletRequest request, ReqData reqData, PageBean pageBean) {
+		pageBean.setPageIndex(pageIndex);
+		reqData.setSortname("putwayTime");
+		reqData.setSortorder("desc");
+		reqData.putValue("is_putway", 0, SystemConstant.REQ_PARAMETER_EQ);
+		goodsService.selectGoodsAndPage(reqData, pageBean);
+		request.setAttribute("glist", pageBean.getData());
+		return new ModelAndView("/activity/promotion/goods_list_page");
+	}
+
+	/**
+	 * 查询商品
+	 * 
+	 * @param idStr 商品id字符串
+	 * @param request
+	 * @return
+	 * @return JSONObject 
+	 * Date:2017年7月11日 下午10:21:51
+	 */
+	@RequestMapping("/findGoods")
+	public RespData findGoods(String idStr, HttpServletRequest request) {
+		RespData respData = new RespData();
+		List<Goods> list = promotionService.findGoods(idStr);
+		respData.setData(list);
+		return respData;
+	}
+
+	/**
+	 * 添加促销
+	 * 
+	 * @param promotionActivity
+	 * @return RespData Date:2017年7月11日 上午10:43:45
+	 */
+	@RequestMapping("/addPromotion")
+	public RespData addPromotion(PromotionActivity promotionActivity) {
+		RespData respData = new RespData();
+		long id = promotionService.insertPromotion(promotionActivity);
+		respData.setData(id);
+		return respData;
+	}
+
+	/**
+	 * 添加促销商品
+	 * 
+	 * @param proId
+	 * @param proGoods
+	 * @return
+	 * @return JSONObject Date:2017年7月11日 上午10:40:12
+	 */
+	@RequestMapping("/addPromotionGoods")
+	public RespData addPromotionGoods(String proId, String proGoods) {
+		RespData respData = new RespData();
+		promotionService.addPromotionGoods(proId, proGoods);
+		return null;
+	}
+	
+	/**
+	 * 添加促销分类
+	 * 
+	 * @param proId
+	 * @param proGoods
+	 * @return
+	 * @return JSONObject Date:2017年7月18日 下午7:40:12
+	 */
+	@RequestMapping("/addCodeGoods")
+	public RespData addCodeGoods(String proId, String codeIds) {
+		RespData respData = new RespData();
+		promotionService.addCodeGoods(proId, codeIds);
+		return null;
+	}
+	
+	/**
+	 * 添加供应商商品
+	 * 
+	 * @param proId
+	 * @param proGoods
+	 * @return
+	 * @return JSONObject Date:2017年7月18日 下午7:40:12
+	 */
+	@RequestMapping("/addSupGoods")
+	public RespData addSupGoods(String proId, String supIds) {
+		RespData respData = new RespData();
+		promotionService.addSupGoods(proId, supIds);
+		return null;
+	}
+
+	/**
+	 * 促销列表
+	 * 
+	 * @param request
+	 * @return
+	 * @return ModelAndView Date:2017年7月11日 上午10:55:04
+	 */
+	@RequestMapping("/promotionList")
+	public ModelAndView activityList(HttpServletRequest request,ReqData reqData) {
+		PageBean pageBean=new PageBean();
+		reqData2Params(reqData);
+		promotionService.selectPromotionList(reqData, pageBean);
+		request.setAttribute("totalPage",pageBean.getTotalPage()) ;
+		return new ModelAndView("/activity/promotion/promotion_list");
+	}
+
+	@RequestMapping("/promotionList/{pageIndex}")
+	public ModelAndView activityList(@PathVariable("pageIndex") Integer pageIndex,
+			HttpServletRequest request, ReqData reqData,PageBean pageBean) {
+		pageBean.setPageIndex(pageIndex);
+		promotionService.selectPromotionList(reqData, pageBean);
+		request.setAttribute("alist", pageBean.getData());
+		return new ModelAndView("/activity/promotion/promotion_list_page");
+	}
+	
+	/**
+	 * 删除
+	 * @param id
+	 * @return RespData
+	 * Date:2017年7月14日 下午4:47:58
+	 */
+	@RequestMapping("/delPromotion")
+	public RespData delPromotion(String id){
+		RespData respData=new RespData();
+		respData.setData(promotionService.delPromotion(id));
+		return respData;
+	}
+
+	/**
+	 * 编辑专题促销界面
+	 * 
+	 * @param id
+	 * @param request
+	 * @return ModelAndView
+	 * Date:2017年7月14日 下午4:14:36
+	 */
+	@RequestMapping("/toUpdatePromotion")
+	public ModelAndView toUpdatePromotion(String id,
+			HttpServletRequest request) {
+		PromotionActivity promotionActivity = promotionService.getPromotionActivity(id);
+		List<PromotionGoodsDto> list = promotionService.selectProGoodsByActId(id);
+		request.setAttribute("data", promotionActivity);
+		request.setAttribute("goodsList", list);
+		return new ModelAndView("/activity/promotion/edit_promotion");
+	}
+	
+	/**
+	 * 修改专题促销
+	 * @param promotionActivity
+	 * @return RespData
+	 * Date:2017年7月14日 下午5:00:12
+	 */
+	@RequestMapping("/updatePromotion")
+	public RespData updatePromotion(PromotionActivity promotionActivity){
+		RespData respData=new RespData();
+		respData.setData(promotionService.updatePromotion(promotionActivity));
+		return respData;
+	}
+	
+	/**
+	 * 移除活动商品
+	 * @param goodsId    
+	 * @return void    
+	 * Date:2017年7月12日 下午2:24:32
+	 */
+	@RequestMapping("/delPromotionGoods")
+	public void delPromotionGoods(String goodsId,String proId){
+		promotionService.delPromotionGoods(goodsId, proId);
+	}
+}

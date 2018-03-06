@@ -1,0 +1,1181 @@
+package com.zfj.xmy.order.service.app.impl;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
+import com.alibaba.druid.util.StringUtils;
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.zfj.xmy.common.FreightUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.xiaoleilu.hutool.json.JSONArray;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.xiaoleilu.hutool.util.CollectionUtil;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.CouponMapper;
+import com.zfj.xmy.common.persistence.dao.CouponUserMapper;
+import com.zfj.xmy.common.persistence.dao.EntityCouponMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.LimitActivityMapper;
+import com.zfj.xmy.common.persistence.dao.LimitGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OrderGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OrderMapper;
+import com.zfj.xmy.common.persistence.dao.PayWayMapper;
+import com.zfj.xmy.common.persistence.dao.PointsGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.RefundImageMapper;
+import com.zfj.xmy.common.persistence.dao.ShoppingCartMapper;
+import com.zfj.xmy.common.persistence.dao.TermDataMapper;
+import com.zfj.xmy.common.persistence.dao.VocabularyMapper;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import com.zfj.xmy.common.persistence.pojo.CouponUser;
+import com.zfj.xmy.common.persistence.pojo.EntityCoupon;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.LimitActivity;
+import com.zfj.xmy.common.persistence.pojo.LimitGoods;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.OrderGoods;
+import com.zfj.xmy.common.persistence.pojo.PayWay;
+import com.zfj.xmy.common.persistence.pojo.PointsGoods;
+import com.zfj.xmy.common.persistence.pojo.RefundImage;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCart;
+import com.zfj.xmy.common.persistence.pojo.Vocabulary;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.common.service.CommonLimitActivityService;
+import com.zfj.xmy.common.service.OnLineActivityService;
+import com.zfj.xmy.freight.vo.FreightGoods;
+import com.zfj.xmy.order.persistence.app.dao.AppOrderExMapper;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppGoodsVo;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppOrderAllDto;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppOrderDir;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppOrderGoodsDir;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppOrderVo;
+import com.zfj.xmy.order.persistence.app.pojo.dto.CancelOrderInDto;
+import com.zfj.xmy.order.persistence.app.pojo.dto.GoodsDto;
+import com.zfj.xmy.order.persistence.app.pojo.dto.OrderOutDto;
+import com.zfj.xmy.order.persistence.app.pojo.dto.RefundInDto;
+import com.zfj.xmy.order.persistence.common.dao.OrderExMapper;
+import com.zfj.xmy.order.persistence.common.pojo.dto.app.OrderStatusCountDto;
+import com.zfj.xmy.order.service.app.AppOrderService;
+
+/**
+ * 
+ * @author wy
+ *
+ */
+@Service
+public class AppOrderServiceImpl implements AppOrderService {
+
+	@Autowired
+	private OrderMapper orderMapper;
+	
+	@Autowired
+	private OrderGoodsMapper orderGoodsMapper;
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Autowired
+	private AppOrderExMapper appOrderExMapper;
+	
+	@Autowired
+	private TermDataMapper termDataMapper;
+	
+	@Autowired
+	private PayWayMapper payWayMapper;
+	
+	@Autowired
+	private RefundImageMapper refundImageMapper;
+	
+	@Autowired
+	private VocabularyMapper vocabularyMapper;
+ 	
+	@Autowired
+	private OrderExMapper orderExMapper;
+	
+	@Autowired
+	private ShoppingCartMapper shoppingMapper;
+	
+	@Autowired
+	private LimitActivityMapper limitActivityMapper;
+	
+	@Autowired
+	private LimitGoodsMapper limitGoodsMapper;
+	
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	@Autowired
+	private CommonLimitActivityService commonLimitActivityService;
+	
+	@Autowired
+	private EntityCouponMapper entityCouponMapper;
+	
+	@Autowired
+	private CouponMapper couponMapper;
+	
+	@Autowired
+	private CouponUserMapper couponUserMapper;
+	
+	@Autowired
+	private OnLineActivityService onLineService;
+	
+	@Autowired
+	private PointsGoodsMapper pointsGoodsMapper;
+	
+	
+	@Override
+	public List<OrderOutDto> findByUserId(Long userid,AppOrderAllDto orderAllDto) {
+		
+		List<OrderOutDto> orderOuts = new ArrayList<OrderOutDto>();
+		
+		CriteriaParameter para = new CriteriaParameter();
+		Criteria criteria = para.createCriteria();
+		
+		String orderbycreatetime = orderAllDto.getOrderbycreatetime()==1?"ASC":"DESC"; //创建时间升降序
+		
+		//1.查询订单
+		para.setOrderByClause("status asc,create_time "+orderbycreatetime);
+		criteria.equalTo("user_id", userid);
+		criteria.equalTo("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE);//未删除的
+		List<Order> orders = orderMapper.selectByExample(para);
+		
+		//2.查询商品关联 ,商品
+		para.setOrderByClause(null);
+		criteria.clearCriteria();
+		List<Object> orderIds = getIds(orders);
+		List<OrderGoods> orderGoods = null;
+		List<Goods> goods = new ArrayList<Goods>(); //关联的所有商品
+		if (CollectionUtils.isEmpty(orderIds)) {
+			orderGoods = new ArrayList<OrderGoods>();
+		}else {
+			criteria.in("order_id", getIds(orders));
+		    orderGoods = orderGoodsMapper.selectByExample(para);
+		    
+		    criteria.clearCriteria();
+		    criteria.in("id", getGoodsIds(orderGoods));
+		    goods = goodsMapper.selectByExample(para);
+		    
+		}
+		//3.组装数据
+		for (Order order : orders) {
+			OrderOutDto orderOut = new OrderOutDto();
+			orderOut.setOrderId(order.getId());
+			orderOut.setNo(order.getNo());
+			orderOut.setStatus(order.getStatus());
+			orderOut.setTotal(order.getTotal());
+			orderOut.setCreateTime(order.getCreateTime());
+			Integer goodsNum = 0; //每笔订单商品数
+			List<GoodsDto> goodsDtos = new ArrayList<GoodsDto>();
+			List<FreightGoods> freightGoodss = new ArrayList<>();//计算邮费 - 1
+			for (OrderGoods orderGood : orderGoods) { //一个订单包含多个商品
+				if (order.getId().equals(orderGood.getOrderId())) {
+					goodsNum += orderGood.getNum();
+					GoodsDto goodsDto = new GoodsDto();
+					goodsDto.setGoodsId(orderGood.getGoodsId());
+					goodsDto.setFullName(orderGood.getName());
+					goodsDto.setGoodsNum(orderGood.getNum());
+					goodsDto.setPrice(orderGood.getPrice());
+					for (Goods good : goods) {
+						if (orderGood.getGoodsId().equals(good.getId())) {
+							goodsDto.setImgUrl(commonGoodsService.getFirstGoodsImg(good.getId()));
+							
+							//计算邮费 - 2
+							FreightGoods freightGoods = new FreightGoods();
+							freightGoods.setGoods(good);
+							freightGoods.setNum(orderGood.getNum());
+							freightGoodss.add(freightGoods);
+						}
+					}
+					goodsDtos.add(goodsDto);
+				}
+			}
+			orderOut.setGoodsNum(goodsNum);
+			orderOut.setGoods(goodsDtos);
+			
+			//计算邮费 - 3
+			BigDecimal valillaTotal = order.getTotal();//原始总额
+			double weight = FreightUtil.getWeightByGoods(freightGoodss); //获取重量
+			String province = order.getProvince();
+			String area = order.getArea();
+			if (!(StringUtil.isEmpty(province) || StringUtil.isEmpty(area))) {
+				BigDecimal freight = FreightUtil.getFreight(province, area, weight, valillaTotal);
+				orderOut.setFreight(freight);
+			}
+			orderOuts.add(orderOut);
+		}
+		return orderOuts;
+	}
+	
+	/**
+	 * 通过订单获取id列表s
+	 * @param orders
+	 * @return
+	 * @Description 
+	 * @date 2017年7月20日  下午4:07:36
+	 * @author wy
+	 * 2017
+	 * @return List<Long>
+	 */
+	private List<Object> getIds(List<Order> orders){
+		List<Object> longs = new ArrayList<Object>();
+		if (!CollectionUtils.isEmpty(orders)) {
+			for (Order order : orders) {
+				longs.add(order.getId());
+			}
+		}
+		return longs;
+	}
+	
+	/**
+	 * 通过订单商品关系表获取 商品id列表
+	 * @param orderGoods
+	 * @return
+	 * @Description 
+	 * @date 2017年7月20日  下午5:45:25
+	 * @author wy
+	 * 2017
+	 * @return List<Object>
+	 */
+	private List<Object> getGoodsIds(List<OrderGoods> orderGoods){
+		List<Object> longs = new ArrayList<Object>();
+		if (!CollectionUtils.isEmpty(orderGoods)) {
+			for (OrderGoods orderGoods2 : orderGoods) {
+				longs.add(orderGoods2.getGoodsId());
+			}
+		}
+		return longs;
+	}
+	
+	
+	/**
+	 * 生成订单编码
+	 * @param maxNo
+	 * @return    
+	 * @return String    
+	 * Date:2017年8月3日 下午5:23:33 
+	 * @author hexw
+	 */
+	public String getNo(String maxNo){
+		
+		//订单编码规则      长度12位默认从000000100000 递增
+		String no = String.valueOf(Long.parseLong(maxNo)+1);
+		int sort =  (SystemConstant.ORDER.NO_LENGTH-no.length());
+		if ( no.length() < SystemConstant.ORDER.NO_LENGTH ){
+			for (int i = 0 ; i< sort ; i++){
+				no = "0"+no;
+			}
+		}
+		return no ;
+	}
+	
+	@Override
+	public List<OrderStatusCountDto> getOrderCount(Long userid){
+		
+		CriteriaParameter para = new CriteriaParameter();
+		Criteria criteria = para.createCriteria();
+		
+		//1.查询订单
+		para.setOrderByClause("status asc");
+		criteria.equalTo("user_id", userid);
+		criteria.equalTo("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE);//未删除的
+		List<OrderStatusCountDto> ordersStatusCounts = orderExMapper.findOrderStatusCount(para);
+		
+		//2. 组装数据 ，如果不包含的状态，填数据0
+		List<Integer> fullstatuss = new ArrayList<Integer>();
+		fullstatuss.add(SystemConstant.ORDER.STATUS_UNPAID);
+		fullstatuss.add(SystemConstant.ORDER.STATUS_DELIVERY);
+		fullstatuss.add(SystemConstant.ORDER.STATUS_FINISH_DELIVERY);
+		fullstatuss.add(SystemConstant.ORDER.STATUS_WAITTING_COMMENT);
+		fullstatuss.add(SystemConstant.ORDER.STATUS_FINISH);
+		
+		//2.1 有数据的则填充
+		List<Integer> standStatuss = new ArrayList<Integer>();
+		for (OrderStatusCountDto orderStatusCountDto : ordersStatusCounts) {
+			standStatuss.add(orderStatusCountDto.getStatus());
+		}
+		
+		//2.2 没有数据填 数量 0 
+		Collection<Integer> integers = CollectionUtil.disjunction(standStatuss,fullstatuss);
+		for (Integer integer : integers) {
+			OrderStatusCountDto zero = new  OrderStatusCountDto();
+			zero.setCount(0);
+			zero.setStatus(integer);
+			ordersStatusCounts.add(zero);
+		}
+		
+		return ordersStatusCounts;
+	}
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public AppOrderDir findOrder(List<AppGoodsVo> list, Long userId){
+		AppOrderDir appOrderDir = new  AppOrderDir();
+		appOrderDir.setTotalMoney(new BigDecimal(0));
+		appOrderDir.setPoints(0);
+		appOrderDir.setUsePoints(0);
+		List<AppOrderGoodsDir>  goodsList = new ArrayList<AppOrderGoodsDir>();
+		if (list.size() > 0) {
+			// 1. 查询订单商品
+			for (AppGoodsVo appGoodsVo : list) {
+				//1.1查询订单商品
+				ReqData reqData = new ReqData();
+				reqData.putValue("id", appGoodsVo.getId(), SystemConstant.REQ_PARAMETER_EQ);
+				AppOrderGoodsDir   appOrderGoodsDir = appOrderExMapper.findOrderGoods(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				//1.2如果是活动商品的 价格设置为活动商品的价格
+				if ( appGoodsVo.getActivityId() != 0 ){ 
+					appOrderGoodsDir.setPrice(getActivityGoodsPrice(appGoodsVo.getActivityId(), appGoodsVo.getId(), appGoodsVo.getActivityType()));
+				} 
+				if (ObjectUtil.isNotNull(appOrderGoodsDir.getPoints())){
+					appOrderGoodsDir.setPoints(appOrderGoodsDir.getPoints()*appGoodsVo.getNum()); //商品的总积分
+				}
+				//如果有赠品则设置赠品id和name
+				if(!ObjectUtils.isEmpty(appGoodsVo.getPresentGoodsId())&&appGoodsVo.getPresentGoodsId()!=0){
+					appOrderGoodsDir.setPresentGoodsName(goodsMapper.selectByPrimaryKey(appGoodsVo.getPresentGoodsId()).getName());
+					appOrderGoodsDir.setPresentGoodsId(appGoodsVo.getPresentGoodsId());
+				}
+				//如果是积分活动
+				if(!ObjectUtils.isEmpty(appGoodsVo.getPointsActId())&&appGoodsVo.getPointsActId()!=0){
+					reqData.clearValue();
+					reqData.putValue("goods_id", appGoodsVo.getId(),SystemConstant.REQ_PARAMETER_EQ);
+					reqData.putValue("points_id", appGoodsVo.getPointsActId(),SystemConstant.REQ_PARAMETER_EQ);
+					List<PointsGoods> pointsGoods=pointsGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+					if(!ObjectUtils.isEmpty(pointsGoods)){
+						appOrderGoodsDir.setActPoints(pointsGoods.get(0).getPoints());
+						appOrderGoodsDir.setSumActPoints(appOrderGoodsDir.getActPoints()*appGoodsVo.getNum());
+					}
+					appOrderGoodsDir.setPointsActId(appGoodsVo.getPointsActId());
+				}
+				appOrderGoodsDir.setImg(commonGoodsService.getFirstGoodsImg(appGoodsVo.getId())); //商品图片
+				Integer goodsNum = appGoodsVo.getNum();
+				BigDecimal bigDecimalNum = new BigDecimal(Integer.toString(goodsNum));  
+				BigDecimal sumPrice = appOrderGoodsDir.getPrice().multiply(bigDecimalNum); 
+				appOrderGoodsDir.setSumPrice(sumPrice); //商品总价格
+				appOrderGoodsDir.setActivityId(appGoodsVo.getActivityId());  //活动id
+				appOrderGoodsDir.setActivityType(appGoodsVo.getActivityType()); //活动类型
+				appOrderGoodsDir.setNum(appGoodsVo.getNum()); //商品数量
+				goodsList.add(appOrderGoodsDir);
+			}
+			appOrderDir.setList(goodsList);
+			// 2. 订单商品总金额 和总积分
+			for (AppOrderGoodsDir appOrderGoodsDir : goodsList) {
+				//如果是积分购买
+				if(!ObjectUtils.isEmpty(appOrderGoodsDir.getSumActPoints())&&appOrderGoodsDir.getSumActPoints()!=0){
+					appOrderDir.setUsePoints(appOrderDir.getUsePoints()+appOrderGoodsDir.getSumActPoints());
+				}else{//如果不是积分购买
+					if (appOrderDir.getPoints() != null ){
+						appOrderDir.setPoints(appOrderDir.getPoints()+appOrderGoodsDir.getPoints()); //订单的总积分
+					}
+					appOrderDir.setTotalMoney(appOrderDir.getTotalMoney().add(appOrderGoodsDir.getSumPrice()));//订单的总金额
+				}
+			}	
+			DecimalFormat df =new DecimalFormat("#.00");  //保留两位小数
+			appOrderDir.setTotalMoney(new  BigDecimal(df.format(appOrderDir.getTotalMoney())));
+			// 判断订单是否含有跨境商品
+			if (!checkIsAcrossBorders(list)) {
+				appOrderDir.setIsAcrossBorders(SystemConstant.TERMDATA.IS_ACROSSBORDERS);
+			} else{ appOrderDir.setIsAcrossBorders(SystemConstant.TERMDATA.NOT_ACROSSBORDERS);}
+				//3. 查询发票内容
+			ReqData vocReqData = new  ReqData();
+			vocReqData.putValue(SystemConstant.TERMDATA.MARK, SystemConstant.TERMDATA.INVOICE_SETTING, SystemConstant.REQ_PARAMETER_EQ);
+			Vocabulary vocabulary = vocabularyMapper.selectByExampleWithBLOBs(ReqUtil.reqParameterToCriteriaParameter(vocReqData));
+			ReqData invReqData = new  ReqData();
+			invReqData.putValue(SystemConstant.TERMDATA.VID, vocabulary.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			String invoceContents = appOrderExMapper.findInvoiceContent(ReqUtil.reqParameterToCriteriaParameter(invReqData));
+			String[] Contents = invoceContents.split("--");
+			appOrderDir.setInvoiceContents(java.util.Arrays.asList(Contents));
+		} else {
+			throw new BusinessException("订单商品不能为空"); 
+		}
+		return appOrderDir;
+	}
+	
+/*	public AppOrderDir findOrder(List<AppGoodsVo> list, Long userId ,Order order){
+		AppOrderDir appOrderDir = new  AppOrderDir();
+		appOrderDir.setId(order.getId());
+		appOrderDir.setNo(order.getNo());
+		appOrderDir.setTotalMoney(new BigDecimal(0));
+		appOrderDir.setPoints(0);
+		// 1. 查询订单商品
+		ReqData reqData = new  ReqData();
+		reqData.putValue("a.order_id", order.getId(), SystemConstant.REQ_PARAMETER_EQ);
+		List<AppOrderGoodsDir>  goodsList = appOrderExMapper.findOrderGoods(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if (goodsList.size() > 0) {
+			for (AppOrderGoodsDir appOrderGoodsDir : goodsList) {
+				if (appOrderDir.getPoints() != null ){
+					appOrderDir.setPoints(appOrderDir.getPoints()+appOrderGoodsDir.getPoints()*appOrderGoodsDir.getNum());  //赠送积分
+				}
+				appOrderDir.setTotalMoney(appOrderDir.getTotalMoney().add(appOrderGoodsDir.getSumPrice()));
+			}
+			appOrderDir.setList(goodsList);
+		}
+		order.setAccPoints((long)appOrderDir.getPoints());
+		order.setPay(appOrderDir.getTotalMoney());  //保存总金额到订单表
+		order.setTotal(appOrderDir.getTotalMoney());
+		orderMapper.updateByPrimaryKey(order);
+		DecimalFormat df =new DecimalFormat("#.00");  //保留两位小数
+		appOrderDir.setTotalMoney(new  BigDecimal(df.format(appOrderDir.getTotalMoney())));
+			// 2. 判断订单是否含有跨境商品
+		if (!checkIsAcrossBorders(list,order.getId())) {
+			appOrderDir.setIsAcrossBorders(SystemConstant.TERMDATA.IS_ACROSSBORDERS);
+		} else{ appOrderDir.setIsAcrossBorders(SystemConstant.TERMDATA.NOT_ACROSSBORDERS);}
+			// 3. 查询发票内容
+		ReqData vocReqData = new  ReqData();
+		vocReqData.putValue(SystemConstant.TERMDATA.MARK, SystemConstant.TERMDATA.INVOICE_SETTING, SystemConstant.REQ_PARAMETER_EQ);
+		Vocabulary vocabulary = vocabularyMapper.selectByExampleWithBLOBs(ReqUtil.reqParameterToCriteriaParameter(vocReqData));
+		ReqData invReqData = new  ReqData();
+		invReqData.putValue(SystemConstant.TERMDATA.VID, vocabulary.getId(), SystemConstant.REQ_PARAMETER_EQ);
+		String invoceContents = appOrderExMapper.findInvoiceContent(ReqUtil.reqParameterToCriteriaParameter(invReqData));
+		String[] Contents = invoceContents.split("--");
+		appOrderDir.setInvoiceContents(java.util.Arrays.asList(Contents));
+		return appOrderDir;
+	}*/
+	
+/*	@Override
+	public AppOrderDir insertOrder(List<AppGoodsVo> list, Long userId ,String deviceId){
+		if (ObjectUtils.isEmpty(list)) {
+			throw new BusinessException("订单商品不能为空"); 
+		}
+		//一  插入数据
+			//1. 生成订单主表
+		Order order = new  Order();  
+		order.setCreateTime(new Date());
+		order.setUserId(userId);
+		order.setStatus(SystemConstant.ORDER.STATUS_UNPAID);  // 待付款状态
+		String no = appOrderExMapper.findMaxNum(null);
+		if ( StringUtils.isEmpty(no)) { //生成订单编码  默认从000000100000 递增
+			order.setNo(SystemConstant.ORDER.INIT_NO);
+		} else {
+			order.setNo(getNo(no));
+		}
+		order.setDeviceId(deviceId);
+		order.setIsDel(SystemConstant.ORDER.IS_DEL_NOT_DELETE);
+		orderMapper.insertSelective(order);
+		
+		//2. 订单商品表
+		for (AppGoodsVo appGoodsVo : list) {
+			OrderGoods orderGoods = new  OrderGoods();
+			Goods goods = goodsMapper.selectByPrimaryKey(appGoodsVo.getId()); 
+			if (goods != null) {
+				orderGoods.setOrderId(order.getId());
+				orderGoods.setGoodsId(appGoodsVo.getId());
+				orderGoods.setNum(appGoodsVo.getNum());
+				orderGoods.setName(goods.getName());
+				if ( appGoodsVo.getActivityId() != 0 ){ //设置商品单价
+					orderGoods.setPrice(getActivityGoodsPrice(appGoodsVo.getActivityId(), appGoodsVo.getId(), appGoodsVo.getActivityType()));
+					orderGoods.setActivityType(appGoodsVo.getActivityType());
+					orderGoods.setActivityId(appGoodsVo.getActivityId());
+				} else {
+					orderGoods.setPrice(goods.getPrice());
+				}
+				if (orderGoods.getNum() != 0) {  //设置商品总价
+					Integer goodsNum = orderGoods.getNum();
+					BigDecimal bigDecimalNum = new BigDecimal(Integer.toString(goodsNum));  
+					BigDecimal sumPrice = orderGoods.getPrice().multiply(bigDecimalNum)	; 
+					orderGoods.setSumPrice(sumPrice);
+				}
+				if (appGoodsVo.getPresentGoodsId() != 0 ){  //涉及到赠品的
+					Goods presentGoods = goodsMapper.selectByPrimaryKey(appGoodsVo.getPresentGoodsId());
+					if (ObjectUtil.isNotNull(presentGoods)){
+						orderGoods.setPresentGoodsId(presentGoods.getId());
+						orderGoods.setPresentGoodsName(presentGoods.getName());
+					}
+				}
+				orderGoodsMapper.insert(orderGoods);
+			}
+			
+			//3. 清除购物车 (物理删除)
+			if (ObjectUtil.isNotNull(userId)) {   //匿名购买不用清除购物车
+				ReqData shoppingReqData = new  ReqData();
+				shoppingReqData.putValue("goods_id", appGoodsVo.getId(), SystemConstant.REQ_PARAMETER_EQ);
+				shoppingReqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+				shoppingMapper.deleteByExample(ReqUtil.reqParameterToCriteriaParameter(shoppingReqData));
+			}
+			
+		}
+		return findOrder(list,userId,order);  //订单返回数据
+	}*/
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public Map<String,Object> insertOrder(AppOrderVo vo,List<AppGoodsVo> list,Boolean isgenarateOrder){
+		
+		
+		
+		Long userid = vo.getUserid(); 
+		if (ObjectUtil.isNull(userid)) {//用户id ，不登录时为空
+			String devId = vo.getDeviceid();
+			if (ObjectUtil.isNull(devId)) {
+				throw new BusinessException("匿名下单必须传入设备标识号");
+			} 
+		} 
+		//1.检查优惠劵信息
+		Long couponId = vo.getCouponId();//优惠劵表id (couponUser表)
+		//Integer conponType = vo.getCouponType(); //优惠劵类型
+		//定义返回变量
+		BigDecimal couponValue = new BigDecimal(0);
+		Integer quota = 0;
+		if (ObjectUtil.isNotNull(userid)) { //登录状态下才使用优惠劵
+			if (ObjectUtil.isNotNull(couponId)) {
+//				if (ObjectUtil.isNotNull(conponType)) {
+//					throw new BusinessException("使用优惠劵时必须传入优惠劵类型");
+//				}
+				// 检查是否是用户优惠劵
+				CriteriaParameter parameter = new CriteriaParameter();
+				Criteria criteria = parameter.createCriteria();
+				criteria.equalTo("id", couponId);
+				criteria.equalTo("user_id", userid);
+				//criteria.equalTo("type", conponType);
+				criteria.equalTo("status", SystemConstant.COUPON.STATUS_NO_USE);
+				List<CouponUser> couponUsers = couponUserMapper.selectByExample(parameter);
+				if (CollectionUtil.isEmpty(couponUsers)) {
+					throw new BusinessException("优惠劵不存在或是已经被使用了");
+				}
+				CouponUser couponUser = couponUsers.get(0);
+				Integer conponType = couponUser.getType();
+				// TODO: 检查是否可用在这笔订单上
+				// 查询优惠价劵，抵扣总金额
+				if (SystemConstant.COUPON.TYPE_ECOUPON_ELECTRONICS.equals(couponUser.getType())) {
+					//查询电子优惠劵种类表获取抵扣的金额 
+					Coupon coupon = couponMapper.selectByPrimaryKey(couponUser.getCouponId());
+					if (ObjectUtil.isNull(coupon)) {
+						throw new BusinessException("优惠劵不存在");
+					}
+					couponValue = coupon.getCouponValue();
+					quota = coupon.getQuota();
+				}
+                if (SystemConstant.COUPON.TYPE_ECOUPON_Entity.equals(conponType)) {
+                	EntityCoupon entityCoupon = entityCouponMapper.selectByPrimaryKey(couponUser.getCouponId());
+					if (ObjectUtil.isNull(entityCoupon)) {
+						throw new BusinessException("优惠劵不存在");
+					}
+					couponValue = entityCoupon.getCouponValue();
+					quota = entityCoupon.getQuota();
+					//entityCoupon.setStatus(SystemConstant.COUPON.STATUS_PENDING);
+				}
+                couponUser.setStatus(SystemConstant.COUPON.STATUS_PENDING);
+                if (isgenarateOrder) {
+					couponUserMapper.updateByPrimaryKeySelective(couponUser);
+				}
+                
+			}
+		}
+		
+		String province = vo.getProvince();
+		String city = vo.getCity();
+		String area = vo.getArea();
+		String consigneeAddress = vo.getConsigneeAddress(); //收货人详细地址
+		
+		if (StringUtil.isEmpty(province)) {
+			throw new BusinessException("收货人省份不能为空");
+		}
+        if (StringUtil.isEmpty(city)) {
+        	throw new BusinessException("收货人市级不能为空");
+		}
+        if (StringUtil.isEmpty(area)) {
+        	throw new BusinessException("收货人区级不能为空");
+		}
+		
+		//生成订单
+		Order order = new Order();
+		order.setCreateTime(new Date());
+		order.setUserId(userid);
+		order.setStatus(SystemConstant.ORDER.STATUS_UNPAID);  // 待付款状态
+		order.setShipStatus(SystemConstant.ORDER.SHIP_STATUS_UNPAID);
+		order.setUpdateTime(new  Date());
+		String no = appOrderExMapper.findMaxNum(null);
+		if ( StringUtils.isEmpty(no)) { //生成订单编码  默认从000000100000 递增
+			order.setNo(SystemConstant.ORDER.INIT_NO);
+		} else {
+			order.setNo(getNo(no));
+		}
+		order.setDeviceId(vo.getDeviceid());
+		order.setIsDel(SystemConstant.ORDER.IS_DEL_NOT_DELETE);
+		order.setConsigneeName(vo.getConsigneeName());
+		order.setConsigneePhone(vo.getConsigneePhone());
+		
+		String fullAddress = province + city + area + consigneeAddress;
+		order.setConsigneeAddress(fullAddress);
+		order.setConsigneeIdcard(vo.getConsigneeIdcard());
+		order.setSendTime(DateUtil.parse(vo.getSendTime()));
+		order.setOrderRemark(vo.getOrderRemark());
+		order.setTotal(new BigDecimal(0));
+		order.setAccPoints(vo.getAccPoints()); //订单积分
+		order.setInvoiceType(vo.getInvoiceType()); 	//发票类型 0:个人  1:公司
+		order.setTaxpayerNum(vo.getTaxpayerNum());  //纳税人识别号
+		order.setCompanyName(vo.getCompanyName());
+		order.setInvoiceContent(vo.getInvoiceContent());
+		order.setCouponId(couponId);
+		order.setProvince(province);
+		order.setCity(city);
+		order.setArea(area);
+		order.setOrderSource(SystemConstant.ORDER.ORDER_SOURCE_APP);
+		if (isgenarateOrder) {
+			orderMapper.insertSelective(order);
+		}
+		
+		
+		List<FreightGoods> freightGoodss = new ArrayList<>();
+		//2. 订单商品表
+		for (AppGoodsVo appGoodsVo : list) {
+			Goods goods = goodsMapper.selectByPrimaryKey(appGoodsVo.getId());
+			if (ObjectUtil.isNull(goods)) {
+				throw new BusinessException("包含不存在商品或者已经失效");
+			}
+			if (goods != null) {
+				//检查是否支持全国配送
+				if (SystemConstant.GoodsConstant.IS_DELIVERY_FALSE.equals(goods.getIsDelivery())
+						&&  !province.contains("重庆")) {
+					throw new BusinessException("包含不支付全国配送的商品,请重新选择");
+				}
+				//下单
+				OrderGoods orderGoods = new  OrderGoods();
+				orderGoods.setOrderId(order.getId());
+				orderGoods.setGoodsId(appGoodsVo.getId());
+				orderGoods.setNum(appGoodsVo.getNum());
+				orderGoods.setName(goods.getName());
+				orderGoods.setNo(Long.parseLong(goods.getCode()));
+				
+				if ( appGoodsVo.getActivityId() != 0 ){ //设置商品单价
+					orderGoods.setPrice(getActivityGoodsPrice(appGoodsVo.getActivityId(), appGoodsVo.getId(), appGoodsVo.getActivityType()));
+					orderGoods.setActivityType(appGoodsVo.getActivityType());
+					orderGoods.setActivityId(appGoodsVo.getActivityId());
+					//修改活动商品交易完成数量
+					if (isgenarateOrder) {
+						commonLimitActivityService.updateActivityGoodsComplNum(appGoodsVo.getActivityId(), appGoodsVo.getId(), appGoodsVo.getNum());
+					}
+				} else {
+					orderGoods.setPrice(goods.getPrice());
+				}
+				
+				if (orderGoods.getNum() != 0) {  //设置商品总价
+					Integer goodsNum = orderGoods.getNum();
+					BigDecimal bigDecimalNum = new BigDecimal(Integer.toString(goodsNum));  
+					BigDecimal sumPrice = orderGoods.getPrice().multiply(bigDecimalNum)	; 
+					orderGoods.setSumPrice(sumPrice);
+					order.setTotal(order.getTotal().add(sumPrice));  //计算订单总金额
+				}
+				if (appGoodsVo.getPresentGoodsId() != 0 ){  //涉及到赠品的
+					Goods presentGoods = goodsMapper.selectByPrimaryKey(appGoodsVo.getPresentGoodsId());
+					if (ObjectUtil.isNotNull(presentGoods)){
+						orderGoods.setPresentGoodsId(presentGoods.getId());
+						orderGoods.setPresentGoodsName(presentGoods.getName());
+					}
+				}
+				//3. 清除购物车 (物理删除)
+				if (isgenarateOrder) {
+					if (ObjectUtil.isNotNull(userid)) {   //匿名购买不用清除购物车
+						ReqData shoppingReqData = new  ReqData();
+						shoppingReqData.putValue("goods_id", appGoodsVo.getId(), SystemConstant.REQ_PARAMETER_EQ);
+						shoppingReqData.putValue("user_id", vo.getUserid(), SystemConstant.REQ_PARAMETER_EQ);
+						shoppingMapper.deleteByExample(ReqUtil.reqParameterToCriteriaParameter(shoppingReqData));
+						
+						/*if (!checkLimitActivityGoods(list,userid)) {  //检查活动商品是否符合活动规则  之所以放在这处理判断是  因为统计活动商品个数也统计了购物车的 所以先把购物车的清楚了在判断
+							throw new BusinessException("您购买的活动商品超过了限购的数量");
+						}*/
+					}
+					orderGoodsMapper.insert(orderGoods);
+				}
+				
+			}
+			
+			//获取邮费参数
+			FreightGoods freightGoods = new FreightGoods();
+			freightGoods.setGoods(goods);
+			freightGoods.setNum(appGoodsVo.getNum());
+			freightGoodss.add(freightGoods);
+		}
+		
+		//4.计算邮费
+		BigDecimal valillaTotal = order.getTotal();//原始总额
+		double weight = FreightUtil.getWeightByGoods(freightGoodss); //获取重量
+		BigDecimal freight = FreightUtil.getFreight(province, area, weight, valillaTotal);
+		//BigDecimal totalAfterfreight = valillaTotal.add(freight); //增加邮费以后的总金额
+		//4.使用优惠劵
+		BigDecimal totalAfterCoupon = valillaTotal;
+		if ( valillaTotal.doubleValue() > quota) { //总金额大于优惠劵起用金额才可用
+			totalAfterCoupon = valillaTotal.subtract(couponValue);
+		}
+		
+		if (totalAfterCoupon.doubleValue() < 0) {
+			totalAfterCoupon = new BigDecimal(0);
+		}
+		//增加邮费
+		order.setTotal(totalAfterCoupon.add(freight));
+		order.setFreight(freight);
+		//5.更新订单
+		if (isgenarateOrder) {
+			orderMapper.updateByPrimaryKeySelective(order);  //主要是订单总金额的修改
+		}
+		
+		
+		//6.返回数据
+		Map<String, Object> result = new HashMap<String, Object>();
+		if (isgenarateOrder) {
+			result.put("orderId", order.getId());
+		    result.put("orderNo", order.getNo());
+		}else {
+			result.put("freight", freight);
+		}
+		return result;
+	}
+	
+	public boolean checkLimitActivityGoods(List<AppGoodsVo> list,Long userId){
+		boolean flag = true ;
+		for (AppGoodsVo appGoodsVo : list) {
+			ShoppingCart shoppingCart = new ShoppingCart();
+			shoppingCart.setGoodsId(appGoodsVo.getId());
+			shoppingCart.setActivityId(appGoodsVo.getActivityId());
+			shoppingCart.setActivityType(appGoodsVo.getActivityType());
+			shoppingCart.setNum(appGoodsVo.getNum());
+			shoppingCart.setUserId(userId);
+			if (commonLimitActivityService.checkLimitActivity(shoppingCart) != 0) {
+				flag = false;
+			} 
+		}
+		return flag;
+	}
+	
+	 
+/*	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void updateOrder(AppOrderVo vo ){
+		//0.验证
+		Long userid = vo.getUserid(); //用户id ，不登录时为空
+		Order order  = orderMapper.selectByPrimaryKey(vo.getId());
+		if (!ObjectUtil.isNull(vo.getUserid())) {
+			//userid 不为空 - 是登录状态
+			if (!userid.equals(order.getUserId())) {
+				throw  new  BusinessException("该订单无法修改");
+			}
+		}else {
+			//userid 为空 - 非登录状态  设备号校验
+			//TODO : 验证用户？
+			String devId = vo.getDeviceid();
+			if (ObjectUtil.isNull(devId)) {
+				throw new BusinessException("匿名下单必须传入设备标识号");
+			} else {
+				if (!devId.equals(order.getDeviceId())) {
+					throw new BusinessException("匿名下单设备标识号不一致");
+				}
+			}
+		}
+		if (ObjectUtil.isNull(order)) {
+			throw  new  BusinessException("该订单不存在");
+		}
+		if (!SystemConstant.ORDER.STATUS_UNPAID.equals(order.getStatus()) ) {
+			throw  new  BusinessException("待付款的订单才可以修改");
+		}
+        
+		//1. 修改订单数据	
+		order.setConsigneeName(vo.getConsigneeName());
+		order.setConsigneePhone(vo.getConsigneePhone());
+		order.setConsigneeAddress(vo.getConsigneeAddress());
+		order.setConsigneeIdcard(vo.getConsigneeIdcard());
+		order.setSendTime(DateUtil.parse(vo.getSendTime()));
+		order.setOrderRemark(vo.getOrderRemark());
+		order.setTotal(vo.getPrice());
+		order.setAccPoints(vo.getAccPoints());
+		order.setInvoiceType(vo.getInvoiceType()); 	//发票类型 0:个人  1:公司
+		order.setTaxpayerNum(vo.getTaxpayerNum());  //纳税人识别号
+		order.setCompanyName(vo.getCompanyName());
+		order.setInvoiceContent(vo.getInvoiceContent());
+		order.setUpdateTime(new  Date());
+		orderMapper.updateByPrimaryKey(order);
+		//List<PayWay> list = payWayMapper.selectByExample(null); //查询支付方式
+	}*/
+	
+
+	@Override
+	public BigDecimal getActivityGoodsPrice(long activityId,long goodsId,Integer activityType){
+		BigDecimal prcie = new  BigDecimal(0);
+		ReqData reqData = new  ReqData();
+		switch (activityType) {
+			case SystemConstant.ACTIVITY.BYU_AND_PRESENT_ACTIVITY:
+				// 买即赠
+				break;
+			case SystemConstant.ACTIVITY.PROMOTION_ACTIVITY:
+				// 专题促销
+				break;
+			case SystemConstant.ACTIVITY.LIMIT_ACTIVITY:
+				LimitActivity limitivity = limitActivityMapper.selectByPrimaryKey(activityId);
+				reqData.putValue("limit_id", limitivity.getId(), SystemConstant.REQ_PARAMETER_EQ);
+				reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+				List<LimitGoods> list = limitGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				if (list.size() > 0) {
+					prcie=list.get(0).getPrice();
+				}
+				break;
+			default:
+				break;
+		}
+		return prcie;
+	}
+	
+	/**
+	 * 判断是否含有跨境商品
+	 * @param list
+	 * @return    
+	 * @return boolean    false 表示有跨境商品
+	 * Date:2017年8月1日 上午11:38:38 
+	 * @author hexw
+	 */
+	public boolean checkIsAcrossBorders(List<AppGoodsVo> list){
+		boolean flag = true ;
+		ReqData reqData = new  ReqData();
+		for (AppGoodsVo appGoodsVo : list) {
+			reqData.putValue("a.goods_id", appGoodsVo.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			List<String> categoryNames = appOrderExMapper.findCategoryName(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			for (String categoryName : categoryNames) {
+				if (!StringUtils.isEmpty(categoryName)) {
+					if(categoryName.indexOf(SystemConstant.TERMDATA.ACROSSBORDERS)!=-1){ //包含跨境两个字
+						return false ;
+					}
+				}
+			}
+		}
+		return flag;
+	}	
+	
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void refund(RefundInDto refundIn) {
+		Long userid =  refundIn.getUserid();
+		Long orderid = refundIn.getOrderId();
+		String orderNo = refundIn.getOrderNo();
+		String comment = refundIn.getComment();
+		List<String> imgs = refundIn.getImgs();
+		
+		//1.验证
+		if (!(!ObjectUtils.isEmpty(orderid) || !StringUtils.isEmpty(orderNo))) {
+			throw new BusinessException("退款订单ID和订单编号必须输入一个");
+		}
+		if (ObjectUtils.isEmpty(userid)) {
+			throw new BusinessException("退款人不能为空");
+		}
+		if (StringUtil.isEmpty(comment)) {
+			throw new BusinessException("退货原因不能为空");
+		}
+		
+		CriteriaParameter para = new CriteriaParameter();
+		Criteria criteria = para.createCriteria();
+		
+		criteria.equalTo("user_id", userid);
+		if (!ObjectUtils.isEmpty(orderid)) {
+			criteria.equalTo("id", orderid);
+		}
+		if (!StringUtils.isEmpty(orderNo)) {
+			criteria.equalTo("no", orderNo);
+		}
+		
+		
+		List<Order> orders = orderMapper.selectByExample(para);
+		if (CollectionUtils.isEmpty(orders)) {
+			throw new BusinessException("订单不存在");
+		}
+		Order order = orders.get(0);
+		if (SystemConstant.ORDER.STATUS_UNPAID.equals(order.getStatus())) {
+			throw new BusinessException("订单没有支付无需退款");
+		}
+		if (SystemConstant.ORDER.RETURN_STATUS_REFUNDING.equals(order.getReturnStatus())) {
+			throw new BusinessException("你的订单已经在处理中了，请耐心等待");
+		}
+		
+		//2.退款处理
+		order.setReturnReason(comment);//退款原因
+		order.setReturnStatus(SystemConstant.ORDER.RETURN_STATUS_REFUNDING);
+		order.setUpdateTime(DateUtil.date());
+		orderMapper.updateByPrimaryKeySelective(order);
+		
+		if (!CollectionUtils.isEmpty(imgs)) {
+			Date now = DateUtil.date();
+			for (String string : imgs) {
+				RefundImage refundImage = new RefundImage();
+				refundImage.setCreateTime(now);
+				refundImage.setImagePath(string);
+				refundImage.setOrderId(order.getId());
+				refundImageMapper.insertSelective(refundImage);
+			}
+			
+		}
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void cancelOrder(CancelOrderInDto cancelOrderIn) {
+		Long userid =  cancelOrderIn.getUserid();
+		Long orderid = cancelOrderIn.getOrderId();
+		
+		if (ObjectUtils.isEmpty(orderid)) {
+			throw new BusinessException("取消的订单不能为空");
+		}
+		if (ObjectUtils.isEmpty(userid)) {
+			throw new BusinessException("取消人不能为空");
+		}
+		
+		CriteriaParameter para = new CriteriaParameter();
+		Criteria criteria = para.createCriteria();
+		
+		criteria.equalTo("user_id", userid);
+		criteria.equalTo("id", orderid);
+		List<Order> orders = orderMapper.selectByExample(para);
+		if (CollectionUtils.isEmpty(orders)) {
+			throw new BusinessException("订单不存在");
+		}
+		Order order = orders.get(0);
+		if (!order.getStatus().equals(SystemConstant.ORDER.STATUS_UNPAID)) {
+			throw new BusinessException("未支付的订单才可以取消");
+		}
+		
+		order.setIsDel(SystemConstant.ORDER.IS_DEL_DELETE); //删除就是取消
+		order.setUpdateTime(DateUtil.date());
+		orderMapper.updateByPrimaryKeySelective(order);
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void confirmReceipt(CancelOrderInDto cancelOrderIn) {
+		
+		Long userid =  cancelOrderIn.getUserid();
+		Long orderid = cancelOrderIn.getOrderId();
+		
+		//1.校验输入
+		if (ObjectUtils.isEmpty(orderid)) {
+			throw new BusinessException("确认收货的订单不能为空");
+		}
+		if (ObjectUtils.isEmpty(userid)) {
+			throw new BusinessException("确认收货人不能为空");
+		}
+		CriteriaParameter para = new CriteriaParameter();
+		Criteria criteria = para.createCriteria();
+		
+		criteria.equalTo("user_id", userid);
+		criteria.equalTo("id", orderid);
+		List<Order> orders = orderMapper.selectByExample(para);
+		if (CollectionUtils.isEmpty(orders)) {
+			throw new BusinessException("订单不存在");
+		}
+		Order order = orders.get(0);
+		if (!SystemConstant.ORDER.STATUS_FINISH_DELIVERY.equals(order.getStatus()) ) {
+			throw new BusinessException("订单在待收货状态才可以确认收货");
+		}
+		//2.确认收货
+		order.setStatus(SystemConstant.ORDER.STATUS_WAITTING_COMMENT);
+		order.setArrivalTime(DateUtil.date()); //确认收货时间
+		order.setUpdateTime(DateUtil.date());
+		orderMapper.updateByPrimaryKey(order);
+	}
+
+	@Override
+	public JSONObject OrderDetail(CancelOrderInDto cancelOrderIn) {
+		CriteriaParameter para = new CriteriaParameter();
+		Criteria criteria = para.createCriteria();
+		
+		Long orderId = cancelOrderIn.getOrderId();
+		Order order = orderMapper.selectByPrimaryKey(orderId);
+		if (ObjectUtil.isNull(order)) {
+			throw new BusinessException("订单不存在");
+		}
+		
+		JSONObject res = new JSONObject();
+		res.put("status", order.getStatus());//订单状态
+		res.put("consigneeName", order.getConsigneeName());//收货人名称
+		res.put("consigneePhone", order.getConsigneePhone());//收货人联系方式
+		res.put("consigneeAddress", order.getConsigneeAddress());//收货人地址
+		
+		//2.取出商品数据
+		List<OrderGoods> orderGoods = null;
+		List<Goods> goods = new ArrayList<Goods>(); //关联的所有商品
+		
+		criteria.equalTo("order_id", orderId);
+		orderGoods = orderGoodsMapper.selectByExample(para);
+		
+		
+		criteria.clearCriteria();
+		criteria.in("id", getGoodsIds(orderGoods));
+		goods = goodsMapper.selectByExample(para);
+		
+//		List<FreightGoods> freightGoodss = new ArrayList<>(); //邮费计算-1
+		BigDecimal goodsAllPrice = new BigDecimal(0);//原始商品总价
+		
+		JSONArray goodslist = new JSONArray();
+        for (OrderGoods ordergoods : orderGoods) {
+        	for (Goods goods2 : goods) {
+    			if (ordergoods.getGoodsId().equals(goods2.getId())) {
+    				JSONObject goodsjo = new JSONObject();
+    				goodsjo.put("goodsId", goods2.getId());
+    				goodsjo.put("goodsName", goods2.getName());
+    				goodsjo.put("imgurl", commonGoodsService.getFirstGoodsImg(goods2.getId()));
+    				goodsjo.put("goodsNum", ordergoods.getNum());
+    				goodsjo.put("price", ordergoods.getPrice());
+    				goodsjo.put("weight", goods2.getStandard());
+    				goodslist.add(goodsjo);
+    				
+    				//
+    				goodsAllPrice = goodsAllPrice.add(ordergoods.getPrice().multiply(new BigDecimal(ordergoods.getNum())));
+    				
+    				//获取邮费参数
+//    				FreightGoods freightGoods = new FreightGoods();
+//    				freightGoods.setGoods(goods2);
+//    				freightGoods.setNum(ordergoods.getNum());
+//    				freightGoodss.add(freightGoods);
+				}
+    		}
+		}
+        
+        res.put("goodsAllPrice", goodsAllPrice);//原始商品总价
+		res.put("goods", goodslist); //商品详情
+		res.put("sendTime", order.getSendTime());//发货时间（配送日期）
+		res.put("deliveryMethod", order.getDeliveryMethod());//配送方式
+		//res.put(key, value) //抵用卷
+		
+		res.put("consigneeIdcard", order.getConsigneeIdcard());//收货人身份证信息
+		res.put("hasInvoice", ObjectUtil.isNotNull(order.getInvoiceType())); //是否有发票信息
+		res.put("companyName", order.getCompanyName()); //发票信息企业名称
+		res.put("invoiceContent", order.getInvoiceType());//发票内容
+		
+		res.put("orderRemark", order.getOrderRemark()); //订单备注
+		
+		res.put("total", order.getTotal()); //订单商品总额
+//		res.put("orderRemark", order.getOrderRemark()); //订单备注
+//		res.put("orderRemark", order.getOrderRemark()); //订单备注
+//		res.put("orderRemark", order.getOrderRemark()); //订单备注
+		BigDecimal actual = order.getActual();
+		res.put("actual", ObjectUtil.isNull(actual)?0:actual) ;//第三方实付款
+		
+		res.put("no", order.getNo());//订单编号
+		res.put("createTime", order.getCreateTime());// 订单创建时间
+		res.put("payTime", order.getPayTime()); //付款时间
+		
+		//自动关闭订单时间 + 1天
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(order.getCreateTime());
+		cal.add(Calendar.DATE, 1);
+		res.put("closeTime",cal.getTime());// 自动关闭订单时间
+		
+		res.put("freight",order.getFreight());
+		//计算邮费 - 3
+//		BigDecimal valillaTotal = order.getTotal();//原始总额
+//		double weight = FreightUtil.getWeightByGoods(freightGoodss); //获取重量
+//		String province = order.getProvince();
+//		String area = order.getArea();
+//		if (!(StringUtil.isEmpty(province) || StringUtil.isEmpty(area))) {
+//			BigDecimal freight = FreightUtil.getFreight(province, area, weight, valillaTotal);
+//			res.put("freight",freight);
+//		}
+		
+		return res;
+	}
+	
+	@Override
+	public AppGoodsVo createAppGoodsVo(ShoppingCart shoppingCart){
+		AppGoodsVo vo = new AppGoodsVo();
+		vo.setId(shoppingCart.getGoodsId());
+		vo.setNum(shoppingCart.getNum());
+		if (ObjectUtil.isNotNull(shoppingCart.getActivityId())) {
+			vo.setActivityId(shoppingCart.getActivityId());
+		} else {
+			vo.setActivityId(0);
+		}
+		if (ObjectUtil.isNotNull(shoppingCart.getActivityType())) {
+			vo.setActivityType(shoppingCart.getActivityType());
+		} else {
+			vo.setActivityType(0);
+		}
+		if (ObjectUtil.isNotNull(shoppingCart.getPresentGoodsId())) {
+			vo.setPresentGoodsId(shoppingCart.getPresentGoodsId());
+		} else {
+			vo.setPresentGoodsId(0);
+		}
+		return vo;
+	}
+	
+	@Override
+	public Map<String,Object> getFreight(List<AppGoodsVo> list,String provinces,String area,Long userId){
+		Map<String,Object> result = new HashMap<String,Object>();
+		BigDecimal disCountPrice = new BigDecimal("0");
+		// 1. 计算出商品总重量
+		double weight = FreightUtil.getWeightByGoods(getFreightGoods(list));
+		// 2. 计算商品总金额
+		BigDecimal sumPrice = getGoodSumPrice(list);
+		// 3. 计算出运费
+		BigDecimal freight = FreightUtil.getFreight(provinces, area, weight, sumPrice);
+		// 4. xmy开业6.8 活动
+		if (ObjectUtil.isNotNull(userId)) {
+			BigDecimal goodsPrice = new BigDecimal("0");
+			if (ObjectUtil.isNotNull(userId)) {
+				List<Object> ids = new ArrayList<Object>();
+				for (AppGoodsVo vo : list) {
+					ids.add(vo.getId());
+				}
+				goodsPrice = commonGoodsService.getDiscountSumPrice(ids, userId) ;  //不包含跨境专区和企业定制商品
+				disCountPrice = onLineService.getDiscountPrice(goodsPrice,userId,provinces);
+			}
+		}
+		result.put("freight", freight);
+		result.put("disCountPrice", disCountPrice);
+		return result;
+	}
+
+	public List<FreightGoods> getFreightGoods(List<AppGoodsVo> list){
+		List<FreightGoods> allGoods = new ArrayList<FreightGoods>();
+		for (AppGoodsVo appGoodsVo : list) {
+			FreightGoods freightGoods = new FreightGoods();
+			Goods goods = goodsMapper.selectByPrimaryKey(appGoodsVo.getId());
+			if (ObjectUtil.isNotNull(goods)) {
+				freightGoods.setGoods(goods);
+				freightGoods.setNum(appGoodsVo.getNum());
+				allGoods.add(freightGoods);
+			}
+			if (ObjectUtil.isNotNull(appGoodsVo.getPresentGoodsId()) && appGoodsVo.getPresentGoodsId() !=0 ) { //是否有赠品
+				goods = goodsMapper.selectByPrimaryKey(appGoodsVo.getPresentGoodsId());
+				if (ObjectUtil.isNotNull(goods)) {
+					freightGoods.setGoods(goods);
+					freightGoods.setNum(appGoodsVo.getNum());
+					allGoods.add(freightGoods);
+				}
+			}
+		}
+		return allGoods;
+	}
+	
+	/**
+	 *  计算商品总金额
+	 */
+	public BigDecimal getGoodSumPrice(List<AppGoodsVo> list){
+		// 1. 查询商品
+		List<Object> ids = new ArrayList<Object>();
+		for (AppGoodsVo vo : list) {
+			ids.add(vo.getId());
+		}
+		CriteriaParameter para=new CriteriaParameter();
+		Criteria createCriteria = para.createCriteria();
+		createCriteria.in("id", ids);
+		List<Goods> allGoods = goodsMapper.selectByExample(para);
+		// 2. 计算总金额
+		BigDecimal sumPrice = new BigDecimal("0.00");
+		for (Goods goods : allGoods) {
+			sumPrice = sumPrice.add(goods.getPrice());
+		}
+		return sumPrice;
+	}
+	
+}

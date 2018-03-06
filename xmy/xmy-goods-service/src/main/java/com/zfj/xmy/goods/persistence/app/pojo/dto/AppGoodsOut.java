@@ -1,0 +1,108 @@
+package com.zfj.xmy.goods.persistence.app.pojo.dto;
+
+import java.math.BigDecimal;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+public class AppGoodsOut {
+	
+	private long id;//商品id
+	
+	private String name;//商品名称
+	
+	private String standard;//商品规格
+	
+	private String imgPath ;//商品图片
+	
+	private BigDecimal price;//商品价格
+	
+	private Integer sumDeal;//商品成交量
+	
+	private Integer sumComment;//商品评论总数
+	
+	private Integer countPage;//总页数
+	
+	private Integer pageIndex;//当前第几页
+	
+	private long activityId;//活动id
+	
+	private Integer activityType;//活动类型用于区分那张表
+	
+	private String activityImgPath;//活动图标
+	
+	public long getActivityId() {
+		return activityId;
+	}
+	public void setActivityId(long activityId) {
+		this.activityId = activityId;
+	}
+	public Integer getActivityType() {
+		return activityType;
+	}
+	public void setActivityType(Integer activityType) {
+		this.activityType = activityType;
+	}
+	public String getActivityImgPath() {
+		return activityImgPath;
+	}
+	public void setActivityImgPath(String activityImgPath) {
+		this.activityImgPath = activityImgPath;
+	}
+	public long getId() {
+		return id;
+	}
+	public void setId(long id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getStandard() {
+		return standard;
+	}
+	public void setStandard(String standard) {
+		this.standard = standard;
+	}
+	public String getImgPath() {
+		return imgPath;
+	}
+	public void setImgPath(String imgPath) {
+		this.imgPath = imgPath;
+	}
+	public BigDecimal getPrice() {
+		return price;
+	}
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+	public Integer getSumDeal() {
+		return sumDeal;
+	}
+	public void setSumDeal(Integer sumDeal) {
+		this.sumDeal = sumDeal;
+	}
+	public Integer getSumComment() {
+		return sumComment;
+	}
+	public void setSumComment(Integer sumComment) {
+		this.sumComment = sumComment;
+	}
+	public Integer getCountPage() {
+		return countPage;
+	}
+	public void setCountPage(Integer countPage) {
+		this.countPage = countPage;
+	}
+	public Integer getPageIndex() {
+		return pageIndex;
+	}
+	public void setPageIndex(Integer pageIndex) {
+		this.pageIndex = pageIndex;
+	}
+	
+}

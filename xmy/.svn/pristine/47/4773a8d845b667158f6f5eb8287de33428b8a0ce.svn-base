@@ -1,0 +1,144 @@
+$(document).ready(function () {
+    $(".sum>.level:gt(0)").hide();
+    $("#pay").hide();
+    $(".choice-ul").on("click","li",function(){
+    	if ($(this).text() == "货到付款") {
+    		if ($("#isCrossGodods").val() == 0) { //含有跨境商品不能选择货到付款
+    			pop("含有跨境商品的订单尚不支持货到付款！")
+    			return;
+    		}
+        }
+        $(this).addClass("active").siblings().removeClass("active");
+        $(this).find(".hx").show();
+        $(this).siblings().find(".hx").hide();
+        var index=$(".choice-ul li").index(this);
+        $(".sum>.level").eq(index).show().siblings().hide();
+        if($(this).text() == "支付宝支付"){
+	    	 var orderId=$(".select").val();
+			//网页支付宝支付
+	    	$.ajax({
+	    			url:"pay/goods",
+	    			type:"post",
+	    			data:"orderid="+orderId+"&paytype=8",
+	    			success:function(data){
+	    				$(".level").eq(3).html(data.alipay);
+	    				$("from").last().att("target","alipay");
+	    			}
+	    	});
+        }
+    });
+    $(".option-ul").on("click","li",function(){
+        $(this).find(".chunk").addClass("active");
+        $(this).siblings().find(".chunk").removeClass("active");
+        if($(this).find(".chunk").hasClass("active")){
+            $(this).find(".active").append("<div class='xz'></div>");
+        };
+    });
+    var setTime = 40;
+    var time=parseInt($("#time").text());
+    setTime=setInterval(function(){
+        if(time<=0){
+            clearInterval(setTime);
+            return;
+        }
+        time--;
+        $("#time").text(time);
+    },1000);
+    $(".activate").click(function(){
+        $(".blances-modal").fadeIn();
+    });
+    //个人账户支付
+    $(".select").click(function(){
+		var balance = $(".balance").text();
+		var autal = $(".payment").children().first().text();
+		var pay = $(".pay").children().first().val();
+		if(pay != "" ){
+			$(".pay").children().first().val("");
+			$("#pay").hide();
+		}else{
+			if(parseInt(balance) >= parseInt(autal)){
+				$(".pay").children().first().val(autal);
+				$("#pay").show();
+			}else{
+				$(".pay").children().first().val(balance);
+			}
+		}
+    });
+    //余额支付
+    $("#pay").click(function(){
+    	var pay = $(".pay").children().first().val();
+    	$("#balancePay").val(pay);
+    	$("#payMethod").val(4);//购物卡支付
+    	$("#payOrder").submit();//提交表单
+    });
+    //货到付款支付
+    $(".confirm").children().first().click(function(){
+    	var pay = $(".pay").children().first().val();
+    	var balance = $(".balance").text();
+    	var check = null;
+    	$(".select").each(function(){
+    		check = this.checked;
+    	})
+    	if(check){
+    		if(balance == "0"){
+    			$("#balancePay").val("0.00");
+    		}else{
+    			$("#balancePay").val(pay);
+    		}
+    	}else{
+    		$("#balancePay").val("0.00");
+    	}
+    	$("#payMethod").val(5);//货到付款
+    	$("#payOrder").submit();//提交表单
+    });
+    //激活购物卡
+    $(".action-active").click(function(){
+    	var cardNo = $("#cardNo").val();
+    	var cardPwd = $("#cardPwd").val();
+    	var orderId = $(".select").val();
+    	//window.location.href ="card/addShopingCard/"+cardNo+"/"+cardPwd+"/"+orderId;
+    	$.ajax({
+    		url:"card/addShopingCard/"+cardNo+"/"+cardPwd+"/"+orderId,
+    		type:"post",
+    		success:function(data){
+    			if(data == 0){
+    				var text = "绑定购物卡成功！请刷新页面！";
+    				pop(text);
+    			}
+    			if(data == 1){
+    				var text = "购物卡编号或密码错误！";
+    				pop(text);
+    			}
+    			if(data == 2){
+    				var text = "该卡已经被用户使用请用户核实！";
+    				pop(text);
+    			}
+    		}
+    	})
+    });
+    //生成微信支付二维码
+	var orderId=$(".select").val();
+	$.ajax({
+		url: "pay/goods",
+		type:"post",
+		data:"orderid="+orderId+"&paytype=7",
+		success:function(data){
+			$("canvas").hide();
+			$("#ewms").qrcode(data.code_url);
+		}
+	});
+});
+//公共弹窗方法 简单的 
+function pop(text){
+	var btnFn = function(){
+		easyDialog.close();
+	  return false;
+	};
+	easyDialog.open({
+	  container : {
+	    header : '提示',
+	    content : text,
+	    yesFn : btnFn
+	  }
+	});
+}

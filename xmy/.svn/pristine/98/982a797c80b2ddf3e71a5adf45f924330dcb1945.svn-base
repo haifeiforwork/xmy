@@ -1,0 +1,58 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/common/common_html.jsp" %>
+<%@ include file="/WEB-INF/jsp/common/common_tag.jsp" %>
+<%@ include file="/WEB-INF/jsp/common/common_css.jsp" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<link rel="stylesheet" href="resources/home/css/home.css" />
+ <style>
+	header{z-index:9999;}
+	footer{z-index:9999;}
+	p{margin:0} 
+ </style>
+<body ontouchstart>
+<header>
+    <div class="header-top header-top2">
+        <div class="pull-left"><img src="resources/common/images/index-logo.png"/></div>
+        
+        <div class="pull-center">
+            <div class="head-phone">
+                <img src="resources/common/images/ico-index-24@2x.png" alt="">
+                <p>400-822-3936(客服)</p>
+                <p>17723156790(夜间)</p>
+            </div>
+        </div>
+        
+        <div class="pull-right">
+            <span class="search"><img src="resources/common/images/btn-index-search@2x.png" alt=""></span>
+           <!--  <span class="share"><img src="resources/common/images/btn-index-share@2x.png"/></span> -->
+            <span class="shrink"><img src="resources/common/images/btn-index-more@2x.png"/>
+            	<div class="modal-some">
+                    
+                </div>
+            </span>
+        </div>
+        
+    </div>
+</header>
+
+	<input type="hidden" id="targetHtml" value="${url }" />
+	<%-- <%@ include file="/activity/wap_20171118jujbs.html" %> --%>
+    
+    <%@ include file="/WEB-INF/jsp/common/common_footer.jsp" %>
+    <script type="text/javascript" src="resources/common/js/jquery.min.js"></script>
+    <script type="text/javascript" src="resources/common/js/jquery-weui.min.js"></script>
+    <script type="text/javascript" src="resources/common/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="resources/common/js/jquery.flexslider-min.js"></script>
+    <script type="text/javascript" src="resources/common/js/jquery.raty.min.js"></script>
+    <script type="text/javascript" src="resources/activity/js/html.js"></script>
+    <script type='text/javascript' src='activity/js/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='activity/js/sm.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='activity/js/sm-extend.min.js' charset='utf-8'></script>	
+    <script type="text/javascript" src="activity/js/wapbdj.js"></script>
+</body>
+</html>

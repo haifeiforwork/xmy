@@ -1,0 +1,228 @@
+.content {
+	bottom: 0
+}
+/*自定样式*/
+.clearfix {
+	*zoom: 1;
+}
+
+.clearfix:before,.clearfix:after {
+	display: table;
+	line-height: 0;
+	content: "";
+}
+
+.clearfix:after {
+	clear: both;
+}
+
+.container-white {
+	background-color: #FFF;
+	width: 100%;
+}
+
+.container .logo-area img {
+	width: 100%;
+}
+
+ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+/*所有大图*/
+.banner img {
+	width: 100%;
+	display: block
+}
+
+.banner {
+	position: relative;
+}
+
+/*自定栅格*/
+.col-49 {
+	width: 48.5%;
+	margin-right: 3%;
+	float: left
+}
+
+.row4 {
+	margin: 0 0.5rem;
+}
+
+/*商品列表*/
+.shop-list {
+	
+}
+
+.shop-list .col-49 {
+	padding: 0.2rem;
+	margin-top: 0.5rem;
+}
+
+.shop-list .col-49:nth-of-type(2n) {
+	margin-right: 0;
+}
+
+.shop-list .shop-img {
+	width: 100%;
+	display: block;
+	margin: 0 auto
+}
+
+.shop-list .shop-name {
+	font-size: 0.6rem;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	color: #333;
+	height: 40px;
+	padding: 0 0.2rem;
+	margin-top: 0.1rem;
+}
+
+.shop-list .shop-list-foot {
+	text-align: right;
+	padding: 0.1rem 0.2rem;
+}
+
+.shop-list .col-33 .shop-list-foot {
+	margin-top: -0.4rem;
+}
+
+.shop-list .shop-list-foot3 {
+	font-size: 0.5rem;
+	color: #333;
+	text-align: left;
+}
+
+.shop-list-foot3 .jf-price {
+	margin-right: 0.4rem;
+}
+
+/*一行title*/
+.vip-title {
+	font-size: 0.8rem;
+	padding: 0.3rem 0.5rem;
+}
+
+.vip-title img {
+	width: 19px;
+	height: 19px;
+	position: relative;
+	top: 4px;
+	margin-right: 0.2rem;
+}
+
+/*tab切换*/
+.tab-nav {
+	background-color: #2D9700;
+	color: #FFF;
+	font-size: 0.7rem;
+}
+
+.tab-nav .weui-flex__item {
+	padding: 0.5rem 0;
+	text-align: center;
+}
+
+.tab-nav .active {
+	border-bottom: 2px solid #FFF;
+}
+
+/*商品列表新增*/
+.vip .shop-name {
+	width: 71%;
+	float: left
+}
+
+.vip .badge {
+	width: 27%;
+	float: left;
+	background: url("../images/bg-hyzx-bq@2x.png") no-repeat;
+	background-size: 100% 100%;
+	color: #FFF;
+	font-size: 0.6rem;
+	line-height: 1.1;
+	text-align: center;
+	padding: 0.2rem 0 0.3rem
+}
+
+.vip-gutter {
+	padding: 0.3rem 0.5rem 0.5rem;
+	background-color: #FFF;
+	margin-bottom: 0.5rem;
+}
+
+.vip-gutter .vip-title {
+	padding: 0 0 0.3rem;
+}
+
+/*会员权益导航*/
+.head-nav {
+	padding: 0.5rem 0 0;
+	border-top: 1px solid #f0f0f0;
+	font-size: 0.6rem;
+	text-align: center
+}
+
+.head-nav .vip-head-img {
+	width: 45px;
+	display: block;
+	margin: 0 auto 0.1rem;
+}
+
+.head-nav .active {
+	color: #FE8E00;
+}
+
+/*头部*/
+.head {
+	background: url("../images/vip-head_02.png") no-repeat;
+	background-size: 100% 100%;
+}
+
+.head .weui-media-box_appmsg .weui-media-box__thumb {
+	border-radius: 50%;
+	border: 1px solid #FFF;
+}
+
+.head .phone {
+	color: #FFF;
+	font-size: 0.7rem;
+	margin-top: 0.2rem;
+}
+
+.head .jf {
+	color: #F68D00;
+	font-size: 0.7rem;
+	text-align: right
+}
+
+.head .jf .jf-count {
+	float: left
+}
+
+.head .sign-btn {
+	background-color: #FF960F;
+	color: #FFF;
+	padding: 0.15rem 0.7rem;
+	border-radius: 10px;
+	border: none;
+	margin-right: 10%;
+	font-size: 14px;
+	margin-top:-10px;
+}
+
+.head .acc-point {
+	background-color: #FF960F;
+	color: #FFF;
+	padding: 0 0.5rem;
+	border-radius: 10px;
+	border: none;
+	margin-right: 13%;
+	font-size: 14px;
+	float: left;
+}

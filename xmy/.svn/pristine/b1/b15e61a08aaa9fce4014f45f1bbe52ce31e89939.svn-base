@@ -1,0 +1,630 @@
+package com.zfj.xmy.user.service.common.impl;
+
+
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.RowBounds;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
+import com.alibaba.druid.support.json.JSONUtils;
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.http.HttpUtil;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.xiaoleilu.hutool.lang.Validator;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.xiaoleilu.hutool.util.RandomUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.commons.mini.constant.BaseConstant;
+import com.zfj.base.encryption.MD5Utils;
+import com.zfj.base.enu.BaseProp;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.UUIDUtil;
+import com.zfj.xmy.common.persistence.dao.MsgPushInfoMapper;
+import com.zfj.xmy.common.persistence.dao.SmsLogMapper;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.dao.UserMapper;
+import com.zfj.xmy.common.persistence.pojo.MsgPushInfo;
+import com.zfj.xmy.common.persistence.pojo.SmsLog;
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.redis.TokenManager;
+import com.zfj.xmy.user.persistence.pojo.dto.UserInfoDto;
+import com.zfj.xmy.user.persistence.pojo.dto.app.AppUserInDto;
+import com.zfj.xmy.user.persistence.pojo.dto.app.MobilePhoneDto;
+import com.zfj.xmy.user.persistence.pojo.dto.app.RegisterInDto;
+import com.zfj.xmy.user.persistence.pojo.dto.app.UserLoginInDto;
+import com.zfj.xmy.user.persistence.pojo.dto.app.UserLoginOutDto;
+import com.zfj.xmy.user.persistence.pojo.dto.app.UserRegisterInDto;
+import com.zfj.xmy.user.service.common.SmsLogService;
+import com.zfj.xmy.user.service.common.UserService;
+import com.zfj.xmy.util.EmailUtil;
+import com.zfj.xmy.util.SendSMSUtil;
+import com.zfj.xmy.util.WechatLogin;
+
+@Service
+public class UserServiceImpl extends BaseService implements UserService{
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private UserInfoMapper userInfoMapper;
+	@Autowired
+	private MsgPushInfoMapper msgPushInfoMapper;
+	@Autowired
+	private TokenManager tokenManager ;
+	@Autowired
+	private SmsLogMapper smsLogMapper;
+	
+	@Autowired
+	private  SmsLogService smsLogService;
+	
+	@Override
+	public List<UserInfoDto> findUserInfoEx(CriteriaParameter para,
+			RowBounds rowBound) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void bindNewPhone(UserRegisterInDto bindNewPhoneVo,Long userid) {
+		//1.验证输入
+		String mobilePhone = bindNewPhoneVo.getMobilePhone();
+		String code = bindNewPhoneVo.getCode();
+
+		if (ObjectUtils.isEmpty(mobilePhone)) {
+			throw new BusinessException("手机号不能为空");
+		}
+		if (ObjectUtils.isEmpty(code)) {
+			throw new BusinessException("验证码不能为空");
+		}
+		// 2.验证手机验证码
+		smsLogService.valid(code, mobilePhone);
+		// 3.验证用户信息
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("mobile_phone", mobilePhone);
+		List<UserInfo> userInfos = userInfoMapper.selectByExample(parameter);
+		if (!CollectionUtils.isEmpty(userInfos)) {
+			throw new BusinessException("系统已存在该号码");
+		}
+		
+		//4.修改用户手机号
+		UserInfo userInfosModify = userInfoMapper.selectByPrimaryKey(userid);
+		if (ObjectUtils.isEmpty(userInfosModify)) {
+			throw new BusinessException("登录用户不存在");
+		}
+		userInfosModify.setPhone(mobilePhone);
+		userInfoMapper.updateByPrimaryKeySelective(userInfosModify);
+	}
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void verifyPhone(String mobilePhone){
+		if (ObjectUtils.isEmpty(mobilePhone)) {
+			throw new BusinessException("手机号不能为空");
+		}
+		// 判断该手机号是否已被注册
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("mobile_phone", mobilePhone);
+		List<UserInfo> userInfos = userInfoMapper.selectByExample(parameter);
+		if (!CollectionUtils.isEmpty(userInfos)) {
+			throw new BusinessException("系统已存在该号码");
+		}
+	}
+	
+	@Override
+	public int updateUser(ReqData reqData, UserInfoDto userInfoDto) {
+		User user=new User();
+		user.setId(userInfoDto.getId());
+		//如果管理员设置了用户的密码，那就设置值
+		if(!ObjectUtils.isEmpty(userInfoDto.getPassword()))
+			user.setPassword(MD5Utils.encodeString(userInfoDto.getPassword()));
+		user.setName(userInfoDto.getName());
+		user.setStatus(userInfoDto.getStatus());
+		user.setLevel(userInfoDto.getLevel());
+		int updateByPrimaryKeySelective = userMapper.updateByPrimaryKeySelective(user);
+		return updateByPrimaryKeySelective;
+	}
+
+	@Override
+	public int updateUserStatus(String[] idArry, String status) {
+		User user=new User();
+		int num = 0;
+		for (String string : idArry) {
+			user.setId(Long.valueOf(string));
+			//1 判断状态是启用，就更新状态为启用
+			if(status.equals(SystemConstant.USERINFO.STATUS_ON_STRING))
+			{
+				user.setStatus(SystemConstant.USERINFO.STATUS_ON_INTEGER);
+				
+			}
+			//2 判断状态是禁用，就更新状态为禁用
+			else 
+			{
+				user.setStatus(SystemConstant.USERINFO.STATUS_OFF_INTEGER);
+			}
+			int updateByPrimaryKey = userMapper.updateByPrimaryKeySelective(user);
+			num+=updateByPrimaryKey;
+		}
+		return num;
+	}
+
+	@Override
+	public int deleteUsers(String[] idArry) {
+		int num=0;
+		for (String string : idArry) {
+			int deleteByPrimaryKey = userMapper.deleteByPrimaryKey(Long.valueOf(string));
+			num+=deleteByPrimaryKey;
+		}
+		return num;
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void register(UserRegisterInDto registerInDto) {
+		RegisterInDto register = new RegisterInDto();
+		register.setCode(registerInDto.getCode());
+		register.setMobilePhone(registerInDto.getMobilePhone());
+		register.setPassword(registerInDto.getPassword());
+		register.setType(RegisterInDto.TYPE_NOMARL);
+		register( register);
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public UserLoginOutDto login(UserLoginInDto loginInDto) {
+		//1.登录
+		String name = loginInDto.getName();
+		String password = loginInDto.getPassword();
+		String qqOpenid = loginInDto.getQqOpenId();
+		String wechatcode = loginInDto.getWechatcode();
+		Integer type = loginInDto.getType();
+		
+		if (ObjectUtils.isEmpty(type)) {
+			throw new BusinessException("登录类型不能为空");
+		}
+		
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		
+
+		User user = null; //登录成功的用户对象
+		UserInfo userInfo = null;//登录成功的用户对象
+		
+		if (UserLoginInDto.TYPE_NOMARL.equals(type)) {//1.1普通登录
+            if (StringUtil.isEmpty(name)) {
+            	throw new BusinessException("帐号不能为空");
+			}
+			if (StringUtil.isEmpty(password)) {
+				throw new BusinessException("密码不能为空");
+			}
+			
+			
+			//1.11 用手机号登录
+			criteria.equalTo("mobile_phone", name);
+			List<UserInfo> mobilePhoneUserInfos = userInfoMapper.selectByExample(parameter);
+			if (!CollectionUtils.isEmpty(mobilePhoneUserInfos)) {
+				userInfo = mobilePhoneUserInfos.get(0);
+				user = userMapper.selectByPrimaryKey(userInfo.getId());
+				if (!MD5Utils.encodeString(password).equals(user.getPassword())) { 
+					throw new BusinessException("帐号密码不正确");
+				}
+			}
+			
+			//1.12 邮箱登录
+			criteria.clearCriteria();
+			criteria.equalTo("email", name);
+			List<UserInfo> emailUserInfos = userInfoMapper.selectByExample(parameter);
+			
+			if (!CollectionUtils.isEmpty(emailUserInfos)) {
+				userInfo = emailUserInfos.get(0);
+				user = userMapper.selectByPrimaryKey(userInfo.getId());
+				if (!MD5Utils.encodeString(password).equals(user.getPassword())) { 
+					throw new BusinessException("帐号密码不正确");
+				}
+			}
+			
+			//1.13 用户名登录
+			criteria.clearCriteria();
+			criteria.equalTo("name", name);
+			List<User> nameUsers = userMapper.selectByExample(parameter);
+			if (!CollectionUtils.isEmpty(nameUsers)) {
+				user = nameUsers.get(0);
+				if (!MD5Utils.encodeString(password).equals(user.getPassword())) { 
+					throw new BusinessException("帐号密码不正确");
+				}else {
+					userInfo = userInfoMapper.selectByPrimaryKey(user.getId()); //密码验证通过，取出信息
+				}
+			}
+		}else if (UserLoginInDto.TYPE_WECHAT.equals(type)) { //1.2 微信登录
+			// throw new BusinessException("暂时不支持微信登录");
+			if (StringUtil.isEmpty(wechatcode)) {
+				throw new BusinessException("微信登录时需要传入code");
+			}
+			String wechatOpenid = wechatcodeToGetOpenid(wechatcode);
+			criteria.clearCriteria();
+			criteria.equalTo("wechat_openid", wechatOpenid);
+			List<User> openidUser = userMapper.selectByExample(parameter);
+			if (CollectionUtils.isEmpty(openidUser)) {
+				// 静默注册
+				RegisterInDto register = new RegisterInDto();
+				register.setWechatOpenId(wechatOpenid);
+				register.setType(RegisterInDto.TYPE_WECHAT);
+				register(register);
+				List<User> openidNewUsers = userMapper.selectByExample(parameter);
+				user = openidNewUsers.get(0);
+				userInfo = userInfoMapper.selectByPrimaryKey(user.getId());
+			} else {
+				// 静默登录
+				user = openidUser.get(0);
+				userInfo = userInfoMapper.selectByPrimaryKey(user.getId());
+			}
+		}else if (UserLoginInDto.TYPE_QQ.equals(type)) { //1.3 qq 登录
+			//throw new BusinessException("暂时不支持QQ登录");
+			if (StringUtil.isEmpty(qqOpenid)) {
+				throw new BusinessException("QQ登录时需要传入openid");
+			}
+			criteria.clearCriteria();
+			criteria.equalTo("qq_openid", qqOpenid);
+			List<User> openidUser = userMapper.selectByExample(parameter);
+			if (CollectionUtils.isEmpty(openidUser)) {
+				// 静默注册
+				RegisterInDto register = new RegisterInDto();
+				register.setQqOpenId(qqOpenid);
+				register.setType(RegisterInDto.TYPE_QQ);
+				register(register);
+				List<User> openidNewUsers = userMapper.selectByExample(parameter);
+				user = openidNewUsers.get(0);
+				userInfo = userInfoMapper.selectByPrimaryKey(user.getId());
+			} else {
+				// 静默登录
+				user = openidUser.get(0);
+				userInfo = userInfoMapper.selectByPrimaryKey(user.getId());
+			}
+		}else {
+			throw new BusinessException("登录类型不正确");
+		}
+		
+		//2.登录成功返回数据
+		if (ObjectUtils.isEmpty(user) || ObjectUtils.isEmpty(userInfo)) {
+			throw new BusinessException("登录失败,帐号不存在");
+			//throw new BusinessException(233, "登录失败,帐号不存在");
+		}
+		//2.1 更新登录时间
+		user.setLastLoginTime(DateUtil.date());
+		
+		userMapper.updateByPrimaryKey(user);
+		
+		UserLoginOutDto out = new UserLoginOutDto();
+		out.setEmail(userInfo.getEmail());
+		out.setName(user.getName());
+		out.setMobilePhone(userInfo.getMobilePhone());
+		out.setToken(user.getAppToken());
+		out.setTokenExpire(user.getAppTokenExpire());
+		out.setLastLoginTime(user.getLastLoginTime());
+		//2.1 更新redis
+		tokenManager.setKey(user.getAppToken(),JSONUtils.toJSONString(user.getId()));
+		return out;
+	}
+
+	/**
+	 * 用户注册私有方法
+	 * @param register
+	 * @Description 
+	 * @date 2017年8月7日  下午2:35:40
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	private void register(RegisterInDto register) {
+		//1.验证输入
+		String mobilePhone = register.getMobilePhone();
+		String password = register.getPassword();
+		String code = register.getCode();
+		
+		String qqOpenid = register.getQqOpenId();
+		String wechatOpenid = register.getWechatOpenId();
+		Integer type = register.getType();
+		
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		
+		if (RegisterInDto.TYPE_NOMARL.equals(type)) {
+			if (ObjectUtils.isEmpty(mobilePhone)) {
+				throw new BusinessException("手机号不能为空");
+			}
+			if (ObjectUtils.isEmpty(password)) {
+				throw new BusinessException("密码不能为空");
+			}
+			//2.验证手机号
+			criteria.equalTo("mobile_phone", mobilePhone);
+			List<UserInfo> userInfos = userInfoMapper.selectByExample(parameter);
+			if (!CollectionUtils.isEmpty(userInfos)) {
+				throw new BusinessException("系统已经存在该号码，请直接登录");
+			}
+			//3.验证手机验证码
+			smsLogService.valid(code, mobilePhone);
+		}else if (RegisterInDto.TYPE_WECHAT.equals(type)) {
+			 if (StringUtil.isEmpty(wechatOpenid)) {
+	            throw new BusinessException("微信登录时需要传入openid");
+			 }
+			 criteria.clearCriteria();
+			 criteria.equalTo("wechat_openid", wechatOpenid);
+			 List<User> openidUser = userMapper.selectByExample(parameter);
+			 if (!CollectionUtils.isEmpty(openidUser)) {
+				 throw new BusinessException("该用户已经注册");
+			 }
+		}else if (RegisterInDto.TYPE_QQ.equals(type)) {
+			if (StringUtil.isEmpty(qqOpenid)) {
+	            throw new BusinessException("QQ登录时需要传入openid");
+			 }
+			 criteria.clearCriteria();
+			 criteria.equalTo("qq_openid", qqOpenid);
+			 List<User> openidUser = userMapper.selectByExample(parameter);
+			 if (!CollectionUtils.isEmpty(openidUser)) {
+				 throw new BusinessException("该用户已经注册");
+			 }
+		}else {
+			throw new BusinessException("注册类型不正确");
+		}
+		
+		
+		
+		//4.保存用户信息
+	    User user = new User();
+	    user.setCreateTime(new Date());
+	    user.setName(StringUtil.isEmpty(mobilePhone)?RandomUtil.randomString(6):mobilePhone); //没有手机号的时候随机生成名字
+	    user.setPassword(StringUtil.isEmpty(password)?MD5Utils.encodeString(RandomUtil.randomNumbers(6)):MD5Utils.encodeString(password));//没有密码的时候随机生成密码
+	    user.setWechatOpenid(wechatOpenid);
+	    user.setQqOpenid(qqOpenid);
+	    user.setStatus(SystemConstant.USER.STATUS_ENABLE);
+	    user.setAppToken(UUIDUtil.generateToken());
+	    user.setAppTokenExpire(DateUtil.nextMonth());
+	    
+	    UserInfo userInfo = new UserInfo();
+	    userInfo.setSex(SystemConstant.USERINFO.SEX_MALE);
+	    userInfo.setMobilePhone(mobilePhone);
+	    userInfo.setIdCard(""); //身份证号
+	    userInfo.setAccPoints(SystemConstant.USER.PRESENT_POINTS);
+	    userMapper.insert(user);
+	    userInfo.setId(user.getId());
+	    userInfoMapper.insert(userInfo);
+	}
+	
+	@Override
+	public MsgPushInfo getMsgPushById(Long msgid) {
+		MsgPushInfo msgPushInfo = msgPushInfoMapper.selectByPrimaryKey(msgid);
+		//msgPushInfo.setImgurl(PropertiesUtil.PROP.getValue("SERVER_PATH")+msgPushInfo.getImgurl());
+		return 	msgPushInfo;
+	}
+
+	@Override
+	public List<MsgPushInfo> findMsgInfoByUser(Long userid) {
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("user_id", userid);
+		criteria.equalTo("del", SystemConstant.MSG_PUSH_INFO.DEL_NOMARL);
+		List<MsgPushInfo> pushInfos = msgPushInfoMapper.selectByExample(parameter);
+		List<MsgPushInfo> resultPushInfos = new ArrayList<MsgPushInfo>();
+		if (!CollectionUtils.isEmpty(pushInfos)) {
+			for (MsgPushInfo msgPushInfo : pushInfos) {
+				//去除不要的列
+				msgPushInfo.setUserId(null);
+				msgPushInfo.setDel(null);
+				msgPushInfo.setImgurl(null);
+				resultPushInfos.add(msgPushInfo);
+			}
+			return resultPushInfos;
+		}
+		return new ArrayList<MsgPushInfo>();
+	}
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void makeMsgRead(Long userid, Long msgid) {
+		if (StringUtil.isEmpty(msgid)) {
+			throw new BusinessException("消息id不能为空");
+		}
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("user_id", userid);
+		criteria.equalTo("id", msgid);
+		MsgPushInfo msgPushInfo = new MsgPushInfo();
+		msgPushInfo.setReadstatus(SystemConstant.MSG_PUSH_INFO.READSTATUS_READ);
+		msgPushInfoMapper.updateByExampleSelective(msgPushInfo, parameter);
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void retrievePass(UserRegisterInDto retrieveInDto) {
+		//1.验证输入
+		String mobilePhone = retrieveInDto.getMobilePhone();
+		String password = retrieveInDto.getPassword();
+		String code = retrieveInDto.getCode();
+
+		if (ObjectUtils.isEmpty(mobilePhone)) {
+			throw new BusinessException("手机号不能为空");
+		}
+		if (ObjectUtils.isEmpty(password)) {
+			throw new BusinessException("新密码不能为空");
+		}
+		// 2.验证手机验证码
+		smsLogService.valid(code, mobilePhone);
+		// 3.验证用户信息
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("mobile_phone", mobilePhone);
+		List<UserInfo> userInfos = userInfoMapper.selectByExample(parameter);
+		if (CollectionUtils.isEmpty(userInfos)) {
+			throw new BusinessException("系统不存在该号码");
+		}
+		
+		UserInfo userInfo = userInfos.get(0);
+		User user = userMapper.selectByPrimaryKey(userInfo.getId());
+		
+		user.setPassword(MD5Utils.encodeString(password));
+		user.setAppToken(UUIDUtil.generateToken());
+		user.setAppTokenExpire(DateUtil.nextMonth());
+		
+		userMapper.updateByPrimaryKeySelective(user);
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void sendsms(MobilePhoneDto phoneDto) {
+		String phone = phoneDto.getMobilePhone();
+		Integer sendType = phoneDto.getSendType();
+		// 1.验证手机号
+		if (StringUtil.isEmpty(phone)) {
+			throw new BusinessException("手机帐号不能为空");
+		}
+		if (!Validator.isMobile(phone)) {
+			throw new BusinessException("手机号格式不正确或者不支持");
+		}
+		
+		// 1.1验证类型
+		if (StringUtil.isEmpty(sendType)) {
+			throw new BusinessException("发送短信业务类型不能为空");
+		}
+		if (SystemConstant.SENDSMS_TYPE_REGISTER.equals(sendType)) {
+			CriteriaParameter param=new CriteriaParameter();
+			Criteria createCriteria = param.createCriteria();
+			createCriteria.equalTo("mobile_phone", phone);
+			List<UserInfo> userInfo = userInfoMapper.selectByExample(param);
+			if (!CollectionUtils.isEmpty(userInfo)) {
+				throw new BusinessException("该手机号已经存在,请您直接登录");
+			}
+		}else if (SystemConstant.SENDSMS_TYPE_RETRIEVE.equals(sendType)) {
+			CriteriaParameter param=new CriteriaParameter();
+			Criteria createCriteria = param.createCriteria();
+			createCriteria.equalTo("mobile_phone", phone);
+			List<UserInfo> userInfo = userInfoMapper.selectByExample(param);
+			if (CollectionUtils.isEmpty(userInfo)) {
+				throw new BusinessException("该手机号不存在");
+			}
+		}else {
+			throw new BusinessException("发送短信业务类型不正确");
+		}
+		
+		
+		//2.限制1分钟内发一次
+		smsLogService.limitSmsCount(phone, 1);
+		//3.发送
+		String code = RandomUtil.randomNumbers(6) ;
+		String content = "【香满园】验证码" + code + "，感谢您的支持！";
+		try {
+			SendSMSUtil.sendFullSMS(phone, content);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			throw new BusinessException("文本转码失败");
+		}
+		//保存发送信息
+		SmsLog log = new SmsLog() ;
+		log.setId(StringUtil.generateKey()) ;
+		log.setCode(code) ;
+		log.setStatus(BaseConstant.STATUS_ENABLE) ;
+		log.setMobilePhone(phone) ;
+		log.setCreateTimestamp(new Date()) ;
+		log.setMessage(content) ;
+		smsLogMapper.insertSelective(log) ;
+	}
+	
+	
+	@Override
+	public void sendBindinEmail(String email) {
+		// 1.验证邮箱
+		if (StringUtil.isEmpty(email)) {
+			throw new BusinessException("邮箱地址不能为空");
+		}
+		if (!Validator.isEmail(email)) {
+			throw new BusinessException("邮箱格式不正确");
+		}
+		
+		//2.发送
+		String code = RandomUtil.randomNumbers(4);
+		EmailUtil.sendEmail(email, "请求绑定邮件", "你的邮箱验证码是 " + code);
+	}
+	
+	@Override
+	public void modifyPassword(AppUserInDto user){
+		CriteriaParameter param=new CriteriaParameter();
+		Criteria createCriteria = param.createCriteria();
+		createCriteria.equalTo("id", user.getUserId());
+		createCriteria.equalTo("password", MD5Utils.encodeString(user.getOldPassword()));
+		List<User> selectByExample = userMapper.selectByExample(param);
+		//密码输入错误
+		if(!(selectByExample.size()>0)){
+			throw new BusinessException("你输入的密码错误!");
+		}else{//密码输入正确
+			User oldUser = selectByExample.get(0);
+			oldUser.setPassword(MD5Utils.encodeString(user.getNewPassword()));//替换成新密码
+			userMapper.updateByPrimaryKeySelective(oldUser);
+		}
+	}
+
+	@Override
+	public void updateScancode(Long userId, String code) {
+		
+		User user = userMapper.selectByPrimaryKey(userId);
+		if (ObjectUtil.isNull(user)) {
+			throw new BusinessException("用户不存在");
+		}
+		user.setScancode(code);
+		userMapper.updateByPrimaryKeySelective(user);
+		tokenManager.setKey(SystemConstant.REDIS_SCANCODE_PREF + code,code);
+	}
+	
+	
+	/**
+	 * 微信- 根据 code 获取openid
+	 * @param code
+	 * @Description 
+	 * @date 2017年9月29日  下午2:26:50
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	private String wechatcodeToGetOpenid(String code) {
+		return WechatLogin.wechatcodeToGetOpenid(code);
+	}
+
+	@Override
+	public List<MsgPushInfo> findNotReadMsgInfo(Long userid) {
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("user_id", userid);
+		criteria.equalTo("del", SystemConstant.MSG_PUSH_INFO.DEL_NOMARL);
+		criteria.equalTo("readstatus", 0);
+		List<MsgPushInfo> pushInfos = msgPushInfoMapper.selectByExample(parameter);
+		List<MsgPushInfo> resultPushInfos = new ArrayList<MsgPushInfo>();
+		if (!CollectionUtils.isEmpty(pushInfos)) {
+			for (MsgPushInfo msgPushInfo : pushInfos) {
+				//去除不要的列
+				msgPushInfo.setUserId(null);
+				msgPushInfo.setDel(null);
+				msgPushInfo.setImgurl(null);
+				resultPushInfos.add(msgPushInfo);
+			}
+			return resultPushInfos;
+		}
+		return new ArrayList<MsgPushInfo>();
+	}
+}

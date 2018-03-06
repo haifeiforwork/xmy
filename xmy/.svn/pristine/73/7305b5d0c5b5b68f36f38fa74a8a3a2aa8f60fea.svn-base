@@ -1,0 +1,9 @@
+package com.zfj.xmy.user.persistence.dao;
+
+import com.zfj.xmy.user.persistence.wap.dto.ShoppingCartOutDto;
+
+public interface ShoppingCartExMapper {
+	
+	ShoppingCartOutDto findShoppingCartGoodsCount(Long userId);
+	
+}

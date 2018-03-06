@@ -1,0 +1,28 @@
+/*L自定样式*/
+.not-top-gutter{margin-top: 0;}
+.text-elisps{display: -webkit-box;  -webkit-box-orient: vertical;  -webkit-line-clamp: 1;  overflow: hidden;}
+.container .weui-cell:before{left: 0;color: #dfdfdf;}
+.container .weui-cell{padding:10px;}
+.container-wrap{padding: 0 0.5rem;}
+
+.detel-border{border: none;}
+.add-distance2{margin: 1rem 0;}
+.container .item-title{font-size: 0.7rem;color: #666;}
+.container .item-after{font-size: 0.6rem;color: #b0b0b0;}
+.col-20{width: 20%;}
+.col-80{width: 80%;}
+/*该页面样式*/
+.content{bottom: 0;}
+.container .article{font-size: 0.6rem;color: #666;}
+
+.logistics-item{position: relative;overflow: hidden;background-color: #FFF;}
+.logistics ul{padding: 0;margin: 0;list-style-type: none;}
+.logistics-item .left-inner, .logistics-item .right-inner{float: left}
+.logistics-item .left-inner{text-align: center;/*height:100%; overflow:hidden; padding-bottom:9999px; margin-bottom:-9999px;*/}
+.logistics-item .left-inner .circle{width: 0.7rem;height: 0.7rem;border-radius: 0.35rem;background-color: #b0b0b0;display: inline-block;position: relative;z-index: 666;top: 0.4rem;}
+.logistics-item .left-inner .active{background-color: #666;top: 0;}
+.logistics-item .left-inner .line{width: 1px;height: 100%;background-color: #dfdfdf;position: absolute;top: 0;left: 10%;}
+.logistics-item .right-inner{padding: 0.5rem 0;border-bottom: 1px solid #dfdfdf;}
+.logistics-item:first-child  .left-inner .line{height: 80%;top: 15px;}
+.logistics-item:first-child  .left-inner .circle{top: 0.4rem;}
+.container-white{background-color: #FFF;padding: 0.5rem ;}

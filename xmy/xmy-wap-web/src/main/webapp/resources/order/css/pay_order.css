@@ -1,0 +1,22 @@
+header .header-top{border-bottom: 1px solid #C3C3C3;}
+        .content{bottom: 0;}
+        .head-top{font-size: 0.7rem;color: #444;background-color: #fff;padding: 13px 10px;}
+        .head-top .head-right{float: right;}
+        .ok-pay{padding: 0 20px;margin-top: 1.5rem;margin-bottom: 1rem;}
+        .ok-pay button{width: 100%;height: 2rem;color: #fff;font-size: 0.7rem;background-color: #348811;border:0;border-radius: 3px;}
+        .list{margin:0;margin-top: 0.5rem;}
+        .weui-cells:after, .weui-cells:before, .weui-cell:before{display: none;}
+        .list .weui-cell{border-bottom: 1px solid #f0f0f0;font-size: 0.7rem;color: #444;padding: 10px 10px;}
+        .list .weui-cell .weui-cell__bd img{width: 5.5rem;}
+        .list .weui-cell .weui-cell__bd .pay{margin-top: 0.25rem;}
+        .list .weui-cell .weui-cell__bd .pay input{margin:0 0.2rem;height: 1rem;width: 5rem;border:1px solid  #B3B3B3;border-radius: 2px;text-align: center;font-size: 0.65rem;color: #444;-webkit-appearance: none;}
+        .list .weui-cell .weui-cell__ft{color: #FF1017;font-size: 0.6rem;}
+        .list .weui-cell .weui-cell__ft.wx{color: #444;text-align: left;width: 7.5rem;}
+        .list .weui-cell .weui-cell__ft.shop-card button{background-color: #348811;color: #fff;border:0;border-radius: 3px;font-size: 0.7rem;padding: 1.5px 9px;}
+        .list .weui-cell .weui-cell__hd{padding: 10px 3px;}
+        .list .weui-cell .weui-cell__hd .yuan{width: 20px;height: 20px;border:1px solid #C9C9CB;border-radius: 50%;margin-right: 0.25rem;}
+        .list .weui-cell .weui-cell__hd .yuan img{width:100%;height:100%;display:none;}
+        .list .weui-cell .weui-cell__hd .yuan.active{background:url(resources/order/images/xz.png);background-size: 100% 100%;border:0;}
+         .list .weui-cell .weui-cell__hd .yuan.active img{display:block;}
+         /* .list .weui-cell .weui-cell__hd .account{border-radius:initial;} */
+        

@@ -1,0 +1,17 @@
+require(["common"],function(){
+	$(".refer").click(function(){
+		var refundMoney={refundMoney:$("#refundMoney").val(),url:window.location.href,no:$("#no").val(),returnReason:$("#returnReason").val()};
+		$.ajax({
+			url:"order/applyRefund",
+			type:"post",
+			data:refundMoney,
+			success:function(data){
+				alert(data.data);
+			}
+			
+		})
+	})
+	$(".pull-left").click(function(){
+		window.location.href="gotoPage/mine/center";
+	});
+});

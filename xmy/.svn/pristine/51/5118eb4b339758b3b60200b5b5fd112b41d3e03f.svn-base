@@ -1,0 +1,107 @@
+//默认地址选择
+$(".safe-check .cate-table table .table-list").hover(function () {
+   $(this).find(".active-adress-btn").show()
+    if($(this).find(".adress-btn").hasClass("default-adress-btn")){
+     $(this).css("background","#FFF")
+    }else{
+    	$(this).hover(function(){
+    		$(this).css("background","#EEE")
+    	},function(){
+    		$(this).css("background","#FFF")
+    	})
+    }
+},function () {
+    $(".active-adress-btn").hide()
+});
+$(".adress-btn").click(function () {
+    $(this).addClass("default-adress-btn").removeClass("active-adress-btn");
+    $(this).parent().parent().siblings().find(".adress-btn").hide().removeClass("default-adress-btn").addClass("active-adress-btn")
+})
+var Gid  = document.getElementById ;
+var showArea = function(){
+	Gid('show').innerHTML = "<h3>省" + Gid('s_province').value + " - 市" + 	
+	Gid('s_city').value + " - 县/区" + 
+	Gid('s_county').value + "</h3>"
+							}
+
+
+
+var a=1;
+var b=1;
+var c=1;
+var d=1;
+var e=1;
+function checkName(input){
+	var name=input.value;
+	if(name==null||name.trim()==''){
+		$("#name").get(0).innerHTML="收货人不能为空!";
+		a=0;
+	}else{
+		$("#name").get(0).innerHTML="";
+		a=1;
+	}
+}
+function checkPhone(input){
+	var phone=input.value;
+	var reg=/^1[34578]\d{9}$/;
+	if(phone==null||phone.trim()==""){
+		$("#phone").get(0).innerHTML="手机号码不能为空!";
+		b=0;
+	}else if(!reg.test(phone)){
+		$("#phone").get(0).innerHTML="手机号码格式不正确!";
+		b=0;
+	}else{
+		$("#phone").get(0).innerHTML="";
+		b=1;
+	}
+}
+function checkCall(input){
+	var call=input.value;
+	var reg=/^(0?(13[0-9]|15[012356789]|17[013678]|18[0-9]|14[57])[0-9]{8})|(400|800)([0-9\\-]{7,10})|(([0-9]{4}|[0-9]{3})(-| )?)?([0-9]{7,8})((-| |转)*([0-9]{1,4}))?$/;
+	if(call==null||call.trim()==""){
+		$("#call").get(0).innerHTML="";
+		c=1;
+	}else if(!reg.test(call)){
+		$("#call").get(0).innerHTML="备用号码格式不正确!";
+		c=0;
+	}else{
+		$("#call").get(0).innerHTML="";
+		c=1;
+	}
+}
+function checkAddress(input){
+	var address=input.value;
+	if(address==null||address.trim()==""){
+		$("#address").get(0).innerHTML="详细地址不能为空！";
+		d=0;
+	}else{
+		$("#address").get(0).innerHTML="";
+		d=1;
+	}
+}
+function checkAdd(){
+	var add=$("#s_county").val()
+	if(add=='市、县级市'){
+		$("#msg").get(0).innerHTML="请选择地区！";
+		e=0;
+	}else{
+		$("#msg").get(0).innerHTML="";
+		e=1;
+	}
+}
+function check(form){
+	var n=a+b+c+d+e;
+	if(n==5){
+		return true;
+	}
+	$("#ms").get(0).innerHTML="请仔细核对地址信息！";
+	return false;
+}
+
+var i=0;
+function initialize(){
+	if(i==0){
+		_init_area();
+		i=1;
+	}
+}

@@ -1,0 +1,46 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%> 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<table class="layui-table" lay-skin="line">
+ <thead>
+   <tr>
+  	 <th><input type="checkbox" name="" lay-skin="primary" lay-filter="allChoose"></th>
+     <th>ID</th>
+      <th>用户账号</th>
+      <th>手机</th>
+      <!-- <th>余额</th>
+      <th>积分</th> -->
+      <!-- <th>累计消费</th> -->
+      <th>注册日期</th>
+      <!-- <th>用户状态</th> -->
+      <th>操作</th>
+   </tr> 
+ </thead>
+ <tbody>
+ 	<c:forEach items="${userList}" var="user">
+	  	<tr >
+	  	  <td><input type="checkbox" data-id="${user.id }" name="" lay-skin="primary"></td>
+	  	  <td>${user.id}</td>
+	      <td>${user.name}</td>
+	     <%--  <td><img alt="" src="${item.imgPath}"></td> --%>
+	      <%-- <td>${item.code}</td> --%>
+	      <td>${user.mobilePhone}</td>
+	      <%-- <td>¥ ${user.balance}</td>
+	      <td>${user.accPoints}</td>
+	      <td>¥ ${user.totalCost}</td> --%>
+	      <td><fmt:formatDate pattern="yyyy-MM-dd" value="${user.createTime}"></fmt:formatDate> </td>
+	      <%-- <td id="oper">
+	      		
+	      		<c:if test="${user.status==0}"><i class="layui-icon" style="color: #009688;">&#xe617;</i> 启用</c:if>
+	      		<c:if test="${user.status==1}"><i class="layui-icon" style="color:#c2c2c2;" >&#xe617;</i> 禁用</c:if>
+	      </td> --%>
+	      <td>
+			    <div class="site-demo-button " >
+			    	<%--  <a href="userManagement/editUser/${user.id}"> <button class="layui-btn">编辑</button></a>
+			         <button class="layui-btn" id="del" data-id="${user.id }"  >删除</button> --%>
+			    </div>
+	      </td>
+	    </tr>
+  	</c:forEach>
+ </tbody>
+</table>

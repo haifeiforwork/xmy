@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.ShoppingCartMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.ShoppingCart" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="activity_type" property="activityType" jdbcType="INTEGER" />
+    <result column="activity_id" property="activityId" jdbcType="BIGINT" />
+    <result column="activity_price" property="activityPrice" jdbcType="DECIMAL" />
+    <result column="act_id" property="actId" jdbcType="INTEGER" />
+    <result column="activity_points" property="activityPoints" jdbcType="INTEGER" />
+    <result column="activity_name" property="activityName" jdbcType="VARCHAR" />
+    <result column="present_goods_id" property="presentGoodsId" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, goods_id, create_time, num, activity_type, activity_id, activity_price, 
+    act_id, activity_points, activity_name, present_goods_id
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from shopping_cart
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from shopping_cart
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from shopping_cart
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from shopping_cart
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update shopping_cart
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.goodsId != null" >
+        goods_id = #{record.goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.num != null" >
+        num = #{record.num,jdbcType=INTEGER},
+      </if>
+      <if test="record.activityType != null" >
+        activity_type = #{record.activityType,jdbcType=INTEGER},
+      </if>
+      <if test="record.activityId != null" >
+        activity_id = #{record.activityId,jdbcType=BIGINT},
+      </if>
+      <if test="record.activityPrice != null" >
+        activity_price = #{record.activityPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.actId != null" >
+        act_id = #{record.actId,jdbcType=INTEGER},
+      </if>
+      <if test="record.activityPoints != null" >
+        activity_points = #{record.activityPoints,jdbcType=INTEGER},
+      </if>
+      <if test="record.activityName != null" >
+        activity_name = #{record.activityName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.presentGoodsId != null" >
+        present_goods_id = #{record.presentGoodsId,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update shopping_cart
+    set id = #{record.id,jdbcType=BIGINT},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      goods_id = #{record.goodsId,jdbcType=BIGINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      num = #{record.num,jdbcType=INTEGER},
+      activity_type = #{record.activityType,jdbcType=INTEGER},
+      activity_id = #{record.activityId,jdbcType=BIGINT},
+      activity_price = #{record.activityPrice,jdbcType=DECIMAL},
+      act_id = #{record.actId,jdbcType=INTEGER},
+      activity_points = #{record.activityPoints,jdbcType=INTEGER},
+      activity_name = #{record.activityName,jdbcType=VARCHAR},
+      present_goods_id = #{record.presentGoodsId,jdbcType=BIGINT}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from shopping_cart
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from shopping_cart
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.ShoppingCart" useGeneratedKeys="true" keyProperty="id" >
+    insert into shopping_cart (user_id, goods_id, create_time, 
+      num, activity_type, activity_id, 
+      activity_price, act_id, activity_points, 
+      activity_name, present_goods_id)
+    values (#{userId,jdbcType=BIGINT}, #{goodsId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{num,jdbcType=INTEGER}, #{activityType,jdbcType=INTEGER}, #{activityId,jdbcType=BIGINT}, 
+      #{activityPrice,jdbcType=DECIMAL}, #{actId,jdbcType=INTEGER}, #{activityPoints,jdbcType=INTEGER}, 
+      #{activityName,jdbcType=VARCHAR}, #{presentGoodsId,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.ShoppingCart" useGeneratedKeys="true" keyProperty="id" >
+    insert into shopping_cart
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="goodsId != null" >
+        goods_id,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="num != null" >
+        num,
+      </if>
+      <if test="activityType != null" >
+        activity_type,
+      </if>
+      <if test="activityId != null" >
+        activity_id,
+      </if>
+      <if test="activityPrice != null" >
+        activity_price,
+      </if>
+      <if test="actId != null" >
+        act_id,
+      </if>
+      <if test="activityPoints != null" >
+        activity_points,
+      </if>
+      <if test="activityName != null" >
+        activity_name,
+      </if>
+      <if test="presentGoodsId != null" >
+        present_goods_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="goodsId != null" >
+        #{goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=INTEGER},
+      </if>
+      <if test="activityType != null" >
+        #{activityType,jdbcType=INTEGER},
+      </if>
+      <if test="activityId != null" >
+        #{activityId,jdbcType=BIGINT},
+      </if>
+      <if test="activityPrice != null" >
+        #{activityPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="actId != null" >
+        #{actId,jdbcType=INTEGER},
+      </if>
+      <if test="activityPoints != null" >
+        #{activityPoints,jdbcType=INTEGER},
+      </if>
+      <if test="activityName != null" >
+        #{activityName,jdbcType=VARCHAR},
+      </if>
+      <if test="presentGoodsId != null" >
+        #{presentGoodsId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.ShoppingCart" >
+    update shopping_cart
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="goodsId != null" >
+        goods_id = #{goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=INTEGER},
+      </if>
+      <if test="activityType != null" >
+        activity_type = #{activityType,jdbcType=INTEGER},
+      </if>
+      <if test="activityId != null" >
+        activity_id = #{activityId,jdbcType=BIGINT},
+      </if>
+      <if test="activityPrice != null" >
+        activity_price = #{activityPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="actId != null" >
+        act_id = #{actId,jdbcType=INTEGER},
+      </if>
+      <if test="activityPoints != null" >
+        activity_points = #{activityPoints,jdbcType=INTEGER},
+      </if>
+      <if test="activityName != null" >
+        activity_name = #{activityName,jdbcType=VARCHAR},
+      </if>
+      <if test="presentGoodsId != null" >
+        present_goods_id = #{presentGoodsId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.ShoppingCart" >
+    update shopping_cart
+    set user_id = #{userId,jdbcType=BIGINT},
+      goods_id = #{goodsId,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      num = #{num,jdbcType=INTEGER},
+      activity_type = #{activityType,jdbcType=INTEGER},
+      activity_id = #{activityId,jdbcType=BIGINT},
+      activity_price = #{activityPrice,jdbcType=DECIMAL},
+      act_id = #{actId,jdbcType=INTEGER},
+      activity_points = #{activityPoints,jdbcType=INTEGER},
+      activity_name = #{activityName,jdbcType=VARCHAR},
+      present_goods_id = #{presentGoodsId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

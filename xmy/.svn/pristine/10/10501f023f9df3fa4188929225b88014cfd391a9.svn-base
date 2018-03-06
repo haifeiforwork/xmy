@@ -1,0 +1,186 @@
+package com.zfj.xmy.app.web.controller.goods;
+
+import java.math.BigInteger;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.base.commons.mini.annotation.Exclusion;
+import com.zfj.base.util.web.WebUtil;
+import com.zfj.xmy.app.web.common.AppResp;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.elasticsearch.document.GoodsDoc;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsInDto;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsOut;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppOrderMethod;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppScreenInDto;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppScreenOutDto;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcSearchDto;
+import com.zfj.xmy.goods.service.app.AppGoodsService;
+import com.zfj.xmy.goods.service.pc.PcElasticGoodsService;
+import com.zfj.xmy.goods.service.pc.PcSearchService;
+import com.zfj.xmy.util.DataPage;
+
+@RestController
+@RequestMapping(value="/screenGoods",params=SystemConstant.MOBILE_VERSION_V10)
+public class ScreenGoodsController {
+	
+	@Autowired
+	private AppGoodsService appGoodsService;
+	
+	@Autowired
+	private PcSearchService pcSearchService;
+
+	@Autowired
+	private PcElasticGoodsService elasticGoodsService;
+	
+	/**
+	 * @param goodsName
+	 * @param orderMethod
+	 * @return ResponseEntity<List<AppGoodsOut>>
+	 * @author lij
+	 * @date 2017年7月28日 上午11:04:53
+	 * 搜索商品列表
+	 */
+	@RequestMapping(value="/findGoodsByName",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> testAdd(@RequestBody AppGoodsInDto goodsInDto){
+		PageBean pageBean = new PageBean();
+		pageBean.setPageIndex(goodsInDto.getPageIndex());
+		//List<AppGoodsOut> goodsOutList = appGoodsService.findGoodsByGoodsName(goodsInDto.getGoodsName(), goodsInDto.getOrderMethod());
+		Integer beginPrice = null;
+		Integer endPrice = null;
+		if(!ObjectUtils.isEmpty(goodsInDto.getBeginPrice())){
+			BigInteger integer = goodsInDto.getBeginPrice().toBigInteger();
+			beginPrice = Integer.parseInt(integer.toString());
+		}
+		if(!ObjectUtils.isEmpty(goodsInDto.getEndPrice())){
+			BigInteger integer = goodsInDto.getEndPrice().toBigInteger();
+			endPrice = Integer.parseInt(integer.toString());
+		}
+		DataPage<GoodsDoc> searchGoods = elasticGoodsService.searchGoods(goodsInDto.getOrderMethod(), goodsInDto.getGoodsName(), goodsInDto.getPageIndex(),
+				goodsInDto.getPriceOrder(), goodsInDto.getIsDelivery(), goodsInDto.getTypeName(), beginPrice, endPrice,
+				null);
+		return AppResp.get(searchGoods);
+	}
+	/**
+	 * @param goodsName
+	 * @param orderMethod
+	 * @return ResponseEntity<List<AppGoodsOut>>
+	 * @author lij
+	 * @date 2017年7月28日 上午11:04:53
+	 * 根据二级id搜索商品列表
+	 */
+	@RequestMapping(value="/findGoodsByType",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findGoods(@RequestBody AppGoodsInDto goodsInDto){
+		List<AppGoodsOut> goodsOutList = appGoodsService.findGoodsByTypeId(goodsInDto.getTwoTypeId(), goodsInDto.getOrderMethod());
+		//HttpServletRequest request = WebUtil.getRequest() ;
+		return AppResp.get(goodsOutList);
+	}
+	
+	/**
+	 * @param goodsName
+	 * @param orderMethod
+	 * @return ResponseEntity<List<AppGoodsOut>>
+	 * @author lij
+	 * @date 2017年7月28日 上午11:04:53
+	 * 根据分词id搜索商品列表
+	 */
+	@RequestMapping(value="/findGoodsByParticiple",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findGoodsByParticiple(@RequestBody AppGoodsInDto goodsInDto){
+		List<AppGoodsOut> goodsOutList = appGoodsService.findGoodsByParticipleId(goodsInDto.getParticipleId(), goodsInDto.getOrderMethod());
+		//HttpServletRequest request = WebUtil.getRequest() ;
+		return AppResp.get(goodsOutList);
+	}
+	
+	
+	/**
+	 * @param goodsName
+	 * @return ResponseEntity<List<AppScreenOutDto>>
+	 * @author lij
+	 * @date 2017年7月28日 下午2:16:05
+	 * 根据商品名称查询筛选条件（右边的筛选条件）
+	 */
+	@RequestMapping(value="/findScreenListByName",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findScreenList(@RequestBody AppGoodsInDto goodsInDto){
+		//List<AppScreenOutDto> findScreenList = appGoodsService.findScreenListByName(goodsInDto.getGoodsName());
+		List<PcSearchDto> searchDto = pcSearchService.querySearchDto(goodsInDto.getGoodsName(), goodsInDto.getTypeName(), goodsInDto.getIsDelivery());
+		return AppResp.get(searchDto);
+	}
+	
+	/**
+	 * @param goodsName
+	 * @return ResponseEntity<List<AppScreenOutDto>>
+	 * @author lij
+	 * @date 2017年7月28日 下午2:16:05
+	 * 根据二级分类查询筛选条件（右边的筛选条件）
+	 */
+	@RequestMapping(value="/findScreenListTwoType",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findScreenListByTwo(@RequestBody AppGoodsInDto goodsInDto){
+		List<AppScreenOutDto> findScreenList = appGoodsService.findScreenListByTwo(goodsInDto.getTwoTypeId());
+		return AppResp.get(findScreenList);
+	}
+	
+	/**
+	 * @param goodsName
+	 * @return ResponseEntity<List<AppScreenOutDto>>
+	 * @author lij
+	 * @date 2017年7月28日 下午2:16:05
+	 * 根据分词查询筛选条件（右边的筛选条件）
+	 */
+	@RequestMapping(value="/findScreenListParticiple",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findScreenListParticiple(@RequestBody AppGoodsInDto goodsInDto){
+		List<AppScreenOutDto> findScreenList = appGoodsService.findScreenListByParticipleId(goodsInDto.getParticipleId());
+		return AppResp.get(findScreenList);
+	}
+	/**
+	 * @return ResponseEntity<AppResp>
+	 * @author lij
+	 * @date 2017年8月17日 下午7:59:01
+	 * 查询排序条件
+	 */
+	@RequestMapping(value="/findOrderMethod",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findOrderThod(){
+		List<AppOrderMethod> findOrderMethod = appGoodsService.findOrderMethod();
+		return AppResp.get(findOrderMethod);
+	}
+	
+	/**
+	 * @param appScreenInDto
+	 * @return ResponseEntity<List<AppGoodsOut>>
+	 * @author lij
+	 * @date 2017年7月28日 下午2:31:33
+	 * 根据筛选条件查询商品
+	 */
+	@RequestMapping(value="/findGoodsByScreen",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findGoodsByScreen(@RequestBody AppScreenInDto appScreenInDto){
+		
+		List<AppGoodsOut> findGoodsByScreen = appGoodsService.findGoodsByScreen(appScreenInDto);
+		return AppResp.get(findGoodsByScreen);
+	}
+	
+/*	@RequestMapping(value="/test",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> testService(){
+		List<AppTestDto> findTestDto = testService.findTestDtos(51l);
+		return AppResp.get(findTestDto);
+	}*/
+}

@@ -1,0 +1,228 @@
+package com.zfj.xmy.user.service.common.impl;
+
+
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.EmailLogMapper;
+import com.zfj.xmy.common.persistence.dao.UserAddreesMapper;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.dao.UserMapper;
+import com.zfj.xmy.common.persistence.pojo.EmailLog;
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.UserAddrees;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.common.service.CommonPayOrderService;
+import com.zfj.xmy.user.persistence.dao.UserInfoExMapper;
+import com.zfj.xmy.user.persistence.pojo.dto.UserInfoDto;
+import com.zfj.xmy.user.service.common.UserInfoService;
+
+@Service
+public class UserInfoServiceImpl extends BaseService implements UserInfoService{
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private UserInfoMapper userInfoMapper;
+	@Autowired
+	private UserInfoExMapper userInfoExMapper;
+	@Autowired
+	private UserAddreesMapper userAddreesMapper;
+	@Autowired
+	private EmailLogMapper emailLogMapper;
+	
+	@Autowired
+	private CommonPayOrderService commonPayOrderService;
+	@Override
+	public void findUserInfo(ReqData reqData, PageBean pageBean) {
+		List<UserInfoDto> selectByExampleAndPage =userInfoExMapper.findUserInfoEx(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		int countByExample = userInfoExMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		pageBean.setTotalCount(countByExample);
+		pageBean.setData(selectByExampleAndPage);
+	}
+	@Override
+	public List<UserInfoDto> findUserInfoNoPageBean(ReqData reqData) {
+		List<UserInfoDto> selectByExampleAndPage =userInfoExMapper.findUserInfoExNoPageBean(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return selectByExampleAndPage;
+	}
+	@Override
+	public int getCountUserInfo(ReqData reqData) {
+		int countByExample = userInfoMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return countByExample;
+	}
+	@Override
+	public UserInfoDto findUserInfo(ReqData reqData) {
+		UserInfoDto findUserInfoEx2 = userInfoExMapper.findUserInfoEx2(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return findUserInfoEx2;
+	}
+	
+	@Override
+	public int updateUserInfo(UserInfoDto userInfoDto) {
+		userInfoDto.setUpdateTime(new Date());
+		Integer updateByPrimaryKeySelective = null;
+		//更新userinfo表
+	/*	if(!ObjectUtils.isEmpty(userInfoDto)){
+			//修改name的时候注意是否修改的是昵称,name不能和别人的相同
+			if(!StringUtil.isEmpty(userInfoDto.getName())){
+				CriteriaParameter param=new CriteriaParameter();
+				Criteria createCriteria = param.createCriteria();
+				createCriteria.equalTo("name", userInfoDto.getName());
+				List<User> selectByExample = userMapper.selectByExample(param);
+				if(!CollectionUtils.isEmpty(selectByExample))
+					throw new BusinessException("修改失败,昵称已经被别人使用了!");
+			}
+			
+		}*/
+		updateByPrimaryKeySelective = userInfoMapper.updateByPrimaryKeySelective(userInfoDto);
+		
+		
+		//User user = userMapper.selectByPrimaryKey(userInfoDto.getId());
+		User user=new User();
+		//更新user表
+			//修改name的时候注意是否修改的是昵称,name不能和别人的相同
+			if(!StringUtil.isEmpty(userInfoDto.getName())){
+				CriteriaParameter param=new CriteriaParameter();
+				Criteria createCriteria = param.createCriteria();
+				createCriteria.equalTo("name", userInfoDto.getName());
+				List<User> selectByExample = userMapper.selectByExample(param);
+				if(!CollectionUtils.isEmpty(selectByExample))
+					throw new BusinessException("修改失败,昵称已经被别人使用了!");
+			}
+			BeanUtils.copyProperties(userInfoDto, user);
+			updateByPrimaryKeySelective=userMapper.updateByPrimaryKeySelective(user);
+		return updateByPrimaryKeySelective;
+	}
+	@Override
+	public int deleteUsersInfo(String[] idArry) {
+		int num=0;
+		for (String string : idArry) {
+			int deleteByPrimaryKey = userInfoMapper.deleteByPrimaryKey(Long.valueOf(string));
+			num+=deleteByPrimaryKey;
+		}
+		return num;
+	}
+	@Override
+	public UserInfoDto getUserInfoDto(Long id){
+		UserInfoDto userInfoDto=null;
+		
+		ReqData reqData=new ReqData();
+		reqData.putValue(SystemConstant.USERINFO.USERINFO_ID, id, SystemConstant.REQ_PARAMETER_EQ);
+		userInfoDto = userInfoExMapper.getUserInfo(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		//查询用户购物卡余额
+		userInfoDto.setBalance(commonPayOrderService.getUserAllBalance(id));
+		return userInfoDto;
+	}
+	@Override
+	public void updatePassword(Long id,String oldPassword,String newPassword){
+		ReqData reqData=new ReqData();
+		reqData.putValue(SystemConstant.USER.USER_ID, id, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue(SystemConstant.USER.PASSWORD, oldPassword, SystemConstant.REQ_PARAMETER_EQ);
+		UserInfoDto userInfoDto= userInfoExMapper.findUserInfoEx2(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if(ObjectUtils.isEmpty(userInfoDto)){//为空说明用户输入的原密码是错误的
+			//throw new XmyException("原密码错误");
+		}
+		else{//原密码正确
+			User user=new User();
+			user.setId(id);
+			user.setPassword(newPassword);
+			userMapper.updateByPrimaryKeySelective(user);
+		}
+	}
+	@Override
+	public void updatePhone(Long id,String oldPhone,String newPhone){
+		ReqData reqData=new ReqData();
+		reqData.putValue(SystemConstant.USERINFO.USERINFO_ID, id, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue(SystemConstant.USERINFO.MOBILE_PHONE, oldPhone, SystemConstant.REQ_PARAMETER_EQ);
+		UserInfoDto userInfoDto = userInfoExMapper.findUserInfoEx2(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if(ObjectUtils.isEmpty(userInfoDto)){//原手机号输入错误
+			//throw new XmyException("原手机号错误");
+		}
+		else{
+			userInfoDto.setMobilePhone(oldPhone);
+			Integer updateByPrimaryKeySelective = userInfoExMapper.updateByPrimaryKeySelective(userInfoDto);
+			if(ObjectUtils.isEmpty(updateByPrimaryKeySelective)||updateByPrimaryKeySelective<1){
+				//throw new XmyException("修改手机号码失败");
+			}
+		}
+	}
+	@Override
+	public void updateEmail(UserInfo userInfo,EmailLog emailLog){
+		String code = emailLog.getCode();
+		String email = emailLog.getEmail();
+		
+		//在数据库中判断是否有这个验证码了
+		CriteriaParameter param=new CriteriaParameter();
+		Criteria createCriteria = param.createCriteria();
+		param.setOrderByClause(" create_timestamp desc  ");
+		createCriteria.equalTo("email", email);
+		createCriteria.equalTo("code", code);
+		List<EmailLog> selectByExample = emailLogMapper.selectByExample(param);
+		if(CollectionUtils.isEmpty(selectByExample)){
+			throw new BusinessException("您输入的验证码错误!");
+		}
+		userInfo.setEmail(emailLog.getEmail());
+		userInfoMapper.updateByPrimaryKeySelective(userInfo);
+	}
+	@Override
+	public void updateUserInfo(ReqData reqData,UserInfoDto userInfoDto){
+		Integer updateByExampleSelective = userInfoExMapper.updateByPrimaryKeySelective(userInfoDto);
+		if(ObjectUtils.isEmpty(updateByExampleSelective)||updateByExampleSelective<1){//更新信息失败
+			//throw new XmyException("更新信息失败");
+		}
+	}
+	@Override
+	public List<UserAddrees> getUserAddress(Long id){
+		ReqData reqData=new ReqData();
+		reqData.putValue(SystemConstant.USERINFO.USER_ID, id, SystemConstant.REQ_PARAMETER_EQ);
+		List<UserAddrees> selectByExample = userAddreesMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return selectByExample;
+	}
+	@Override
+	public void insertUserAddress(UserAddrees userAddrees){
+		Integer insert = userAddreesMapper.insert(userAddrees);
+		if(ObjectUtils.isEmpty(insert)||insert<1){
+			//throw new XmyException("插入用户地址失败");
+		}
+	}
+	@Override
+	public void updateUserAddress(UserAddrees userAddrees){
+		int updateByPrimaryKeySelective = userAddreesMapper.updateByPrimaryKeySelective(userAddrees);
+		if(ObjectUtils.isEmpty(updateByPrimaryKeySelective)||updateByPrimaryKeySelective<1){
+			//throw new XmyException("修改用户地址失败");
+		}
+	}
+	@Override
+	public void  updateUserDefaultAddress(UserAddrees oldUserAddrees,UserAddrees newUserAddresAddrees){
+		oldUserAddrees.setIsDefault(SystemConstant.USERADDRESS.IS_NOT_DEFAULT_AADDRESS);
+		newUserAddresAddrees.setIsDefault(SystemConstant.USERADDRESS.IS_DEFAULT_AADDRESS);
+		userAddreesMapper.updateByPrimaryKeySelective(oldUserAddrees);
+		userAddreesMapper.updateByPrimaryKeySelective(newUserAddresAddrees);
+	}
+	@Override
+	public void delUserAddress(Long id){
+		Integer deleteByPrimaryKey = userAddreesMapper.deleteByPrimaryKey(id);
+		if(ObjectUtils.isEmpty(deleteByPrimaryKey)||deleteByPrimaryKey<1){
+			//throw new XmyException("删除用户地址失败");
+		}
+	}
+	@Override
+	public UserInfo getUserInfo(Long id) {
+		return userInfoMapper.selectByPrimaryKey(id);
+	}
+}

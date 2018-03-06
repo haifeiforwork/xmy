@@ -1,0 +1,41 @@
+.category *{-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+.category .text-center{text-align: center;}
+.category .price{color: #EF1722;}
+
+/*上方搜索*/
+.navigation .navigation-left .left-chunk2 .logo-near{color: #FFF;margin-top: 15px;}
+.navigation .navigation-right .L-search{margin-right: 0;width: 338px;}
+.navigation .navigation-right .L-search input{width: 268px;}
+.navigation .navigation-right .L-search button{float: right;color:#258912;}
+
+/*201709191554*/
+.category{background-color: #FFF;padding: 15px 0;}
+.title-nav,.order-info{width: 1050px;margin: 0 auto;font-size: 13px;}
+.title-nav ul{padding: 0 18px;}
+.title-nav .active{font-weight: 600;border: 1px solid;border-color: #719861 #719861 transparent #719861;border-top-left-radius: 3px;border-top-right-radius: 3px;position: relative;z-index: 3;}
+.title-nav li{width: 85px;text-align: center;padding: 2px 0;background-color: #FFF;}
+.order-info{border: 1px solid #719861;margin-top: -1px;border-radius: 1px;padding: 18px;}
+.order-info .ad-size{font-weight: 600;color: #444;}
+.order-info .item-after{color: #666;}
+.per-order-info-line{margin: 8px 0;}
+.per-order-info .per-order-info-line:last-child{margin-bottom: 0;}
+.order-wrap{border-top: 1px solid #f0f0f0;padding: 15px 0;margin-top: 15px;}
+.order-wrap .order-wrap-title{margin-bottom: 10px;}
+.order-info-det ul{padding: 0 7px;}
+.order-info-det li{float: left;width: 33.333%;margin-bottom: 5px;}
+.order-info-det li.col-66{width: 66%}
+.order-table-wrap table{border-collapse: collapse;width: 100%;border: 1px solid #E0E0E0;color: #666;}
+.order-table-wrap .head{background-color: #D1FFBE;}
+.order-table-wrap .head th{padding: 10px 0;font-weight: normal;}
+.order-table-wrap .head .col-320{width: 320px;}
+.order-table-wrap .head .col-100{width: 100px;}
+.order-table-wrap .head .col-70{width: 70px;}
+.order-table-wrap .item-line{border-top: 1px solid #E0E0E0;}
+.order-table-wrap .item-line .img-wrap{width: 60px;height: 60px;float: left;margin-right: 7px;}
+.order-table-wrap .item-line .img-wrap img{width: 100%;height: 100%;}
+.order-table-wrap .item-line .text-left{text-align: left;}
+.order-table-wrap .item-line td{padding: 2px 5px;}
+.order-table-wrap .item-line td:not(:last-child){border-right:1px solid #E0E0E0; }
+.order-table-wrap .text-right{text-align: right;margin-top: 10px;margin-bottom: 25px;}
+.order-table-wrap .price{font-size: 16px;color: #B31C31;}
+/*201709191554end*/

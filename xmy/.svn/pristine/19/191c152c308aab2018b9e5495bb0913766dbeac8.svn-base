@@ -1,0 +1,6 @@
+@CHARSET "UTF-8";
+ header .header-top{border-bottom: 1px solid #C3C3C3;}
+        .content{bottom: 0;background-color: #FFF;}
+        .header-por-list{}
+        .header-por-list .header-por-list-item{width: 45px;height: 45px;float: left;margin-left: 0.75rem;margin-top: 0.6rem}
+        .header-por-list .header-por-list-item img{width: 100%;height: 100%;border-radius: 50%;}

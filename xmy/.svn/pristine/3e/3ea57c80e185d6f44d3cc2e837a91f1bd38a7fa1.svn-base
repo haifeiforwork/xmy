@@ -1,0 +1,417 @@
+$(function(){
+	//全部分类图标设置
+	$("#two").show();
+	//首页左侧hover事件
+	$(".ewm").hover(function(){
+		$(this).toggleClass("active");
+		if($(this).hasClass("active")){
+			$(this).find(".pop-up").fadeIn(300);
+		}else{
+			$(this).find(".pop-up").fadeOut(100);
+		}
+	});
+	//首页左侧购物车hover事件
+	$(".floatleft .floatleft-ul .floatleft-li.floatleft-lis").hover(function(){
+		if($(".cart-ul").hasClass("add-active")){
+            $(".cart-ul").stop();
+			$(".cart-ul").removeClass("add-active").fadeOut(100);
+		}else{
+            $(".cart-ul").stop();
+			$(".cart-ul").addClass("add-active").fadeIn(500);
+		}
+	});
+	//首页左侧我的收藏hover事件
+	$(".collects-li").hover(function(){
+		if($(".collects").hasClass("add-active")){
+            $(".collects").stop();
+			$(".collects").removeClass("add-active").fadeOut(100);
+		}else{
+            $(".collects").stop();
+			$(".collects").addClass("add-active").fadeIn(500);
+		}
+	});
+	//首页左侧我的香满园hover事件
+	$(".my-xmy").hover(function(){
+		if($(".my-xmys").hasClass("add-active")){
+            $(".my-xmys").stop();
+			$(".my-xmys").removeClass("add-active").fadeOut(100);
+		}else{
+            $(".my-xmys").stop();
+			$(".my-xmys").addClass("add-active").fadeIn(500);
+		}
+	});
+	//首页左侧充值hover事件
+	$(".recharge").hover(function(){
+		if($(".recharges").hasClass("add-active")){
+            $(".recharges").stop();
+			$(".recharges").removeClass("add-active").fadeOut(100);
+		}else{
+            $(".recharges").stop();
+			$(".recharges").addClass("add-active").fadeIn(500);
+		}
+	});
+	//首页左侧QQhover事件
+	$(".QQ").hover(function(){
+		if($(".QQs").hasClass("add-active")){
+            $(".QQs").stop();
+			$(".QQs").removeClass("add-active").fadeOut(100);
+		}else{
+            $(".QQs").stop();
+			$(".QQs").addClass("add-active").fadeIn(500);
+		}
+	});
+	//首页左侧客服热线hover事件
+	$(".hot-line").hover(function(){
+		if($(".hot-lines").hasClass("add-active")){
+            $(".hot-lines").stop();
+			$(".hot-lines").removeClass("add-active").fadeOut(100);
+		}else{
+            $(".hot-lines").stop();
+			$(".hot-lines").addClass("add-active").fadeIn(500);
+		}
+	});
+	//个人中心左侧菜单
+	$(".menu-ul").on("click",".menu-li",function(){
+		$(this).find(".menu-li-span").addClass("active");
+		$(this).siblings().find(".menu-li-span").removeClass("active")
+	});
+	
+	//顶部导航收藏夹hover事件
+	$(".collect").hover(
+	    function(){
+            $(".collect-ul").stop();
+			$(".collect-ul").slideDown();
+		},
+		function(){
+            $(".collect-ul").stop();
+			$(".collect-ul").slideUp();
+		}
+	);
+	//顶部购物车hover事件
+	$(".details-all").hover(
+		function(){
+			$(".shop-details").slideDown();
+		},
+		function(){
+            $(".shop-details").stop();
+			$(".shop-details").slideUp();
+		}
+	);
+	//顶部手机香满圆hover事件
+    $(".phone-all").hover(
+        function(){
+            $(".phone-code").slideDown();
+        },
+        function(){
+            $(".phone-code").stop();
+            $(".phone-code").slideUp();
+        }
+    );
+    //顶部网站导航
+    $(".net-all").hover(
+        function(){
+
+            $(this).find(".net-nav").slideDown();
+
+        },
+        function(){
+            $(".net-nav").stop();
+            $(this).find(".net-nav").slideUp();
+        }
+    );
+
+	//首页商品hover4px距离
+	$(".chunk-z-li").hover(
+		function(){
+			$(this).find("img").animate({
+				   left: -4
+				 }, 200);
+		},
+		function(){
+			$(this).find("img").animate({
+				   left: 0
+				 }, 200);
+		}
+	);
+	//我的订单-所有类型
+	$(".order-tab-ul").on("click",".order-tab-li",function(){
+		$(this).addClass("active").siblings().removeClass("active");
+	});
+	//我的订单分页
+	$(".paging-ul").on("click",".paged",function(){
+		$(this).addClass("active").siblings().removeClass("active");
+	});
+	//弹窗关闭按钮
+	$(".close").click(function(){
+		$(".popup").fadeOut(500);
+	});
+	//建议申请售后
+	$(".apply").click(function(){
+		$(".hing").fadeIn(500);
+	});
+	//退款
+	$(".refund").click(function(){
+		$(".drawback").fadeIn(500);
+	});
+	//退款取消并返回
+	$(".cancel").click(function(){
+		$(".drawback").fadeOut(500);
+	});
+	shoppingCart();
+	//右侧购物车的显示隐藏
+	$(function () {
+        $(".tab-content>div:gt(0)").hide();
+        $(".tab-nav li").hover(function () {
+            $(this).addClass("active").siblings().removeClass("active");
+            var index=$(".tab-nav li").index(this);
+            $("div.tab-content>div").eq(index).show().siblings().hide()
+        });
+    });
+	 //弹窗拖拽
+    $("#title").mousedown(function(e){ 
+		$(this).css("cursor","move");//改变鼠标指针的形状 
+		var offset = $(this).offset();//DIV在页面的位置 
+		var x = e.pageX - offset.left;//获得鼠标指针离DIV元素左边界的距离 
+		var y = e.pageY - offset.top;//获得鼠标指针离DIV元素上边界的距离 
+		$(document).bind("mousemove",function(ev){ 
+			$(".dialog-box").stop();//加上这个之后 
+			var _x = ev.pageX - x;//获得X轴方向移动的值 
+			var _y = ev.pageY - y;//获得Y轴方向移动的值 
+			$(".dialog-box").animate({left:_x+"px",top:_y+"px"},10); 
+		}); 
+	}); 
+	$(document).mouseup(function(){ 
+		$(".dialog-box").css("cursor","default"); 
+		$(this).unbind("mousemove"); 
+	});
+	
+	//配置在线客户
+	$("#qianniu").click(function(){
+		//判断用户是否已登录
+		$.ajax({
+			url:"commons/user",
+			type:"get",
+			success:function(data){
+				if (data == 1) {
+					warnPop("登录后才能使用！");
+					return;
+				}
+			}
+		}); 	
+		
+		$.ajax({
+			url:"commons/qianniu",
+			type:"post",
+			success:function(data){
+				if(data.users.userid == ""){
+					$("#qian").hide();
+				}else{
+					WKIT.init({
+						uid:data.users.userid,
+						appkey:data.appkey ,
+						credential:data.users.password,
+						touid:data.customid,
+						sendMsgToCustomService:true,
+						container:  document.getElementById('qian'),
+			            width: 400,
+			            height: 400,
+			            sendBtn:true
+					});
+					$("#qian").toggle();
+				}
+			}
+		})
+	});
+	//关闭客户聊天窗口
+	$("#close").click(function(e){
+		e.stopPropagation();
+		$("#qian").hide();
+	});
+	$("#topSearch").click(function(){
+		var val=$("#topSearchContent").val();
+		
+		window.location.href = "/elastic/goods?goodsName="+val;
+	})
+	//个人中心公共页面搜索
+/*	$("#navSearch").click(function(){
+		var searchContent=$("#navSearchContent").val();
+		window.location.href = "/elastic/goods?goodsName="+searchContent;
+	});*/
+	$(window).scroll(function () {
+		if($(window).scrollTop()  > 615){
+			$(".floattop").show().css({"top":"0","opacity":"1"});
+          $(".float-icon").show();
+		};
+		if($(window).scrollTop()  <= 615){
+          $(".floattop").hide().css({"top":"-50px","opacity":"0"});
+          $(".float-icon").hide();
+		};
+	});
+	 $(".floattop-logo").hover(function(){
+		 $(this).find(".net-nav").fadeIn(300); 
+	  },function(){
+		  
+		  $(this).find(".net-nav").hide(); 
+	  });
+	 //商品分类跳转
+	 $(".category").click(function(){
+		 var id = $(this).attr("value");
+		 window.location.href="category/findCategoryGoods?id="+id
+		 //category/findCategoryGoods?id=${termData.id}
+	 })
+	 
+});
+//回车提交个人中心搜索商品
+$("#navSearchContent").keyup(function(event){  
+	  if(event.keyCode ==13){  
+		  var val=$("#navSearchContent").val();
+			window.location.href = "/elastic/goods?goodsName="+val;
+	  }  
+});
+//查询购物车信息
+function shoppingCart(){
+	//顶部
+	$.ajax({
+		url:"commons/findCart",
+		type:"post",
+		dataType:"html",
+		success:function(data){
+			//$("#shoppingcart").html(data);
+			document.getElementById("shoppingcart").innerHTML=data;
+		}
+	});
+	//商品总数
+	$.ajax({
+		url:"commons/cart/count",
+		type:"post",
+		dataType:"json",
+		success:function(data){
+			//$("#cartCount").html(data);
+			//$("#cartnum").html("购物车"+data);
+			document.getElementById("cartCount").innerHTML=data;
+			document.getElementById("cartnum").innerHTML="购物车"+data;
+		}
+	});
+	//右侧
+	$.ajax({
+		url:"commons/findRightCart",
+		type:"post",
+		dataType:"html",
+		success:function(data){
+			//$("#downCart").html(data);
+			document.getElementById("downCart").innerHTML=data;
+		}
+	})
+	
+}
+
+//全部商品导航
+	$(document).ready(function () {
+        $(".classify-ul").on("mouseover",".classify-li",function () {
+            $(this).find(".meau").show();
+			var size = $(this).find('.meau-item').size(),
+				miWeight = $(".meau-item").outerWidth(true);
+			if(size<=3){
+				$(this).find(".meau-content").css("width",miWeight);
+			}
+			if(size>3 && size <6){
+				if(size==4){
+					/*$(this).find(".meau-content").append("<li class='meau-item' style='height:100px;width:240px'>李杰</li><li class='meau-item' style='height:100px;width:240px'>李杰</li>");*/
+					$(this).find(".meau-content").find(".meau-item").eq(3).css({"position":"absolute","top":"16px","right":"0"});
+					
+				}
+				if(size==5){
+					$(this).find(".meau-content").find(".meau-item").eq(3).css({"position":"absolute","top":"16px","right":"0"});
+					$(this).find(".meau-content").find(".meau-item").eq(4).css({"position":"absolute","top":"135px","right":"0"});
+				}
+				$(this).find(".meau-content").css("width",2*miWeight);
+			}
+			if(size == 6){
+				$(this).find(".meau-content").find(".meau-item").eq(3).css({"position":"absolute","top":"16px","right":"0"});
+				$(this).find(".meau-content").find(".meau-item").eq(4).css({"position":"absolute","top":"135px","right":"0"});
+				$(this).find(".meau-content").find(".meau-item").eq(5).css({"position":"absolute","top":"256px","right":"0"});
+				$(this).find(".meau-content").css("width",2*miWeight);
+			}
+			if(size >6 && size<9){
+				if(size==7){
+					$(this).find(".meau-content").find(".meau-item").eq(3).css({"position":"absolute","top":"16px","right":"280px"});
+					$(this).find(".meau-content").find(".meau-item").eq(4).css({"position":"absolute","top":"135px","right":"280px"});
+					$(this).find(".meau-content").find(".meau-item").eq(5).css({"position":"absolute","top":"256px","right":"280px"});
+					$(this).find(".meau-content").find(".meau-item").eq(6).css({"position":"absolute","top":"16px","right":"0"});
+					/*$(this).find(".meau-content").find(".meau-item").eq(7).css({"position":"absolute","top":"135px","right":"0"});*/
+				}
+				if(size==8){
+					$(this).find(".meau-content").find(".meau-item").eq(3).css({"position":"absolute","top":"16px","right":"280px"});
+					$(this).find(".meau-content").find(".meau-item").eq(4).css({"position":"absolute","top":"135px","right":"280px"});
+					$(this).find(".meau-content").find(".meau-item").eq(5).css({"position":"absolute","top":"256px","right":"280px"});
+					$(this).find(".meau-content").find(".meau-item").eq(6).css({"position":"absolute","top":"16px","right":"0"});
+					$(this).find(".meau-content").find(".meau-item").eq(7).css({"position":"absolute","top":"135px","right":"0"});
+				}
+				$(this).find(".meau-content").css("width",3*miWeight);
+				
+			}
+			if(size ==9){
+				$(this).find(".meau-content").find(".meau-item").eq(3).css({"position":"absolute","top":"16px","right":"280px"});
+				$(this).find(".meau-content").find(".meau-item").eq(4).css({"position":"absolute","top":"135px","right":"280px"});
+				$(this).find(".meau-content").find(".meau-item").eq(5).css({"position":"absolute","top":"256px","right":"280px"});
+				$(this).find(".meau-content").find(".meau-item").eq(6).css({"position":"absolute","top":"16px","right":"0"});
+				$(this).find(".meau-content").find(".meau-item").eq(7).css({"position":"absolute","top":"135px","right":"0"});
+				$(this).find(".meau-content").find(".meau-item").eq(8).css({"position":"absolute","top":"256px","right":"0"});
+				$(this).find(".meau-content").css("width",3*miWeight);
+			}
+           /* if(size >= 3 && size<= 6){
+                $(this).find(".meau-content").css("width",2*miWeight);
+            }else if(size>6){
+                $(this).find(".meau-content").css("width",3*miWeight);
+            }else if(size < 3){
+                $(this).find(".meau-content").css("width",miWeight);
+            }*/
+        }).on("mouseout",function () {
+            $(this).find(".meau").hide();
+        });
+    });
+	//导航条
+	$(document).ready(function () {
+		var navSection = $(".nav-section"),
+			itemWidth = $(".nav-section .list-li"),
+			allWidth = itemWidth.size();
+			var sumWidth =0;
+			navSection.find(".list-li:lt(8)").each(function(){
+				return sumWidth += $(this).innerWidth();
+			});
+			if(allWidth >= 8){
+				$(".nav-section .right").show();
+				$(".nav-section .clearfix").css({"width":sumWidth+15,"overflow":"hidden"})
+			}
+			$(".nav-section .right").click(function () {
+                $(".nav-section .clearfix").css("width","1025px")
+				$(this).hide();
+
+            })
+	});
+
+
+//提示弹框
+function warnPop(txt){
+	easyDialog.open({
+		  container : {
+		    header : '提示',
+		    content : txt
+		  }
+	});
+}
+
+//删除购物车
+function deleteCartGoods(goodsId){
+	$.ajax({
+		url:"cart/delShoppingCart/"+goodsId,
+		type:"get",
+		success:function(data){
+			shoppingCart();
+		}
+	});
+}
+
+
+ 
+ 

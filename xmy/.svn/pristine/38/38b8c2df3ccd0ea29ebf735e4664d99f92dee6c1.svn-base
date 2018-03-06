@@ -1,0 +1,178 @@
+package com.zfj.xmy.order.service.pc;
+
+import java.util.List;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.common.persistence.pojo.PointsGoods;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCart;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcCollectionGoodsDto;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcGoodsDto;
+
+public interface PcShoppingCartService {
+	
+	/**
+	 * @param userId
+	 * @param pageBean
+	 * @return List<PcGoodsDto>
+	 * @author lij
+	 * @date 2017年8月7日 下午7:22:48
+	 * 查询用户购物车商品信息
+	 */
+	List<PcGoodsDto> findShoppingCartByUserId(Long userId);
+	
+	/**
+	 * @param userId
+	 * @param num
+	 * @param goodsId void
+	 * @author lij
+	 * @date 2017年8月7日 下午8:43:58
+	 * 修改购物车商品数量
+	 */
+	void updateShoppingCartNum(Long userId,Integer num,Long goodsId);
+	/**
+	 * @param userId
+	 * @param goodsId void
+	 * @author lij
+	 * @date 2017年8月7日 下午9:01:39
+	 * 删除购物车的商品
+	 */
+	void deleteShoppingCartGoods(Long userId,Long goodsId);
+	
+	/**
+	 * @param usreId
+	 * @param goodsId
+	 * @param categoryName void
+	 * @author lij
+	 * @date 2017年8月8日 下午2:42:14
+	 * 添加到收藏夹
+	 */
+	void addCollectionGoods(Long userId,PcCollectionGoodsDto dto);
+	
+	/**
+	 * @param userId
+	 * @param goodsId
+	 * @return Integer 0.没有 1.有
+	 * @author lij
+	 * @date 2017年8月8日 下午2:57:58
+	 * 查询收藏夹中是否有该商品
+	 */
+	Integer findCollectinoGoodsIsDel(Long userId,Long goodsId);
+	/**
+	 * @param userId
+	 * @param goodsId
+	 * @return Integer 0:购物车中没有该商品 1:购物车中有该商品
+	 * @author lij
+	 * @date 2017年8月8日 下午8:08:17
+	 * 查询购物车中是否有该商品
+	 */
+	Integer findCartGoods(Long userId,Long goodsId);
+	/**
+	 * @param userId
+	 * @param goodsId
+	 * @param goodsNum void
+	 * @author lij
+	 * @date 2017年8月8日 下午8:10:40
+	 * 添加到购物车
+	 */
+	void addShoppingCart(Long userId,Long goodsId,Integer goodsNum);
+	/**
+	 * @param userId
+	 * @param goodsId
+	 * @param goodsNum void
+	 * @author zhangh
+	 * @date 2017年9月5日 下午5:10:40
+	 * 积分商品添加到购物车
+	 */
+	void addPointsShoppingCart(Long userId,Long goodsId,Integer goodsNum,Integer points,Integer actId);
+	/**
+	 * @param userId
+	 * @param goodsId
+	 * @param goodsNum
+	 * @param activityType
+	 * @param activityId
+	 * @param activityPrice
+	 * @param activityName
+	 * @param presentId void
+	 * @author lij
+	 * @date 2017年8月29日 上午9:43:39
+	 * 添加活动商品到购物车
+	 */
+	void addActivityCart(ShoppingCart shoppingCart);
+	
+	/**
+	 * 领取优惠券
+	 * @param couponId
+	 * @param userId
+	 * @return    
+	 * @return int    
+	 * Date:2017年10月10日 下午4:52:27 
+	 * @author hexw
+	 */
+	int getCoupon(long couponId, long userId);
+	
+	/**
+	 * 批量收藏商品
+	 * @param userId
+	 * @param goodsIds    
+	 * @return void    
+	 * Date:2017年10月20日 下午5:20:33 
+	 * @author hexw
+	 */
+	void addBatchCollectionGoods(Long userId, String goodsIds);
+	
+	/**
+	 * 校验积分活动限购的数量
+	 * @param pointsId
+	 * @param goodsId
+	 * @param points
+	 * @return    
+	 * @return int    
+	 * Date:2017年10月23日 下午6:18:08 
+	 * @author hexw
+	 */
+	int checkPointGoods(Long pointsId,Long userId, Long goodsId, Integer num);
+	
+	/**
+	 * 根据活动id和商品id查询积分活动
+	 * @param actId
+	 * @param goodsId
+	 * @return    
+	 * @return PointsGoods    
+	 * Date:2017年10月23日 下午8:28:58 
+	 * @author hexw
+	 */
+	PointsGoods getPointsGoodsByActId(Integer actId, Long goodsId);
+	
+	/**
+	 * 查询购物车
+	 * @param userId
+	 * @param goodsId
+	 * @return    
+	 * @return ShoppingCart    
+	 * Date:2017年10月24日 上午11:14:58 
+	 * @author hexw
+	 */
+	ShoppingCart findShoppingCart(Long userId, Long goodsId ,Long activityId);
+	
+	/**
+	 * 判断活动商品添加的数量
+	 * @param activityId
+	 * @param goodsId
+	 * @param allNum
+	 * @return    
+	 * @return Integer    
+	 * Date:2017年10月24日 上午11:40:07 
+	 * @author hexw
+	 */
+	Integer checkActivityGoodsNum(Long activityId, Long goodsId, Integer allNum);
+	
+	/**
+	 * 获取积分商品
+	 * @param pointGoodsId
+	 * @return    
+	 * @return PointsGoods    
+	 * Date:2017年10月31日 下午4:46:35 
+	 * @author hexw
+	 */
+	PointsGoods getpointsGoods(Long pointGoodsId);
+}

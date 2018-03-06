@@ -1,0 +1,44 @@
+#SERVER_PATH=http\://192.168.0.15:8080
+#SERVER_PATH=http://wx.cqzfj.com/sg
+APP_NAME=\u9999\u6EE1\u56ED\u7BA1\u7406\u7CFB\u7EDF
+APP_VERSION=0.1
+APP_PATH=http\://127.0.0.1/xmy-cms
+#login redirect address
+APP_REDIRECT_PATH=/login
+#0:no limit
+IMAGE_MAX_SIZE=0
+
+
+#### jpush config start #
+
+JPUSH_APPKEY=99b64d40ce4fc95173aaf02b
+JPUSH_MASTERSECRET=e53b5eef89308127cd2e5635
+
+#### jpush config start #
+
+
+
+#### openim config start #
+
+OPENIM_APPKEY=24602319
+OPENIM_APPSECRET=d9cba3f4ea0ea63d1b1e88ce7297073a
+OPENIM_CUSTOMTAOBAOID=tzdsxl
+
+#### openim config end #
+
+
+
+#### wechat login config start #
+
+WECHAT_LOGIN_APPID=wxe41266d25245a434
+WECHAT_LOGIN_SECRET=ce2a29301a6d8a483542d2cd907fb2f8
+
+#### wechat login config end #
+
+
+#### baidu map config start #
+
+BAIDU_AK=KTAi0i0WrRCRcDMASMDPGlKz
+BAIDU_SK=smbN6jxqk1NEVKchXr0tmiyfpcaaTUml
+
+#### baidu map config end #

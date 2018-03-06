@@ -1,0 +1,113 @@
+layui.use(["pager","form","upload","laydate","layer"],function(){
+	var tool = layui.tool ,$ = layui.jquery ,pager = layui.pager ,laydate=layui.laydate;
+	var form = layui.form(), layer = layui.layer ;
+
+	//修改支付配置
+	$("body").on("click",".channels-modify", function(){
+		var paytype = $(this).val(); //支付类型
+		
+		   var index = layer.open({
+			   type: 2,
+			   title: '修改支付配置',
+			   shadeClose: true,
+			   area: ['80%', '95%'],
+			   content: "payconfig/findchannel?paytype="+paytype,
+			   btn: ['确定', '取消'],
+			   btnAlign: 'c',
+			   yes:function(index, layero){  //
+				   
+//				   try {
+//					   if (!time) {
+//					       throw "请选择推送时间";
+//					   }
+//					   if (!msg) {
+//						   throw "请填写推送内容";
+//					   }
+//				   } catch (e) {
+//					  tool.error(e);
+//					  return;
+//				   }
+//				  
+//				   $.post("push/add",{time:time,msg:msg},function(data){
+//					   if(data.resultCode == 200){
+//						   tool.info("添加成功！")
+//						   window.location.href="push/list";
+//						   layer.close(index); 
+//					   }else {
+//						   tool.error("添加失败！"+data.data);
+//					   }
+//				   });
+				   
+			   },
+			   btn2:function(index, layero){
+				   layer.close(index); 
+			   }
+		   })
+		  
+		});
+	//立即推送
+	$("body").on("click","#btn-push-now", function(){
+										var form = '<form id="pushForm">'
+												+ '<div class="layui-form-item">'
+												+ '<label class="layui-form-label">推送信息</label>'
+												+ '<div class="layui-input-block">'
+												+ '<textarea rows="3" cols="10" class="layui-textarea" id="push-message" ></textarea>'
+												+ '</div>' + '</div>'
+												+ '</form>'
+										var index = layer
+												.open({
+													type : 1,
+													title : '立即推送消息',
+													shadeClose : true,
+													area : [ '30%', '40%' ],
+													content : form,
+													btn : [ '确定推送', '取消' ],
+													btnAlign : 'c',
+													yes : function(index,
+															layero) { //
+														var msg = $("#push-message").val();
+														try {
+															if (!msg) {
+																throw "请填写推送内容";
+															}
+														} catch (e) {
+															tool.error(e);
+															return;
+														}
+														$.post("push/push",{msg : msg},
+																		function(
+																				data) {
+																			if (data.resultCode == 200) {
+																				tool.info("推送成功！");
+																				layer.close(index);
+																			} else {
+																				tool.error("推送失败！"+ data.data);
+																			}
+																		});
+
+													},
+													btn2 : function(index,
+															layero) {
+														layer.close(index);
+													}
+												})
+	});
+	//删除
+//	$("body").on("click",".del-btn", function(){
+//		var jobName = $(this).attr("data-jobName");
+//		var triggerName = $(this).attr("data-triggerName");
+//		tool.confirm("您确定要删除这个定时推送吗？",function(){
+//			$.get("push/del",{jobName:jobName,triggerName:triggerName},function(data){
+//				if(data.resultCode == 200){
+//					   tool.info("删除成功！")
+//					   window.location.href="push/list";
+//					   layer.close(index); 
+//				   }else {
+//					   tool.error("删除失败！"+data.data);
+//				   }
+//			});
+//		}) ;
+//	});
+}) ;
+
+

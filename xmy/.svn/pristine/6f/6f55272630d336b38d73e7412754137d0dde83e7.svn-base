@@ -1,0 +1,91 @@
+package com.zfj.xmy.user.persistence.pojo.dto.app;
+
+/**
+ * 用户登录传入参数
+ * @author Administrator
+ *
+ */
+public class UserLoginInDto {
+
+	/**
+	 * 普通登陆
+	 */
+	public static final Integer  TYPE_NOMARL =  1;
+	/**
+	 * 微信登陆
+	 */
+	public static final Integer  TYPE_WECHAT =  2;
+	/**
+	 * QQ 登陆
+	 */
+	public static final Integer  TYPE_QQ =  3;
+	
+	
+	/**
+	 * 手机号/用户名/邮箱
+	 */
+	private String name;
+	/**
+	 * 密码
+	 */
+    private String password;
+    
+    /**
+     * 登录类型  / 1 普通登录 2 微信登录 3 qq登录
+     */
+    private Integer type; 
+    
+    /**
+     * 微信授权code
+     */
+    private String wechatcode;
+    /**
+     * qq openid
+     */
+    private String qqOpenId;
+    /**
+     * qq授权code
+     */
+    private String qqtoken;
+    
+    
+	
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
+	public String getQqOpenId() {
+		return qqOpenId;
+	}
+	public void setQqOpenId(String qqOpenId) {
+		this.qqOpenId = qqOpenId;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getWechatcode() {
+		return wechatcode;
+	}
+	public void setWechatcode(String wechatcode) {
+		this.wechatcode = wechatcode;
+	}
+	public String getQqtoken() {
+		return qqtoken;
+	}
+	public void setQqtoken(String qqtoken) {
+		this.qqtoken = qqtoken;
+	}
+    
+    
+}

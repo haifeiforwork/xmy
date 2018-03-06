@@ -1,0 +1,549 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%> 
+<%@ include file="/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+<head>
+<title>全部订单</title>
+<%@ include file="/commons/comm_css.jsp"%>
+<style type="text/css">
+.layui-btn {margin-left: 70%}
+.layui-input-inline{margin-left: 20%}
+.text {text-align:right}
+.ok { font-size: 16px}
+.orderLi{margin-left: 40px}
+i:hover
+{ 
+cursor:pointer
+}
+.layui-table td{padding:2px 15px;font-size: 12px}
+</style>
+</head>
+<body>
+<div class="layui-layout layui-layout-admin">
+  <!-- 公共layout -->
+  <%@ include file="/commons/common_layout.jsp"%>
+   <div class="layui-tab layui-tab-brief" lay-filter="demoTitle">
+ 	 	<div class="layui-body layui-tab-content site site-body site-custom-body layui-form-item">
+ 	 		<i class="layui-icon" style="font-size: 20px; color: #009688;">订单详情</i>
+ 	 		<hr>
+		 	 <blockquote class="layui-elem-quote">
+				订单编号：${orderMap.order.no }
+				<c:if test="${orderMap.order.isDel==1 }">
+					<c:if test="${orderMap.order.returnStatus==0 || empty orderMap.order.returnStatus }">
+						<button id="delete" class="layui-btn" >作废订单</button>
+						<button id="user" class="layui-btn">客户清单</button>
+						<c:if test="${orderMap.order.shipStatus==1 }">
+							<button id="audit" class="layui-btn" >审核通过</button>
+							<button class="layui-btn" >审核失败</button>
+							<i class="layui-icon" style="font-size: 16px; color: #009688;">●待审核</i>
+						</c:if>
+						<c:if test="${orderMap.order.shipStatus==2 }">
+							<button id="updatePayStatus" class="layui-btn" >改为已支付</button>
+						</c:if>
+						<c:if test="${orderMap.order.shipStatus==3 }">
+							<i class="layui-icon" style="font-size: 16px; color: #009688;">●供货确认</i>
+						</c:if>
+						<c:if test="${orderMap.order.shipStatus==4}">
+							<button id="prepare" class="layui-btn" >备货确认</button>
+							<i class="layui-icon" style="font-size: 16px; color: #009688;">●备货中</i>
+						</c:if>
+						<c:if test="${orderMap.order.shipStatus==5 }">
+							<i class="layui-icon"  style="font-size: 16px; color: #009688;">●待发货</i>
+						</c:if>
+						<c:if test="${orderMap.order.shipStatus==6 }">
+							<button id="finish" class="layui-btn" >订单完成</button>
+							<i class="layui-icon" style="font-size: 16px; color: #009688;">●已发货</i>
+						</c:if>
+						<c:if test="${orderMap.order.shipStatus==7 }">
+							<i class="layui-icon"  style="font-size: 16px; color: #c2c2c2;">●已完成</i>
+						</c:if>
+					</c:if>
+					<c:if test="${orderMap.order.returnStatus==2 }">
+						<button id="delete" class="layui-btn" >订单作废</button>
+						<button id="retern" class="layui-btn" >确认退货</button>
+						<i class="layui-icon"  style="font-size: 16px; color: #c2c2c2;">●退货中</i>
+					</c:if>
+					<c:if test="${orderMap.order.returnStatus==1 }">
+						<button id="delete" class="layui-btn" >订单作废</button>
+						<i class="layui-icon"  style="font-size: 16px; color: #c2c2c2;">●已退货</i>
+					</c:if>
+				</c:if>
+				<c:if test="${orderMap.order.isDel==0 }">
+						<i class="layui-icon"  style="font-size: 16px; color: #c2c2c2;float: right;">●已作废</i>
+				</c:if>
+			</blockquote>
+			<!-- 订单商品信息 -->
+			<fieldset class="layui-elem-field site-demo-button">
+				<legend>商品信息&nbsp;&nbsp;</legend>
+	  			<div style="width: 90%" >
+	  				<table class="layui-table" lay-even="" lay-skin="row" style="margin-left: 70px">
+					  <colgroup>
+					    <col width="150">
+					    <col width="150">
+					    <col width="200">
+					    <col>
+					  </colgroup>
+					  <thead>
+					    <tr>
+					      <th>商品编号</th>
+					      <th>商品名称</th>
+					      <th>商品状态</th>
+					      <th>分类</th>
+					      <th>商品图片</th>
+					      <th>购买数量</th>
+					      <th>销售单价</th>
+					      <th>小计（元）</th>
+					     <%--  <c:if test="${orderMap.order.isDel==1 }">
+					      		<th>操作</th>
+					      </c:if> --%>
+					    </tr> 
+					  </thead>
+					  <tbody>
+					  <c:forEach items="${orderMap.goods }" var="good">
+					    <tr>
+					      <td>${good.no }</td>
+					      <td>
+					      		${good.name }
+					      		<c:if test="${not empty good.presentGoodsName }">
+					      			<br/>
+					      			<span style="color: red;">赠品：${good.presentGoodsName } </span>
+					      		</c:if>
+					      </td>
+					      <td>已上架</td>
+					      <td>${good.typeName }</td>
+					      <td>无</td>
+					      <td>${good.num }
+				      			<!-- 禁用商品数量不能修改 -->
+				      			<%-- <input type="text" value="${good.num }" name="${good.id }" class="layui-input" style="width: 50px"/> --%>
+					      </td>
+					      <td><fmt:formatNumber value="${good.price }" pattern="#.00"/></td>
+					      <td><fmt:formatNumber value="${good.sumPrice }" pattern="#.00"/></td>
+					     <%--  <c:if test="${orderMap.order.isDel==1 }">
+			      			<td>
+			      				<button class="layui-btn updateGoodsnum" value="${good.id }" style="margin-left: 0px;">保存</button>
+			      				<button class="layui-btn delOrderGoods" value="${good.id }" style="margin-left: 0px;">删除</button>
+			      			</td>
+					      </c:if> --%>
+					    </tr>
+					    </c:forEach>
+					     <tr>
+					      <td colspan="9" class="text"><i class="layui-icon" style="font-size: 16px; color: #009688;">
+					      		配送费：${orderMap.order.freight }元
+					      	</i><br>
+					      	<i class="layui-icon" style="font-size: 20px; color: #009688; font-family: "黑体">
+					      		订单金额合计：${orderMap.order.total }元
+					      	</i>
+					      </td>
+					    </tr>
+					  </tbody>
+					</table>  
+					<input type="text" value="${message }" id="mes" style="display: none"/>
+	  			</div>
+  			</fieldset>
+  				<!-- 扩展时间 -->
+ 				<c:if test="${orderMap.order.isDel==1 }">
+					<c:if test="${orderMap.order.shipStatus==3 || orderMap.order.shipStatus==4 }">
+						<fieldset class="layui-elem-field site-demo-button">
+						  <legend>扩展时间</legend>
+						  <div style="width: 90%;">
+						  	<br>
+						    <form class="layui-form" action="order/updateOrderDate" >
+						  		<div class="layui-form-item">
+						  			<input type="text" value="<fmt:formatDate value="${orderMap.order.extendTime }" pattern="yyyy-MM-dd HH:mm:ss"/>" onclick="layui.laydate({elem: this, istime: true, format: 'YYYY-MM-DD hh:mm'})" style="width: 200px;float: left;margin-left: 40px" name="updateTime" placeholder="扩展时间" class="layui-input">
+							 		<input type="text" value="${orderMap.order.id }" name="id" style="display: none">
+							 		<button  class="layui-btn" >扩展时间</button>
+							 	</div>
+						  	</form>
+						  	<br>
+						  </div>
+						</fieldset>
+					</c:if>
+			   </c:if>
+				<!-- 配送人 -->
+				<c:if test="${orderMap.order.isDel==1 }">
+					<c:if test="${orderMap.order.shipStatus==5 }">
+						<div class="layui-form-item" style="background-color: #eeeeee;">
+						<form class="layui-form" action="order/updateOrderDelivery" >
+							<br>
+							<label class="layui-form-label">选择配送人</label>
+							<div class="layui-input-block" style="width: 250px">
+								<select name="deliveryId" id="sel" lay-verify="deliveryId">
+								<option value="" class="op">请选择配送人</option>
+								<c:forEach items="${sessionScope.deliveryUser }" var="data">
+									<option value="${data.id }" class="op">${data.name }，联系方式：${data.mobilePhone }</option>
+								</c:forEach>
+								</select>
+							</div>
+							<input type="text" id="or" style="display: none" name="ids" value="${orderMap.order.id }"/>
+							<br>
+							<div class="layui-form-item layui-form-text">
+							    <label class="layui-form-label">短信内容</label>
+							    <div class="layui-input-block" style="width: 600px">
+							      <textarea class="layui-textarea" id="send" name="sendContent">亲：您的订单将于今日配送，配送人：xxx，联系电话：xxxx，请保持电话畅通，如有疑问，请及时与配送人联系。祝您购物愉快！【香满圆】
+							      </textarea>
+							    </div>
+							</div>
+								<div class="layui-input-inline" style="margin-left: 20px">
+									<button class="layui-btn" lay-submit="" lay-filter="demo2">发货确认</button>
+								</div>
+								<!-- <div class="layui-input-inline">
+									<button class="layui-btn" lay-submit="" lay-filter="demo2">发货确认（不发短信）</button>
+								</div> -->
+								<br><br><br>
+								<input type="hidden" id="isSendSMS" name="isSendSMS" value="1">
+							</form>
+						</div>
+						<div class="layui-form-item" style="background-color: #eeeeee;">
+						<form class="layui-form" action="order/updateSanOrder" >
+							<br>
+							<label class="layui-form-label">选择快递：</label>
+							<div class="layui-input-block" style="width: 250px">
+								<select name="kdniaoExpCode" lay-verify="kdniaoExpCode">
+								<option value="" class="op">请选择快递公司</option>
+								<c:forEach items="${kdList }" var="kd">
+									<option value="${kd.code }" class="op">${kd.name }</option>
+								</c:forEach>
+								</select>
+							</div>
+							<br><br>
+							<label class="layui-form-label">物流单号：</label>
+							 <div class="layui-input-block">
+			    				 <input type="text" class="layui-input" style="width: 250px" value="" lay-verify="logisticsNo" placeholder="请输入物流单号" name="logisticsNo"/>
+			   				 </div>
+			   				 <br></br>
+							<input type="text" id="or" style="display: none" name="ids" value="${orderMap.order.id }"/>
+								<div class="layui-input-inline" style="margin-left: 20px">
+									<button class="layui-btn" lay-submit="" lay-filter="demo2">发货确认</button>
+								</div>
+								<br><br><br>
+							</form>
+						</div>
+					</c:if>
+				</c:if>
+  				<!-- 订单信息 -->
+  				<fieldset class="layui-elem-field site-demo-button">
+				  <legend>收货人信息&nbsp;<i data-method="offset" class="layui-icon" style="font-size: 16px; color: #009688;">【修改】</i></legend>
+				  <div style="width: 90%" >
+				  			<br>
+				    		<li class="orderLi">收货人名称：${orderMap.order.consigneeName }</li><br>
+				    		<li class="orderLi">收货人电话：${orderMap.order.consigneePhone }</li><br>
+				    		<li class="orderLi">身份证号：${orderMap.order.consigneeIdcard }</li><br>
+				    		<li class="orderLi">收货人地址：${orderMap.order.consigneeAddress }</li><br>
+				    		<li class="orderLi">指定配送日期：<fmt:formatDate value="${orderMap.order.parsetTime }" pattern="yyyy-MM-dd"/></li><br>
+				    		<li class="orderLi">用户备注：${orderMap.order.orderRemark }</li><br>
+				    		
+				  </div>
+				</fieldset>
+  				<!-- 商家备注信息 -->
+  				<fieldset class="layui-elem-field site-demo-button">
+				  <legend>商家备注&nbsp;<i data-method="btnremark" class="layui-icon" style="font-size: 16px; color: #009688;">【修改备注】</i></legend>
+				  <div style="width: 90%;">
+				  <br>
+				    <li class="orderLi">${orderMap.order.businessRemark }</li><br>
+				  </div>
+				</fieldset>
+				<c:if test="${!empty orderMap.order.invoiceContent }">
+					<fieldset class="layui-elem-field site-demo-button">
+					  <legend>开票信息&nbsp;<i data-method="btninvoce" class="layui-icon" style="font-size: 16px; color: #009688;">【修改】</i></legend>
+					  <div style="width: 90%;">
+					  	<br>
+					    <li class="orderLi">发票类型：<c:if test="${orderMap.order.invoiceType==0 }">个人</c:if><c:if test="${orderMap.order.invoiceType==1 }">公司</c:if></li><br>
+					    <li class="orderLi">公司名称：${orderMap.order.companyName }</li><br>
+					    <li class="orderLi">纳税人识别号：${orderMap.order.taxpayerNum }</li><br>
+					  </div>
+					</fieldset>
+				</c:if>
+				<c:if test="${empty orderMap.order.invoiceContent }">
+					<fieldset class="layui-elem-field site-demo-button">
+					  <legend>开票信息&nbsp;<i data-method="btninvoce" class="layui-icon" style="font-size: 16px; color: #009688;">【修改】</i></legend>
+					  <div style="width: 90%;">
+					  	<br>
+					    <li class="orderLi">发票类型：无</li><br>
+					  </div>
+					</fieldset>
+				</c:if>
+				<fieldset class="layui-elem-field site-demo-button">
+				  <legend>支付信息</legend>
+				  <div style="width: 90%;">
+				  	<br>
+				    <table class="layui-table" style="margin-left: 40px" lay-skin="line">
+  						<tr>
+  							<td>订单金额：${orderMap.order.total }<%-- <input type="text" style="width: 60px;" id="total" value="${orderMap.order.total }"/> --%><button style="margin-left: 10px;display: none;" class="layui-btn layui-btn-primary layui-btn-small" id="updateTotal">修改金额</button> </td>
+  							<td>赠送积分：${orderMap.order.accPoints }</td>
+  						</tr>
+  						<tr>
+  							<td>优惠方式：<c:if test="${empty orderMap.order.businessRemark }">无</c:if> <c:if test="${!empty orderMap.order.businessRemark }">${orderMap.order.businessRemark }</c:if> </td>
+  							<td>优惠金额：${orderMap.order.discountPrice }</td>
+  						</tr>
+  						<tr>
+  							<td>会员折扣：无</td>
+  							<td>支付方式：
+  								<c:if test="${orderMap.order.payType==1 }">支付宝</c:if>
+					        	<c:if test="${orderMap.order.payType==2 }">微信</c:if>
+					        	<c:if test="${orderMap.order.payType==3 }">银联</c:if>
+					        	<c:if test="${orderMap.order.payType==4 }">购物卡</c:if>
+					        	<c:if test="${orderMap.order.payType==5 }">货到付款(${orderMap.order.total })</c:if>
+					        	<c:if test="${orderMap.order.payType==6 }">混合支付</c:if></td>
+  						</tr>
+  						<tr>
+  							<td>提货卡支付：
+	  							<c:if test="${orderMap.order.shipStatus==2 || empty orderMap.order.pay }">0.00</c:if> 
+	  							<c:if test="${orderMap.order.shipStatus>=3 || orderMap.order.shipStatus==1 }">${orderMap.order.pay }</c:if>
+  							</td>
+  							<td>第三方支付金额：
+  								<c:if test="${orderMap.order.payType==5 }">
+  									0.00
+  								</c:if>
+  								<c:if test="${orderMap.order.payType!=5 && orderMap.order.payType!=6}">
+		  							<c:if test="${orderMap.order.shipStatus==2}">0.00</c:if>
+		  							<c:if test="${orderMap.order.shipStatus>=3}">${orderMap.order.actual }</c:if>
+  								</c:if>
+  								<!-- 混合支付 -->
+  								<c:if test="${orderMap.order.payType==6}">
+		  							<c:if test="${orderMap.order.shipStatus==2}">0.00</c:if>
+		  							<c:if test="${orderMap.order.shipStatus>=3}">
+		  								${orderMap.order.actual }
+		  								<c:forEach items="${tradeType }"  var="item">
+		               			 	 		<c:if test="${item.key == orderMap.order.thirdPartyPayType }">(${item.value })</c:if> 
+		               					</c:forEach>
+		  							</c:if>
+  								</c:if>
+  							</td>
+  						</tr>
+  						<tr>
+  							<td>积分扣除：${orderMap.order.usedPoints }</td>
+  							<td>
+  								<c:if test="${not empty coupon }">优惠券抵用：${coupon.name } 抵用金额 ：${coupon.couponValue }</c:if>
+  								<c:if test="${empty coupon }">优惠券抵用:0</c:if>
+  							</td>
+  						</tr>
+  						<tr>
+  							<td><i data-method="offset" class="layui-icon" style="font-size: 15px; color: #009688;">
+  							实付金额：￥
+  							<c:if test="${orderMap.order.shipStatus==2 }">0.00</c:if> 
+  							<c:if test="${orderMap.order.shipStatus>=3 && orderMap.order.payType != 5}">${orderMap.order.total }</c:if>
+  							<c:if test="${orderMap.order.shipStatus==1 }">${orderMap.order.pay }</c:if>
+  							<c:if test="${orderMap.order.shipStatus==1 && empty orderMap.order.pay }">0.00</c:if>
+  							<c:if test="${orderMap.order.shipStatus>=3 && orderMap.order.payType == 5 }">${orderMap.order.pay }</c:if>
+  							元</i></td>
+  							<td></td>
+  						</tr>
+					</table>
+					<br>
+				  </div>
+				</fieldset>
+				<!-- 其它信息 -->
+				<fieldset class="layui-elem-field site-demo-button">
+				  <legend>其它信息<i data-method="delivery" class="layui-icon" style="font-size: 16px; color: #009688;">【修改配送方式】</i></legend>
+				  <div style="width: 90%;">
+				  	<br>
+				  	<center>
+					    <td>下单时间：<fmt:formatDate value="${orderMap.order.createTime }" pattern="yyyy-MM-dd HH:mm:ss"/></td>&nbsp;&nbsp;
+					    <td>支付时间：<fmt:formatDate value="${orderMap.order.payTime }" pattern="yyyy-MM-dd HH:mm:ss"/></td>&nbsp;&nbsp;
+					    <!-- <td>提货流水号：135414</td>&nbsp;&nbsp;
+					    <td>微信支付流水号：325807127</td>&nbsp;&nbsp; -->
+					    <td>配送方式：<c:if test="${orderMap.order.deliveryMethod==0 }">买家自提</c:if>
+				  					 <c:if test="${orderMap.order.deliveryMethod==1 }">平台配送</c:if>
+				  					 <c:if test="${empty orderMap.order.deliveryMethod }">平台配送</c:if>
+				  		</td>
+				  		<td>
+				  			订单来源：<c:if test="${orderMap.order.orderSource==1 }">PC</c:if>
+				  					 <c:if test="${orderMap.order.orderSource==2 }">APP</c:if>
+				  					 <c:if test="${orderMap.order.orderSource==3 }">WAP</c:if>
+				  					 <c:if test="${empty orderMap.order.orderSource}">历史订单未知</c:if>
+				  		</td>
+				    </center>
+				    <br>
+				    <br>
+				  </div>
+				</fieldset>
+				<!-- 订单轨迹 -->
+				<fieldset class="layui-elem-field site-demo-button">
+				  <legend>订单轨迹</legend>
+				  <div style="width: 90%;">
+				  	<br>
+				    <table class="layui-table" lay-skin="line" style="margin-left: 40px">
+						<tr style="background-color: #e2e2e2;">
+							<th>日期</th>
+							<th>操作人</th>
+							<th>变更内容</th>
+						</tr>
+						<c:forEach items="${orderMap.orderPath }" var="orderPath">
+							<tr>
+								<td><fmt:formatDate value="${orderPath.changeTime }" pattern="yyyy-MM-dd HH:mm:ss"/></td>
+								<td>${orderPath.userName }</td>
+								<td>${orderPath.changeContent }</td>
+							</tr>
+						</c:forEach>
+					</table>
+					<br>
+					<br>
+				</fieldset>
+			<!-- 隐藏表单弹出层 (订单未被作废才能修改这些东西)-->	
+			<!-- 修改用户收货地址 -->
+	 <c:if test="${orderMap.order.isDel==1 }">
+		 <div id="consignee" style="display: none">
+			<form class="layui-form layui-form-pane" action="order/updetaConsignee">
+				<br>
+			  <div class="layui-form-item">
+			    <label class="layui-form-label">收货人改名</label>
+			    <div class="layui-input-inline">
+			      <input type="text" name="consigneeName" lay-verify="username" value="${orderMap.order.consigneeName }" placeholder="请输入" autocomplete="off" class="layui-input">
+			    </div>
+			  </div>
+			  
+			  <div class="layui-form-item">
+			    <label class="layui-form-label">收货人电话</label>
+			    <div class="layui-input-inline">
+			      <input type="text" name="consigneePhone" lay-verify="phone" value="${orderMap.order.consigneePhone }" placeholder="请输入" autocomplete="off" class="layui-input">
+			    </div>
+			  </div>
+			  
+			  <div class="layui-form-item">
+			    <label class="layui-form-label">身份证号码</label>
+			    <div class="layui-input-inline">
+			      <input type="text" name="username"  placeholder="请输入" autocomplete="off" class="layui-input">
+			    </div>
+			  </div>
+			  
+			  <!-- <div class="layui-form-item">
+			    <label class="layui-form-label">地址</label>
+			    <div class="layui-input-inline" style="width: 100px">
+			      <select name="quiz1">
+			        <option value="">请选择省</option>
+			        <option value="浙江" selected="">浙江省</option>
+			        <option value="你的工号">江西省</option>
+			        <option value="你最喜欢的老师">福建省</option>
+			      </select>
+			    </div>
+			    <div class="layui-input-inline" style="width: 100px">
+			      <select name="quiz2">
+			        <option value="">请选择市</option>
+			        <option value="杭州">杭州</option>
+			        <option value="宁波" disabled="">宁波</option>
+			        <option value="温州">温州</option>
+			        <option value="温州">台州</option>
+			        <option value="温州">绍兴</option>
+			      </select>
+			    </div>
+			    <div class="layui-input-inline" style="width: 100px">
+			      <select name="quiz3">
+			        <option value="">请选择县/区</option>
+			        <option value="西湖区">西湖区</option>
+			        <option value="余杭区">余杭区</option>
+			        <option value="拱墅区">临安市</option>
+			      </select>
+			    </div>
+			  </div> -->
+			  
+			 <div class="layui-form-item">
+			      <label class="layui-form-label">详细地址</label>
+			    <div class="layui-input-block">
+			      <input type="text" name="consigneeAddress" autocomplete="off" value="${orderMap.order.consigneeAddress }" placeholder="详细地址" class="layui-input">
+			    </div>
+	  		</div>
+			  <div class="layui-form-item layui-form-text">
+			    <label class="layui-form-label">用户备注</label>
+			    <div class="layui-input-block">
+			      <textarea placeholder="多行输入" class="layui-textarea" name="orderRemark">${orderMap.order.orderRemark }</textarea>
+			    </div>
+	  		</div>
+	  		<input type="text" id="orderid" value="${orderMap.order.id }" name="id" style="display: none">
+	  		<div class="layui-input-inline" >
+			  <div class="layui-form-item">
+			    <button class="layui-btn " lay-submit="" lay-filter="demo2">保存</button>
+			  </div>
+			</div>
+			
+			<div class="layui-input-inline" style="width: 100px">
+			  <div class="layui-form-item" style="margin-left: 100px">
+			    <button class="layui-btn " lay-submit="" lay-filter="demo2">重置</button>
+			  </div>
+			</div>
+			</form>
+		  </div>
+	  </c:if>
+	 <!-- 更改配送方式 -->
+	 <c:if test="${orderMap.order.isDel==1 }">
+		 <div id="delivery" style="display: none">
+		 	<br><br><br>
+			<form class="layui-form layui-form-pane" action="order/deliveryMethod">
+				<div class="layui-form-item" style="margin-left: 40px">
+					<label class="layui-form-label">配送方式</label>
+					<div class="layui-input-inline" style="width: 150px;">
+						<select name="deliveryMethod">
+							 <option value="0">买家自提</option>
+							 <option value="1" selected="">平台配送</option>
+						</select>
+					</div>
+					<input type="text" value="${orderMap.order.id }" name="id" style="display: none">
+					<div class="layui-input-inline">
+						<button class="layui-btn " lay-submit="" lay-filter="demo2">保存</button>
+					</div>
+				</div>
+			</form>
+		  </div>
+	  </c:if>
+	  <!-- 修改商家备注信息 -->
+	  <c:if test="${orderMap.order.isDel==1 }">
+		  <div id="busremark" style="display: none">
+		  <form class="layui-form layui-form-pane" action="order/deliveryMethod">
+				<div class="layui-form-item" style="margin-left: 40px">
+					<label class="layui-form-label">商家备注</label>
+					<input type="text" value="${orderMap.order.id }" name="id" style="display: none">
+					<div class="layui-input-block">
+			      		<textarea placeholder="多行输入" class="layui-textarea" name="businessRemark">${orderMap.order.businessRemark }</textarea>
+			    	</div>
+			    	<br>
+			    	<button class="layui-btn " lay-submit="" lay-filter="demo2" style="margin-left: 45%">保存</button>
+				</div>
+			</form>
+		  <br>
+		  </div>
+	  </c:if>
+	  <!-- 修改订单发票信息 -->
+	  <c:if test="${orderMap.order.isDel==1 }">
+		  <div id="btninvoce" style="display: none">
+		  <form class="layui-form layui-form-pane" action="order/updateInvoice">
+				<div class="layui-form-item">
+				    <label class="layui-form-label">纳税人识别号</label>
+				    <div class="layui-input-inline">
+				      <input type="text" name="taxpayerNum" lay-verify="taxpayerNum" value="${orderMap.order.taxpayerNum }" placeholder="请输入" autocomplete="off" class="layui-input">
+				    </div>
+			  	</div>
+			  	<input type="text" value="${orderMap.order.id }" name="id" style="display: none">
+			  	 <div class="layui-form-item">
+				    <label class="layui-form-label">发票类型</label>
+				    <div class="layui-input-block">
+				      <c:if test="${orderMap.order.invoiceType==0 }">
+				      	<input type="radio" name="invoiceType" value="0" title="个人" checked="">
+				      	<input type="radio" name="invoiceType" value="1" title="公司">
+				      </c:if>
+				      <c:if test="${orderMap.order.invoiceType==1 }">
+				      	<input type="radio" name="invoiceType" value="0" title="个人">
+				      	<input type="radio" name="invoiceType" value="1" title="公司" checked="">
+				      </c:if>
+				      <c:if test="${empty orderMap.order.invoiceType }">
+					      <input type="radio" name="invoiceType" value="1" title="公司">
+					      <input type="radio" name="invoiceType" value="0" title="个人">
+				      </c:if>
+				    </div>
+				 </div>
+			  	<div class="layui-form-item">
+				    <label class="layui-form-label">发票信息</label>
+				    <div class="layui-input-inline">
+				      <input type="text" name="invoiceContent" lay-verify="invoiceContent" value="${orderMap.order.invoiceContent }" placeholder="发票类容" autocomplete="off" class="layui-input">
+				    </div>
+			  	</div>
+			  	<button class="layui-btn " lay-submit="" lay-filter="demo2" style="margin-left: 45%">保存</button>
+			</form>
+		  <br>
+		  </div>
+	  </c:if>
+	</div>
+	<!-- 底部 -->
+  <%@ include file="/commons/buttom.jsp"%>
+  <script type="text/javascript" src="order/js/order_detail.js"></script>
+</div>
+</body>
+</html>

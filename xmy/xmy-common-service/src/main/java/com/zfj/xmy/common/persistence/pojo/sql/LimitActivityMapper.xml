@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.LimitActivityMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.LimitActivity" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="port" property="port" jdbcType="VARCHAR" />
+    <result column="join_condition" property="joinCondition" jdbcType="VARCHAR" />
+    <result column="limit_num" property="limitNum" jdbcType="INTEGER" />
+    <result column="begin_time" property="beginTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="img_id" property="imgId" jdbcType="BIGINT" />
+    <result column="img_path" property="imgPath" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="icon" property="icon" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, `name`, `type`, type_name, port, join_condition, limit_num, begin_time, end_time, 
+    img_id, img_path, `status`, icon, description
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from limit_activity
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from limit_activity
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from limit_activity
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from limit_activity
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update limit_activity
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null" >
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.type != null" >
+        `type` = #{record.type,jdbcType=INTEGER},
+      </if>
+      <if test="record.typeName != null" >
+        type_name = #{record.typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.port != null" >
+        port = #{record.port,jdbcType=VARCHAR},
+      </if>
+      <if test="record.joinCondition != null" >
+        join_condition = #{record.joinCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="record.limitNum != null" >
+        limit_num = #{record.limitNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.beginTime != null" >
+        begin_time = #{record.beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.endTime != null" >
+        end_time = #{record.endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.imgId != null" >
+        img_id = #{record.imgId,jdbcType=BIGINT},
+      </if>
+      <if test="record.imgPath != null" >
+        img_path = #{record.imgPath,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
+        `status` = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.icon != null" >
+        icon = #{record.icon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.description != null" >
+        description = #{record.description,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update limit_activity
+    set id = #{record.id,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      `type` = #{record.type,jdbcType=INTEGER},
+      type_name = #{record.typeName,jdbcType=VARCHAR},
+      port = #{record.port,jdbcType=VARCHAR},
+      join_condition = #{record.joinCondition,jdbcType=VARCHAR},
+      limit_num = #{record.limitNum,jdbcType=INTEGER},
+      begin_time = #{record.beginTime,jdbcType=TIMESTAMP},
+      end_time = #{record.endTime,jdbcType=TIMESTAMP},
+      img_id = #{record.imgId,jdbcType=BIGINT},
+      img_path = #{record.imgPath,jdbcType=VARCHAR},
+      `status` = #{record.status,jdbcType=INTEGER},
+      icon = #{record.icon,jdbcType=VARCHAR},
+      description = #{record.description,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from limit_activity
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from limit_activity
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.LimitActivity" useGeneratedKeys="true" keyProperty="id" >
+    insert into limit_activity (`name`, `type`, type_name, 
+      port, join_condition, limit_num, 
+      begin_time, end_time, img_id, 
+      img_path, `status`, icon, 
+      description)
+    values (#{name,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{typeName,jdbcType=VARCHAR}, 
+      #{port,jdbcType=VARCHAR}, #{joinCondition,jdbcType=VARCHAR}, #{limitNum,jdbcType=INTEGER}, 
+      #{beginTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{imgId,jdbcType=BIGINT}, 
+      #{imgPath,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{icon,jdbcType=VARCHAR}, 
+      #{description,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.LimitActivity" useGeneratedKeys="true" keyProperty="id" >
+    insert into limit_activity
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        `name`,
+      </if>
+      <if test="type != null" >
+        `type`,
+      </if>
+      <if test="typeName != null" >
+        type_name,
+      </if>
+      <if test="port != null" >
+        port,
+      </if>
+      <if test="joinCondition != null" >
+        join_condition,
+      </if>
+      <if test="limitNum != null" >
+        limit_num,
+      </if>
+      <if test="beginTime != null" >
+        begin_time,
+      </if>
+      <if test="endTime != null" >
+        end_time,
+      </if>
+      <if test="imgId != null" >
+        img_id,
+      </if>
+      <if test="imgPath != null" >
+        img_path,
+      </if>
+      <if test="status != null" >
+        `status`,
+      </if>
+      <if test="icon != null" >
+        icon,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="typeName != null" >
+        #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="port != null" >
+        #{port,jdbcType=VARCHAR},
+      </if>
+      <if test="joinCondition != null" >
+        #{joinCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="limitNum != null" >
+        #{limitNum,jdbcType=INTEGER},
+      </if>
+      <if test="beginTime != null" >
+        #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="imgId != null" >
+        #{imgId,jdbcType=BIGINT},
+      </if>
+      <if test="imgPath != null" >
+        #{imgPath,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="icon != null" >
+        #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.LimitActivity" >
+    update limit_activity
+    <set >
+      <if test="name != null" >
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        `type` = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="typeName != null" >
+        type_name = #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="port != null" >
+        port = #{port,jdbcType=VARCHAR},
+      </if>
+      <if test="joinCondition != null" >
+        join_condition = #{joinCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="limitNum != null" >
+        limit_num = #{limitNum,jdbcType=INTEGER},
+      </if>
+      <if test="beginTime != null" >
+        begin_time = #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="imgId != null" >
+        img_id = #{imgId,jdbcType=BIGINT},
+      </if>
+      <if test="imgPath != null" >
+        img_path = #{imgPath,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="icon != null" >
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.LimitActivity" >
+    update limit_activity
+    set `name` = #{name,jdbcType=VARCHAR},
+      `type` = #{type,jdbcType=INTEGER},
+      type_name = #{typeName,jdbcType=VARCHAR},
+      port = #{port,jdbcType=VARCHAR},
+      join_condition = #{joinCondition,jdbcType=VARCHAR},
+      limit_num = #{limitNum,jdbcType=INTEGER},
+      begin_time = #{beginTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      img_id = #{imgId,jdbcType=BIGINT},
+      img_path = #{imgPath,jdbcType=VARCHAR},
+      `status` = #{status,jdbcType=INTEGER},
+      icon = #{icon,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

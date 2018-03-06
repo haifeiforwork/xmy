@@ -1,0 +1,41 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/common/common_tag.jsp"%>
+
+<!-- 商品搜索页面 -->
+<div class="list">
+	<ul class="list-ul">
+		<c:if test="${empty goodsList && empty pageFlag}">
+			<li style="text-align: center;background-color:#f0f0f0;padding:2rem 0;color:#999;font-size:0.75rem;width:100%;"><div><img src="resources/goods/images/search-big-icon.png" style="width:4rem;" /></div>没有相关筛选商品！</li>
+		</c:if>
+		<c:if test="${empty goodsList && not empty pageFlag}">
+			<div class="last-pagetips">
+	        	<div class="last-pageword">抱歉,没有更多商品啦~</div>
+	        	<div class="last-pageimg"><img src="resources/common/images/img-index-bt@2x.png"/></div>
+	        </div>
+       	</c:if>
+		<c:if test="${not empty goodsList }">
+			<c:forEach items="${goodsList }" var="goods">
+				<li class="goods-div">
+					<div class="showimage">
+						<img
+							src="${goods.imgPath }?x-oss-process=image/resize,m_fixed,h_180,w_180" />
+					</div> <c:if test="${searchType eq 'name' }">
+						<p class="details">${goods.fullName }</p>
+						<p class="money">
+							¥
+							<fmt:formatNumber pattern="0.00" value="${goods.price/100 }"></fmt:formatNumber>
+						</p>
+					</c:if> <c:if test="${searchType eq 'type' }">
+						<p class="details">${goods.name }</p>
+						<p class="money">¥ ${goods.phonePrice }</p>
+					</c:if> <input type="hidden" class="add-shopping" goods_id="${goods.id }">
+				</li>
+			</c:forEach>
+		</c:if>
+	</ul>
+	<div class="weui-loadmore" style="display:none">
+		<i class="weui-loading"></i> <span class="weui-loadmore__tips">正在加载</span>
+	</div>
+</div>
+<input type="hidden" id="pageIndexPage" value="${pageBean.pageIndex }">
+<input type="hidden" id="totalPage" value="${pageBean.totalPage }" />

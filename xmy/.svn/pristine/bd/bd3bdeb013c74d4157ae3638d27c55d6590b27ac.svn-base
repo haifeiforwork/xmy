@@ -1,0 +1,66 @@
+package com.zfj.xmy.common.service.impl;
+
+import java.util.List;
+
+import org.apache.ibatis.session.RowBounds;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.persistence.dao.JiguangPushLabelMapper;
+import com.zfj.xmy.common.persistence.pojo.JiguangPushLabel;
+import com.zfj.xmy.common.service.CommonPushLabelService;
+
+@Service
+public class CommonPushLabelServiceImpl implements CommonPushLabelService {
+
+	@Autowired
+	private JiguangPushLabelMapper jiguangPushLabelMapper;
+	
+	
+	@Override
+	public List<JiguangPushLabel> getJiguangPushLabelList(CriteriaParameter para, PageBean pageBean) {
+		
+		return jiguangPushLabelMapper.selectByExampleAndPage(para, pageBean.getRowBounds());
+	}
+
+
+	@Override
+	public void addLabel(String labelName) {
+		if (StringUtil.isEmpty(labelName)) {
+			throw new BusinessException("标签名不能为空");
+		}
+		JiguangPushLabel jiguangPushLabel = new JiguangPushLabel();
+		jiguangPushLabel.setLabel(labelName);
+		jiguangPushLabel.setCreateTimestamp(DateUtil.date());
+		jiguangPushLabelMapper.insertSelective(jiguangPushLabel);
+	}
+
+
+	@Override
+	public void modifyLabel(Long id, String labelName) {
+		if (StringUtil.isEmpty(labelName)) {
+			throw new BusinessException("标签名不能为空");
+		}
+		JiguangPushLabel jiguangPushLabel = jiguangPushLabelMapper.selectByPrimaryKey(id);	
+		if (ObjectUtil.isNull(jiguangPushLabel)) {
+			throw new BusinessException("标签不存在");
+		}
+		jiguangPushLabel.setLabel(labelName);
+		jiguangPushLabelMapper.updateByPrimaryKey(jiguangPushLabel);
+	}
+
+
+	@Override
+	public void delLabel(Long id) {
+		if (ObjectUtil.isNull(id)) {
+			throw new BusinessException("请选择要删除的标签");
+		}
+		jiguangPushLabelMapper.deleteByPrimaryKey(id);
+	}
+}

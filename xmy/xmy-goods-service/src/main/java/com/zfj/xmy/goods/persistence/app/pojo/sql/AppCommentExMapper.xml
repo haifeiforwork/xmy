@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.goods.persistence.app.dao.AppCommentExMapper">
+	<resultMap id="BaseResultMap" type="com.zfj.xmy.goods.persistence.app.pojo.dto.AppCommentDto" >
+	    <id column="id" property="id" jdbcType="BIGINT" />
+	    <result column="order_id" property="orderId" jdbcType="BIGINT" />
+	    <result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+	    <result column="user_id" property="userId" jdbcType="BIGINT" />
+	    <result column="comment_conten" property="commentConten" jdbcType="VARCHAR" />
+	    <result column="comment_star" property="commentStar" jdbcType="INTEGER" />
+	    <result column="comment_type" property="commentType" jdbcType="INTEGER" />
+	    <result column="comment_status" property="commentStatus" jdbcType="INTEGER" />
+	    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	    <result column="audit_time" property="auditTime" jdbcType="TIMESTAMP" />
+	    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	    <result column="name" property="userName" jdbcType="VARCHAR" />
+	 </resultMap>
+
+	  <select id="findComment" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+	  	 select a.* ,b.name from comment a
+		 left join user b on a.user_id = b.id 
+	    <if test="_parameter != null" >
+	      <include refid="sqlcriteria.util.Example_Where_Clause" />
+	    </if>
+	    <if test="orderByClause != null" >
+	      order by ${orderByClause}
+	    </if>
+	  </select>
+
+</mapper>

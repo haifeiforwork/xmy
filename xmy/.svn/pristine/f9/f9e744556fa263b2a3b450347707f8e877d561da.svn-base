@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.activity.persistence.app.dao.CouponExMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.activity.persistence.app.pojo.dto.AppCouponOutDto" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="couponValue" property="couponValue" jdbcType="BIGINT" />
+    <result column="couponImg" property="couponImg" jdbcType="VARCHAR" />
+    <result column="effectiveStartTime" property="effectiveStartTime" jdbcType="DATE" />
+    <result column="effectiveEndTime" property="effectiveEndTime" jdbcType="DATE" />
+    <result column="quota" property="quota" jdbcType="INTEGER" />
+    <result column="useRange" property="useRange" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="usePercent" property="usePercent" jdbcType="INTEGER" />
+    <collection property="goodsList" ofType="com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsOut">
+    	<id column="gid" property="id" jdbcType="BIGINT" />
+    	<result column="gname" property="name" jdbcType="VARCHAR" />
+    	<result column="gimgPath" property="imgPath" jdbcType="VARCHAR" />
+    </collection>
+  </resultMap>
+  
+  <resultMap id="AppGoodsOut" type="com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsOut" >
+   	<id column="id" property="id" jdbcType="BIGINT" />
+   	<result column="path" property="imgPath" jdbcType="VARCHAR" />
+  </resultMap>
+  
+ <!-- @auth @date 2017年8月14日16:20:18 查询优惠券 -->
+ <select id="findCoupon" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+	SELECT * FROM `table` WHERE id >= (SELECT floor( RAND() * ((SELECT MAX(id) FROM `table`)-(SELECT MIN(id) FROM `table`)) + (SELECT MIN(id) FROM `table`))) ORDER BY id LIMIT 
+ </select>
+  <!-- @auth@date 2017年8月14日16:20:18 随机选择商品 -->
+ <select id="findRandomGoods"  resultMap="AppGoodsOut"> 
+    SELECT
+		sql_no_cache g.id,gi.path
+	FROM
+		goods g
+	INNER JOIN goods_image gi on gi.goods_id =g.id
+	WHERE
+		g.id >= (
+			SELECT
+				floor(
+					RAND() * (
+						(SELECT MAX(id) FROM goods) - (SELECT MIN(id) FROM goods)
+					) + (SELECT MIN(id) FROM goods)
+				)
+		)
+	and is_putway=0 and g.create_time &lt;=#{date}
+	GROUP BY id
+	LIMIT 0,3
+ </select>
+</mapper>

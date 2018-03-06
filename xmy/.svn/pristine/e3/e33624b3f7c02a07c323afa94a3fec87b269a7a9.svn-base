@@ -1,0 +1,384 @@
+package com.zfj.xmy.openim;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.taobao.api.ApiException;
+import com.taobao.api.DefaultTaobaoClient;
+import com.taobao.api.TaobaoClient;
+import com.taobao.api.domain.OpenImUser;
+import com.taobao.api.domain.Userinfos;
+import com.taobao.api.request.OpenimChatlogsGetRequest;
+import com.taobao.api.request.OpenimCustmsgPushRequest;
+import com.taobao.api.request.OpenimCustmsgPushRequest.CustMsg;
+import com.taobao.api.request.OpenimImmsgPushRequest;
+import com.taobao.api.request.OpenimImmsgPushRequest.ImMsg;
+import com.taobao.api.request.OpenimUsersAddRequest;
+import com.taobao.api.request.OpenimUsersDeleteRequest;
+import com.taobao.api.request.OpenimUsersGetRequest;
+import com.taobao.api.request.OpenimUsersUpdateRequest;
+import com.taobao.api.response.OpenimChatlogsGetResponse;
+import com.taobao.api.response.OpenimCustmsgPushResponse;
+import com.taobao.api.response.OpenimImmsgPushResponse;
+import com.taobao.api.response.OpenimUsersAddResponse;
+import com.taobao.api.response.OpenimUsersDeleteResponse;
+import com.taobao.api.response.OpenimUsersGetResponse;
+import com.taobao.api.response.OpenimUsersUpdateResponse;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.encryption.DESUtil;
+import com.zfj.base.enu.BaseProp;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.UUIDUtil;
+import com.zfj.xmy.common.persistence.dao.UserMapper;
+import com.zfj.xmy.common.persistence.pojo.User;
+
+
+/**
+ * 百川云旺·即时通讯
+ * @author wy
+ *
+ */
+@Component
+public class OpenImManager {
+	
+	 private static String appkey = BaseProp.BASE.getValue("OPENIM_APPKEY");
+	 
+	 private static String appsecret = BaseProp.BASE.getValue("OPENIM_APPSECRET") ;
+	 
+	 /**
+	  * 客服主帐号
+	  */
+	 private static String customtaobaoid = BaseProp.BASE.getValue("OPENIM_CUSTOMTAOBAOID") ;
+	 
+	 
+	 private static String serverUrl = "https://eco.taobao.com/router/rest";//正式环境
+	 
+	 
+	 private static TaobaoClient client;
+	 
+	 @Autowired
+	 private UserMapper userMapper;
+	 
+	 static {
+		 client = new DefaultTaobaoClient(serverUrl, appkey, appsecret);
+	 }
+	 
+	 /**
+	  * 获取用户 (业务系统的userid)
+	  * @param userid
+	  * @return
+	  * @Description 
+	  * @date 2017年8月29日  下午2:13:31
+	  * @author wy
+	  * 2017
+	  * @return String
+	  */
+	 public String getUser(Long userid){
+		OpenimUsersGetRequest getRequest = new OpenimUsersGetRequest();
+		Userinfos userinfos = genarateOpenImUseridAndPass(userid);
+		getRequest.setUserids(userinfos.getUserid());
+			try {
+				OpenimUsersGetResponse getResponse = client.execute(getRequest);
+				String body = getResponse.getBody();
+				System.out.println(body);
+				
+				JSONObject jsonObject = new JSONObject(body);
+				JSONObject jsonObjectUserinfos = jsonObject.getJSONObject("openim_users_get_response");
+				if (ObjectUtil.isNull(jsonObjectUserinfos)) {
+					throw new BusinessException("获取用户出错 "+ jsonObject.getStr("error_response"));
+				}
+				JSONObject jsonObjectUserinfos2 = jsonObjectUserinfos.getJSONObject("userinfos");
+				return jsonObjectUserinfos2.toString();
+			} catch (ApiException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return null;
+	 }
+	 /**
+	  * 获取用户
+	  * @param userid (openim系统的userid)
+	  * @return
+	  * @Description 
+	  * @date 2017年11月3日  下午2:39:10
+	  * @author wy
+	  * 2017
+	  * @return String
+	  */
+	 public String getUserByOpenimUserid(String userid){
+			OpenimUsersGetRequest getRequest = new OpenimUsersGetRequest();
+			getRequest.setUserids(userid);
+				try {
+					OpenimUsersGetResponse getResponse = client.execute(getRequest);
+					String body = getResponse.getBody();
+					System.out.println(body);
+					
+					JSONObject jsonObject = new JSONObject(body);
+					JSONObject jsonObjectUserinfos = jsonObject.getJSONObject("openim_users_get_response");
+					if (ObjectUtil.isNull(jsonObjectUserinfos)) {
+						throw new BusinessException("获取用户出错 "+ jsonObject.getStr("error_response"));
+					}
+					JSONObject jsonObjectUserinfos2 = jsonObjectUserinfos.getJSONObject("userinfos");
+					return jsonObjectUserinfos2.toString();
+				} catch (ApiException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return null;
+		 }
+	 
+	 /**
+	  * 增加用户
+	  * @param userid openim用户系统的userid
+	  * @param password openim用户系统的password
+	  * @return
+	  * @Description 
+	  * @date 2017年8月29日  下午2:21:50
+	  * @author wy
+	  * 2017
+	  * @return String
+	  */
+	 public String addUser(Userinfos userinfo){
+			OpenimUsersAddRequest openimUsersAddRequest = new OpenimUsersAddRequest();
+			List<Userinfos> userinfos = new ArrayList<Userinfos>();
+			userinfos.add(userinfo);
+			openimUsersAddRequest.setUserinfos(userinfos);
+			
+			try {
+				OpenimUsersAddResponse addResponse = client.execute(openimUsersAddRequest);
+				String body = addResponse.getBody();
+				System.out.println(body);
+				return body;
+			} catch (ApiException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+	 }
+	 
+	
+	 
+
+
+	/**
+	  * 根据用户id 获取云旺帐号密码
+	  * @param userid
+	  * @return
+	  * @Description 
+	  * @date 2017年8月30日  上午11:27:55
+	  * @author wy
+	  * 2017
+	  * @return Userinfos
+	  */
+	 public Userinfos genarateOpenImUseridAndPass(Long userid){
+			User user = userMapper.selectByPrimaryKey(userid);
+			if (ObjectUtil.isNull(user)) {
+				throw new BusinessException("用户不存在");
+			}
+			/***
+			 * 编码规则 
+			 * openim_userid -> userid
+			 * (userid+password) -> 加密 -> 去掉 "=+" 字符 -> 截取32 位->password
+			 */
+			Userinfos userinfos = new Userinfos();
+			userinfos.setUserid(user.getOpenimUserid());
+			String s = userid+(user.getPassword() == null ? "" : user.getPassword());
+			try {
+			    String send = DESUtil.encryptDES(s).replace("=", "").replace("+", "");
+				userinfos.setPassword(send.length() > 32 ? send.substring(0, 32) : send.substring(0, send.length()));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return userinfos;
+		 }
+	 
+	 /**
+	  * 更新用户信息
+	  * @param userinfo
+	  * @return
+	  * @Description 
+	  * @date 2017年8月29日  下午2:43:39
+	  * @author wy
+	  * 2017
+	  * @return String
+	  */
+	 public static String updateUser(Userinfos userinfo){
+		OpenimUsersUpdateRequest openimUsersUpdateRequest = new OpenimUsersUpdateRequest();
+		List<Userinfos> userinfos = new ArrayList<Userinfos>();
+		userinfos.add(userinfo);
+		if (StringUtil.isEmpty(userinfo.getUserid())) {
+			throw new BusinessException("更新操作时用户id(token)不能为空");
+		}
+		openimUsersUpdateRequest.setUserinfos(userinfos);
+
+		try {
+			OpenimUsersUpdateResponse updateResponse = client
+					.execute(openimUsersUpdateRequest);
+			String body = updateResponse.getBody();
+			System.out.println(body);
+			return body;
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	 }
+	 
+	 /**
+	  * 删除用户
+	  * @param userids
+	  * @return
+	  * @Description 
+	  * @date 2017年8月29日  下午2:54:03
+	  * @author wy
+	  * 2017
+	  * @return String
+	  */
+	 public static String deleteUser(String userids){
+		OpenimUsersDeleteRequest deleteRequest = new OpenimUsersDeleteRequest();
+		deleteRequest.setUserids(userids);
+		try {
+			OpenimUsersDeleteResponse deleteResponse = client.execute(deleteRequest);
+			String body = deleteResponse.getBody();
+			System.out.println(body);
+			return body;
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+		 
+	 }
+	 
+	 /**
+	  * 服务端对openim用户发送标准消息
+	  * @param immsg
+	  * @return
+	  * @Description 
+	  * @date 2017年8月29日  下午3:07:45
+	  * @author wy
+	  * 2017
+	  * @return String
+	  */
+	public static String immsgPush(ImMsg immsg) {
+		OpenimImmsgPushRequest immsgPushRequest = new OpenimImmsgPushRequest();
+		try {
+			immsgPushRequest.setImmsg(immsg);
+			OpenimImmsgPushResponse immsgPushResponse = client.execute(immsgPushRequest);
+			String body = immsgPushResponse.getBody();
+			System.out.println(body);
+			return body;
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	 /**
+	  * 推送自定义openim消息
+	  * @param senderToken 发送方
+	  * @param toToken 接收方
+	  * @param summary 消息摘要
+	  * @param data 信息主体
+	  * @return
+	  * @Description 
+	  * @date 2017年8月29日  下午3:19:14
+	  * @author wy
+	  * 2017
+	  * @return String
+	  */
+	public static String custmsgPush(String senderToken,List<String> toTokens,String summary,String data) {
+		CustMsg custMsg = new CustMsg();
+		custMsg.setFromUser(senderToken);
+		custMsg.setToUsers(toTokens);
+		custMsg.setSummary(summary);
+		custMsg.setData(data);
+		return custmsgPush(custMsg);
+	}
+	/**
+	 * 推送自定义openim消息
+	 * @param senderToken
+	 * @param toToken
+	 * @param summary
+	 * @param data
+	 * @return
+	 * @Description 
+	 * @date 2017年8月29日  下午3:25:25
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	public static String custmsgPush(CustMsg custMsg) {
+		OpenimCustmsgPushRequest custmsgPushRequest = new OpenimCustmsgPushRequest();
+		try {
+			custmsgPushRequest.setCustmsg(custMsg);
+			OpenimCustmsgPushResponse custmsgPushResponse = client.execute(custmsgPushRequest);
+			String body = custmsgPushResponse.getBody();
+			System.out.println(body);
+			return body;
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 获取聊天记录
+	 * @param userid1 用户id 1
+	 * @param userid2 用户id 2
+	 * @return
+	 * @Description 
+	 * @date 2017年9月4日  上午11:17:41
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	public static String getChatLog(String userid1,String userid2, Date beginTime ,Date endTime) {
+		OpenimChatlogsGetRequest req = new OpenimChatlogsGetRequest();
+		
+		OpenImUser user1 = new OpenImUser();
+		user1.setUid(userid1);
+		OpenImUser user2 = new OpenImUser();
+		user2.setUid(userid2);
+		
+		req.setUser1(user1);
+		req.setUser2(user2);
+		req.setBegin(beginTime.getTime());
+		req.setEnd(endTime.getTime());
+		
+		try {
+			OpenimChatlogsGetResponse response =  client.execute(req);
+			String body = response.getBody();
+			System.out.println(body);
+			return body;
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	 public static String getAppkey(){
+		 return appkey;
+	 }
+	 
+	 public static String getCustomtaobaoid(){
+		 return customtaobaoid;
+	 }
+	 
+	 public static void main(String[] args) {
+		//"CAD61BD26E774548A66A5B3CD7A62E41"
+	}
+}

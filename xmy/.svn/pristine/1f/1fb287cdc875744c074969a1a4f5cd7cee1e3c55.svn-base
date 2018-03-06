@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd  http://www.springframework.org/schema/aop  http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+						http://www.springframework.org/schema/task   http://www.springframework.org/schema/task/spring-task.xsd">
+						
+	
+							
+
+						
+	<!-- 阿里 druid数据库连接池 -->
+	<bean id="datasource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 基本属性 url、user、password -->
+		<property name="driverClassName" value="${xmy.cms.jdbc.driver}" />
+		<property name="url" value="${xmy.cms.jdbc.url}" />
+		<property name="username" value="${xmy.cms.jdbc.username}" />
+		<property name="password" value="${xmy.cms.jdbc.password}" />
+
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="1" />
+		<property name="minIdle" value="1" />
+		<property name="maxActive" value="20" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="60000" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<!-- 如果用Oracle，则把poolPreparedStatements配置为true，mysql可以配置为false。分库分表较多的数据库，建议配置为false。 -->
+		<property name="poolPreparedStatements" value="false" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="20" />
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="stat" />
+	</bean>
+	
+ 
+ <task:scheduled-tasks>
+	 	<task:scheduled ref="limitActivityServiceImpl" method="updateFreezingActivityGoods" cron="0 0/30 * * * ?" /> <!-- 修改冰点价活动商品 每隔半小时运行一次     -->
+		<task:scheduled ref="limitActivityServiceImpl" method="updateDayDayActivityGoods" cron="0 0/30 * * * ?" /><!--  修改天天特价活动商品   每隔半小时运行一次  --> 
+	 	<task:scheduled ref="limitActivityServiceImpl" method="updateWeekWeekActivityGoods" cron="0 0/30 * * * ?" />  <!-- 修改每周特价活动商品  每隔半小时运行一次   -->	
+		<task:scheduled ref="buyAndPresentServiceImpl" method="updateBuyAndPresentActivityGoodsPutway" cron="0 0/30 * * * ?" />  <!-- 修改买即赠活动商品  每隔半小时运行一次   -->	
+		<!-- <task:scheduled ref="esActivityGoodsServiceImpl" method="updateEsActivityGoods" cron="0 0/2 * * * ?" /> -->	<!-- 修改上下架时活动es也修改 -->
+		<task:scheduled ref="limitActivityServiceImpl" method="updatePromotionActivityGoodsPutway" cron="0 0/30 * * * ?" />  <!-- 修改专题活动商品  每隔半小时运行一次   -->
+		<task:scheduled ref="commonPayOrderServiceImpl" method="cancelOrderTimer" cron="0 0/30 * * * ?" /> <!-- 取消订单 -->
+	<!-- 	<task:scheduled ref="commonPayOrderServiceImpl" method="extensionOrderTimer" cron="0 55 23 * * ?"/> 定时对支付成功订单扩展时间  -->
+		<task:scheduled ref="commonPayOrderServiceImpl" method="countExtensionOrderTimer" cron="0 1 0 * * ?"/> <!-- 定时发送已供货订单数量的短信 -->
+	<!-- 	<task:scheduled ref="commonPayOrderServiceImpl" method="updateOrderRemark" cron="0 0/30 * * * ?"/> 定时对供货确认的订单修改响应的备注 -->
+		
+		<task:scheduled ref="baseCommonServiceImpl" method="refreshIndexHomePage" cron="0 0 12 * * ?" /><!-- 每天12点00分 刷新三端首页redis -->
+		<task:scheduled ref="baseCommonServiceImpl" method="refreshIndexHomePage" cron="0 0 0 * * ?" /><!-- 每天00点00分 刷新三端首页redis -->
+		
+		
+		<task:scheduled ref="commonPayOrderServiceImpl" method="extensionOrderTimerPRO" cron="0 55 23 * * ?"/> <!-- 定时对支付成功订单扩展时间  执行存储过程 --> 
+		<task:scheduled ref="commonPayOrderServiceImpl" method="addOrderRemarkTimerPro" cron="0 0/30 * * * ?"/> <!--修改订单备注  执行存储过程 -->
+  </task:scheduled-tasks>   
+	
+	<!-- quartz 任务 -->
+	<!-- 这个类用来做需要完成的业务-->  
+    <bean id="commonPushUtilService" class="com.zfj.xmy.common.service.impl.CommonPushUtilServiceImpl"></bean>  
+
+    <!-- 定时任务 -->  
+    <!-- 定义调用对象和调用对象的方法，这个配置和普通的一样的,id是JobDetail的名字  -->  
+    <bean id="pushtask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <!-- 调用的类  -->  
+        <property name="targetObject" ref="commonPushUtilService" />  
+        <!-- 调用类中的方法  -->  
+        <property name="targetMethod" value="testme"  />  
+        <!-- 是否并发  -->  
+        <property name ="concurrent" value ="false"  />          
+    </bean>  
+
+    <!-- 定义触发时间 ，这边就不同了，这里必须将时间设置成无限长，因为我们要去读取数据库的时间来做为定时器的触发时间-->  
+    <!-- <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean ">  
+        <property name="jobDetail" ref="pushtask" />  
+        cron表达式   
+        <property name="cronExpression" value="59 * * * * ?" />  
+    </bean> -->  
+
+    <!-- 总管理类 如果将lazy-init='false'那么容器启动就会执行调度程序  -->  
+    <bean id="startQuertz" lazy-init="true" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+        <property name="triggers">  
+            <list>  
+                <!-- <ref bean="cronTrigger" /> -->  
+            </list>  
+        </property> 
+        <!-- 使用数据库存储job任务 -->
+        <property name="dataSource" ref="datasource" />
+        <property name="configLocation" value="classpath:quartz.properties" />
+    </bean>  
+
+    <!--这个类是用来设置触发时间的， startJobs方法启动调度容器，然后按照上面触发器每隔1s执行所配置的myJob2.doSomething()方法 -->     
+    <bean id="quartzManager" class="com.zfj.xmy.quartz.QuartzManager" lazy-init="false" init-method="startJobs" >  
+        <!--这个对象一定要注入，这样类才能进行管理，还有在类型要用get set方法，不然会报错。-->  
+        <property name="scheduler" ref="startQuertz" />  
+    </bean>
+</beans>

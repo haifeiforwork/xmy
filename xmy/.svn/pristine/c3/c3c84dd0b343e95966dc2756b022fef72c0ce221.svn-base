@@ -1,0 +1,343 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/common/common_tag.jsp"%>
+
+<!--确认商品页面-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>确认订单</title>
+	    <!-- 公共css区域 -->
+	    <%@ include file="/WEB-INF/jsp/common/common_css.jsp" %>
+	    <!-- 公共css完区域 -->
+	    <!-- 该页面应用css区域 -->
+	    <link href="resources/shopping/css/confirm_shopping.css" rel="stylesheet">
+	    <link href="resources/shopping/css/address_shopping.css" rel="stylesheet">
+	    <link href="resources/shopping/css/add_address_shopping.css" rel="stylesheet">
+	    <link href="resources/shopping/css/coupon_shopping.css" rel="stylesheet">
+	    <!-- 该页面应用css区域 -->
+    </head>
+    <body ontouchstart>	
+    <header>
+    	<div class="header-top">
+    		<div class="pull-left goback"><img src="resources/common/images/btn-fenl-back@2x.png"/></div>
+    		<div class="pull-center">确认订单</div>
+    		<div class="pull-right">
+    			<span class="shrink"><img src="resources/common/images/btn-fenl-more@2x.png"/>
+    				<div class="modal-some">
+                    
+                	</div>
+    			</span>
+    		</div>
+    	</div>
+    </header>
+	<div class="content" style="bottom: 55px;">
+		<form action="order/addOrder" method="post" id="confirmOrderForm">
+			<input type="hidden" name="companyName" id="companyName" />
+			<input type="hidden" name="taxpayerNum" id="taxpayerNum" />
+			<input type="hidden" name="invoiceType" id="invoiceType" />
+			
+	    	<div class="weui-panel__bd list">
+	    		<c:set var="goodsAllprice" value="0.00"></c:set>
+	    		<c:set var="goodspoints" value="0"></c:set>
+					<c:forEach items="${cartList }" var="goods" varStatus="status">
+						<a href="javascript:void(0);" class="weui-media-box weui-media-box_appmsg">
+			                <div class="weui-media-box__hd">
+			                    <img class="weui-media-box__thumb" src="${goods.imgPath }"/>
+			                </div>
+			                <div class="weui-media-box__bd">
+			                    <p class="weui-media-box__desc">${goods.name }</p>
+			                    <c:if test="${not empty goods.presentGoods }">
+		                    		<p class="weui-media-box__desc" style="color:red;-webkit-line-clamp:1">赠品：${goods.presentGoods.name }</p>
+		                    	</c:if>
+			                </div>
+			                <div class="weui-cell__ft">
+			                    <p class="money">
+			                    	<c:if test="${not empty goods.sumPoints && goods.sumPoints != 0 }">
+			                         	${goods.sumPoints }积分
+			                        </c:if>
+			                        <c:if test="${empty goods.sumPoints || goods.sumPoints==0 }">
+			                         	¥<c:if test="${empty goods.activityPrice }">${goods.price }</c:if>
+			                          	 <c:if test="${!empty goods.activityPrice }">${goods.activityPrice }</c:if>
+			                         </c:if>
+						               <%--      	
+			                    	<c:if test="${empty goods.activityPrice }">
+			                    		${goods.price }
+			                    		<c:set var="goodsAllprice" value="${goodsAllprice + goods.price*goods.cartNum }"></c:set>
+			                    	</c:if>
+		                          	<c:if test="${!empty goods.activityPrice }">
+		                          		${goods.activityPrice }
+		                          		<c:set var="goodsAllprice" value="${goodsAllprice + goods.activityPrice*goods.cartNum }"></c:set>
+		                          	</c:if> --%>
+			                    </p>
+			                    <p>X${goods.cartNum }</p>
+			                    <p>${goods.standard }</p>
+			                </div>
+			            </a>
+			            <input type="hidden" name="freightGoodsList[${status.index }].goods.id" value="${goods.id }">
+			            <input type="hidden" name="freightGoodsList[${status.index }].goods.weight" value="${goods.weight }">
+			            <input type="hidden" name="freightGoodsList[${status.index }].num" value="${goods.cartNum }">
+			        </c:forEach>
+			        <input type="hidden" name="province" id="chooseProvince" value="${userAddress[0].province }">
+			        <input type="hidden" name="city" id="chooseCity" value="${userAddress[0].city }">
+				    <input type="hidden" name="area" id="chooseArea" value="${userAddress[0].area }">
+				    <input type="hidden" name="address" id="chooseAddress" value="${userAddress[0].address }">
+				    <input type="hidden" name="goodsId" value="${param.goodsId }">
+				    <input type="hidden" name="addressId" id="chooseId" value="${userAddress[0].id }">
+				    
+	        </div>
+	        <div class="weui-cells address">
+	            <div class="weui-cell weui-cell_access address-shopping">
+	                <div class="weui-cell__hd"><img src="resources/common/images/ico-spjs-addr@2x.png"/></div>
+	                <div class="weui-cell__bd address-info">
+	                	<c:if test="${fn:length(userAddress) > 0 }">
+	        				<p class="consignee">收货人:<span>${userAddress[0].name }</span><span class="phone">${userAddress[0].mobilePhone }</span></p>
+	                    	<p class="del">收货地址:<span>${userAddress[0].province }${userAddress[0].city }${userAddress[0].area }${userAddress[0].address }</span></p>
+				       	</c:if>
+				       	<c:if test="${fn:length(userAddress) <= 0 }">
+				       		<p style="text-align: right;color:#666;">请输入收货地址</p>
+				       	</c:if>
+	                </div>
+	                <input type="hidden" name="name" id="addressName" value="${userAddress[0].name }">
+	                <input type="hidden" name="mobilePhone" id="addressPhone" value="${userAddress[0].mobilePhone }">
+	                <input type="hidden" name="consigneePhone" id="consigneePhone" value="${userAddress[0].mobilePhone }">
+				    <input type="hidden" name="consigneeName" id="consigneeName" value="${userAddress[0].name }">
+				    <input type="hidden" name="id" id="addressId" value="${userAddress[0].id }">
+	                <div class="weui-cell__ft"></div>
+	            </div>
+	            <c:if test="${out==1 }">
+		            <a class="weui-cell add weui-cell_access" href="javascript:;" >
+		                <div class="weui-cell__bd">
+		                    <p>配送时间</p>
+		                </div>
+		                <div class="weui-cell__ft"><input class="time" readonly="readonly" name="postTime" id="postTime" type="text" placeholder="请选择配送时间" value="${nextDay }"/></div>
+		            </a>
+		         </c:if>
+	            <a class="weui-cell add weui-cell_access" href="javascript:;">
+	                <div class="weui-cell__bd">
+	                    <p>抵用券</p>
+	                </div>
+	                <div class="weui-cell__ft coupon"><input type="hidden" name="couponId" id="couponId"/>
+	                	<p style="font-size: 0.65rem;color: #666;" class="choose-coupon">请选择抵用券</p>
+	                </div>
+	            </a>
+	            <c:if test="${out==0 }">
+	            	<a class="weui-cell add" href="javascript:;">
+	                <div class="weui-cell__bd">
+	                    <p>跨境信息</p>
+	                </div>
+		            </a>
+		            <a class="weui-cell add weui-cell_access" href="javascript:;">
+		                <div class="weui-cell__bd">
+		                    <p>身份证姓名</p>
+		                </div>
+		                <div class="weui-cell__ft"><input type="text" name="idCardName" id="idCardName" placeholder="请输入身份证姓名"/></div>
+		            </a>
+		            <a class="weui-cell add weui-cell_access" href="javascript:;">
+		                <div class="weui-cell__bd">
+		                    <p>身份证号码</p>
+		                </div>
+		                <div class="weui-cell__ft"><input type="text" name="consigneeIdcard" id="consigneeIdcard" placeholder="请输入身份证号码"/></div>
+		            </a>
+	            </c:if>
+	            <a class="weui-cell add" href="javascript:;">
+	                <div class="weui-cell__bd bz">
+	                    <p>备注</p>
+	                </div>
+	                <div class="weui-cell__ft"><textarea type="text" name="orderRemark" placeholder="请输入备注"></textarea></div>
+	            </a>
+	        </div>
+	        <div class="weui-cells address">
+			<a class="weui-cell add invoiceDiv" href="javascript:;">
+	                <div class="weui-cell__bd" style="text-align: center">
+	                    <p>发票信息</p>
+	                </div>
+	            </a>
+	            <div style="display: none" class="near-content" id="invoiceContent">
+		            <a class="weui-cell add weui-cell_access titket-pick" href="javascript:;">
+		                <div class="weui-cell__bd">
+		                    <p>名称</p>
+		                </div>
+		                <div class="weui-cell__ft"><input type="text" readonly="readonly" placeholder="请选择" id="noteName"/></div>
+		            </a>
+		            <a class="weui-cell add " href="javascript:;">
+		                <div class="weui-cell__bd">
+		                    <p>发票内容</p>
+		                </div>
+		                <div class="weui-cell__ft"><input type="text" id="invoiceContentInput" readonly="readonly" name="invoiceContent" /></div>
+		            </a>
+	            </div>
+	        </div>
+	        <div class="weui-form-preview__bd chunk">
+	            <div class="weui-form-preview__item">
+	                <label class="weui-form-preview__label">商品金额</label>
+	                <span class="weui-form-preview__value sum-price">￥${sumPrice }</span>
+	            </div>
+            	<div class="weui-form-preview__item" 
+            	<c:if test="${not empty saleMoney && saleMoney > 0 }">style="display: block"</c:if>
+            	<c:if test="${empty saleMoney || saleMoney <= 0 }">style="display: none"</c:if>
+            	>
+	                <label class="weui-form-preview__label">商品活动打折</label>
+	                <span class="weui-form-preview__value sale-money">-￥${saleMoney }</span>
+	            </div>
+	            <div class="weui-form-preview__item">
+	                <label class="weui-form-preview__label">运费</label>
+	                <span class="weui-form-preview__value postPrice"><fmt:formatNumber pattern="￥0.00" value="${postPrice }" /></span>
+	            </div>
+	            <div class="weui-form-preview__item">
+	                <label class="weui-form-preview__label">抵用券</label>
+	                <span class="weui-form-preview__value coupon-show">￥0.00</span>
+	            </div>
+<%-- 			    <a class="weui-cell wrap ad-gutter weui-cell_access tiket-pick">
+			        <div class="weui-cell__bd">发票</div>
+			        <div class="weui-cell__ft"><input type="text" class="weui-input" placeholder="请选择" readonly="readonly" style="text-align: right"></div>
+			    </a>
+			    <div class="weui-cell wrap">
+			        <div class="weui-cell__bd">发票信息</div>
+			        <div class="weui-cell__ft"><input type="text" readonly="readonly" class="weui-input" placeholder="不需要" value="<c:if test='${order.invoiceType == 0 }'>个人</c:if><c:if test='${order.invoiceType == 1 }'>单位</c:if>" id="ticket-info" style="text-align: right"></div>
+			    </div> --%>
+	            <div class="weui-form-preview__item">
+	                <label class="weui-form-preview__label">使用积分</label>
+	                <span class="weui-form-preview__value">-<fmt:formatNumber value="${sumPoints }" pattern="#"/></span>
+	            </div>
+	            <div class="weui-form-preview__item">
+	                <label class="weui-form-preview__label">获得积分</label>
+	                <span class="weui-form-preview__value gray"><fmt:formatNumber value="${sumPrice }" pattern="#"/></span>
+	            </div>
+	        </div>
+	        <input type="hidden" name="isCrossGoods" id="isCrossGoods" value="${out }">
+	        <input type="hidden" name="usedPoints" id="usedPoints" value="${sumPoints }">
+	        <input type="hidden" name="accPoints" value="<fmt:formatNumber value="${sumPrice }" pattern="#"/>"/>
+        </form>
+   	</div>
+   	<!-- 隐藏值 -->
+   	<input type="hidden" id="sumPrice" value="${sumPrice }">
+   	<input type="hidden" id="postHiddenPrice">
+   	<input type="hidden" id="postPrice" value="${postPrice }" />
+   	<input type="hidden" id="couponHiddenPrice">
+   	<input type="hidden" id="saleHiddenMoney" value="${saleMoney }">
+   	<input type="hidden" id="nextDay" value="${nextDay }">
+   	<input type="hidden" id="today" value="${today }">
+   	<input type="hidden" id="isDelivery" value="${isDelivery }">
+   	<input type="hidden" id="sessionInfo" value="${sessionInfo }">
+   	<input type="hidden" id="goodsAllpoint" value="${sumPoints }">
+	<input type="hidden" id="accpoint" value="${accPoints }"/>
+	<!-- 隐藏值 -->
+    <footer>
+        <div class="row">
+            <div class="ly-65">实付款:<span class="sumPriceShow">￥${salePrice + postPrice}</span></div>
+            <div class="ly-35 addorder">下一步</div>
+        </div>  
+    </footer>
+    
+    <!-- 选择地址弹窗 -->
+    <div id="address_popup" class="weui-popup__container popup-bottom" style="z-index: 999">
+	  <div class="weui-popup__overlay"></div>
+	  <div class="weui-popup__modal open-popup address_content" data-target="" style="height: 100%;">
+	  
+	  </div>
+	</div>
+	
+	<!-- 修改地址弹窗 -->
+	<div id="add_address_popup" class="weui-popup__container popup-bottom" style="z-index: 999">
+	  <div class="weui-popup__overlay"></div>
+	  <div class="weui-popup__modal open-popup add_address_content" data-target="" style="height: 100%;">
+	  
+	  </div>
+	</div>
+	
+	
+	<!-- 优惠券弹窗 -->
+	<div id="coupon_popup" class="weui-popup__container popup-bottom" style="z-index: 999">
+	  <div class="weui-popup__overlay"></div>
+	  <div class="weui-popup__modal open-popup add_address_content" data-target="" style="height: 100%;">
+	  	<header>
+	    	<div class="header-top">
+	    		<div class="pull-left"><img src="resources/common/images/btn-fenl-back@2x.png"/></div>
+	    		<div class="pull-center">优惠券</div>
+	    	</div>
+    	</header>
+	  		<body ontouchstart>	
+				<div class="content">
+					<div class="lump">
+						<div class="lump1">
+							<div class="weui-panel weui-panel_access">
+								<div class="weui-panel__bd">
+									<c:forEach items="${couponList }" var="coupon">
+									<c:set var="effectiveStartTime">  
+									    <fmt:formatDate value="${coupon.effectiveStartTime }" pattern="yyyy-MM-dd HH:mm:ss"/>  
+									</c:set>  
+									<c:set var="effectiveEndTime">  
+									    <fmt:formatDate value="${coupon.effectiveEndTime }" pattern="yyyy-MM-dd HH:mm:ss"/>  
+									</c:set> 
+										<c:if test="${coupon.quota <= sumPrice && nowLong >= effectiveStartTime && nowLong <= effectiveEndTime }">
+											<a href="javascript:void(0);" class="weui-media-box weui-media-box_appmsg coupon-div" coupon-id="${coupon.id }" coupon-price="${coupon.couponValue }">
+											    <div class="weui-media-box__hd">
+											        <div class="money">￥<span>${coupon.couponValue }</span></div>
+											        <p>
+											        	<c:if test="${coupon.useRange eq 1}">全场通用</c:if>
+											        	<c:if test="${coupon.useRange eq 2}">分类使用</c:if>
+											        	<c:if test="${coupon.useRange eq 3}">限定商品</c:if>
+											        	<c:if test="${coupon.useRange eq 4}">排队商品</c:if>
+											        </p>
+											    </div>
+											    <div class="weui-media-box__bd">
+											        <p class="weui-media-box__desc coupon-name">${coupon.name }</p>
+											        <div class="times">
+											        	<p>
+											        		<fmt:formatDate pattern="yyyy.MM.dd" value="${coupon.effectiveStartTime }"/>
+											        		-
+											        		<fmt:formatDate pattern="yyyy.MM.dd" value="${coupon.effectiveEndTime }"/>
+											        	</p>
+											        	<p>使用条件:<span>满${coupon.quota }可用</span></p>
+											        </div>
+											    </div>
+										    </a>
+									    </c:if>
+									</c:forEach>
+								</div>
+							</div>
+						</div>
+					</div>
+			   	</div>
+			</body>
+			<footer>
+				<a href="javascript:;" class="weui-btn weui-btn_primary slef-btn_primary close-popup notUse">不使用</a>
+			</footer>
+	  </div>
+	</div>
+<div id="tiket-pop" class="weui-popup__container">
+    <div class="weui-popup__overlay"></div>
+    <div class="weui-popup__modal">
+        <div class="modal-bd">
+           <div class="nav-list">
+	               <div class="nav-item active"><span class="check-circle" value="0" ></span>个人</div>
+	               <div class="nav-item"><span class="check-circle" value="1" ></span>单位</div>
+	               <a class="save" style="float:right;position:relative;top:0.2rem;" >保存</a>
+           </div>
+            <div class="nav-content">
+                <div>个人</div>
+                <div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">企业名称</div>
+                        <div class="weui-cell__bd"><input type="text" class="weui-input nav-content-input company-name" placeholder="输入企业名称"></div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">纳税人识别号</div>
+                        <div class="weui-cell__bd"><input type="text" class="weui-input nav-content-input taxpayerNum" placeholder="输入识别号"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="qx-line"><img src="resources/common/images/qx.png" alt="" class="close-popup"></div>
+    </div>
+</div>
+
+    
+    <!-- 公共js区域 --> 
+	<%@include file="/WEB-INF/jsp/common/common_js.jsp" %>
+    <!-- 公共js区域完 -->
+    <!-- 该页面应用js区域 -->
+    <script type="text/javascript" src="resources/shopping/js/confirm_shopping.js"></script>
+    <!-- 该页面应用js区域 -->
+    </body>
+</html>

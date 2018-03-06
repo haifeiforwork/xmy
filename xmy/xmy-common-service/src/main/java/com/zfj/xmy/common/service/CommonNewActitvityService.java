@@ -1,0 +1,98 @@
+package com.zfj.xmy.common.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.zfj.xmy.common.persistence.pojo.ShoppingCart;
+
+/** 
+ * @Title: CommonNewActitvityService.java 
+ * @Package com.zfj.xmy.common.service 
+ * @Description: 
+ * @author zhangh
+ * @date 2018年1月3日 上午11:08:47 
+ */
+public interface CommonNewActitvityService {
+	/**
+	 * 商品添加购物车
+	 * 
+	 * 普通商品
+	 * @param shoppingCarts 用户购物车记录
+	 * @param list			当前商品购物车记录
+	 * @param goodsId		商品id
+	 * @param userId		用户id
+	 * @param goodsNum		商品数量
+	 * 
+	 * 积分活动商品
+	 * @param actId			积分商品活动id
+	 * @param points		积分活动购买积分
+	 * 
+	 * @author zhangh
+	 */
+	void addGoodsToCart(List<ShoppingCart> shoppingCarts,List<ShoppingCart> list,Long goodsId,Long userId,Integer goodsNum,Integer actId,Integer points);
+	/**
+	 * 判断用户以前是否购买过特殊商品id 拼购商品，三免一商品
+	 * @param userId
+	 * @param goodsId
+	 * @return Boolean
+	 * @author lij
+	 * @date 2018年1月3日 上午11:14:44
+	 */
+	Integer OrderContainSpeicleGoods(Long userId,String goodsId);
+	
+	/**
+	 * 判断指定商品添加到购物车 （拼购抽，三免一）
+	 * @param shoppingCart    
+	 * @return void    
+	 * Date:2018年1月3日 下午3:50:25 
+	 * @author hexw
+	 */
+	void checkAssignActivityGoodsToShoppingCart(ShoppingCart shoppingCart);
+	
+	/**
+	 * 商品是否是拼购抽，三免一活动商品
+	 * @param goodsId
+	 * @return    
+	 * @return boolean    
+	 * Date:2018年1月3日 下午4:06:39 
+	 * @author hexw
+	 */
+	boolean checkPgcSmyGoodsShoppingCart(Long goodsId);
+	/**
+	 * 查询免邮商品购买了多少个 key:商品ID value：购买总量
+	 * @return Map<String,Integer>
+	 * @author lij
+	 * @date 2018年1月15日 上午10:51:00
+	 */
+	Map<String, Integer> chekFeeFerightGodos();
+	
+	/**
+	 * 
+	 * @param goodsId
+	 * @return    
+	 * @return Integer    
+	 * Date:2018年1月25日 下午2:14:01 
+	 */
+	Integer getGoodsSales(Long goodsId);
+	
+	
+	/**
+	 * 判断是否是优惠券商品
+	 * @param shoppingCart    
+	 * @return void    
+	 * Date:2018年3月5日 下午2:27:09 
+	 * @author hexw
+	 */
+	void checkBuyCouponGoods(ShoppingCart shoppingCart);
+	
+	
+	/**
+	 * 判断购物车是否含有单独购买的商品
+	 * @param userId
+	 * @return    
+	 * @return boolean    
+	 * Date:2018年3月5日 下午2:35:14 
+	 * @author hexw
+	 */
+	boolean checkBuyAlone(Long userId);
+}

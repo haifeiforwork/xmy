@@ -1,0 +1,94 @@
+package com.zfj.xmy.common.service.impl;  
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.CouponMapper;
+import com.zfj.xmy.common.persistence.dao.CouponUserMapper;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import com.zfj.xmy.common.persistence.pojo.CouponUser;
+import com.zfj.xmy.common.persistence.pojo.app.AppCouponInDto;
+import com.zfj.xmy.common.service.CommonCouponService;
+
+/** 
+ * @Title: CommonCouponServiceImpl.java 
+ * @Package com.zfj.xmy.common.service.impl 
+ * @Description: 
+ * @author hexw
+ * @date 2017年11月22日 下午4:23:40 
+ */
+@Service
+public class CommonCouponServiceImpl extends BaseService implements CommonCouponService{
+	
+	@Autowired
+	private CouponUserMapper couponUserMapper;
+	
+	@Autowired
+	private CouponMapper couponMapper;
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void toReceiveCoupon(AppCouponInDto coupon,boolean canGetForNotShowInCouponCenter) {
+		
+		Long couponTypeId = coupon.getId(); //优惠劵类别id
+		Long userId = coupon.getUserId();//用户id
+		
+		if (ObjectUtil.isNull(couponTypeId) ) {
+			throw new BusinessException("优惠劵类别id不能为空");
+		}
+		if (ObjectUtil.isNull(userId) ) {
+			throw new BusinessException("用户id不能为空");
+		}
+		
+		CriteriaParameter param = new CriteriaParameter();
+		Criteria criteria = param.createCriteria();
+		
+		//1. 查询之前是否领取了这个优惠券
+		
+		
+		criteria.equalTo("user_id", coupon.getUserId());
+		criteria.equalTo("coupon_id", coupon.getId());
+		List<CouponUser> couponUsers = couponUserMapper.selectByExample(param);
+		if (!CollectionUtils.isEmpty(couponUsers)) {
+			throw new BusinessException("您已经领取了一次,请勿重复领取!");
+		}
+		
+		//2.检查优惠劵是否可以领
+		if (!canGetForNotShowInCouponCenter) {
+			criteria.clearCriteria();
+			criteria.equalTo("id", coupon.getId());
+			criteria.equalTo("show_in_coupon_center", SystemConstant.COUPON.SHOW_IN_COUPON_CENTER_TRUE); //在前台显示的
+			List<Coupon> coupons = couponMapper.selectByExample(param);
+			if (ObjectUtil.isNull(coupons)) {
+				throw new BusinessException("该优惠券不可领取");
+			}
+		}
+		//3.检查优惠卷是否存在
+		criteria.clearCriteria();
+		criteria.isNull("user_id");// 没人领取过
+		criteria.equalTo("coupon_id", coupon.getId());
+		//
+		List<CouponUser> noReceivecouponUsers = couponUserMapper.selectByExample(param);
+		if (CollectionUtils.isEmpty(noReceivecouponUsers)) {
+			throw new BusinessException("不好意思，您来晚了，该优惠券已经领取完了!");
+		}else {
+			//如果存在则领取
+			CouponUser couponUser = noReceivecouponUsers.get(0);
+			couponUser.setUserId(userId);
+			couponUser.setReceiveTime(new Date());//领取时间
+			couponUserMapper.updateByPrimaryKeySelective(couponUser);
+		}
+	}
+}
+  

@@ -1,0 +1,72 @@
+package com.zfj.xmy.order.persistence.app.pojo.dto;
+
+import java.math.BigDecimal;
+
+public class GoodsDto {
+	
+	private long goodsId;  
+
+	/**
+	 * 商品全名
+	 */
+	private String fullName;
+	
+	/**
+	 * 商品价格
+	 */
+	private BigDecimal price;
+	
+	/**
+	 * 商品图片
+	 */
+	private String imgUrl;
+	
+	/**
+	 * 商品数量
+	 */
+	private Integer goodsNum;
+
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+
+	
+
+	public String getImgUrl() {
+		return imgUrl;
+	}
+
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
+	}
+
+	public Integer getGoodsNum() {
+		return goodsNum;
+	}
+
+	public void setGoodsNum(Integer goodsNum) {
+		this.goodsNum = goodsNum;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public long getGoodsId() {
+		return goodsId;
+	}
+
+	public void setGoodsId(long goodsId) {
+		this.goodsId = goodsId;
+	}
+	
+	
+}

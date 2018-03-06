@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.goods.persistence.common.dao.CategoryWordSegExMapper" >
+
+<resultMap id="BaseResultMap" type="com.zfj.xmy.goods.persistence.common.pojo.dto.CategoryWordSegDir" >
+  <id column="id" property="id" jdbcType="BIGINT" />
+  <result column="word_seg" property="wordSeg" jdbcType="VARCHAR" />
+</resultMap>
+
+<select id="findCategoryWordSeg" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+	select a.id,a.word_seg from category_word_seg a
+  <if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+
+ <!--查询商品的搜索词汇  -->
+<select id="findGoodsSpec" parameterType="com.appdev.db.common.CriteriaParameter" resultType="String">
+	select b.word_seg from goods_spec_category a
+	INNER JOIN category_word_seg b on a.spec_category_id = b.id
+  <if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+
+</mapper>

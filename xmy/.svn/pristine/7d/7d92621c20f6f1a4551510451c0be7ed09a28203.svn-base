@@ -1,0 +1,153 @@
+// JavaScript Document
+
+	$(function(){	
+			 setInterval(waptimeController(),100);	
+			 function waptimeController(){
+				var nowTime = new Date();
+				var day = nowTime.getDate();
+				var hours = nowTime.getHours();
+				var year = nowTime.getFullYear();
+				var month = nowTime.getMonth()+1;
+				//18号
+				if((day==18&&hours>12)||(day==19&&hours<12)&&year==2017&&month==11){
+					setInterval(setbdj1(),100);
+					function setbdj1(){
+						var url_nid_1=$("#wapbdj1").attr("value");
+						var url_nid_2=$("#wapbdj2").attr("value");
+						$("#wapbdj1").empty();
+						$("#wapbdj1").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_1+"&activityId=35&activityType=2';return false\"></div>");
+						$("#wapbdj2").empty();
+						$("#wapbdj2").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_2+"&activityId=35&activityType=2';return false\"></div>");
+						}
+					}else if(day<25&&day>17||(day==19&&hours>12)) {
+						setInterval(setbdj2(),100);
+						function setbdj2(){
+						$("#wapbdj1").empty();
+						$("#wapbdj1").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						$("#wapbdj2").empty();
+						$("#wapbdj2").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						}
+						}
+				//19号		
+				if((day==19&&hours>12)||(day==20&&hours<12)&&year==2017&&month==11){
+					setInterval(setbdj3(),100);
+					function setbdj3(){
+						var url_nid_1=$("#wapbdj3").attr("value");
+						var url_nid_2=$("#wapbdj4").attr("value");
+						$("#wapbdj3").empty();
+						$("#wapbdj3").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_1+"&activityId=35&activityType=2';return false\"></div>");
+						$("#wapbdj4").empty();
+						$("#wapbdj4").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_2+"&activityId=35&activityType=2';return false\"></div>");
+						}
+					}else if(day<25&&day>18||(day==20&&hours>12)) {
+						setInterval(setbdj4(),100);
+						function setbdj4(){
+						$("#wapbdj3").empty();
+						$("#wapbdj3").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						$("#wapbdj4").empty();
+						$("#wapbdj4").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						}
+						}
+				//20号		
+				if((day==20&&hours>12)||(day==21&&hours<12)&&year==2017&&month==11){
+					setInterval(setbdj5(),100);
+					function setbdj5(){
+						var url_nid_1=$("#wapbdj5").attr("value");
+						var url_nid_2=$("#wapbdj6").attr("value");
+						$("#wapbdj5").empty();
+						$("#wapbdj5").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_1+"&activityId=35&activityType=2';return false\"></div>");
+						$("#wapbdj6").empty();
+						$("#wapbdj6").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_2+"&activityId=35&activityType=2';return false\"></div>");
+						}
+					}else if(day<25&&day>19||(day==20&&hours>12)) {
+						setInterval(setbdj6(),100);
+						function setbdj6(){
+						$("#wapbdj5").empty();
+						$("#wapbdj5").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						$("#wapbdj6").empty();
+						$("#wapbdj6").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						}
+						}
+				//21号		
+				if((day==21&&hours>12)||(day==22&&hours<12)&&year==2017&&month==11){
+					setInterval(setbdj7(),100);
+					function setbdj7(){
+						var url_nid_1=$("#wapbdj7").attr("value");
+						var url_nid_2=$("#wapbdj8").attr("value");
+						$("#wapbdj7").empty();
+						$("#wapbdj7").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_1+"&activityId=35&activityType=2';return false\"></div>");
+						$("#wapbdj8").empty();
+						$("#wapbdj8").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_2+"&activityId=35&activityType=2';return false\"></div>");
+						}
+					}else if(day<25&&day>20||(day==22&&hours>12)) {
+						setInterval(setbdj8(),100);
+						function setbdj8(){
+						$("#wapbdj7").empty();
+						$("#wapbdj7").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						$("#wapbdj8").empty();
+						$("#wapbdj8").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						}
+						}		
+				//22号		
+				if((day==22&&hours>12)||(day==23&&hours<12)&&year==2017&&month==11){
+					setInterval(setbdj9(),100);
+					function setbdj9(){
+						var url_nid_1=$("#wapbdj9").attr("value");
+						var url_nid_2=$("#wapbdj10").attr("value");
+						$("#wapbdj9").empty();
+						$("#wapbdj9").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_1+"&activityId=35&activityType=2';return false\"></div>");
+						$("#wapbdj10").empty();
+						$("#wapbdj10").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_2+"&activityId=35&activityType=2';return false\"></div>");
+						}
+					}else if(day<25&&day>21||(day==23&&hours>12)) {
+						setInterval(setbdj10(),100);
+						function setbdj10(){
+						$("#wapbdj9").empty();
+						$("#wapbdj9").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						$("#wapbdj10").empty();
+						$("#wapbdj10").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						}
+						}
+				//23号		
+				if((day==23&&hours>12)||(day==23&&hours<12)&&year==2017&&month==11){
+					setInterval(setbdj11(),100);
+					function setbdj11(){
+						var url_nid_1=$("#wapbdj11").attr("value");
+						var url_nid_2=$("#wapbdj12").attr("value");
+						$("#wapbdj11").empty();
+						$("#wapbdj11").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_1+"&activityId=35&activityType=2';return false\"></div>");
+						$("#wapbdj12").empty();
+						$("#wapbdj12").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_2+"&activityId=35&activityType=2';return false\"></div>");
+						}
+					}else if(day<25&&day>22||(day==24&&hours>12)) {
+						setInterval(setbdj12(),100);
+						function setbdj12(){
+						$("#wapbdj11").empty();
+						$("#wapbdj11").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						$("#wapbdj12").empty();
+						$("#wapbdj12").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						}
+						}	
+				//24号		
+				if((day==24&&hours>12)||(day==25&&hours<12)&&year==2017&&month==11){
+					setInterval(setbdj13(),100);
+					function setbdj13(){
+						var url_nid_1=$("#wapbdj13").attr("value");
+						var url_nid_2=$("#wapbdj14").attr("value");
+						$("#wapbdj13").empty();
+						$("#wapbdj13").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_1+"&activityId=35&activityType=2';return false\"></div>");
+						$("#wapbdj14").empty();
+						$("#wapbdj14").html("<div class='bingdian_div' onclick=\"window.location.href= 'http://m.xmyb2b.com/goods/goodsInfo?goodsId="+url_nid_2+"&activityId=35&activityType=2';return false\"></div>");
+						}
+					}else if(day<25&&day>23||(day==24&&hours>12)) {
+						setInterval(setbdj14(),100);
+						function setbdj14(){
+						$("#wapbdj13").empty();
+						$("#wapbdj13").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						$("#wapbdj14").empty();
+						$("#wapbdj14").html("<div class='bingdian_div' ><img src='images/wap_20171118sq.png' class='bingdian_img'/></div>");
+						}
+						}										
+					
+				 }
+		})

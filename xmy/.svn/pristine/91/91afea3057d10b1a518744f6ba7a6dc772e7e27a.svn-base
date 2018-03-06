@@ -1,0 +1,47 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%> 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<table class="layui-table" lay-skin="line">
+ <thead>
+   <tr>
+  	 <th><input type="checkbox" name="" lay-skin="primary" lay-filter="allChoose"></th>
+     <th>ID</th>
+      <th>用户账号</th>
+      <th>手机</th>
+      <th>用户标签</th>
+      <th>注册日期</th>
+      <th>操作</th>
+   </tr> 
+ </thead>
+ <tbody>
+ 	<c:forEach items="${userList}" var="user">
+	  	<tr >
+	  	  <td><input type="checkbox" data-id="${user.id }" name="" lay-skin="primary"></td>
+	  	  <td>${user.id}</td>
+	      <td>${user.name}</td>
+	      <td>${user.mobilePhone}</td>
+	      <td>
+	          <c:forTokens items="${user.labels}" delims="," var="userlabel" >
+	              <c:forEach items="${labels }" var="label" >
+	                  <c:if test="${userlabel eq label.id }">
+	                      <%-- <span class="layui-badge layui-bg-blue">${label.label }</span> --%>
+	                      <button class="layui-btn  layui-badge layui-bg-green userlabel-btn" data-userid="${user.id }" data-labelid="${label.id }"  >${label.label }</button>
+	                  </c:if>
+	              </c:forEach>
+	          </c:forTokens>
+	          <!-- <span class="layui-badge layui-bg-blue">蓝</span>
+	          <span class="layui-badge layui-bg-blue">蓝</span> -->
+	      </td>
+	      <td><fmt:formatDate pattern="yyyy-MM-dd" value="${user.createTime}"></fmt:formatDate> </td>
+	      <td>
+			    <div class="site-demo-button " >
+			    	<%--  <a href="userManagement/editUser/${user.id}"> <button class="layui-btn">编辑</button></a>
+			         <button class="layui-btn" id="del" data-id="${user.id }"  >删除</button> --%>
+			         <%-- <a href="push/userlabelList/add?userid=${user.id}"> <button class="layui-btn">添加标签</button></a> --%>
+			         <a data-user="${user.id}" class="addlabeltouser" > <button class="layui-btn">添加标签</button></a>
+			    </div>
+	      </td>
+	    </tr>
+  	</c:forEach>
+ </tbody>
+</table>

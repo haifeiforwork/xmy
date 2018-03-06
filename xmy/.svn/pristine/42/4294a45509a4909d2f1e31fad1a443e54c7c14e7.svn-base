@@ -1,0 +1,219 @@
+package com.zfj.xmy.cms.web.controller.activity;  
+
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.xmy.activity.persistence.cms.pojo.dto.LimitGoodsDto;
+import com.zfj.xmy.activity.service.cms.CmsLimitActivityService;
+import com.zfj.xmy.cms.web.controller.BaseController;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.LimitActivity;
+import com.zfj.xmy.goods.service.cms.CmsGoodsService;
+
+/** 
+ * @Title: IimitActivity.java 
+ * @Package com.zfj.xmy.cms.web.controller.activity 
+ * @Description: 
+ * @author hexw
+ * @date 2017年7月5日 下午5:11:50 
+ */
+@RequestMapping("/limitActivity")
+@RestController
+public class LimitActivityController extends BaseController{
+
+	@Autowired
+	private CmsGoodsService goodsService;
+	
+	@Autowired
+	private CmsLimitActivityService limitActivityService;
+	
+	// 自定义类型转换器  
+	@InitBinder  
+	public void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {  
+	    binder.registerCustomEditor(Date.class,  
+	            new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd HH:mm"), true));  
+	} 
+	
+	/**
+	 * 添加活动界面
+	 * @return    
+	 * @return ModelAndView    
+	 * Date:2017年7月5日 下午7:37:10
+	 */
+	@RequestMapping("/toAddActivity")
+	public ModelAndView toAddActivity(){
+		return new ModelAndView("/activity/limitActivity/add_limitActivity");
+	}
+	
+	/**
+	 * 商品列表
+	 * @param request
+	 * @return    
+	 * @return ModelAndView    
+	 * Date:2017年6月19日 上午10:55:04
+	 */
+	@RequestMapping("/goodsList")
+	public ModelAndView goodsList(HttpServletRequest request, ReqData reqData){
+		reqData2Params(reqData);
+		PageBean pageBean = new PageBean();
+		reqData.putValue("is_putway", 0, SystemConstant.REQ_PARAMETER_EQ);
+		goodsService.selectGoodsAndPage(reqData, pageBean);
+		request.setAttribute("totalPage",pageBean.getTotalPage()) ;
+		return new ModelAndView("/activity/limitActivity/goods_list");
+	}
+	
+	@RequestMapping("/goodsList/{pageIndex}")
+	public ModelAndView goodsList(@PathVariable("pageIndex") Integer pageIndex,
+			HttpServletRequest request, ReqData reqData, PageBean pageBean) {
+		pageBean.setPageIndex(pageIndex);
+		reqData.setSortname("putwayTime");
+		reqData.setSortorder("desc");
+		reqData.putValue("is_putway", 0, SystemConstant.REQ_PARAMETER_EQ);
+		goodsService.selectGoodsAndPage(reqData, pageBean);
+		request.setAttribute("glist", pageBean.getData());
+		return new ModelAndView("/activity/limitActivity/goods_list_page");
+	}
+	
+	/**
+	 * 查询商品
+	 * @param idStr  商品id字符串
+	 * @param request
+	 * @return    
+	 * Date:2017年7月5日 下午8:21:51
+	 */
+	@RequestMapping("/findGoods")
+	public RespData findGoods(String idStr, HttpServletRequest request) {
+		RespData respData = new RespData() ; 
+		List<Goods> list = limitActivityService.findGoods(idStr);
+		respData.setData(list);
+		return respData;
+	}
+	
+	
+	/**
+	 * 添加活动
+	 * @param limitActivity
+	 * @return    
+	 * Date:2017年7月6日 下午2:43:45
+	 */
+	@RequestMapping("/addActivity")
+	public ModelAndView addActivity(LimitActivity limitActivity ,HttpServletRequest request){
+		String[] goodsId = request.getParameterValues("goodsId");
+		String[] price = request.getParameterValues("price");
+		String[] limitNum = request.getParameterValues("limNum");
+		String[] allNum = request.getParameterValues("allNum");
+		String[] completeNum = request.getParameterValues("completeNum");
+		String[] activityTime = request.getParameterValues("activityTime");
+		limitActivityService.insertActivity(limitActivity, goodsId,price, limitNum, allNum, completeNum,activityTime);
+		return new ModelAndView("redirect:/limitActivity/activityList");
+	}
+	
+	
+
+	
+	
+	/**
+	 * 活动列表
+	 * @param request
+	 * @return    
+	 * @return ModelAndView    
+	 * Date:2017年6月19日 上午10:55:04
+	 */
+	@RequestMapping("/activityList")
+	public ModelAndView activityList(HttpServletRequest request,ReqData reqData){
+		PageBean pageBean = new  PageBean();
+		reqData2Params(reqData);
+		limitActivityService.selectActivityList(reqData, pageBean);;
+		request.setAttribute("totalPage",pageBean.getTotalPage()) ;
+		return new ModelAndView("/activity/limitActivity/limitActivity_list");
+	}
+	
+	@RequestMapping("/activityList/{pageIndex}")
+	public ModelAndView activityList(@PathVariable("pageIndex") Integer pageIndex,
+			HttpServletRequest request, ReqData reqData, PageBean pageBean) {
+		reqData2Params(reqData);
+		pageBean.setPageIndex(pageIndex);
+		limitActivityService.selectActivityList(reqData, pageBean);;
+		request.setAttribute("alist", pageBean.getData());
+		return new ModelAndView("/activity/limitActivity/limitActivity_list_page");
+	}
+	
+	/**
+	 * 删除活动
+	 * @param id
+	 * @return    
+	 * Date:2017年7月6日 下午7:47:58
+	 */
+	@RequestMapping("/delActivity")
+	public RespData delActivity(String id){
+		RespData respData = new RespData();
+		respData.setData(limitActivityService.delActivity(id));
+		return respData;
+	}
+	
+	/**
+	 * 到编辑限时活动界面
+	 * @param id
+	 * @param request
+	 * @return    
+	 * @return ModelAndView    
+	 * Date:2017年7月6日 下午8:14:36
+	 */
+	@RequestMapping("/toUpdateActivity")
+	public ModelAndView toUpdateActivity(String id,HttpServletRequest request){
+		LimitActivity limitActivity = limitActivityService.getLimitActivity(id);
+		List<LimitGoodsDto> goodsLit = limitActivityService.selectLimitGoodsByActId(id);
+		request.setAttribute("data", limitActivity);
+		request.setAttribute("goodsLit", goodsLit);
+		return new ModelAndView("/activity/limitActivity/edit_limitActivity");
+	}
+	
+	/**
+	 * 修改活动
+	 * @param limitActivity
+	 * @return    
+	 * Date:2017年7月7日 上午11:00:12
+	 */
+	@RequestMapping("/updateActivity")
+	public ModelAndView updateActivity(LimitActivity limitActivity ,HttpServletRequest request){
+		String[] goodsId = request.getParameterValues("goodsId");
+		String[] price = request.getParameterValues("price");
+		String[] limitNum = request.getParameterValues("limNum");
+		String[] allNum = request.getParameterValues("allNum");
+		String[] activityTime = request.getParameterValues("activityTime");
+		String[] completeNum = request.getParameterValues("completeNum");
+		limitActivityService.updateActivity(limitActivity, goodsId,price, limitNum, allNum, completeNum,activityTime);
+		return new ModelAndView("redirect:/limitActivity/activityList");
+	}
+	
+	/**
+	 * 移除活动商品
+	 * @param goodsId    
+	 * @return void    
+	 * Date:2017年7月7日 下午2:24:32
+	 */
+	@RequestMapping("/delActivityGoods")
+	public void delActivityGoods(String goodsId,String actId){
+		limitActivityService.delActivityGoods(goodsId,actId);
+	}
+	
+
+}
+  

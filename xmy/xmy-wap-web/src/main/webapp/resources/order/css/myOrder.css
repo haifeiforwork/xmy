@@ -1,0 +1,30 @@
+header .header-top{border-bottom: 1px solid #C3C3C3;}
+        .content{bottom: 0;}
+        .head{height: 2.5rem;background-color: #fff;text-align: center;font-size: 0.75rem;line-height: 2.5rem;color: #444;}
+        .head .weui-flex .weui-flex__item.active{color: #348811;border-bottom: 2px solid #348811;}
+        .lump2, .lump3, .lump4, .lump5{display: none;}
+        .chunk{margin-top: 0.5rem;}
+        .chunk .title{height: 2.5rem;line-height: 2.5rem;color: #444;font-size: 0.7rem;background-color: #fff;padding: 0 10px;position: relative;}
+        .chunk .title .oreder{width: 10rem;}
+        .chunk .title .oreder.active .yuan{background: url(../images/xz.png);background-size: 100% 100%;border:0;}
+        .chunk .title .oreder .yuan{height: 1rem;width: 1rem;border:1px solid #999999;border-radius: 50%;float: left;margin-top: 0.75rem;margin-right: 0.25rem;}
+        .chunk .title .state{color: #348811;position: absolute;top: 0rem;right: 10px;}
+        .chunk .weui-panel{margin:0;}
+        .chunk .weui-panel .weui-panel__bd .weui-media-box{background-color: #f0f0f0;padding: 10px 10px;}
+        .chunk .weui-panel .weui-panel__bd .weui-media-box .weui-media-box__hd{width: 4rem;height: 4rem;line-height: 4rem;}
+        .chunk .weui-panel .weui-panel__bd .weui-media-box .weui-media-box__hd img{width: 4rem;height: 4rem;}
+        .chunk .weui-panel .weui-panel__bd .weui-media-box .weui-media-box__bd .titled{height: 2.7rem;font-size: 0.7rem;color: #444;line-height: 0.9rem;-webkit-line-clamp:3;}
+        .chunk .weui-panel .weui-panel__bd .weui-media-box .weui-media-box__bd .money{color: #444;font-size: 0.7rem;height: 1rem;margin-top: 0.3rem;}
+        .chunk .sum{height: 2rem;line-height: 2rem;text-align: right;font-size: 0.6rem;color: #444;background-color: #fff;padding: 0 10px;}
+        .chunk .sum .red{color: #F42D30;font-size: 0.7rem;}
+        .chunk .handle{height: 2.5rem;line-height: 2.5rem;text-align: right;font-size: 0.6rem;color: #444;background-color: #fff;padding: 0 10px;}
+        .chunk .handle button{width: 4rem;height: 1.75rem;color: #444;border:1px solid #999999;border-radius: 3px;font-size: 0.7rem;margin-left: 0.5rem;background-color: #fff;}
+        .chunk .handle .evaluate{background-color: #348811;border:0;color: #fff;}
+        .add-bottom{bottom: 55px;}
+        .unpaid{display: none;}
+        .unpaid .row{overflow: hidden;height: 100%;line-height: 55px;}
+        .unpaid .row .ly-65{float: left;width: 65%;padding: 0 10px;background-color: #fff;}
+        .unpaid .row .ly-35{float: left;width: 35%;font-size: 0.8rem;color: #fff;text-align: center;background-color: #808080;}
+        .order-status{width:100%;overflow-x:auto;overflow-y:hidden;}
+        .order-status::-webkit-scrollbar{background:transparent;height:0;width:0;display:none;-webkit-overflow-scrolling: touch;}
+        .order-status .weui-flex__item{display:block;width:20%;float:left;flex:none;}

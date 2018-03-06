@@ -1,0 +1,93 @@
+package com.zfj.xmy.activity.service.cms.impl;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.activity.persistence.cms.dao.ShoppingCardExMapper;
+import com.zfj.xmy.activity.persistence.cms.pojo.dto.ShoppingCardDto;
+import com.zfj.xmy.activity.service.cms.ShoppingCardService;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.ShoppingCardMapper;
+import com.zfj.xmy.common.persistence.dao.ShoppingCardRecordMapper;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCard;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCardRecord;
+
+@Service
+public class ShoppingCardServiceImpl implements ShoppingCardService{
+	@Autowired
+	private ShoppingCardExMapper shoppingCardExMapper;
+	
+	@Autowired
+	private ShoppingCardMapper shoppingCardMapper;
+	
+	@Autowired
+	private ShoppingCardRecordMapper recordMapper;
+	
+	/**
+	 * 分页查询商品信息
+	 */
+	@Override
+	public List<ShoppingCardDto> findAllShoppingCard(ReqData reqData, PageBean pageBean) {
+		List<ShoppingCardDto> list = shoppingCardExMapper.findShoppingCard(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		pageBean.setTotalCount(shoppingCardExMapper.countTotalShoppingCard(ReqUtil.reqParameterToCriteriaParameter(reqData)));
+		return list;
+	}
+	
+	/**
+	 * 根据订单ID查询订单的购物卡记录
+	 */
+	@Override
+	public List<ShoppingCard> findShoppingCardByUserId(Long orderId) {
+		ReqData reqData = new  ReqData();
+		String cardId = "0";
+		reqData.putValue("order_id", orderId, SystemConstant.REQ_PARAMETER_EQ);
+		List<ShoppingCardRecord> byExample = recordMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		for (ShoppingCardRecord shoppingCardRecord : byExample) {
+			cardId+=","+shoppingCardRecord.getShoppingCardId();
+		}
+		//reqData.putValue("user_id", orderId, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("id", cardId, SystemConstant.REQ_PARAMETER_IN);
+		List<ShoppingCard> selectByExample = shoppingCardMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return selectByExample;
+	}
+	/**
+	 * 修改
+	 */
+	@Override
+	public void updateShoppingCard(Long id, Integer type, BigDecimal money) {
+		ShoppingCard oldCard = shoppingCardMapper.selectByPrimaryKey(id);
+		if (type == SystemConstant.userSpendPoints.SPEND_TYPE_SAVE) {//存入余额
+			oldCard.setBalance(oldCard.getBalance().add(money));//+ userSpendPoints.getMoneyPoint());
+		} else {
+			oldCard.setBalance(oldCard.getBalance().subtract(money));//- userSpendPoints.getMoneyPoint());
+		}
+		shoppingCardMapper.updateByPrimaryKey(oldCard);
+	}
+	
+	@Override
+	public void importShoppingCard(MultipartFile file){
+		System.out.println(file);
+		//保存卡号数据
+		String contentType = file.getContentType();
+		if (StringUtil.isEmpty(contentType)) {
+			throw new BusinessException("请选择要导入的购物卡");
+		}
+		if (!contentType.contains("excel")) {
+			throw new BusinessException("文件格式不允许");
+		}
+		
+		//
+		
+	}
+	
+}

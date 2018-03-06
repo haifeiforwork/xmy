@@ -1,0 +1,501 @@
+package com.zfj.xmy.activity.service.common.impl;  
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.date.DateTime;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.date.Month;
+import com.xiaoleilu.hutool.lang.Assert;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.xmy.activity.persistence.app.pojo.dto.AppActivityInDto;
+import com.zfj.xmy.activity.persistence.common.dao.LimitActivityExMapper;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.AppBuyAndPresentOutDto;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.LimitActivityDir;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.LimitActivityGoodsDir;
+import com.zfj.xmy.activity.service.common.LimitActivityService;
+import com.zfj.xmy.common.DateUtils;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.AdImageMapper;
+import com.zfj.xmy.common.persistence.dao.AdInfoMapper;
+import com.zfj.xmy.common.persistence.dao.BuyAndPresentMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsImageMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.LimitActivityMapper;
+import com.zfj.xmy.common.persistence.dao.LimitGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.ShoppingCartMapper;
+import com.zfj.xmy.common.persistence.pojo.AdImage;
+import com.zfj.xmy.common.persistence.pojo.AdInfo;
+import com.zfj.xmy.common.persistence.pojo.BuyAndPresent;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.GoodsImage;
+import com.zfj.xmy.common.persistence.pojo.LimitActivity;
+import com.zfj.xmy.common.persistence.pojo.LimitGoods;
+import com.zfj.xmy.common.persistence.pojo.app.AppGoodsCondense;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.elasticsearch.service.GoodsDocService;
+import com.zfj.xmy.util.StringUtils;
+
+/** 
+ * @Title: AppLimitActivityServiceImpl.java 
+ * @Package com.zfj.xmy.activity.service.app.impl 
+ * @Description: 
+ * @author hexw
+ * @date 2017年7月31日 上午11:21:31 
+ */
+@Service
+public class LimitActivityServiceImpl extends BaseService implements LimitActivityService {
+
+	@Autowired
+	private LimitActivityExMapper  limitActivityExMapper;
+	
+	@Autowired
+	private GoodsImageMapper goodsImageMapper;
+	
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	@Autowired
+	private BuyAndPresentMapper buyAndPresentMapper;
+	
+	@Autowired
+	private AdInfoMapper adInfoMapper;
+	
+	@Autowired
+	private AdImageMapper adImageMapper;
+	
+	@Autowired
+	private LimitActivityMapper limitActivityMapper;
+	
+	@Autowired
+	private LimitGoodsMapper limitGoodsMapper;
+	
+	@Autowired
+	private ShoppingCartMapper shoppingCartMapper;
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Autowired
+	private GoodsDocService docService;
+	
+	@Override
+	public List<LimitActivityDir> findLimitActivityList(AppActivityInDto activityInDto){
+		ReqData reqData = new  ReqData();
+		//是否类型类型查询单个活动
+		if(!ObjectUtils.isEmpty(activityInDto)){
+			reqData.putValue("type", activityInDto.getType(), SystemConstant.REQ_PARAMETER_EQ);
+		}
+		//reqData.putValue("port",  SystemConstant.LIMITACTIVITY.APP, SystemConstant.REQ_PARAMETER_CN);
+		reqData.putValue("status", SystemConstant.LIMITACTIVITY.STATUS_YES, SystemConstant.REQ_PARAMETER_EQ);
+		// 1.查询活动
+		List<LimitActivityDir> list = limitActivityExMapper.findList(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if (list.size() > 0) {
+			for (LimitActivityDir appLimitActivityDir : list) {
+				ReqData  goodsReqData = new ReqData();
+				PageBean pageBean = new PageBean();
+				pageBean.setPageIndex(1);
+				goodsReqData.putValue("a.limit_id", appLimitActivityDir.getId(), SystemConstant.REQ_PARAMETER_EQ);
+				switch (appLimitActivityDir.getType()) {
+						case SystemConstant.LIMITACTIVITY.FREEZING : 
+							//冰点价
+							if (new Date().getTime() > DateUtils.getTwelveOfToday().getTime()){ //当当前时间大于12点 就取今天的活动时间  否则取昨天的
+								goodsReqData.putValue("activity_time", DateUtil.format(DateUtils.getDayBegin(),"yyyy-MM-dd HH:mm:ss"),  SystemConstant.REQ_PARAMETER_GE);
+							} else {
+								goodsReqData.putValue("activity_time", DateUtil.format(DateUtils.getBeginDayOfYesterday(), "yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_GE);
+							}
+							pageBean.setPageSize(6);
+							break;
+						case SystemConstant.LIMITACTIVITY.DAYDAY: 							
+							//天天特价
+							goodsReqData.putValue("activity_time", DateUtil.format(DateUtils.getDayBegin(), "yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_GE);
+							pageBean.setPageSize(6);
+							break;
+						case SystemConstant.LIMITACTIVITY.WEEKWEEK:
+							//每周特价
+							goodsReqData.putValue("activity_time", DateUtil.format(DateUtils.getBeginDayOfWeek(), "yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_GE);
+							goodsReqData.putValue("activity_time",  DateUtil.format(DateUtils.getEndDayOfWeek(),"yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_LE);
+							pageBean.setPageSize(6);
+							break;
+						case SystemConstant.LIMITACTIVITY.WOLE:
+							//整件惠
+							//goodsReqData.putValue("activity_time", DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_GE);
+							pageBean.setPageSize(15);
+							break;
+				}
+				goodsReqData.setSortname("a.activity_time");
+				goodsReqData.setSortorder("asc");
+				//2.查询活动商品
+				List<LimitActivityGoodsDir> goodsList = limitActivityExMapper.findActivityGoods(ReqUtil.reqParameterToCriteriaParameter(goodsReqData),pageBean.getRowBounds());
+				if (goodsList != null) {
+					for (LimitActivityGoodsDir appLimitActivityGoodsDir : goodsList) {
+						//3. 获取商品的第一张图片
+						appLimitActivityGoodsDir.setGoodsImg(commonGoodsService.getFirstGoodsImg(appLimitActivityGoodsDir.getGoodsId()));
+						Date activityTime = appLimitActivityGoodsDir.getBeginTime();
+						if (ObjectUtil.isNotNull(activityTime)) {   //判断活动是不是当前可抢购的商品
+							appLimitActivityGoodsDir.setIsToday(checkIsToDay(activityTime,appLimitActivityDir.getType()));
+						}
+						appLimitActivityGoodsDir.setBeginTimeStr(DateUtils.getMothAndDay(activityTime));
+					}
+					appLimitActivityDir.setGoodsList(goodsList);
+					appLimitActivityDir.setCurrentTime(new Date());
+				}
+				appLimitActivityDir.setActivityType(SystemConstant.ACTIVITY.LIMIT_ACTIVITY);  //主要用于区分活动属于那张表  0 买即赠 1专题促销 2 其他活动
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * 判断商品是不是当天可抢购的商品  0可抢 1不可抢
+	 * @param activityTime
+	 * @param activityType
+	 * @return    
+	 * @return int    
+	 * Date:2017年10月12日 上午11:50:10 
+	 * @author hexw
+	 */
+	public int checkIsToDay(Date activityTime,Integer activityType) {
+		int result = 1;
+		if (activityType == SystemConstant.LIMITACTIVITY.FREEZING ) { //冰点价   当天12点之前  可抢购的是昨天的活动商品 12后可抢购的是今天的活动商品
+			if (new Date().getTime() < DateUtils.getTwelveOfToday().getTime()) { 
+				if (activityTime.getTime() <= DateUtils.getDayBegin().getTime()) {
+					result = 0 ;
+				} 
+			} else {
+				if (activityTime.getTime()<=DateUtils.getDayEnd().getTime()) {
+					result = 0 ;
+				}
+			}
+		} else {
+			if (activityTime.getTime() <= DateUtils.getDayEnd().getTime()){  
+				result = 0 ;
+			}
+		}
+		return result;
+	}
+	
+	
+
+	@Override
+	public List<AppBuyAndPresentOutDto> findBuyAndPersentActivity(){
+		ReqData reqData = new  ReqData();
+		reqData.putValue("end_time", new Date(), SystemConstant.REQ_PARAMETER_LE);
+		reqData.putValue("status", SystemConstant.BUYANDPRSENT.USERING, SystemConstant.REQ_PARAMETER_EQ);
+		List<BuyAndPresent> buyAndPresents = buyAndPresentMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		List<AppBuyAndPresentOutDto> list = new  ArrayList<AppBuyAndPresentOutDto>();
+		for (BuyAndPresent buyAndPresent : buyAndPresents) {
+			AppBuyAndPresentOutDto appBuyAndPresentOutDto = new AppBuyAndPresentOutDto();
+			//主商品
+			AppGoodsCondense mainGoods = new AppGoodsCondense();
+			//赠品
+			AppGoodsCondense giftGoods = new AppGoodsCondense();
+			//通过主商品id获取到主商品
+			String mainGoodsIds = buyAndPresent.getMainGoodsIds();
+			List<Object> exchangeSplit = StringUtils.exchangeSplit(mainGoodsIds);
+			List<Goods> findsGoodsWithIds = commonGoodsService.findsGoodsWithIds(exchangeSplit);
+			//防止添加多个商品，只取一个
+			if(findsGoodsWithIds.size()>0){
+				Goods goods = findsGoodsWithIds.get(0);
+				BeanUtils.copyProperties(goods, mainGoods);
+			}
+			appBuyAndPresentOutDto.setMainGoods(mainGoods);
+			
+			//通过赠品id获取到赠品
+			String giftGoodsIds = buyAndPresent.getGiftGoodsIds();
+			List<Object> giftGoodsIdsList = StringUtils.exchangeSplit(giftGoodsIds);
+			List<Goods> giftGoodsList = commonGoodsService.findsGoodsWithIds(giftGoodsIdsList);
+			//防止添加多个商品，只取一个
+			if(giftGoodsList.size()>0){
+				Goods goods = giftGoodsList.get(0);
+				BeanUtils.copyProperties(goods, giftGoods);
+			}
+			
+			//返回下买即赠的开始时间，结束时间
+			appBuyAndPresentOutDto.setId(buyAndPresent.getId());
+			appBuyAndPresentOutDto.setStartTime(buyAndPresent.getStartTime());
+			appBuyAndPresentOutDto.setEndTime(buyAndPresent.getEndTime());
+			appBuyAndPresentOutDto.setCurrentTime(new Date());
+			appBuyAndPresentOutDto.setGiftGoods(giftGoods);
+			appBuyAndPresentOutDto.setActivityType(SystemConstant.ACTIVITY.BYU_AND_PRESENT_ACTIVITY);  //用于区分那张表
+			list.add(appBuyAndPresentOutDto);	
+		}
+		
+		return list;
+	}
+	
+	
+	
+	/*public List<LimitActivityDir> findLimitActivityList(Integer type){
+		ReqData reqData = new  ReqData();
+		reqData.putValue("type", type, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("port",  SystemConstant.LIMITACTIVITY.APP, SystemConstant.REQ_PARAMETER_CN);
+		reqData.putValue("status", SystemConstant.LIMITACTIVITY.STATUS_YES, SystemConstant.REQ_PARAMETER_EQ);
+		// 1.查询活动
+		List<LimitActivityDir> list = limitActivityExMapper.findList(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if (list.size() > 0) {
+			for (LimitActivityDir appLimitActivityDir : list) {
+				ReqData  goodsReqData = new ReqData();
+				goodsReqData.putValue("a.limit_id", appLimitActivityDir.getId(), SystemConstant.REQ_PARAMETER_EQ);
+				//2.查询活动商品
+				List<LimitActivityGoodsDir> goodsList = limitActivityExMapper.findActivityGoods(ReqUtil.reqParameterToCriteriaParameter(goodsReqData));
+				if (goodsList != null) {
+					for (LimitActivityGoodsDir appLimitActivityGoodsDir : goodsList) {
+						//3. 获取商品的第一张图片
+						appLimitActivityGoodsDir.setGoodsImg(commonGoodsService.getFirstGoodsImg(appLimitActivityGoodsDir.getGoodsId()));
+					}
+					appLimitActivityDir.setGoodsList(goodsList);
+					appLimitActivityDir.setCurrentTime(new Date());
+				}
+				appLimitActivityDir.setActivityType(SystemConstant.ACTIVITY.LIMIT_ACTIVITY);  //用于区分那张表
+			}
+		}
+		return list;
+	}*/
+	
+	@Override
+	public List<AdImage> findActivityImage(Integer type){
+		List<AdImage> list = new ArrayList<AdImage>();
+		ReqData reqData = new  ReqData();
+		reqData.putValue("type", SystemConstant.AdInfoImage.TYPE_OPENGRAB, SystemConstant.REQ_PARAMETER_EQ);
+		List<AdInfo> findAdInfo = adInfoMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if (findAdInfo.size()>0) {
+			ReqData imgReqData = new  ReqData();
+			imgReqData.putValue("ad_id", findAdInfo.get(0).getId(), SystemConstant.REQ_PARAMETER_EQ);
+			imgReqData.putValue("img_type", type, SystemConstant.REQ_PARAMETER_EQ);
+			imgReqData.setSortname("weight");
+			imgReqData.setSortorder("asc");
+			list =adImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(imgReqData));
+		}
+		return list;
+	}
+	
+	
+	
+	//判断用户是否重复购买活动商品
+	/**
+	 * 
+	 * @param userId  
+	 * @param activityId
+	 * @param num 商品数量
+	 * @return    
+	 * @return int    
+	 * Date:2017年10月13日 下午5:36:05 
+	 * @author hexw
+	 */
+	@Override
+	public int checkLimitGoods(Long userId,Long activityId,Long goodsId,Integer num){
+		int result = 0;
+		LimitActivity limitActivity = limitActivityMapper.selectByPrimaryKey(activityId);
+		if (ObjectUtil.isNotNull(limitActivity)) {
+			ReqData reqData = new ReqData();
+			reqData.putValue("a.user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("b.activity_id", activityId, SystemConstant.REQ_PARAMETER_EQ);
+			int orderNum = limitActivityExMapper.countLimitAcivity(ReqUtil.reqParameterToCriteriaParameter(reqData)); //已生成到订单的活动
+			reqData.clearValue();
+			reqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("activity_id", activityId, SystemConstant.REQ_PARAMETER_EQ);
+			int cartNum = shoppingCartMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			 //判断用户参与该活动的次数是否大于活动限定的次数
+			if ((orderNum+cartNum) >= limitActivity.getLimitNum()) {
+				result = 1; //用户已超过了活动限定次数
+			} else { //判断用户购买的活动商品数量是否大于限购商品数量
+				reqData.clearValue();
+				LimitGoods limitGoods = null;
+				//查询活动商品记录
+				reqData.putValue("limit_id", activityId,SystemConstant.REQ_PARAMETER_EQ);
+				reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+				List<LimitGoods> list = limitGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				if (list.size() > 0 ){
+					limitGoods = list.get(0);
+				}
+				//统计用户购买活动商品的个数
+				if (num > limitGoods.getLimitNum()) {
+					result = 2;  //用户购买数量大于了活动商品的限定数量
+				}
+			}
+		} else {
+			throw new BusinessException("未查询到活动");
+		}
+		return result;
+	}
+	
+	/**
+	 * 修改活动商品完成量
+	 * @param activityId
+	 * @param goodsId
+	 * @param num  商品数量
+	 * @return void    
+	 * Date:2017年10月14日 上午11:43:10 
+	 * @author hexw
+	 */
+	@Override
+	public void updateActivityGoodsComplNum(Long activityId,Long goodsId,Integer num){
+		ReqData reqData = new ReqData();
+		reqData.putValue("limit_id", activityId,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+		List<LimitGoods> list = limitGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		LimitGoods limitGoods = null;
+		if (list.size() > 0 ){
+			limitGoods = list.get(0);
+			limitGoods.setCompleteNum(limitGoods.getCompleteNum()+num);
+			limitGoodsMapper.updateByPrimaryKeySelective(limitGoods);
+		}
+	}
+	
+	/**
+	 * 根据活动id查询活动商品
+	 * @param activityId
+	 * @return    
+	 * @return List<LimitGoods>    
+	 * Date:2017年10月24日 下午7:25:32 
+	 * @author hexw
+	 */
+	public List<LimitGoods> findLimitGoodsByActId(Long activityId){
+		ReqData reqData = new ReqData();
+		reqData.putValue("limit_id", activityId, SystemConstant.REQ_PARAMETER_EQ);
+		return limitGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+	}
+	
+	/**
+	 * 定时修改冰点价商品上下架状态
+	 * @param list    
+	 * @return void    
+	 * Date:2017年10月24日 下午8:00:01 
+	 * @author hexw
+	 */
+	@Override
+	public void updateFreezingActivityGoods() {
+		// 1. 查询冰点价活动
+		ReqData reqData = new ReqData();
+		reqData.putValue("status", SystemConstant.LIMITACTIVITY.STATUS_YES, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("type", SystemConstant.LIMITACTIVITY.FREEZING, SystemConstant.REQ_PARAMETER_EQ);
+		List<LimitActivity> activitylist = limitActivityMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData)); //查询出冰点价活动
+		for (LimitActivity limitActivity : activitylist) {
+			List<LimitGoods> list = findLimitGoodsByActId(limitActivity.getId()); //查询出冰点价活动商品
+			for (LimitGoods limitGoods : list) {
+		// 2. 判断活动是否开始
+				// 2.1 判断当前时间是否是 12点之前  是取昨天的时间判断  否则就取今天的
+				Long nowDate = new Date().getTime();
+				if (nowDate < DateUtils.getTwelveOfToday().getTime()) {
+					if (limitGoods.getActivityTime().getTime() > DateUtils.getBeginDayOfYesterday().getTime() && limitGoods.getActivityTime().getTime() < DateUtils.getEndDayOfYesterDay().getTime()) {
+						updateGoodsPutway(limitGoods.getGoodsId(),SystemConstant.GoodsConstant.PUTWAY);
+					} else { //活动已结束 或 未开始
+						updateGoodsPutway(limitGoods.getGoodsId(),SystemConstant.GoodsConstant.NOT_PUTWAY);
+					}
+				} else {
+					if (limitGoods.getActivityTime().getTime() > DateUtils.getDayBegin().getTime() && limitGoods.getActivityTime().getTime() < DateUtils.getDayEnd().getTime()) {
+						updateGoodsPutway(limitGoods.getGoodsId(),SystemConstant.GoodsConstant.PUTWAY);
+					} else {  //活动已结束 或 未开始
+						updateGoodsPutway(limitGoods.getGoodsId(),SystemConstant.GoodsConstant.NOT_PUTWAY);
+					}
+				}
+			}
+		}
+		docService.limitActivityPutway();
+	}
+	
+	/**
+	 * 修改天天特价商品上下架状态
+	 * @param list    
+	 * @return void    
+	 * Date:2017年10月24日 下午8:02:24 
+	 * @author hexw
+	 */
+	@Override
+	public void updateDayDayActivityGoods() {
+		ReqData reqData = new ReqData();
+		reqData.putValue("status", SystemConstant.LIMITACTIVITY.STATUS_YES, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("type", SystemConstant.LIMITACTIVITY.DAYDAY, SystemConstant.REQ_PARAMETER_EQ);
+		List<LimitActivity> activitylist = limitActivityMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData)); //查询出天天特价活动
+		for (LimitActivity limitActivity : activitylist) {
+			List<LimitGoods> list = findLimitGoodsByActId(limitActivity.getId()); //查询出天天特价活动商品
+			for (LimitGoods limitGoods : list) {
+				if (limitGoods.getActivityTime().getTime() >=DateUtils.getDayBegin().getTime() && limitGoods.getActivityTime().getTime() <= DateUtils.getDayEnd().getTime()) {
+					updateGoodsPutway(limitGoods.getGoodsId(),SystemConstant.GoodsConstant.PUTWAY);
+				} else {  //活动已结束 或 未开始
+					updateGoodsPutway(limitGoods.getGoodsId(),SystemConstant.GoodsConstant.NOT_PUTWAY);
+				}
+			}
+		}
+		docService.limitActivityPutway();
+	}
+	
+	/**
+	 * 修改每周特价商品的上下架状态
+	 * @param list    
+	 * @return void    
+	 * Date:2017年10月24日 下午8:09:26 
+	 * @author hexw
+	 */
+	@Override
+	public void updateWeekWeekActivityGoods() {
+		ReqData reqData = new ReqData();
+		reqData.putValue("status", SystemConstant.LIMITACTIVITY.STATUS_YES, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("type", SystemConstant.LIMITACTIVITY.WEEKWEEK, SystemConstant.REQ_PARAMETER_EQ);
+		List<LimitActivity> activitylist = limitActivityMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData)); //查询每周特价活动
+		for (LimitActivity limitActivity : activitylist) {
+			List<LimitGoods> list = findLimitGoodsByActId(limitActivity.getId()); //查询出每周特价特价活动商品
+			for (LimitGoods limitGoods : list) {
+				if (limitGoods.getActivityTime().getTime() >= DateUtils.getBeginDayOfWeek().getTime() && limitGoods.getActivityTime().getTime() <= DateUtils.getEndDayOfWeek().getTime()) {
+					updateGoodsPutway(limitGoods.getGoodsId(),SystemConstant.GoodsConstant.PUTWAY);
+				} else {  //活动已结束 或 未开始
+					updateGoodsPutway(limitGoods.getGoodsId(),SystemConstant.GoodsConstant.NOT_PUTWAY);
+				}
+			}
+		}
+		docService.limitActivityPutway();
+	}
+	
+	
+	public void updateGoodsPutway(Long goodsId,Integer isPutway){
+		Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
+		if (ObjectUtil.isNotNull(goods)) {
+			goods.setIsPutway(isPutway);
+			goodsMapper.updateByPrimaryKeySelective(goods);
+		}
+	}
+	
+	
+	public LimitActivityGoodsDir getLimitActivityGoods(Long activityId,Long goodsId){
+		LimitActivityGoodsDir limitActivityGoodsDir = new LimitActivityGoodsDir();
+		//1. 查询活动
+		LimitActivity limitActivity = limitActivityMapper.selectByPrimaryKey(activityId);
+		if (ObjectUtil.isNotNull(limitActivity)) {
+		//2. 查寻活动商品	
+			ReqData reqData = new ReqData();
+			reqData.putValue("limit_id", limitActivity.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+			List<LimitGoods> list = limitGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			if (list.size() > 0) {
+				LimitGoods limitGoods = list.get(0);
+				limitActivityGoodsDir.setActivityPrice(limitGoods.getPrice()); //活动价格
+				limitActivityGoodsDir.setWaterImg(limitActivity.getImgPath()); //活动商品水印
+				if (SystemConstant.LIMITACTIVITY.FREEZING == limitActivity.getType()) { //冰点价
+					limitActivityGoodsDir.setBeginTimeStr(DateUtils.getMothAndDay(limitGoods.getActivityTime()));
+				}
+			}
+		}
+		return limitActivityGoodsDir;
+	}
+	
+
+}
+  

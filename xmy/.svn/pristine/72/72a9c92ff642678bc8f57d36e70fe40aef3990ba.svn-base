@@ -1,0 +1,20 @@
+package com.zfj.xmy.activity.persistence.common.dao;
+
+import java.util.List;
+
+import com.zfj.xmy.common.persistence.pojo.CouponUser;
+
+public interface CouponUserExMapper {
+
+	/**
+	 * 批量添加优惠劵
+	 * @param couponUsers
+	 * @return
+	 * @Description 
+	 * @date 2017年11月20日  上午11:35:07
+	 * @author wy
+	 * 2017
+	 * @return int
+	 */
+	int insertBatch(List<CouponUser> couponUsers);
+}

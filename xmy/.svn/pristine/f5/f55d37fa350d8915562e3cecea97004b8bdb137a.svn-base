@@ -1,0 +1,48 @@
+header .header-top{background-color: #348811;color: #fff;}
+header .header-top .pull-right .edit{font-size: 0.7rem;position: relative;top: -7px;margin-right: 0.25rem;}
+footer .row{height: 100%;width: 100%;background-color: #fff;}
+footer .row .ly-65{width: 65%;float: left;height: 100%;line-height: 55px;border-top: 1px solid #f0f0f0;padding: 0 0 0 35px;font-weight: 600;}
+footer .row .ly-65 span{color: #D50401;}
+footer .row .ly-65 span.reminder{font-size: 0.6rem;color: #999;font-weight: 400;margin-left: 0.5rem;}
+footer .row .ly-35{width: 35%;float: left;height: 100%;line-height: 55px;text-align: center;background-color: #348811;color: #fff;font-size: 0.8rem;}
+.hint{height: 2.5rem;line-height: 2.5rem;padding: 0 10px;font-size: 0.7rem;color: #348811;background-color: #fff;}
+.list{margin-top: 0.5rem;}
+.list .weui-media-box{background-color: #fff;position: relative;padding: 10px 10px 10px 40px;border-bottom: 1px solid #f0f0f0;}
+.list .weui-media-box .choose{width: 40px;height: 4rem;position: absolute;top: 10px;left: 0px;}
+.list .weui-media-box .choose .yuan{width: 20px;height: 20px;border-radius: 50%;border:1px solid #535258;margin-left: 10px;margin-top: 1.5rem;}
+.list .weui-media-box .choose .yuan.active{background: url(../images/xz.png);background-size: 100% 100%;border: 0;}
+.list .weui-media-box .weui-media-box__hd{width: 4rem;height: 4rem;margin-right: 10px;}
+.list .weui-media-box .weui-media-box__bd{height: 4rem;}
+.list .weui-media-box .weui-media-box__bd .weui-media-box__desc{font-size: 0.7rem;color: #444;line-height: 0.9rem;/* height: 1.8rem; */}
+.list .weui-media-box .weui-media-box__bd .etalon{font-size: 0.55rem;color: #999;margin-top: 0.1rem;margin-bottom: 0.1rem;}
+.list .weui-media-box .weui-cell__ft{font-size: 0.7rem;color: #F1322B;}
+.weui-media-box:before{display: none;}
+.gw_num{border: 1px solid #dbdbdb;width: 86px;line-height: 23px;overflow: hidden;height: 23px;}
+.gw_num em{display: block;height: 23px;width: 23px;float: left;color: #7A7979;border-right: 1px solid #dbdbdb;text-align: center;cursor: pointer;background: #F0F0F0;line-height: 20px;}
+.gw_num .num{display: block;float: left;text-align: center;width: 38px;font-style: normal;font-size: 14px;height: 22px;border: 0;line-height: 22px;}
+.gw_num em.add{float: right;border-right: 0;border-left: 1px solid #dbdbdb;}
+em{font-style:normal;}
+.listing{margin-top: 1rem;}
+
+.list{margin-top: 0.5rem;}
+.listing .weui-media-box{background-color: #fff;position: relative;padding: 10px 10px 10px 40px;border-bottom: 1px solid #f0f0f0;}
+.listing .weui-media-box .choose{width: 40px;height: 4rem;position: absolute;top: 0px;left: 0px;}
+.listing .weui-media-box .choose .yuan{width: 20px;height: 20px;border-radius: 50%;border:1px solid #535258;margin-left: 10px;margin-top: 1.5rem;}
+.listing .weui-media-box .choose .yuan.active{background: url(../images/xz.png);background-size: 100% 100%;border: 0;}
+.listing .weui-media-box .weui-media-box__hd{width: 4rem;height: 4rem;margin-right: 10px;}
+.listing .weui-media-box .weui-media-box__bd{height: 4rem;}
+.listing .weui-media-box .weui-media-box__bd .weui-media-box__desc{font-size: 0.7rem;color: #444;line-height: 0.9rem;/* height: 1.8rem; */}
+.listing .weui-media-box .weui-media-box__bd .etalon{font-size: 0.55rem;color: #999;margin-top: 0.1rem;margin-bottom: 0.1rem;}
+.listing .weui-media-box .weui-cell__ft{font-size: 0.7rem;color: #F1322B;}
+
+.listing .weui-media-box{background-color: #fff;padding: 10px 10px 10px 60px;margin-bottom: 0.1rem;position: relative;}
+.listing .weui-media-box .state{background-color: #AAAAAA;font-size: 0.6rem;color: #fff;position: absolute;top:1.4rem;left: 10px;padding: 0 7px;border-radius: 2px;}
+.listing .weui-media-box .weui-media-box__hd{width: 3rem;height: 3rem;margin-right: 10px;}
+.listing .weui-media-box .weui-media-box__bd{height: 3rem;}
+.listing .weui-media-box .weui-media-box__bd .weui-media-box__desc{font-size: 0.7rem;color: #444;line-height: 0.9rem;height: 1.8rem;}
+.listing .weui-media-box .weui-media-box__bd .hing{font-size: 0.6rem;color: #999;margin-top: 0.4rem;}
+.ly-65 .choose1{width: 40px;height: 4rem;position: absolute;top: 7px;left: 0px;}
+.ly-65 .choose1 .yuan1{width: 20px;height: 20px;border-radius: 50%;border:1px solid #535258;margin-left: 10px;margin-top: 0.5rem;}
+.ly-65 .choose1 .yuan1.active{background: url(../images/xz.png);background-size: 100% 100%;border: 0;}
+.weui-dialog__btn{color:#3cc51f}
+.weui-dialog .weui-dialog__btn{color:#444}

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.comment.persistence.app.pojo.dao.WapCommentExMapper" >
+
+	<resultMap id="commentList" type="com.zfj.xmy.comment.persistence.app.pojo.dto.CommentListOutDto" autoMapping="true" >
+		<id column="goods_id" property="goodsId" />
+		<result column="create_time" property="createTime" />
+		<result column="real_name" property="realName" />
+		<result column="mobile_phone" property="mobilePhone" />
+		<result column="comment_star" property="commentStar" />
+		<result column="comment_rank" property="commentRank" />
+		<result column="comment_conten" property="commentConten" />
+		<result column="star_sum" property="starSum" />
+	</resultMap>
+	
+	<select id="findCommentsByGoodsId" parameterType="java.lang.Long" resultMap="commentList" >
+		SELECT
+			m.comment_conten,
+			m.create_time,
+			u.real_name,
+			u.mobile_phone,
+			m.comment_star,
+			m.comment_rank,
+			m.goods_id,
+			mc.star_sum
+		FROM
+		`comment` m 
+		INNER JOIN user_info u ON u.id = m.user_id
+		INNER JOIN (
+				SELECT
+					goods_id,
+					COUNT(id) comments_count,
+					SUM(comment_star) star_sum
+				FROM
+					`comment`
+				WHERE
+					goods_id = #{id}
+				AND comment_type = 1
+				AND comment_status = 0
+			) mc ON mc.goods_id = m.goods_id
+		WHERE m.goods_id = #{id}
+			  AND m.comment_type = 1
+			  AND m.comment_status = 0
+	</select>
+	
+</mapper>

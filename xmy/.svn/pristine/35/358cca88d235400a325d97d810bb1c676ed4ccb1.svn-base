@@ -1,0 +1,232 @@
+require(["common"],function(){
+    	$(".weui-flex").on("click",".weui-flex__item",function(){
+    		$(this).addClass("active").siblings().removeClass("active");
+    	});
+    	
+    	$(".chunk").on("click",".piece",function(){
+    		if($(this).hasClass("active")){
+    			$(this).removeClass("active");
+    		}else{
+    			$(this).addClass("active");
+    		}
+    	});
+    	
+    	$(".good").click(function() {
+    		vars = $(this).parents("form").serialize();
+    		values = $("#appraise").serialize();
+    		$.ajax({
+    			url : 'comment/addComment',
+    			data : vars,
+    			type : 'post',
+    			dataType : 'json',
+    			success : function(data) {
+    				if(data.status == 1) {
+    					/*$.alert("评价成功", function() {
+    						location .href = "order/myOrder/4";
+    					});*/
+    					$.toast("感谢你的好评",1000,function(){
+    						location .href = "order/myOrder/4";
+    					}) ;
+    				} else {
+    					$.alert(data.msg);
+    				}
+    			},
+    			error:function(error){
+    				$(".weui-loadmore").hide() ;
+    				if(error.responseText == "SESSION_LOST"){
+    					$.alert("未登录或登录超时",function(){
+    						location.reload() ;
+    					}) ;
+    				}
+    				else if(error.responseText == "BUSINESS_EXCEPTION"){
+    					$.alert("系统内部繁忙",function(){
+    						location.reload() ;
+    					}) ;
+    				}else{
+    					$.alert(error.responseText,function(){
+    						location.reload() ;
+    					}) ;
+    				}
+    			}
+    		});
+    	});
+    	
+    	$("body").on("click", ".toGoodsInfo", function(e) {
+    		e.stopPropagation();
+    		if($.isPutaway($(this).attr("goods-id"))){
+    			$.alert("该商品已下架") ;
+    			return ;
+    		}
+    		location.href = $(this).attr("url");
+    	});
+    	
+    	//后退
+    	$(".pull-left").click(function(){
+    		location.href = "mine/center" ;
+    	}) ;
+    	
+    	$("body").on("click", ".appraise", function() {
+    		$(this).parents(".doComment").submit();
+    	});
+    	
+    	//根据不同状态查询订单列表
+    	$(".order-status").on("click",".weui-flex__item",function(){
+    		var userId=$(".userId").val();
+    		window.location.href = "order/myOrder/"+ $(this).attr("status") +"?set="+userId;
+    	});
+    	
+    	//初始化加载
+    	loadOrderList();
+    	
+    	//滚动加载
+/*        var loading = false;  //状态标记
+        $(".content").infinite().on("infinite", function() {
+            if(loading) return;
+            loading = true;
+            if($("#pageIndex").val()*10 <= $(".goods-div").length){
+            	$(".weui-loadmore").show() ;
+                loadOrderList() ;
+            }
+        });*/
+        
+        function loadOrderList(){
+        	$(".weui-loadmore").hide() ;
+/*        	var data = {typeId : $("#typeId").val(), pageIndex : $("#pageIndex").length >= 1 ? parseInt($("#pageIndex").val(),10) + 1 : 1} ;
+        	$.commonAjax(data,"goods/goodsPage","text",function(data){
+        		$("#pageIndex").remove() ;
+        		$(".goods-list").append(data) ;
+        		$(".weui-loadmore").hide() ;
+        	}) ;*/
+        };
+        
+        //滚动加载
+        loading = false;
+        $(".content").infinite().on("infinite", function() {
+        	if(loading) {
+        		return;
+        	}
+        	
+        	loading = true;
+        	
+        	//状态
+        	status = $(".order-status").find(".active").attr("status");
+        	
+        	//当前页数
+        	pageIndex = parseInt($("#pageIndex").val()) + 1;
+        	$("#pageIndex").remove();
+        	
+        	//判断总数如果小于10则无更多订单
+        	if($("#orderCount").val() < 10) {
+        		return;
+        	} else {
+        		$("#orderCount").remove();
+        	}
+        	
+        	//开始请求
+        	$.ajax({
+        		url : 'order/myOrder/' + status + "/pageIndex/" + pageIndex,
+        		type : 'post',
+        		dataType : 'text',
+        		success : function(data) {
+        			$(".lump1").append(data);
+        			//重置加载状态
+        			loading = false;
+        		}
+        	});
+        	
+        	
+        });
+        
+       //订单操作
+       $(".content").on("click","button",function(){
+			var this_obj = $(this),
+				orderId = this_obj.parents('.chunk').find('.oreder a').attr("value"), 
+				temp = this_obj.attr("value") ;
+			//订单支付
+			if(this_obj.hasClass("pay")){
+				window.location.href = "order/payOrder/"+orderId;
+			}
+			if(this_obj.hasClass("cancel")) {
+				$.confirm("确认取消订单？", function() {
+					var orderId = {orderId : this_obj.parents('.chunk').find('.oreder a').attr("value"),url:window.location.href};
+					    //点击确认后的回调函数
+						$.commonAjax(orderId,"order/delete","json",function(data){
+							window.location.href = data.data;
+						}) ;
+					  }, function() {
+					  //点击取消后的回调函数
+				});
+			}
+			//确认收货
+			if(this_obj.hasClass("confirm")){
+				var orderId = {orderId : this_obj.parents('.chunk').find('.oreder a').attr("value"),url:window.location.href};
+				$.confirm("是否确认收货",function(){
+					$.commonAjax(orderId,"order/confirmOrder","json",function(data){
+						window.location.href = data.data;
+					}) ;
+				}) ;
+			}
+			//查看物流
+			if($(this).hasClass("look")){
+				/*$.ajax({
+					type:"POST",
+					data:orderId,
+					url:"order/logisticsOrder",
+					success: function(msg){
+					     //alert( "Data Saved: ");
+					},error:function(){
+						alert("物流不存在");
+					}
+				})*/
+				window.location.href="order/logisticsOrder/"+orderId;
+			}
+       }) ; 
+        
+       /* 
+    	$(".handle").each(function(){
+    		//为下面的每一个元素赋值
+    		$(this).children().click(function(){
+    			var this_obj = $(this),
+    				orderId = this_obj.parents('.chunk').find('.oreder a').attr("value"), 
+    				temp = this_obj.attr("value") ;
+    			//订单支付
+    			if(this_obj.hasClass("pay")){
+    				window.location.href = "order/payOrder/"+orderId;
+    			}
+    			if(this_obj.hasClass("cancel")) {
+    				$.confirm("确认取消订单？", function() {
+    					var orderId = {orderId : this_obj.parents('.chunk').find('.oreder a').attr("value"),url:window.location.href};
+    					    //点击确认后的回调函数
+							$.commonAjax(orderId,"order/delete","json",function(data){
+								window.location.href = data.data;
+							}) ;
+    					  }, function() {
+    					  //点击取消后的回调函数
+    				});
+    			}
+    			//确认收货
+    			if(this_obj.hasClass("confirm")){
+    				var orderId = {orderId : this_obj.parents('.chunk').find('.oreder a').attr("value"),url:window.location.href};
+    				$.confirm("是否确认收货",function(){
+    					$.commonAjax(orderId,"order/confirmOrder","json",function(data){
+    						window.location.href = data.data;
+    					}) ;
+    				}) ;
+    			}
+    			//查看物流
+    			if($(this).hasClass("look")){
+    				$.ajax({
+    					type:"POST",
+    					data:orderId,
+    					url:"order/logisticsOrder",
+    					success: function(msg){
+    					     //alert( "Data Saved: ");
+    					},error:function(){
+    						alert("物流不存在");
+    					}
+    				})
+    				window.location.href="order/logisticsOrder/"+orderId;
+    			}
+    		});
+    	});*/
+    });

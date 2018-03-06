@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zfj.xmy.activity.persistence.cms.dao.ShoppingCardExMapper" >
+   <resultMap id="BaseResultMap" type="com.zfj.xmy.activity.persistence.cms.pojo.dto.ShoppingCardDto" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="card_num" property="cardNum" jdbcType="VARCHAR" />
+    <result column="card_password" property="cardPassword" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="total_value" property="totalValue" jdbcType="DECIMAL" />
+    <result column="balance" property="balance" jdbcType="DECIMAL" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="active_time" property="activeTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="userName" property="userName" jdbcType="VARCHAR"/>
+  </resultMap>
+  <!-- 查询全部购物卡 -->
+  <select id="findShoppingCard" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+  	select sc.*,u.name userName from shopping_card sc LEFT JOIN `user` u on sc.user_id=u.id
+	  <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	   <if test="orderByClause != null" >
+	     order by ${orderByClause}
+	   </if>
+  </select>
+  <select id="countTotalShoppingCard" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer">
+  	select count(*) from shopping_card sc LEFT JOIN `user` u on sc.user_id=u.id
+	  <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+	  </if>
+  </select>
+</mapper>

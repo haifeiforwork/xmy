@@ -1,0 +1,452 @@
+package com.zfj.xmy.wap.web.controller.order;
+
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.OrderMapper;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.common.service.CommonPayOrderService;
+import com.zfj.xmy.common.service.OrderCommitService;
+import com.zfj.xmy.goods.service.pc.PcGoodsService;
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto;
+import com.zfj.xmy.order.persistence.wap.pojo.dto.WapOrderDto;
+import com.zfj.xmy.order.service.common.CommonOrderService;
+import com.zfj.xmy.order.service.pc.PcOrderService;
+import com.zfj.xmy.order.service.wap.WapOrderService;
+import com.zfj.xmy.user.service.common.UserInfoService;
+import com.zfj.xmy.user.service.pc.PcUserService;
+import com.zfj.xmy.wap.web.common.AjaxResult;
+import com.zfj.xmy.wap.web.common.MyUtil;
+import com.zfj.xmy.wap.web.common.SessionInfo;
+import com.zfj.xmy.wap.web.common.SessionUtils;
+import com.zfj.xmy.wap.web.controller.common.CommonController;
+
+/**
+ * 订单控制层
+ * @author liux
+ * @createTime 2017年10月25日
+ *
+ */
+@RestController
+@RequestMapping("/order")
+public class OrderController extends CommonController{
+	
+	@Autowired
+	private PcOrderService orderService;
+	@Autowired
+	private PcUserService pcUserService;
+	@Autowired
+	private UserInfoMapper userInfoMapper;
+	@Autowired
+	private WapOrderService wapOrderService;
+	@Autowired
+	private CommonOrderService commonOrderService;
+	@Autowired
+	private PcGoodsService pcGoodsService;
+	@Autowired
+	private UserInfoService userInfoService;
+	@Autowired
+	private OrderCommitService orderCommitService;
+	@Autowired
+	private CommonPayOrderService commonPayOrderService;
+	
+	@Autowired
+	private OrderMapper orderMapper;
+	
+	/**我的订单页面*/
+	private final static String MYORDER = "order/myOrder";
+	/**支付订单*/
+	private final static String PAY_ORDER = "order/pay_order";
+	/**查看物流*/
+	private final static String LOGISTICS_ORDER="/order/logistics_order";
+	/**查看物流*/
+	private final static String LOGISTICS_CONTENT="/order/logistics_content";
+	/**申请退款*/
+	private final static String APPLY_REFUND = "order/apply_refund";
+	/**订单详情*/
+	private final static String DETAILS_ORDER="order/details_order";
+	/**模块标识*/
+	private final static String MODEL = "model";
+	
+	/**
+	 * 查询所有订单
+	 * @param set
+	 * @param status
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/modifyTicketInfo")
+	@ResponseBody
+	public AjaxResult modifyTicket(Long id, Integer ticketKind, String companyName, String taxpayerNum) {
+		Integer result = null;
+		if(companyName != null && companyName.trim().length() != 0 && taxpayerNum != null && taxpayerNum.trim().length() != 0) {
+			result = wapOrderService.changeTicketInfo(id, companyName, taxpayerNum);
+		} else {
+			result = wapOrderService.changeTicketType(id, ticketKind);
+		}
+		return new AjaxResult(result, null, null);
+	}
+
+	@RequestMapping("/myOrder/{status}")//订单状态status：0、查询所有，1、待付款 ，2、待发货 ，3、待收货， 4、待评价 5、已完成
+	public ModelAndView findAllOrder(@PathVariable("status") Integer status,
+			HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		PageBean pageBean = new PageBean();
+		//1.查询订单
+		//wapOrderService.findAllOrderByUserId(status, sessionInfo.getUser().getId(), pageBean);
+		List<OrderDto> findAllOrderByUserId = wapOrderService.findAllOrderByUserId(status,sessionInfo.getUser().getId(), pageBean);
+		request.setAttribute("pageIndex", pageBean.getPageIndex());
+		request.setAttribute("status", status);
+		request.setAttribute("allOrder", findAllOrderByUserId);
+		request.setAttribute("userId", sessionInfo.getUser().getId());
+		return new ModelAndView(MYORDER);
+	}
+	
+	@RequestMapping("/myOrder/{status}/pageIndex/{page}")//订单状态status：0、查询所有，1、待付款 ，2、待发货 ，3、待收货， 4、待评价 5、已完成
+	public ModelAndView findAllOrderByPage(@PathVariable("page") Integer pageIndex, @PathVariable("status") Integer status,
+			HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		PageBean pageBean = new PageBean();
+		pageBean.setPageIndex(pageIndex);
+		//1.查询订单
+		//wapOrderService.findAllOrderByUserId(status, sessionInfo.getUser().getId(), pageBean);
+		List<OrderDto> findAllOrderByUserId = wapOrderService.findAllOrderByUserId(status,sessionInfo.getUser().getId(), pageBean);
+		request.setAttribute("pageIndex", pageBean.getPageIndex());
+		request.setAttribute("status", status);
+		request.setAttribute("allOrder", findAllOrderByUserId);
+		request.setAttribute("userId", sessionInfo.getUser().getId());
+		return new ModelAndView("order/myOrder_page");
+	}
+	
+	/**
+	 * 添加订单
+	 * @param request
+	 * @param response
+	 * @param map
+	 * @return
+	 */
+	@RequestMapping("/addOrder")
+	public ModelAndView addOrder(HttpServletRequest request, HttpServletResponse response, WapOrderDto wapOrderDto, String address){
+		
+		wapOrderDto.setConsigneeAddress(address);
+		SessionInfo sessionInfo = SessionInfo.get();
+		UserInfo user = new UserInfo();
+		Long addressId = wapOrderDto.getAddressId();
+		if(wapOrderDto.getIsCrossGoods() != null && wapOrderDto.getIsCrossGoods() == 0){
+			if(StringUtil.isEmpty(wapOrderDto.getConsigneeIdcard()) || StringUtil.isEmpty(wapOrderDto.getIdCardName())){
+				//包含跨境商品时身份证信息不能为NULL
+				throw new BusinessException("isCrossGodods but idCard or idCardName is null");
+			}else{
+				//包含跨境商品时身份证姓名与收货人姓名必须相同
+				if(!wapOrderDto.getIdCardName().equals(wapOrderDto.getConsigneeName())){
+					throw new BusinessException("isCrossGodods but idCard is not inconsistent with idCardName");
+				}
+			}
+		}
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			user.setRealName("匿名");
+			addressId = 0L;
+		}else{
+			user.setId(sessionInfo.getUserId());
+			user.setRealName(sessionInfo.getUserName());
+		}
+		if(!ObjectUtils.isEmpty(sessionInfo)){
+			int accPoints = sessionInfo.getUserInfo().getAccPoints() == null ? 0 : sessionInfo.getUserInfo().getAccPoints();
+			if(wapOrderDto.getUsedPoints() != null && wapOrderDto.getUsedPoints() != 0){
+				if(accPoints < wapOrderDto.getUsedPoints()){
+					//积分不足
+					throw new BusinessException("user accpoints is not enough");
+				}
+				//修改session和用户数据库积分
+				sessionInfo.getUserInfo().setAccPoints(accPoints - wapOrderDto.getUsedPoints());
+				userInfoMapper.updateByPrimaryKeySelective(sessionInfo.getUserInfo());
+			}
+		}
+		Order addOrder = wapOrderService.addOrder(request,response,wapOrderDto.getConsigneePhone(),wapOrderDto.getConsigneeAddress(),wapOrderDto.getConsigneeName(),wapOrderDto.getTaxpayerNum(),
+				wapOrderDto.getConsigneeIdcard(),addressId,wapOrderDto.getPostTime(),
+				wapOrderDto.getInvoiceContent(),wapOrderDto.getGoodsId(),wapOrderDto.getOrderRemark(),
+				wapOrderDto.getCouponId() == null ? null : wapOrderDto.getCouponId().toString(),wapOrderDto.getProvince(),
+				wapOrderDto.getArea(),user, wapOrderDto.getCompanyName(), wapOrderDto.getInvoiceType(),wapOrderDto.getAccPoints(), wapOrderDto.getArea());
+		/*if(!ObjectUtils.isEmpty(sessionInfo)){
+			boolean checkOrder = commonPayOrderService.checkOrder(addOrder, sessionInfo.getUserId());
+			if(checkOrder){//订单满足满额减条件
+				addOrder.setTotal(addOrder.getTotal().subtract(new BigDecimal(15)));
+				orderMapper.updateByPrimaryKey(addOrder);
+			}
+		}*/
+		int out=0;
+		String ids="0"+","+wapOrderDto.getGoodsId();//跨境商品IDs类型不对修改
+		boolean findGoodsIsOut = pcGoodsService.findGoodsIsOut(ids);
+		if(!findGoodsIsOut){
+			out = 1;//不包含跨境商品
+		}
+		return new ModelAndView("redirect:/order/payOrder/"+addOrder.getId()+"?out="+out+"&confirm="+"confirm");
+	}
+	
+	/**
+	 * 支付订单
+	 * @param orderId
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/payOrder/{orderId}")
+	public ModelAndView payOrder(@PathVariable("orderId") Long orderId,HttpServletRequest request,Integer out, String confirm ){
+		SessionInfo sessionInfo = SessionInfo.get();
+		Order order = orderService.findOrderByOrderId(orderId);
+		UserInfo userInfo = null;
+		if(!ObjectUtils.isEmpty(sessionInfo)){
+			userInfo = pcUserService.getUserInfo(sessionInfo.getUser().getId());
+			//获取用户余额
+			BigDecimal balance = wapOrderService.getUserBalance(userInfo.getId()) ;
+			request.setAttribute("balance", balance);
+		}
+		String ua = ((HttpServletRequest) request).getHeader("user-agent").toLowerCase();  
+		if (ua.indexOf("micromessenger") > 0) {// 是微信浏览器  
+			request.setAttribute("micromessenger", "micromessenger");
+		}  
+		String goodsIds =  orderService.getOrderGoodsId(orderId);
+		if(out == null && !StringUtil.isEmpty(goodsIds)){
+			boolean findGoodsIsOut = pcGoodsService.findGoodsIsOut(goodsIds);
+			if(!findGoodsIsOut){
+				out = 1;//不包含跨境商品
+			}else{
+				out = 0;
+			}
+		}
+		Order o = orderService.findOrderByOrderId(orderId);
+		request.setAttribute("order", o);
+		request.setAttribute("userInfo", userInfo);
+		request.setAttribute("payOrder", order);
+		request.setAttribute("confirm", confirm);
+		MyUtil.displayFields(logger, o);
+		request.setAttribute("out",out);//0：包含跨境商品  1：不包含跨境商品
+		return new ModelAndView(PAY_ORDER);
+	}
+	
+	/**
+	 * 取消订单
+	 * @param orderId
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/delete")
+	@ResponseBody
+	public RespData deleteOrder(Long orderId,HttpServletRequest request,String url){
+		
+		RespData respDate = new RespData();
+		respDate.setData(url);
+		Order findOrderByOrderId = orderService.findOrderByOrderId(orderId);
+		SessionInfo sessionInfo=SessionInfo.get();
+		if(findOrderByOrderId == null){
+			throw new BusinessException("该订单不存在");
+		}
+		if(findOrderByOrderId.getIsDel().intValue() == 0){
+			throw new BusinessException("该订单已取消");
+		}
+		if(findOrderByOrderId.getStatus().intValue() == 2 && findOrderByOrderId.getShipStatus().intValue() >= 5){
+			if(findOrderByOrderId.getShipStatus().intValue() >= 5){
+				throw new BusinessException("该订单已备货确认，不能取消");
+			}
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(findOrderByOrderId.getPayTime() == null ? findOrderByOrderId.getCreateTime() : findOrderByOrderId.getPayTime());
+			cal.add(Calendar.DAY_OF_YEAR, 1);
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+			cal.set(Calendar.MINUTE, 0);
+			cal.set(Calendar.SECOND, 0);
+			if(cal.getTime().getTime() <= new Date().getTime()){
+				throw new BusinessException("该订单已超过取消时间限定，不能取消");
+			}
+		}
+		//用户获得积分
+		if(findOrderByOrderId != null && findOrderByOrderId.getUsedPoints()!=null && findOrderByOrderId.getUsedPoints()!=0){
+			sessionInfo.getUserInfo().setAccPoints(sessionInfo.getUserInfo().getAccPoints()+findOrderByOrderId.getUsedPoints().intValue());
+		}
+		orderService.deleteOrderByOrder(orderId);
+		sessionInfo.getUserInfo().setBalance(wapOrderService.getUserBalance(sessionInfo.getUserId()));;
+		
+		
+		return respDate;
+	}
+	
+	/**
+	 * 确认收货
+	 * @param orderId
+	 * @param request
+	 * @param url
+	 * @return
+	 */
+	@RequestMapping("/confirmOrder")
+	@ResponseBody
+	public RespData confirmOrder(String orderId,HttpServletRequest request,String url){
+		
+		RespData respDate = new RespData();
+		respDate.setData(url);
+		Integer accPoints = SessionInfo.get().getUserInfo().getAccPoints();
+		Order findOrderByOrderId = orderService.findOrderByOrderId(Long.parseLong(orderId));
+		SessionInfo sessionInfo=SessionInfo.get();
+		//用户获得积分
+		if(findOrderByOrderId.getAccPoints()!=null || findOrderByOrderId.getAccPoints()!=0){
+			sessionInfo.getUserInfo().setAccPoints(accPoints+findOrderByOrderId.getAccPoints().intValue());
+		}
+		orderService.updateOrderByOrderId(orderId);
+		
+		return respDate;
+	}
+	
+	/**
+	 * 查看物流内容
+	 * @param orderId
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/logisticsContent/{orderId}")
+	public ModelAndView logisticsContent(@PathVariable("orderId")String orderId,HttpServletRequest request){
+		if(!StringUtil.isEmpty(orderId)){
+			try {
+				JSONObject  json = commonOrderService.getOrderLogisticsInfo(Long.valueOf(orderId));
+				request.setAttribute("json", json);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		return new ModelAndView(LOGISTICS_CONTENT);
+	}
+	
+	/**
+	 * 查看物流页面
+	 * @param orderId
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/logisticsOrder/{orderId}")
+	public ModelAndView logisticsOrder(@PathVariable("orderId")String orderId,HttpServletRequest request){
+		if(!StringUtil.isEmpty(orderId)){
+			try {
+				JSONObject  json = commonOrderService.getOrderLogisticsInfo(Long.valueOf(orderId));
+				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>logisticsOrder" + json);
+				request.setAttribute("json", json);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		request.setAttribute("orderId", orderId);
+		return new ModelAndView(LOGISTICS_ORDER);
+	}
+	
+	@RequestMapping("/apply")
+	public ModelAndView apply(){
+		
+		return new ModelAndView(APPLY_REFUND);
+	}
+	
+	/**
+	 * 申请退款
+	 * @param request
+	 * @param order
+	 * @param refundMoney
+	 * @param returnReason
+	 * @param url
+	 * @param no
+	 * @return
+	 */
+	@RequestMapping("/applyRefund")
+	public RespData  applyRefund(HttpServletRequest request, Order order,String refundMoney,String returnReason, String url){
+		
+		RespData resqData=new RespData();
+		Long userId = SessionUtils.getUser(request).getId();
+		if(StringUtil.isEmpty(order.getNo())){
+			throw new BusinessException("输入的订单编号不正确");
+		}
+		Order orderByNo = wapOrderService.findOrderByNo(order.getNo());
+		if(orderByNo == null){
+			throw new BusinessException("输入的订单编号不正确");
+		}
+		if(orderByNo.getStatus() == null || orderByNo.getStatus().intValue() < 2 ){
+			throw new BusinessException("该订单暂不支持退货");
+		}
+		if(orderByNo.getReturnStatus() != null && orderByNo.getReturnStatus().intValue() == SystemConstant.ORDER.RETURN_STATUS_REFUNDING.intValue()){
+			throw new BusinessException("该订单正在退货中");
+		}
+		String reason=refundMoney+returnReason;
+		Integer result = wapOrderService.updateApplyRefund(order, reason, userId);
+		/*if(result==1){
+			resqData.setData("正在退货中....");
+		}else{
+			resqData.setData("订单号不存在");
+		}*/
+		resqData.setData(result);
+		return resqData;
+				
+	}
+	/**
+	 * 订单详情
+	 * @param orderId
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/detailsOrder")
+	public ModelAndView detailsOrder(Long orderId,HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			throw new BusinessException("用户未登录！");
+		}
+		OrderDto findOderyDetailById = orderService.findOderyDetailById(orderId,sessionInfo.getUserId());
+		request.setAttribute("orderDto", findOderyDetailById);
+		return new ModelAndView(DETAILS_ORDER);
+	}
+	
+	/**
+	 * 是否可以提交订单
+	 * @param orderId
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/isCommit")
+	@ResponseBody
+	public boolean isCommit(Long orderId,HttpServletRequest request){
+		int commit = orderCommitService.isCommitOrder();
+		if(commit > 0) return false;
+		return true;
+	}
+	
+
+	/**
+	 * 是否可以提交订单
+	 * @param orderId
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/judgeNewActivityGoods")
+	@ResponseBody
+	public RespData judgeNewActivityGoods(String goodsId,HttpServletRequest request){
+		Long userId = null;
+		SessionInfo sessionInfo = SessionInfo.get();
+		if(sessionInfo != null && sessionInfo.getUserId() != null) userId = sessionInfo.getUserId();
+		RespData resp = wapOrderService.judgeNewActivityGoods(userId, goodsId);
+		return resp;
+	}
+	
+}

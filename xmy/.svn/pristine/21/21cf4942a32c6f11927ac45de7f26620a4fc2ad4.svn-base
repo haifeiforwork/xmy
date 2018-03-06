@@ -1,0 +1,35 @@
+package com.zfj.xmy.common.service;  
+/** 
+ * @Title: CommonUserPointsService.java 
+ * @Package com.zfj.xmy.common.service 
+ * @Description: 
+ * @author hexw
+ * @date 2017年11月4日 下午2:10:21 
+ */
+public interface CommonUserPointsService {
+	
+	/**
+	 * 插入用户积分使用记录
+	 * @return    
+	 * @return int    
+	 * Date:2017年11月4日 下午2:22:58 
+	 * @author hexw
+	 */
+	int insertUserSpendPointsMapper();
+	/**
+	 * 用户确认收货添加积分
+	 * @param orderId void
+	 * @author lij
+	 * @date 2017年12月22日 下午1:55:01
+	 */
+	void updateUserSpendPoints(Long orderId);
+	/**
+	 * 用户评论后添加积分
+	 * @param userId
+	 * @param orderId void
+	 * @author lij
+	 * @date 2017年12月26日 下午1:45:50
+	 */
+	void updateUserCommnetPoints(Long userId,Long orderId,Integer commentStar);
+}
+  

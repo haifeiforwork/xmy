@@ -1,0 +1,5 @@
+package com.zfj.xmy.activity.service.common;
+
+public interface CommonCouponService {
+
+}

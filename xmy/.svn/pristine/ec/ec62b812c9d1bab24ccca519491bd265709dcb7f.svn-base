@@ -1,0 +1,30 @@
+xmy.wap.jdbc.driver=com.mysql.jdbc.Driver
+#xmy.wap.jdbc.url=jdbc:mysql://192.168.0.15:3306/xmy?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+xmy.wap.jdbc.url=jdbc\:mysql\://115.29.151.27\:3306/xmy_test?useUnicode\=true&characterEncoding\=utf-8&zeroDateTimeBehavior\=convertToNull 
+xmy.wap.jdbc.username=root
+#xmy.wap.jdbc.password=123456
+xmy.wap.jdbc.password=cqzfj2016123456
+
+#xmy.wap.jdbc.driver=com.mysql.jdbc.Driver
+#xmy.wap.jdbc.url=jdbc\:mysql\://115.29.151.27\:3306/xmy_test?useUnicode\=true&characterEncoding\=utf-8&zeroDateTimeBehavior\=convertToNull 
+#xmy.wap.jdbc.username=root
+#xmy.wap.jdbc.password=cqzfj2016123456
+
+#pool settings
+jdbc.pool.minIdle=3
+jdbc.pool.maxActive=20
+
+#redis
+spring.redis.pool.max-wait=300000
+spring.redis.pool.max-active=150
+spring.redis.pool.max-idle=50
+
+spring.redis.host=192.168.0.99
+spring.redis.port=6379
+spring.redis.timeout=180000
+spring.redis.password=
+#expire time 
+spring.redis.expireSeconds=604800
+
+spring.data.elasticsearch.cluster-name=elasticsearch
+spring.data.elasticsearch.esNodes=192.168.0.99\:9300

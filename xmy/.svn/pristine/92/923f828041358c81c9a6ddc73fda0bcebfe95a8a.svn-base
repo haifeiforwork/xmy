@@ -1,0 +1,9 @@
+package com.zfj.xmy.goods.persistence.wap.dao;
+
+import com.zfj.xmy.goods.persistence.wap.pojo.dto.ShoppingGoodsUpdateDto;
+
+public interface WapShoppingCartExMapper {
+
+	Integer updateGoodsNum(ShoppingGoodsUpdateDto dto);
+	
+}

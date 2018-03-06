@@ -1,0 +1,51 @@
+#xmy.cms.jdbc.driver=com.mysql.jdbc.Driver
+#xmy.cms.jdbc.url=jdbc\:mysql\://192.168.0.15 \:3306/xmy?useUnicode\=true&characterEncoding\=utf-8&zeroDateTimeBehavior\=convertToNull 
+#xmy.cms.jdbc.username=root
+#xmy.cms.jdbc.password=123456
+#xmy.cms.jdbc.driver=com.mysql.jdbc.Driver
+#xmy.cms.jdbc.url=jdbc:mysql://115.29.151.27:3306/xmy_test?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+#xmy.cms.jdbc.username=root
+#xmy.cms.jdbc.password=cqzfj2016123456
+xmy.cms.jdbc.driver=com.mysql.jdbc.Driver
+xmy.cms.jdbc.url=jdbc:mysql://rm-bp1zwy88x1z6ww187o.mysql.rds.aliyuncs.com:3306/xmy?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+xmy.cms.jdbc.username=xmyadmin
+xmy.cms.jdbc.password=365xmy_%(mysql1@Admin#)pwd^
+#pool settings
+jdbc.pool.minIdle=3
+jdbc.pool.maxActive=20
+
+#oss config
+#accessId=LTAIfZFOqUI4Tcoz
+#accessKey=qYSV8rjPFbJubgyOGBHRNJsZJY9sWj
+#bucket=cqzfj
+#protocol=http://
+#endpoint=oss-cn-qingdao.aliyuncs.com
+
+accessId=LTAInJuTjn4zErms
+accessKey=nzu2Zv84bAM3CPsqj5k0HFPBPlSwrn
+bucket=xmyoss
+protocol=http://
+endpoint=oss-cn-hangzhou.aliyuncs.com
+oss-callback=http://wx.cqzfj.com/xmy-cms-web/oss/callback
+
+
+oss-OSS_ImgPath=
+oss-dynamic-prefix=goods,icon,adv,comments,activity
+#oss上传的超时时间（毫秒）
+oss.conf.requestTimeout=1200000
+
+#redis
+spring.redis.pool.max-wait=300000
+spring.redis.pool.max-active=150
+spring.redis.pool.max-idle=50
+
+spring.redis.host=192.168.0.99
+spring.redis.port=6379
+spring.redis.timeout=180000
+spring.redis.password=
+#expire time 
+spring.redis.expireSeconds=604800
+
+
+spring.data.elasticsearch.cluster-name=elasticsearch
+spring.data.elasticsearch.esNodes=192.168.0.99:9300

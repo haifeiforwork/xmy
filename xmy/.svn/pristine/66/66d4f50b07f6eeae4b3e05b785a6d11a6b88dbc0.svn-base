@@ -1,0 +1,227 @@
+package com.zfj.xmy.order.service.pc;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcDateTime;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcGoodsDto;
+
+/**
+ * @author lij
+ */
+public interface PcOrderService {
+	/**
+	 * @param userId
+	 * @param pageBean
+	 * @return List<Order>
+	 * @author lij
+	 * @date 2017年8月2日 上午9:46:57
+	 * 根据用户id分页查询该用户的全部订单
+	 */
+	List<OrderDto> findAllOrderByUserId(Integer status,Long userId,PageBean pageBean);
+	/**
+	 * @param orderId
+	 * @return OrderDto
+	 * @author lij
+	 * @date 2017年9月30日 下午3:48:43
+	 * 查询订单详情
+	 */
+	OrderDto findOderyDetailById(Long orderId);
+	
+	/**
+	 * @param status
+	 * @param userId
+	 * @param pageSize
+	 * @return Integer
+	 * @author 查询订单的总页数
+	 * @date 2017年8月2日 下午4:20:04
+	 */
+	Integer findAllOrderCountPage(Integer status,Long userId,Integer pageSize);
+	/**
+	 * @param userId
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年8月2日 下午4:28:37
+	 * 根据用户ID查询他的待支付的所有订单总数量
+	 */
+	Integer findUnpaidOrderCount(Long userId,Integer status);
+	/**
+	 * @param userId
+	 * @param status
+	 * @param no
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年8月31日 下午8:01:13
+	 * 跟局筛选条件查询总订单条数
+	 */
+	Integer findScreenOrderCount(Long userId,Integer status,String no);
+	
+	/**
+	 * @param status
+	 * @param userId
+	 * @param no
+	 * @return List<OrderDto>
+	 * @author lij
+	 * @date 2017年8月2日 下午7:44:41
+	 * 筛选订单根据订单或商品编号
+	 */
+	List<OrderDto> findScreenOrder(Integer status,Long userId,String no,PageBean pageBean);
+	/**
+	 * @return List<PcDateTime>
+	 * @author lij
+	 * @date 2017年8月3日 下午2:45:42
+	 * 获取前台要选择的时间
+	 */
+	List<PcDateTime> getPcDateTime();
+	/**
+	 * @return List<Invoice>
+	 * @author lij
+	 * @date 2017年8月3日 下午3:21:44
+	 * 查询发票类容
+	 */
+	List<String> getInvoice();
+	
+	/**
+	 * @param goodsId
+	 * @param userId
+	 * @return List<PcGoodsDto>
+	 * @author lij
+	 * @date 2017年8月3日 下午5:36:06
+	 * 根据用户id查询购物车信息
+	 */
+	List<PcGoodsDto> getShippingCart(Long userId,String goodsId);
+	/**
+	 * @param addressId
+	 * @param dateTime
+	 * @param invoice
+	 * @param goodsIds
+	 * @param remark
+	 * @param conponId
+	 * @return Order
+	 * @author lij
+	 * @date 2017年8月4日 下午3:35:17
+	 * 添加到订单信息
+	 */
+	Order addOrder(HttpServletResponse response,String phone,String address,String conName,String taxperNo,String companyName,String idCard,Long addressId,String dateTime,
+			String invoice,String goodsIds,String remark,String conponId,String provinceAddress,String cityAddress,String countyAddress,UserInfo userInfo);
+	/**
+	 * @param orderId
+	 * @param payMethod
+	 * @param balancePay
+	 * @return Order
+	 * @author lij
+	 * @date 2017年8月7日 下午4:41:20
+	 * 订单支付(用户)
+	 */
+	Order updateOrder(Long orderId,Integer payMethod,BigDecimal balancePay,Long userId);
+	
+	/**
+	 * @Description 根据用户ID查询他的订单状态
+	 * @param userId
+	 * @return Integer
+	 * @author zhangh
+	 * @date 2017年8月7日 上午10:28:37
+	 */
+	Integer findOrderStatusCount(Long userId,int status);
+	
+	/**
+	 * @Description 根据用户ID查询他的订单配送方式
+	 * @param userId
+	 * @return Integer
+	 * @author zhangh
+	 * @date 2017年8月7日 上午10:28:37
+	 */
+	Integer findOrderDeliveryCount(Long userId);
+	
+	/**
+	 * @Description 根据用户ID查询他的退款订单
+	 * @param userId
+	 * @return Integer
+	 * @author zhangh
+	 * @date 2017年8月7日 上午10:28:37
+	 */
+	List<Order> findRefundOrder(Long userId);
+	
+	/**
+	 * @Description 根据用户ID查询他的退款订单分页
+	 * @param userId
+	 * @return Integer
+	 * @author zhangh
+	 * @date 2017年8月7日 上午10:28:37
+	 */
+	void findRefundOrderByPage(Long userId,PageBean pageBean);
+	/**
+	 * @Description 根据订单ID查询单个订单信息
+	 * @param orderId
+	 * @return Order
+	 * @author lij
+	 * @date 2017年8月9日 上午11:31:47
+	 */
+	Order findOrderByOrderId(Long orderId);
+	/**
+	 * @Description 根据订单ID作废订单
+	 * @param orderId void
+	 * @author lij
+	 * @date 2017年9月1日 下午2:49:21
+	 */
+	void deleteOrderByOrder(Long orderId);
+	/**
+	 * @param orderIds void
+	 * @author lij
+	 * @date 2017年9月13日 下午7:48:50
+	 * 确认收货（批量单个）
+	 */
+	void updateOrderByOrderId(String orderIds);
+	
+	/**
+	 * 获得运费
+	 * @param province
+	 * @param goodsId
+	 * @param sumPrice
+	 * @param userId
+	 * @return    
+	 * @return Map<String,Object>    
+	 * Date:2017年10月17日 下午8:58:11 
+	 * @author hexw
+	 */
+	Map<String, Object> getFreight(String province,String area, String goodsId,
+			String sumPrice, Long userId);
+	/**
+	 * 获取订单商品ID用于判断是否是跨境商品
+	 * @param orderId
+	 * @return String
+	 * @author lij
+	 * @date 2017年11月18日 下午4:53:28
+	 */
+	String getOrderGoodsId(Long orderId);
+	/**
+	 * 购物卡支付
+	 * @param orderId
+	 * @param payTotalPrice
+	 * @param userId
+	 * @return    
+	 * @return Order    
+	 * Date:2017年11月18日 下午1:30:45 
+	 * @author hexw
+	 */
+	void shoppingCardPay(Long orderId, BigDecimal payTotalPrice, Long userId);
+	
+	/**
+	 * 根据id查询订单
+	 * @param id
+	 * @return    
+	 * @return Order    
+	 * Date:2017年12月14日 上午11:21:22 
+	 * @author hexw
+	 */
+	Order getOrderById(Long id);
+	
+	
+}

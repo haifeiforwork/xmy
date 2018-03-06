@@ -1,0 +1,215 @@
+package com.zfj.xmy.common.persistence.pojo;
+
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.Column;
+
+public class User implements Serializable {
+
+    /**
+     * `user`.id (用户ID)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "id")
+    private Long id;
+
+
+    /**
+     * `user`.name (用户名)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "name")
+    private String name;
+
+
+    /**
+     * `user`.password (密码)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "password")
+    private String password;
+
+
+    /**
+     * `user`.create_time (创建时间)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "create_time")
+    private Date createTime;
+
+
+    /**
+     * `user`.status (状态)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "status")
+    private Integer status;
+
+
+    /**
+     * `user`.level (等级)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "level")
+    private Integer level;
+
+
+    /**
+     * `user`.app_token (app端授权token)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "app_token")
+    private String appToken;
+
+
+    /**
+     * `user`.app_token_expire (token 过期时间)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "app_token_expire")
+    private Date appTokenExpire;
+
+
+    /**
+     * `user`.qq_openid (qq openid)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "qq_openid")
+    private String qqOpenid;
+
+
+    /**
+     * `user`.wechat_openid (微信 openid)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "wechat_openid")
+    private String wechatOpenid;
+
+
+    /**
+     * `user`.last_login_time (最后一次登陆时间)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "last_login_time")
+    private Date lastLoginTime;
+
+
+    /**
+     * `user`.openim_userid (云旺登录id)
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "openim_userid")
+    private String openimUserid;
+
+
+    /**
+     * `user`.scancode (扫码登录 id )
+     * @ibatorgenerated 2017-09-29 09:29:21
+     */
+    @Column(name = "scancode")
+    private String scancode;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public String getAppToken() {
+        return appToken;
+    }
+
+    public void setAppToken(String appToken) {
+        this.appToken = appToken;
+    }
+
+    public Date getAppTokenExpire() {
+        return appTokenExpire;
+    }
+
+    public void setAppTokenExpire(Date appTokenExpire) {
+        this.appTokenExpire = appTokenExpire;
+    }
+
+    public String getQqOpenid() {
+        return qqOpenid;
+    }
+
+    public void setQqOpenid(String qqOpenid) {
+        this.qqOpenid = qqOpenid;
+    }
+
+    public String getWechatOpenid() {
+        return wechatOpenid;
+    }
+
+    public void setWechatOpenid(String wechatOpenid) {
+        this.wechatOpenid = wechatOpenid;
+    }
+
+    public Date getLastLoginTime() {
+        return lastLoginTime;
+    }
+
+    public void setLastLoginTime(Date lastLoginTime) {
+        this.lastLoginTime = lastLoginTime;
+    }
+
+    public String getOpenimUserid() {
+        return openimUserid;
+    }
+
+    public void setOpenimUserid(String openimUserid) {
+        this.openimUserid = openimUserid;
+    }
+
+    public String getScancode() {
+        return scancode;
+    }
+
+    public void setScancode(String scancode) {
+        this.scancode = scancode;
+    }
+}

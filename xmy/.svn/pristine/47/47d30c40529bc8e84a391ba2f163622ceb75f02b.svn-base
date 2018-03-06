@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>全场6.8折,感恩大放送</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="css/sm.min.css">
+    <link rel="stylesheet" href="css/sm-extend.min.css">
+  </head>
+  <style>
+	.nside{max-width: 540px;margin: 0 auto;}
+	img{width: 100%;}
+	.move{margin-top: -0.4rem !important;position: relative;}
+	.click{position: absolute;top: 0;left: 0;width: 100%;height:2rem;margin-top: 0rem;}
+	.col-7{width: 30%;height:2rem; margin-left:35%;cursor:pointer;}
+	.col-8{width: 33%;height:7rem;cursor:pointer; }
+	.col-6{width: 50%;height:10.5rem;cursor:pointer;}
+	.col-12{width: 50%;height:11rem;cursor:pointer;}
+	.bingdian_div{height: 10.5rem;width: 100%;}
+	.bingdian_img{margin-left: 1rem;margin-top:1rem;width:7rem;}
+	.link{position: absolute;top: 0;left: 0;width: 100%;height: 10.5rem;}
+	.col-50s{width: 50%;height:8rem;}
+	.links{position: absolute;top: 0;left: 0;width: 100%;height:6.5rem;}
+	
+	
+	.link1{position: absolute;top: 0;left: 0;width: 100%;height: 12rem;}
+	.col-8-1{width: 33%;height:1.5rem;cursor:pointer;}
+	.col-8-2{width: 50%;height:5rem;cursor:pointer;}
+	
+	
+	.col-7-1{width: 20%;height:1.5rem;  cursor:pointer; margin-left:68%; margin-top:14%;}
+	.col-7-2{width: 20%;height:1.5rem;  cursor:pointer; margin-left:68%; margin-top:6%;}
+	.col-7-3{width: 20%;height:1.5rem;  cursor:pointer; margin-left:68%; margin-top:5%;}
+	.col-7-4{width: 20%;height:1.5rem;  cursor:pointer; margin-left:68%; margin-top:5%;}
+	.col-7-5{width: 23%;height:2rem; margin-left:39%; margin-top:10%; cursor:pointer;}
+	
+  </style>
+  <body>
+	<div class="page-group">
+    	<div class="page page-current">
+        	<div class="content">
+		  		<div class="nside">
+		  			<div class="row no-gutter">
+		  				<div class="col-100"><img src="images/wap_20171118zhuzt_01.jpg"/></div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_02.jpg"/></div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_03.jpg"/></div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_04.jpg"/></div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_05.jpg"/></div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_06.jpg"/>
+                        	<div class="link">	
+								<div class="row no-gutter">
+									<div class="col-6" id="num0">
+                                    	<div id="wapbdj1" value="6504">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+									<div class="col-6" id="num1">
+                                    	<div id="wapbdj2" value="6505">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+								</div>
+							</div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_07.jpg"/>
+                        	<div class="link">	
+								<div class="row no-gutter">
+									<div class="col-6" id="num2">
+                                    	<div id="wapbdj3" value="6506">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+									<div class="col-6" id="num3">
+                                    	<div id="wapbdj4" value="6507">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+								</div>
+							</div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_08.jpg"/>
+                        	<div class="link">	
+								<div class="row no-gutter">
+									<div class="col-6" id="num4">
+                                    	<div id="wapbdj5" value="6600">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+									<div class="col-6" id="num5">
+                                    	<div id="wapbdj6" value="6508">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+								</div>
+							</div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_09.jpg"/>
+                        	<div class="link">	
+								<div class="row no-gutter">
+									<div class="col-6" id="num6">
+                                    	<div id="wapbdj7" value="6509">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+									<div class="col-6" id="num7">
+                                    	<div id="wapbdj8" value="6510">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+								</div>
+							</div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_10.jpg"/>
+                        	<div class="link">	
+								<div class="row no-gutter">
+									<div class="col-6" id="num8">
+                                  	 	<div id="wapbdj9" value="6511">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+									<div class="col-6" id="num9">
+                                    	<div id="wapbdj10" value="6512">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+								</div>
+							</div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_11.jpg"/>
+                        	<div class="link">	
+								<div class="row no-gutter">
+									<div class="col-6" id="num10">
+                                    	<div id="wapbdj11" value="6513">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+									<div class="col-6" id="num11">
+                                    	<div id="wapbdj12" value="6514">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+								</div>
+							</div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_12.jpg"/>
+                        	<div class="link">	
+								<div class="row no-gutter">
+									<div class="col-6" id="num12">
+                                    	<div id="wapbdj13" value="6515">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+									<div class="col-6" id="num13">
+                                    	<div id="wapbdj14" value="6516">
+											<div class="bingdian_div"><img src="images/wap_20171118qd.png" class="bingdian_img"/></div>
+                                        </div>
+									</div>
+								</div>
+							</div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_13.jpg"/>
+                        	<div class="click">
+                            	<div class="row no-gutter">
+                                    <div class="col-7-1 wap-4-4" onclick="window.location.href='http://m.xmy365.com';return false"></div>	
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_14.jpg"/>
+                        	<div class="link">
+                            	<div class="row no-gutter"> 
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6517"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6522"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6523"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_15.jpg"/>
+                        	<div class="click">
+                            	<div class="row no-gutter">
+                                    <div class="col-7-2 wap-4-5" onclick="window.location.href='http://m.xmy365.com';return false"></div>	
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_16.jpg"/>
+                        	<div class="link">
+                            	<div class="row no-gutter">
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6517"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6522"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6523"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_17.jpg"/>
+                        	<div class="click">
+                            	<div class="row no-gutter">
+                                    <div class="col-7-3 wap-4-6" onclick="window.location.href='http://m.xmy365.com';return false"></div>	
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_18.jpg"/>
+                        	<div class="link">
+                            	<div class="row no-gutter">   
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6545"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6542"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6549"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_19.jpg"/>
+                        	<div class="click">
+                            	<div class="row no-gutter">
+                                    <div class="col-7-4 wap-4-7" onclick="window.location.href='http://m.xmy365.com';return false"></div>	
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_20.jpg"/>
+                        	<div class="link">
+                            	<div class="row no-gutter">  
+                                     <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6551"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6554"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                    <div class="col-8">
+                                    	<a href="http://m.xmyb2b.com/goods/goodsInfo?goodsId=6555"><div style="width:100%; height:7rem; float:left;"></div></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-100 move"><img src="images/wap_20171118zhuzt_21.jpg"/>
+                        	<div class="click">
+                            	<div class="row no-gutter">
+                                    <div class="col-7-5 wap-4-8" onclick="window.location.href='http://m.xmyb2b.com';return false"></div>	
+                                </div>
+                            </div>
+                        </div>
+		  			</div>
+		  		</div>
+      		</div>
+    	</div>
+    </div>
+    <script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>	
+    <script type="text/javascript" src="js/wapbdj.js"></script>
+  </body>
+</html>
+

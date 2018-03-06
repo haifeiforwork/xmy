@@ -1,0 +1,443 @@
+package com.zfj.xmy.pc.web.controller.order;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.annotation.CheckLogin;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.activity.service.pc.PcCouponService;
+import com.zfj.xmy.common.UUIDUtil;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.UserAddrees;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.common.service.OnLineActivityService;
+import com.zfj.xmy.goods.service.pc.PcGoodsService;
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcDateTime;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcGoodsDto;
+import com.zfj.xmy.order.service.pc.PcOrderService;
+import com.zfj.xmy.order.service.pc.ShoppingCartService;
+import com.zfj.xmy.pay.service.pay.PayBase;
+import com.zfj.xmy.pay.service.pay.impl.PayBaseImpl;
+import com.zfj.xmy.pc.web.common.SessionInfo;
+import com.zfj.xmy.pc.web.controller.BaseController;
+import com.zfj.xmy.user.service.pc.PcUserAddressService;
+import com.zfj.xmy.user.service.pc.PcUserService;
+
+/**
+ * @author lij
+ */
+@RequestMapping("/order")
+@CheckLogin
+@RestController
+public class OrderController extends BaseController{
+
+	@Autowired
+	private PcOrderService orderService;
+	
+	@Autowired
+	private PcUserAddressService userAddressService;
+	
+	@Autowired
+	private PcCouponService pcCouponSrevice;
+	
+	@Autowired
+	private PcUserService pcUserService;
+	
+	@Autowired
+	private PcGoodsService pcGoodsService;
+	
+	@Autowired
+	private ShoppingCartService cartService;
+	
+	@Autowired
+	private UserInfoMapper userInfoMapper;
+	
+	@Autowired
+	private PayBase payBase;
+	
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	@Autowired
+	private OnLineActivityService onLineActivityService;
+	/**
+	 * @param pageIndex
+	 * @param status
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年8月8日 下午5:44:40
+	 * 查询我的订单
+	 */
+	@RequestMapping("/myOrder/{status}/{pageIndex}")
+	public ModelAndView findAllOrder(Integer set,@PathVariable("pageIndex") Integer pageIndex,@PathVariable("status") Integer status ,
+			HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		List<Integer> pageList = new ArrayList<Integer>();
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(5);
+		pageBean.setPageIndex(pageIndex);
+		//1.查询订单
+		List<OrderDto> findAllOrderByUserId = orderService.findAllOrderByUserId(status,sessionInfo.getUserId(), pageBean);
+		//2.查询总页数
+		Integer countPage = orderService.findAllOrderCountPage(status, sessionInfo.getUserId(), 5);
+		//3.查询待支付订单的总页数
+		Integer unpaidCount = orderService.findUnpaidOrderCount(sessionInfo.getUserId(),status);
+		for(Integer i =1 ; i<=countPage; i++){
+			pageList.add(i);
+		}
+		request.setAttribute("pageIndex", pageIndex);
+		request.setAttribute("pageList", pageList);
+		request.setAttribute("countPage", countPage);
+		request.setAttribute("unpaidCount", unpaidCount);
+		request.setAttribute("status", status);
+		request.setAttribute("allOrder", findAllOrderByUserId);
+		request.getSession().setAttribute("set", set);
+		return new ModelAndView("/center/center_myorder");
+	}
+	
+	/**
+	 * @param status
+	 * @param pageIndex
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年8月3日 上午9:37:51
+	 * 更具编号筛选订单或商品
+	 */
+	@RequestMapping("/myOrder/screen/{status}/{pageIndex}")
+	public ModelAndView screenOrder(Integer set,@PathVariable("status") Integer status,@PathVariable("pageIndex") Integer pageIndex,
+			HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		String no = request.getParameter("no");
+		PageBean pageBean = new PageBean();
+		List<OrderDto> findScreenOrder = orderService.findScreenOrder(status, sessionInfo.getUserId(), no, pageBean);
+		
+		Integer count = orderService.findScreenOrderCount(sessionInfo.getUserId(), status, no);
+		
+		request.setAttribute("unpaidCount", count);
+		request.setAttribute("pageIndex", pageIndex);
+		request.setAttribute("status", status);
+		request.setAttribute("allOrder", findScreenOrder);
+		request.getSession().setAttribute("set", set);
+		return new ModelAndView("/center/center_myorder");
+	}
+	/**
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年8月3日 上午11:18:12
+	 * 提交订单页面
+	 */
+	@RequestMapping("/commitOrder/{goodsId}")
+	public ModelAndView commitOrder(@PathVariable("goodsId") String goodsId ,HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		BigDecimal sumPrice = new BigDecimal("0.00");
+		BigDecimal discountSumPrice = new BigDecimal("0.00");  //不包含跨境商品和企业定制的商品总价格
+		int accPoints=0;//用户拥有的积分
+		int sumPoints=0;
+		int out = 0;//是否包含跨境商品 0:包含跨境商品 1:不包含跨境商品
+		int isDelivery = 0; //是否包含不支持全国配送的商品
+		List<UserAddrees> findAddressByUserId = null;//用户地址
+		List<Coupon> couponList = null;//用户优惠卷
+		List<PcGoodsDto> shoppingCart = null;//购物车商品
+		//1.查询出用户的所有收货地址
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			shoppingCart = cartService.findUnLoadShoppingCart();
+		}else{
+			findAddressByUserId = userAddressService.findAddressByUserId(sessionInfo.getUserId());//获取用户地址
+			couponList = pcCouponSrevice.findCouponByUserId(sessionInfo.getUserId());//获取用户优惠卷信息
+			shoppingCart = orderService.getShippingCart(sessionInfo.getUserId(),goodsId);//获取用户购物车信息
+			//获取用户积分（历史数据，没有userinfo记录，此处报空指针）
+			UserInfo userInfo=userInfoMapper.selectByPrimaryKey(sessionInfo.getUserId());
+			if(userInfo!=null){
+			    accPoints=userInfo.getAccPoints();
+			}else{
+			    accPoints=0;
+			}
+		}
+		//2.获取当前日期开始的后五天的时间
+		List<PcDateTime> pcDateTime = orderService.getPcDateTime();
+		//3.获取发票类容
+		List<String> invoice = orderService.getInvoice();
+		List<Object> ids = new ArrayList<Object>();
+		//计算订单总价格
+		for (PcGoodsDto pcGoodsDto : shoppingCart) {
+			if(pcGoodsDto.getSumPoints()==null||pcGoodsDto.getSumPoints()==0){
+				sumPrice = sumPrice.add(pcGoodsDto.getSumPrice());
+			}
+			if(sessionInfo!=null&&(pcGoodsDto.getSumPoints()!=null && pcGoodsDto.getSumPoints()!=0)){
+				sumPoints=sumPoints+pcGoodsDto.getSumPoints();
+			}
+			ids.add(pcGoodsDto.getId());
+		}
+		
+		// 计算不包含 跨境商品,和企业定制商品的总价格
+		if (!ObjectUtils.isEmpty(sessionInfo)) {
+			discountSumPrice = commonGoodsService.getDiscountSumPrice(ids,sessionInfo.getUserId());
+		} 
+		
+		//明天的日期时间(默认选中指定配送时间为明天)
+		String tomarror = DateUtil.tomorrow().toString().substring(8, 10);
+		//查询是否包含跨境商品
+		boolean findGoodsIsOut = pcGoodsService.findGoodsIsOut(goodsId);
+		if (!findGoodsIsOut) {
+			out = 1 ; //不包含跨境商品
+		}
+		if (!ObjectUtils.isEmpty(sessionInfo)) {
+			Integer integer = onLineActivityService.checkUserOrders(sessionInfo.getUserId());//判断用户是否符合条件
+			if(integer>0){
+				Integer chekActiviDate = onLineActivityService.chekActiviDate();//判断时间是否属于活动时间
+				if(chekActiviDate>0){
+					Integer cqDate = onLineActivityService.chekCqActiviDate();//判断是否是重庆活动时间
+					if(cqDate>0){
+						request.setAttribute("status", 1);//重庆活动时间
+					}else{
+						request.setAttribute("status", 2);//非重庆活动时间
+					}
+				}
+			}
+		}
+		isDelivery = pcGoodsService.findNotIsDelivery(goodsId);
+		request.setAttribute("toomarror", tomarror);
+		request.setAttribute("sumPrice", sumPrice);
+		request.setAttribute("sumPoints", sumPoints);
+		request.setAttribute("accPoints", accPoints);
+		request.setAttribute("cartList", shoppingCart);
+		request.setAttribute("couponList", couponList);
+		request.setAttribute("invoiceList", invoice);
+		request.setAttribute("dateList", pcDateTime);
+		request.setAttribute("userAddress", findAddressByUserId);
+		request.setAttribute("discountSumPrice", discountSumPrice);  //不包含 跨境商品和企业定制商品的总价格
+		request.setAttribute("out",out);
+		request.setAttribute("isDelivery", isDelivery);
+		return new ModelAndView("/order/commit_order");
+	}
+	
+	@RequestMapping("/adduserAddress")
+	public ModelAndView addUserAddress(UserAddrees address,HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		address.setUserId(sessionInfo.getUserId());
+		String goodsId = request.getParameter("goodsId");
+		if (address.getId() == 0) {
+			userAddressService.addUserAddrees(address);
+		} else {
+			userAddressService.updateAddrees(address);
+		}
+		return new ModelAndView("redirect:/order/commitOrder/"+goodsId);
+	}
+	
+	@RequestMapping("/deleteAddresss/{addressId}/{goodsId}")
+	public ModelAndView deleteAddress(@PathVariable("addressId") Long addressId,@PathVariable("goodsId") String goodsId){
+		userAddressService.deleteAddrees(addressId);
+		return new ModelAndView("redirect:/order/commitOrder/"+goodsId);
+	}
+	
+	/**
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年8月8日 下午5:38:56
+	 * 提交订单
+	 */
+	@RequestMapping("/addOrder")
+	public ModelAndView addOrder(HttpServletRequest request,HttpServletResponse response){
+		String addressId = request.getParameter("adress");//订单收货地址
+		String dateTime = request.getParameter("dateTime");//用户指定配送时间
+		String invoice = request.getParameter("invocie");//发票信息
+		String goodsId = request.getParameter("goodsIds");//订单商品的ID
+		String remark = request.getParameter("remark");//订单用户备注
+		String couponId = request.getParameter("conponId");//优惠卷id
+		String idCard = request.getParameter("idCard");//身份证号码
+		String taxperNo = request.getParameter("taxpayerNo");//纳税人识别号
+		String conName = request.getParameter("consigneeName");//收货人姓名
+		String phone = request.getParameter("consigneePhone");//收货人联系电话
+		String address = request.getParameter("consigneeAddress");//收货地址
+		String sumPoints=request.getParameter("sumPoints");//总消耗积分
+		String isCrossGoods = request.getParameter("isCrossGoods") ;//是否含有跨境商品  0含有  1 没有
+		String countyAddress = request.getParameter("countyAddress") ;//收货地址 区县的地址 计算运费用到
+		String provinceAddress = request.getParameter("provinceAddress"); //收货地址 省市 计算运费用到
+		SessionInfo sessionInfo = SessionInfo.get();
+		UserInfo user = new UserInfo();
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			user.setRealName("匿名");
+			addressId="0";
+		}else{
+			user.setId(sessionInfo.getUserId());
+			user.setRealName(sessionInfo.getUserName());
+		}
+		Order addOrder = orderService.addOrder(response,phone,address,conName,taxperNo,idCard,Long.parseLong(addressId), dateTime, invoice, goodsId, remark, couponId,provinceAddress,countyAddress,user);
+		if (ObjectUtil.isNull(addOrder)) {
+			return new ModelAndView("/order/reminder");  // 重复下了订单
+		}
+		if(!ObjectUtils.isEmpty(sessionInfo)){  //扣除积分
+			UserInfo userInfo = pcUserService.getUserInfo(sessionInfo.getUserId());
+			int accPoints=userInfo.getAccPoints();
+			userInfo.setAccPoints(accPoints-Integer.parseInt(sumPoints));
+			userInfoMapper.updateByPrimaryKeySelective(userInfo);
+			userInfo = pcUserService.getUserInfo(sessionInfo.getUserId());
+			request.setAttribute("userInfo", userInfo);
+			if (!StringUtil.isEmpty(sumPoints) && Integer.parseInt(sumPoints) != 0) {
+				pcUserService.insertOrderUserSpendPoints(sessionInfo.getUserId(), addOrder.getId(), Integer.parseInt(sumPoints));
+				request.setAttribute("userInfo", userInfo);
+			}
+		}
+		//全场打折活动
+		if(!ObjectUtils.isEmpty(sessionInfo)){
+			onLineActivityService.activiOrder(addOrder, goodsId, sessionInfo.getUserId(), provinceAddress);
+		}
+		request.setAttribute("payOrder", addOrder);
+		request.setAttribute("isCrossGodods", isCrossGoods);
+		return new ModelAndView("/order/pay_order");
+	}
+	
+	
+	/**
+	 * @param orderId
+	 * @param request
+	 * @return ModelAndView
+	 * @author 个人中心支付订单
+	 * @date 2017年8月9日 上午11:29:15
+	 */
+	@RequestMapping("/payOrder/{orderId}")
+	public ModelAndView payOrder(@PathVariable("orderId") Long orderId,HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		Order order = orderService.findOrderByOrderId(orderId);
+		UserInfo userInfo = pcUserService.getUserInfo(sessionInfo.getUserId());
+		request.setAttribute("userInfo", userInfo);
+		request.setAttribute("payOrder", order);	
+		return new ModelAndView("/order/pay_order");
+	}
+	
+	/**
+	 * @param orderId
+	 * @param balancePay
+	 * @param payMethod
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年8月9日 上午11:27:16
+	 * 订单支付
+	 */ 
+	@RequestMapping("/pay")
+	public ModelAndView testadd(@Param("orderId") Long orderId,@Param("balancePay") BigDecimal balancePay,
+			@Param("payMethod") Integer payMethod,HttpServletRequest request){
+		SessionInfo sessionInfo = SessionInfo.get();
+		
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			orderService.updateOrder(orderId, payMethod, balancePay, new Long("0"));//匿名购买的用户ID为0
+		}else{
+			orderService.updateOrder(orderId, payMethod, balancePay, sessionInfo.getUserId());
+		}
+		request.setAttribute("orderId", orderId);
+		return new ModelAndView("/test/success");
+	}
+	/**
+	 * @param orderId
+	 * @param request
+	 * @return ModelAndView
+	 * @author 订单作废
+	 * @date 2017年9月1日 下午2:55:23
+	 */
+	@RequestMapping("/delete/{orderId}")
+	public ModelAndView deleteOrder(@PathVariable("orderId") Long orderId,HttpServletRequest request){
+		
+		orderService.deleteOrderByOrder(orderId);
+		
+		return null;
+	}
+	/**
+	 * @param orderIds
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年9月13日 下午8:14:11
+	 * 确认收货
+	 */
+	@RequestMapping("/receive/{orderId}")
+	public ModelAndView receiveOrder(@PathVariable("orderId") String orderIds,HttpServletRequest request){
+		
+		orderService.updateOrderByOrderId(orderIds);
+		
+		return null;
+	}
+		
+	@RequestMapping("/detail/{orderId}")
+	public ModelAndView orderDetail(@PathVariable("orderId") Long orderId,HttpServletRequest request){
+		OrderDto findOderyDetailById = orderService.findOderyDetailById(orderId);
+		request.setAttribute("orderDto", findOderyDetailById);
+		request.setAttribute("tradeType", PayBaseImpl.getTradeType());
+		return new ModelAndView("/center/center_order_detail");
+	}
+	
+	
+	/**
+	 * 计算出运费
+	 * @param province
+	 * @param goodsIds
+	 * @param sumPrice
+	 * @return    
+	 * @return RespData    
+	 * Date:2017年10月17日 下午9:01:59 
+	 * @author hexw
+	 */
+	@RequestMapping("/getFreight")
+	public RespData getFreight(String province,String goodsIds,String sumPrice,String area){
+		Map<String,Object> result = new HashMap<String,Object>();
+		SessionInfo sessionInfo = SessionInfo.get();
+		if (ObjectUtil.isNull(sessionInfo)) {
+			result = orderService.getFreight(province, area, goodsIds, sumPrice, null);
+		} else {
+			result = orderService.getFreight(province,area, goodsIds, sumPrice, sessionInfo.getUserId());
+		}
+		RespData respData = new RespData();
+		respData.setData(result);
+		return respData;
+	}
+	
+	/**
+	 * 优惠券弹窗
+	 * @param request
+	 * @param pageBean
+	 * @return    
+	 * @return ModelAndView    
+	 * Date:2017年11月1日 下午4:07:14 
+	 * @author hexw
+	 */
+	@RequestMapping("/couponListPopup")
+	public ModelAndView couponListPopup(HttpServletRequest request,PageBean pageBean){
+		pageBean.setPageSize(6);
+		SessionInfo sessionInfo = SessionInfo.get();
+		if (ObjectUtil.isNotNull(sessionInfo)) {
+			pcCouponSrevice.findCouponByUserId(sessionInfo.getUserId(),pageBean);
+		}
+		request.setAttribute("couponList", pageBean.getData());
+		request.setAttribute("totalPage", pageBean.getTotalPage());
+		request.setAttribute("pageIndex", pageBean.getPageIndex());
+		return new ModelAndView("/order/user_coupon_list");
+	}
+	
+}

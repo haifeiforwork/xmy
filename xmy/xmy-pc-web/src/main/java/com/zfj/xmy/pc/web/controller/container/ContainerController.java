@@ -1,0 +1,291 @@
+package com.zfj.xmy.pc.web.controller.container;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.date.DatePattern;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.LimitActivityDir;
+import com.zfj.xmy.activity.persistence.pc.pojo.dto.PcBuyandPresentDto;
+import com.zfj.xmy.activity.persistence.pc.pojo.dto.PcContainerDto;
+import com.zfj.xmy.activity.persistence.pc.pojo.dto.PcDownColumDto;
+import com.zfj.xmy.activity.persistence.pc.pojo.dto.PcIndexDto;
+import com.zfj.xmy.activity.service.common.LimitActivityService;
+import com.zfj.xmy.activity.service.pc.PcBuyandPresentService;
+import com.zfj.xmy.activity.service.pc.PcColumService;
+import com.zfj.xmy.activity.service.pc.PcIndexConfigService;
+import com.zfj.xmy.activity.service.pc.PcLimitActivityService;
+import com.zfj.xmy.common.DateUtils;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.VocabularyConstant;
+import com.zfj.xmy.common.persistence.pojo.AdImage;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.Notification;
+import com.zfj.xmy.common.persistence.pojo.PcGoodsSeting;
+import com.zfj.xmy.config.service.NotificationService;
+import com.zfj.xmy.goods.service.pc.PcGoodsService;
+import com.zfj.xmy.order.service.pc.PcShoppingCartService;
+import com.zfj.xmy.order.service.pc.ShoppingCartService;
+import com.zfj.xmy.pc.web.controller.BaseController;
+import com.zfj.xmy.pc.web.controller.container.dto.HeadJudger;
+import com.zfj.xmy.pc.web.controller.container.dto.IndexDataDto;
+import com.zfj.xmy.pc.web.controller.container.dto.indexSessionDto;
+import com.zfj.xmy.redis.TokenManager;
+@RestController
+public class ContainerController extends BaseController{
+	@Autowired
+	private PcIndexConfigService configService;
+	
+	@Autowired
+	private PcColumService columService;
+	
+	@Autowired
+	private PcLimitActivityService activityService;
+	
+	@Autowired
+	private PcGoodsService pcGoodsService;
+	
+	@Autowired
+	private PcBuyandPresentService buyandPresentService;
+	
+	@Autowired
+	private ShoppingCartService cartService;
+	
+	@Autowired
+	private PcShoppingCartService pcShoppingCartService;
+	
+	@Autowired
+	private LimitActivityService limitActivityService;
+	@Autowired NotificationService notificationService;
+	
+	@Autowired
+	private  TokenManager tokenManager;
+	
+	/**
+	 * 首页
+	 * @param request
+	 * @param response
+	 * @return
+	 * @Description 
+	 * @date 2017年12月26日  上午10:27:32
+	 * @author 
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/index")
+	public ModelAndView findContainer(HttpServletRequest request,HttpServletResponse response){
+		String agent = request.getHeader("User-Agent");
+		agent = agent.toLowerCase();
+		if(HeadJudger.IsWap(agent)) {
+			return new ModelAndView("redirect:http://m.xmy365.com");
+		}
+		// 获取首页画廊图
+		request.setAttribute("galleryImage", pcGoodsService.getGalleryImage()); 
+		//9.获取搜索关键字
+		List<String> keyWords = configService.findSearchKeyWords();
+		request.getSession().setAttribute("keyWords", keyWords);
+		//3.查询栏目
+		request.getSession().setAttribute("findDownColum", columService.findDownColum(VocabularyConstant.VOC_COLUMN));
+		// 缓存
+		//weiy
+		String indexData = tokenManager.get(SystemConstant.REDIS_B2C_PC_INDEX_DATA);
+		if (!StringUtil.isEmpty(indexData)) {
+			JSONObject jsonObject = new JSONObject(indexData);
+			IndexDataDto indexDataDto = jsonObject.toBean(IndexDataDto.class);
+			HttpSession httpSession = request.getSession();
+			indexSessionDto sessionData = indexDataDto.getSession();
+			
+			//设置session 值
+			httpSession.setAttribute("notifications", sessionData.getNotifications());
+			httpSession.setAttribute("goodsNavigated", sessionData.getGoodsNavigated());
+			//设置request 值
+			request.setAttribute("findPcAd", indexDataDto.getFindPcAd());
+			request.setAttribute("container", indexDataDto.getContainer());
+			request.setAttribute("buyAndPresentActivity", indexDataDto.getBuyAndPresentActivity());
+			request.setAttribute("hotGoods", indexDataDto.getHotGoods());
+			request.setAttribute("newGoods", indexDataDto.getNewGoods());
+			
+			request.setAttribute("iceActivity", indexDataDto.getIceActivity());
+			request.setAttribute("daydayActivity", indexDataDto.getDaydayActivity());
+			request.setAttribute("weekActivity", indexDataDto.getWeekActivity());
+			
+			List<PcGoodsSeting> hotSealGoods = indexDataDto.getSealGoods();
+			List<AdImage> firstImages = indexDataDto.getFirstImage();
+			
+			for(int i = 0; i<hotSealGoods.size();i++){
+				request.setAttribute("sealGoods"+i, hotSealGoods.get(i));
+			}
+			
+			for(int i = 0; i < firstImages.size();i++){
+				request.setAttribute("firstImage"+i, firstImages.get(i));
+			}
+			
+			request.setAttribute("endDayOfWeek", DateUtils.getEndDayOfWeek()); //本周的结束时间
+			request.setAttribute("time", new Date());
+			return new ModelAndView("/home/index");
+		}
+		return refreshIndex(request, response);
+	}
+	
+	/**
+	 * 更新首页缓存
+	 * @param request
+	 * @param response
+	 * @return
+	 * @Description 
+	 * @date 2017年12月26日  上午9:33:26
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/refreshIndex")
+	public ModelAndView refreshIndex(HttpServletRequest request,HttpServletResponse response){
+		
+		JSONObject jsonObject = new JSONObject();
+		
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(6);
+		//1.查询广告信息
+		PcIndexDto findPcAd = configService.findHomeAd();
+		List<AdImage> firstImages = findPcAd.getFirstImages();
+		//2.查询货柜信息
+		List<PcContainerDto> container = configService.findCOntainers();
+		//3.查询栏目
+		//List<PcDownColumDto> findDownColum = columService.findDownColum(VocabularyConstant.VOC_COLUMN);
+		//4.查询商品导航
+		List<PcDownColumDto> goodsNavigated = columService.findDownColum(VocabularyConstant.VOC_CATEGORY);
+		//5.查询活动(开枪了公共方法的调用)
+		List<LimitActivityDir> list = limitActivityService.findLimitActivityList(null);
+		LimitActivityDir  iceActivity = new  LimitActivityDir();  //冰点价
+		LimitActivityDir  daydayActivity = new  LimitActivityDir();  //天天特价
+		LimitActivityDir  weekActivity = new  LimitActivityDir();  //每周特价
+		for (LimitActivityDir limitActivityDir : list) {
+			if (limitActivityDir.getType() == SystemConstant.LIMITACTIVITY.FREEZING) {
+				iceActivity = limitActivityDir;
+			}
+			if (limitActivityDir.getType() == SystemConstant.LIMITACTIVITY.DAYDAY) {
+				daydayActivity = limitActivityDir;
+			}
+			if (limitActivityDir.getType() == SystemConstant.LIMITACTIVITY.WEEKWEEK) {
+				weekActivity = limitActivityDir;
+			} 
+		}
+		
+		jsonObject.put("iceActivity", iceActivity);
+		jsonObject.put("daydayActivity", daydayActivity);
+		jsonObject.put("weekActivity", weekActivity);
+		
+		request.setAttribute("iceActivity", iceActivity);
+		request.setAttribute("daydayActivity", daydayActivity);
+		request.setAttribute("weekActivity", weekActivity);
+		
+		//买即赠活动
+		List<PcBuyandPresentDto> buyAndPresentActivity = buyandPresentService.findPcBuyandPresentDto(new PageBean());
+		//6.查询热卖商品前六条数据
+		List<PcGoodsSeting> hotGoods = pcGoodsService.findGoodsSeting(SystemConstant.PCGOODSSET.HOTGOODS, pageBean);
+		//7.查询新品上市
+		List<PcGoodsSeting> newGoods = pcGoodsService.findGoodsSeting(SystemConstant.PCGOODSSET.NEWGOODS, pageBean);
+		//8.查询热销商品
+		List<PcGoodsSeting> hotSealGoods = pcGoodsService.findGoodsSeting(SystemConstant.PCGOODSSET.HOTSEALGOODS, pageBean);
+		//全部热销商品
+		for(int i = 0; i<hotSealGoods.size();i++){
+			request.setAttribute("sealGoods"+i, hotSealGoods.get(i));
+		}
+		//
+		for(int i = 0; i < firstImages.size();i++){
+			request.setAttribute("firstImage"+i, firstImages.get(i));
+		}
+		
+		jsonObject.put("sealGoods", hotSealGoods);
+		jsonObject.put("firstImage", firstImages);
+		
+		//网站置顶通知
+		ReqData notificationReqData=new ReqData();
+		String nowDateTime = DateUtil.format(new Date(), DatePattern.NORM_DATETIME_PATTERN);
+		notificationReqData.putValue("start_time", nowDateTime, SystemConstant.REQ_PARAMETER_LE);
+		notificationReqData.putValue("end_time", nowDateTime, SystemConstant.REQ_PARAMETER_GE);
+		List<Notification> notifications = notificationService.findNotifications(notificationReqData);
+		
+		
+		request.getSession().setAttribute("notifications", notifications);
+		//request.getSession().setAttribute("findDownColum", findDownColum);
+		request.getSession().setAttribute("goodsNavigated", goodsNavigated);
+		
+		request.setAttribute("findPcAd", findPcAd);
+		request.setAttribute("container", container);
+		request.setAttribute("buyAndPresentActivity", buyAndPresentActivity);
+		request.setAttribute("hotGoods", hotGoods);
+		request.setAttribute("newGoods", newGoods);
+		
+		JSONObject session = new JSONObject();
+		
+		session.put("notifications", notifications);
+		//session.put("findDownColum", findDownColum);
+		session.put("goodsNavigated", goodsNavigated);
+		jsonObject.put("session", session);
+		
+		jsonObject.put("findPcAd", findPcAd);
+		jsonObject.put("container", container);
+		jsonObject.put("buyAndPresentActivity", buyAndPresentActivity);
+		jsonObject.put("hotGoods", hotGoods);
+		jsonObject.put("newGoods", newGoods);
+		
+		tokenManager.setKey(SystemConstant.REDIS_B2C_PC_INDEX_DATA, jsonObject.toString());
+		
+		
+		request.setAttribute("endDayOfWeek", DateUtils.getEndDayOfWeek()); //本周的结束时间
+		request.setAttribute("time", new Date());
+		
+		return new ModelAndView("/home/index");
+	}
+	/**
+	 * @param conid
+	 * @param pageIndex
+	 * @param consize 0 大货柜 1 小货柜
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年10月14日 上午11:44:04
+	 */
+	@RequestMapping("/container/{conid}/{pageIndex}")
+	public ModelAndView findContainerGoods(@PathVariable("conid") Long conid,@PathVariable("pageIndex") Integer pageIndex,
+			@Param("consize") Integer  consize, HttpServletRequest request){
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(50);
+		List<Goods> findContainerGoods = configService.findContainerGoods(conid, pageIndex,consize,pageBean);
+		Integer totalPage = pageBean.getTotalPage();
+		request.setAttribute("goodsList", findContainerGoods);
+		request.setAttribute("consize", consize);
+		request.setAttribute("countPage", totalPage);
+		return new ModelAndView("/home/goods_list");
+	}
+	
+	@RequestMapping("/commColom")
+	public String commColom(HttpServletRequest request){
+	//3.查询栏目
+	List<PcDownColumDto> findDownColum = columService.findDownColum(VocabularyConstant.VOC_COLUMN);
+	//4.查询商品导航
+	List<PcDownColumDto> goodsNavigated = columService.findDownColum(VocabularyConstant.VOC_CATEGORY);
+	//9.获取搜索关键字
+	List<String> keyWords = configService.findSearchKeyWords();
+	request.getSession().setAttribute("keyWords", keyWords);
+	request.getSession().setAttribute("findDownColum", findDownColum);
+	request.getSession().setAttribute("goodsNavigated", goodsNavigated);
+		return null;
+	}
+}

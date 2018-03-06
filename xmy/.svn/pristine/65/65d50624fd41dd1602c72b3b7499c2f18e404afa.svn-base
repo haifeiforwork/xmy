@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.UserMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.User" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="DATE" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="level" property="level" jdbcType="INTEGER" />
+    <result column="app_token" property="appToken" jdbcType="VARCHAR" />
+    <result column="app_token_expire" property="appTokenExpire" jdbcType="TIMESTAMP" />
+    <result column="qq_openid" property="qqOpenid" jdbcType="VARCHAR" />
+    <result column="wechat_openid" property="wechatOpenid" jdbcType="VARCHAR" />
+    <result column="last_login_time" property="lastLoginTime" jdbcType="TIMESTAMP" />
+    <result column="openim_userid" property="openimUserid" jdbcType="VARCHAR" />
+    <result column="scancode" property="scancode" jdbcType="VARCHAR" />
+    <result column="wechat_unionid" property="wechatUnionid" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, `name`, `password`, create_time, `status`, `level`, app_token, app_token_expire, 
+    qq_openid, wechat_openid, last_login_time, openim_userid, scancode, wechat_unionid
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from `user`
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from `user`
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from `user`
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from `user`
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update `user`
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null" >
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.password != null" >
+        `password` = #{record.password,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=DATE},
+      </if>
+      <if test="record.status != null" >
+        `status` = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.level != null" >
+        `level` = #{record.level,jdbcType=INTEGER},
+      </if>
+      <if test="record.appToken != null" >
+        app_token = #{record.appToken,jdbcType=VARCHAR},
+      </if>
+      <if test="record.appTokenExpire != null" >
+        app_token_expire = #{record.appTokenExpire,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.qqOpenid != null" >
+        qq_openid = #{record.qqOpenid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.wechatOpenid != null" >
+        wechat_openid = #{record.wechatOpenid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lastLoginTime != null" >
+        last_login_time = #{record.lastLoginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.openimUserid != null" >
+        openim_userid = #{record.openimUserid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scancode != null" >
+        scancode = #{record.scancode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.wechatUnionid != null" >
+        wechat_unionid = #{record.wechatUnionid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update `user`
+    set id = #{record.id,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      `password` = #{record.password,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=DATE},
+      `status` = #{record.status,jdbcType=INTEGER},
+      `level` = #{record.level,jdbcType=INTEGER},
+      app_token = #{record.appToken,jdbcType=VARCHAR},
+      app_token_expire = #{record.appTokenExpire,jdbcType=TIMESTAMP},
+      qq_openid = #{record.qqOpenid,jdbcType=VARCHAR},
+      wechat_openid = #{record.wechatOpenid,jdbcType=VARCHAR},
+      last_login_time = #{record.lastLoginTime,jdbcType=TIMESTAMP},
+      openim_userid = #{record.openimUserid,jdbcType=VARCHAR},
+      scancode = #{record.scancode,jdbcType=VARCHAR},
+      wechat_unionid = #{record.wechatUnionid,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from `user`
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `user`
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.User" useGeneratedKeys="true" keyProperty="id" >
+    insert into `user` (`name`, `password`, create_time, 
+      `status`, `level`, app_token, 
+      app_token_expire, qq_openid, wechat_openid, 
+      last_login_time, openim_userid, scancode, 
+      wechat_unionid)
+    values (#{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{createTime,jdbcType=DATE}, 
+      #{status,jdbcType=INTEGER}, #{level,jdbcType=INTEGER}, #{appToken,jdbcType=VARCHAR}, 
+      #{appTokenExpire,jdbcType=TIMESTAMP}, #{qqOpenid,jdbcType=VARCHAR}, #{wechatOpenid,jdbcType=VARCHAR}, 
+      #{lastLoginTime,jdbcType=TIMESTAMP}, #{openimUserid,jdbcType=VARCHAR}, #{scancode,jdbcType=VARCHAR}, 
+      #{wechatUnionid,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.User" useGeneratedKeys="true" keyProperty="id" >
+    insert into `user`
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        `name`,
+      </if>
+      <if test="password != null" >
+        `password`,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="status != null" >
+        `status`,
+      </if>
+      <if test="level != null" >
+        `level`,
+      </if>
+      <if test="appToken != null" >
+        app_token,
+      </if>
+      <if test="appTokenExpire != null" >
+        app_token_expire,
+      </if>
+      <if test="qqOpenid != null" >
+        qq_openid,
+      </if>
+      <if test="wechatOpenid != null" >
+        wechat_openid,
+      </if>
+      <if test="lastLoginTime != null" >
+        last_login_time,
+      </if>
+      <if test="openimUserid != null" >
+        openim_userid,
+      </if>
+      <if test="scancode != null" >
+        scancode,
+      </if>
+      <if test="wechatUnionid != null" >
+        wechat_unionid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=DATE},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="level != null" >
+        #{level,jdbcType=INTEGER},
+      </if>
+      <if test="appToken != null" >
+        #{appToken,jdbcType=VARCHAR},
+      </if>
+      <if test="appTokenExpire != null" >
+        #{appTokenExpire,jdbcType=TIMESTAMP},
+      </if>
+      <if test="qqOpenid != null" >
+        #{qqOpenid,jdbcType=VARCHAR},
+      </if>
+      <if test="wechatOpenid != null" >
+        #{wechatOpenid,jdbcType=VARCHAR},
+      </if>
+      <if test="lastLoginTime != null" >
+        #{lastLoginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="openimUserid != null" >
+        #{openimUserid,jdbcType=VARCHAR},
+      </if>
+      <if test="scancode != null" >
+        #{scancode,jdbcType=VARCHAR},
+      </if>
+      <if test="wechatUnionid != null" >
+        #{wechatUnionid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.User" >
+    update `user`
+    <set >
+      <if test="name != null" >
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        `password` = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=DATE},
+      </if>
+      <if test="status != null" >
+        `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="level != null" >
+        `level` = #{level,jdbcType=INTEGER},
+      </if>
+      <if test="appToken != null" >
+        app_token = #{appToken,jdbcType=VARCHAR},
+      </if>
+      <if test="appTokenExpire != null" >
+        app_token_expire = #{appTokenExpire,jdbcType=TIMESTAMP},
+      </if>
+      <if test="qqOpenid != null" >
+        qq_openid = #{qqOpenid,jdbcType=VARCHAR},
+      </if>
+      <if test="wechatOpenid != null" >
+        wechat_openid = #{wechatOpenid,jdbcType=VARCHAR},
+      </if>
+      <if test="lastLoginTime != null" >
+        last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="openimUserid != null" >
+        openim_userid = #{openimUserid,jdbcType=VARCHAR},
+      </if>
+      <if test="scancode != null" >
+        scancode = #{scancode,jdbcType=VARCHAR},
+      </if>
+      <if test="wechatUnionid != null" >
+        wechat_unionid = #{wechatUnionid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.User" >
+    update `user`
+    set `name` = #{name,jdbcType=VARCHAR},
+      `password` = #{password,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=DATE},
+      `status` = #{status,jdbcType=INTEGER},
+      `level` = #{level,jdbcType=INTEGER},
+      app_token = #{appToken,jdbcType=VARCHAR},
+      app_token_expire = #{appTokenExpire,jdbcType=TIMESTAMP},
+      qq_openid = #{qqOpenid,jdbcType=VARCHAR},
+      wechat_openid = #{wechatOpenid,jdbcType=VARCHAR},
+      last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+      openim_userid = #{openimUserid,jdbcType=VARCHAR},
+      scancode = #{scancode,jdbcType=VARCHAR},
+      wechat_unionid = #{wechatUnionid,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

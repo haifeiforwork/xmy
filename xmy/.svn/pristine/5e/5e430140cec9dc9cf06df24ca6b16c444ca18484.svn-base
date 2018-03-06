@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.activity.persistence.common.dao.CouponUserExMapper" >
+
+	<!-- <resultMap id="fullContainer" type="com.zfj.xmy.activity.persistence.common.pojo.dto.WapContainerOutDto">
+		<id column="name" property="name" javaType="String" />
+		<result column="iconImg" property="iconImg" />
+		<result column="bgImg" property="bgImg" />
+		<result column="slogan" property="slogan" />
+		<result column="categoryId" property="categoryId" />
+		<collection property="containerAd" ofType="com.zfj.xmy.common.persistence.pojo.AdImage" autoMapping="true">
+			<id column="id" property="id" javaType="java.lang.Long" />
+			<result column="img_path" property="imgPath" javaType="String" />
+		</collection>
+		<collection property="goods" ofType="com.zfj.xmy.common.persistence.pojo.app.AppGoodsCondense" autoMapping="true">
+			<id column="gId" property="id" javaType="java.lang.Long" />
+		</collection>
+	</resultMap> -->
+
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" >
+	    insert into coupon_user (user_id, coupon_id, receive_time, 
+	      use_time, `status`, `type`, 
+	      paper_coupon_code, coupon_no)
+	    values 
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.userId,jdbcType=BIGINT},
+			 #{item.couponId,jdbcType=BIGINT},
+			 #{item.receiveTime,jdbcType=TIMESTAMP}, 
+	         #{item.useTime,jdbcType=TIMESTAMP},
+	         #{item.status,jdbcType=INTEGER},
+	         #{item.type,jdbcType=INTEGER}, 
+	         #{item.paperCouponCode,jdbcType=VARCHAR},
+	         #{item.couponNo,jdbcType=VARCHAR})
+		</foreach>
+	</insert>
+	
+	
+	<resultMap id="couponUserStatistisDto" type="com.zfj.xmy.activity.persistence.common.pojo.dto.CouponUserStatistisDto">
+		<result column="count" property="count" />
+		<result column="status" property="status" />
+	</resultMap>
+	<select id="getCouponUserStatistis" parameterType="java.lang.Long" resultMap="couponUserStatistisDto" >
+	    SELECT
+			COUNT(cu.id) count,cu.`status` status
+		FROM
+			coupon_user cu
+		  INNER JOIN coupon cp ON cp.id = cu.coupon_id
+		WHERE
+			cu.user_id = #{userid} 
+		GROUP BY
+			cu.`status`
+	</select>
+	<!-- 		  AND cp.effective_end_time > NOW() -->
+	<select id="getCouponUserStatistisDep" parameterType="java.lang.Long" resultMap="couponUserStatistisDto" >
+	    SELECT
+			COUNT(cu.id) count,cu.`status` status
+		FROM
+			coupon_user cu
+		  INNER JOIN coupon cp ON cp.id = cu.coupon_id
+		WHERE
+			cu.user_id = #{userid}
+		  AND cu.`status` = 0
+		  AND cp.effective_end_time <![CDATA[<=]]> NOW()
+		GROUP BY
+			cu.`status`
+	</select>
+	
+</mapper>

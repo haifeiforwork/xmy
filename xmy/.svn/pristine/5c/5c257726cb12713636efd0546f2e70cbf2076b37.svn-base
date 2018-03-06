@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.elasticsearch.persistence.dao.ElasticsearchExMapper" >
+  <resultMap id="categoryDocMap" type="com.zfj.xmy.elasticsearch.document.CategoryDoc" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+    <result column="cid" property="cid" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="pid" property="pid" jdbcType="BIGINT" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+    <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+    <result column="full_name" property="fullName" jdbcType="VARCHAR" />
+  </resultMap>
+  <!-- 查询商品种类 -->
+  <select id="listCategoryDoc" resultMap="categoryDocMap" parameterType="com.appdev.db.common.CriteriaParameter">
+  SELECT gc.id,gc.cid cid,td.`name` `name`,ptd.id pid,ptd.`name` pname,gc.goods_id goods_id,goods.brand_name,goods.category_name,goods.full_name 
+	FROM `goods_category` gc 
+	INNER JOIN term_data td ON gc.cid = td.id
+	INNER JOIN term_data ptd ON td.parent_id=ptd.id
+	INNER JOIN goods goods ON gc.goods_id=goods.id
+  <if test="_parameter != null" >
+    <include refid="sqlcriteria.util.Example_Where_Clause" />
+  </if>
+  <if test="orderByClause != null" >
+    order by ${orderByClause}
+  </if>
+  </select>
+  <select id="countCategoryDoc" resultType="int" parameterType="com.appdev.db.common.CriteriaParameter">
+  SELECT count(*) 
+	FROM `goods_category` gc 
+	INNER JOIN term_data td ON gc.cid = td.id
+	INNER JOIN term_data ptd ON td.parent_id=ptd.id
+	INNER JOIN goods goods ON gc.goods_id=goods.id
+  <if test="_parameter != null" >
+    <include refid="sqlcriteria.util.Example_Where_Clause" />
+  </if>
+  </select>
+  <!-- 查询商品索引数据 -->
+  <resultMap type="com.zfj.xmy.elasticsearch.document.GoodsDoc" id="goodsDocMap">
+  	<id column="id" property="id" jdbcType="BIGINT" />
+    <result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+    <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+    <result column="full_name" property="fullName" jdbcType="VARCHAR" />
+    <result column="img_path" property="imgPath" jdbcType="VARCHAR" />
+    <result column="keyword" property="keywords" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="INTEGER" />
+    <result column="main_land" property="mainLand" jdbcType="INTEGER" />
+    <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+    <result column="sum_comment" property="sumComment" jdbcType="INTEGER" />
+    <result column="sum_deal" property="sumDeal" jdbcType="INTEGER" />
+    <result column="distrRange" property="distrRange" jdbcType="INTEGER" />
+    <result column="word_seg" property="wordSeg" jdbcType="VARCHAR" />
+  </resultMap>
+ <!--  <select id="listGoodsDoc" resultMap="goodsDocMap" parameterType="com.appdev.db.common.CriteriaParameter">
+  SELECT id,brand_name,category_name,full_name,img_path,keyword,floor(price * 100) price,is_China main_land
+  	,putway_time publish_time,sum_comment,sum_deal,0 distrRange
+	FROM goods
+  <if test="_parameter != null" >
+    <include refid="sqlcriteria.util.Example_Where_Clause" />
+  </if>
+  <if test="orderByClause != null" >
+    order by ${orderByClause}
+  </if>
+  </select> -->
+  <!-- <select id="listGoodsDoc" resultMap="goodsDocMap" parameterType="com.appdev.db.common.CriteriaParameter">
+  select g.id,g.brand_name,g.category_name,g.full_name,g.img_path,g.keyword,floor(g.price * 100) price,g.is_delivery as main_land
+  	,g.putway_time as publish_time,g.sum_comment,g.sum_deal,cws.word_seg from goods_spec_category gsc 
+  	right JOIN goods g on gsc.goods_id=g.id 
+  	left JOIN category_word_seg cws on gsc.spec_category_id=cws.id
+  <if test="_parameter != null" >
+    <include refid="sqlcriteria.util.Example_Where_Clause" />
+  </if>
+  </select> -->
+  
+  	<select id="listGoodsDoc" resultMap="goodsDocMap" parameterType="com.appdev.db.common.CriteriaParameter">
+  select g.id,g.brand_name,g.category_name,g.full_name,g.img_path,g.keyword,floor(g.price * 100) price,g.is_delivery as main_land
+  	,g.putway_time as publish_time,g.sum_comment,g.sum_deal from goods g
+  <if test="_parameter != null" >
+    <include refid="sqlcriteria.util.Example_Where_Clause" />
+  </if>
+  </select>
+  
+  <select id="countGoodsDoc" resultType="int" parameterType="com.appdev.db.common.CriteriaParameter">
+  SELECT count(*) from goods
+  <if test="_parameter != null" >
+    <include refid="sqlcriteria.util.Example_Where_Clause" />
+  </if>
+  </select>
+</mapper>

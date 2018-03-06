@@ -1,0 +1,219 @@
+package com.zfj.xmy.wap.web.controller.home;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.http.util.TextUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.zfj.base.util.web.WebUtil;
+import com.zfj.xmy.activity.persistence.app.pojo.dto.AppActivityInDto;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.LimitActivityDir;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.WapContainerOutDto;
+import com.zfj.xmy.activity.service.cms.ContainerService;
+import com.zfj.xmy.activity.service.cms.IndexSettingService;
+import com.zfj.xmy.activity.service.common.LimitActivityService;
+import com.zfj.xmy.activity.service.wap.WapContainerService;
+import com.zfj.xmy.common.persistence.pojo.AdImage;
+import com.zfj.xmy.common.persistence.pojo.IndexConfig;
+import com.zfj.xmy.goods.service.cms.CmsGoodsService;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcCartDto;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcGoodsDto;
+import com.zfj.xmy.order.service.cms.AdvertisementService;
+import com.zfj.xmy.order.service.pc.PcShoppingCartService;
+import com.zfj.xmy.order.service.pc.ShoppingCartService;
+import com.zfj.xmy.wap.web.common.HeadJudger;
+import com.zfj.xmy.wap.web.common.SessionInfo;
+import com.zfj.xmy.wap.web.controller.common.CommonController;
+
+/**
+ * 首页控制层
+ * @author cj
+ * @createDate 2017年10月27日
+ *
+ */
+@Controller
+@RequestMapping("/home")
+public class HomeController extends CommonController{
+	
+	@Autowired
+	private IndexSettingService indexSettingService;
+	@Autowired
+	private ContainerService containerService;
+	@Autowired
+	private AdvertisementService advertisementService;
+	@Autowired
+	private CmsGoodsService cmsGoodsService;
+	@Autowired
+	private LimitActivityService limitActivityService;
+	@Autowired
+	private WapContainerService wapContainerService;
+	@Autowired
+	private PcShoppingCartService pcShoppingCartService;
+	@Autowired
+	private ShoppingCartService cartService;
+	
+	/**首页页面*/
+	private final static String HOME_PAGE = "home/home" ;
+	/**模块*/
+	private final static String MODEL = "model";
+	
+	/**
+	 * 首页信息
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws ParseException 
+	 */
+	@RequestMapping("/home")
+	public ModelAndView home(HttpServletRequest request, HttpServletResponse response,String goodsId) throws ParseException{
+		
+		String agent = request.getHeader("User-Agent");
+		logger.info("浏览器:" + agent);
+		agent = agent.toLowerCase();
+		if(HeadJudger.IsDesktop(agent)) {
+			logger.info("是电脑");
+			return new ModelAndView("redirect:http://www.xmyb2b.com");
+		}
+		
+		SessionInfo sessionInfo=SessionInfo.get();
+		Map<String, Object> data=new HashMap<String, Object>();
+		IndexConfig indexConfig = indexSettingService.getIndexConfig();
+		//获取top轮播图
+		Long topAdId = indexConfig.getTopAdId();
+		List<AdImage> adInfo = advertisementService.findAdImage(String.valueOf(topAdId));
+		data.put("topAdInfo", adInfo);
+		//1号广告位
+		Long firstAdId = indexConfig.getFirstAdId();
+		List<AdImage> firstAdInfo = advertisementService.findAdImage(String.valueOf(firstAdId));
+		data.put("firstAdInfo", firstAdInfo);
+		//获取货柜
+		String containerIds = indexConfig.getContainerIds();
+		List<WapContainerOutDto> containerOuts = wapContainerService.findAllContainer(containerIds);
+		List<PcGoodsDto> shoppingCart = null;//购物车商品
+		Integer temp=0;
+		HttpSession session = WebUtil.getSession() ;
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			temp++;
+			session.setAttribute("temp", temp);
+		}
+		if(!TextUtils.isEmpty(goodsId)){
+				
+			if((!ObjectUtils.isEmpty(session.getAttribute("temp")))&&Integer.parseInt(session.getAttribute("temp").toString())==1){
+				
+				PcCartDto cartDto = new PcCartDto();
+				shoppingCart = cartService.findChooseGoods(goodsId);
+				String[] split = goodsId.split(",");
+				for (int i=0;i<shoppingCart.size();i++) {
+					
+					pcShoppingCartService.addShoppingCart(sessionInfo.getUserId(), shoppingCart.get(i).getId(), shoppingCart.get(i).getCartNum());
+					cartDto.setGoodsId(Long.parseLong(split[i]));
+					cartService.deleteShoppingCart(cartDto, response);
+				}
+				session.removeAttribute("temp");
+			}
+		}
+/*		//遍历查询所属几级分类
+		for(WapContainerOutDto dto : containerOuts) {
+			dto.setLevel(wapContainerService.checkIsLevelOne(dto.getCategoryId()) ? 1 : 2);
+		}*/
+		
+		
+/*		List<Container> containers = containerService.findsContainerWithContainerIdString(containerIds);
+		List<WapContainerOutDto> containerOuts=new ArrayList<WapContainerOutDto>();
+		for (Container container : containers) {
+			WapContainerOutDto containerOutDto=new WapContainerOutDto();
+			BeanUtils.copyProperties(container, containerOutDto);
+			containerOutDto.setLevel(wapContainerService.checkIsLevelOne(container.getCategoryId()) ? 1 : 2);
+			//货柜的广告
+			Long adId = container.getAdId();
+			List<AdImage> adImage = advertisementService.findAdImage(String.valueOf(adId));
+			containerOutDto.setContainerAd(adImage);
+			//货柜的商品
+			String goodsIdsString = container.getGoodsIds();
+			List<Object> goodsIds = StringUtils.exchangeSplit(goodsIdsString);
+			List<Goods> goods = cmsGoodsService.findsGoodsWithIds(goodsIds);
+			List<AppGoodsCondense> goodsCondenses=new ArrayList<>();
+			for (Goods goods2 : goods) {
+				AppGoodsCondense appGoodsCondense=new AppGoodsCondense();
+				BeanUtils.copyProperties(goods2, appGoodsCondense);
+				goodsCondenses.add(appGoodsCondense);
+			}
+			containerOutDto.setGoods(goodsCondenses);
+			containerOuts.add(containerOutDto);
+		}*/
+		
+		data.put("containers", containerOuts);
+		AppActivityInDto activityInDto = new AppActivityInDto() ;
+		activityInDto.setType(1);
+		List<LimitActivityDir> limitActivityDir = limitActivityService.findLimitActivityList(activityInDto) ;
+		data.put("limitActivityDir", limitActivityDir);
+		data.putAll(getLimitData());
+		
+		//存入当前时间
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("M月d日");
+
+		long mill = 0;
+		int hours = date.getHours();
+		mill += hours * 60 * 60 * 1000;
+		int minutes = date.getMinutes();
+		mill += minutes * 60 * 1000;
+		int seconds = date.getSeconds();
+		mill += seconds * 1000;
+		logger.info("当前时间毫秒数:" + mill);
+		request.setAttribute("currMill", mill);
+		String curr = sdf.format(date);
+		request.setAttribute("curr", curr);
+		
+		Date yesterday=new Date();//取时间
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(yesterday);
+		calendar.add(calendar.DATE, -1);//把日期往后增加一天.整数往后推,负数往前移动
+		yesterday=calendar.getTime(); //这个时间就是日期往后推一天的结果 
+		SimpleDateFormat formatter = new SimpleDateFormat("M月d日");
+		String yesterdayStr = formatter.format(yesterday);
+		request.setAttribute("yesterday", yesterdayStr);
+		
+		request.setAttribute("data", data);
+		request.setAttribute(MODEL, "home");
+		
+		return new ModelAndView(HOME_PAGE);
+	}
+	
+	/**
+	 * 计算当前与结束时间
+	 * @return
+	 */
+	private Map<String,Long> getLimitData(){
+		
+		Map<String,Long> map = new HashMap<String,Long>();
+		Date date = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 12);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		if(cal.getTime().getTime() < date.getTime()){
+			cal.add(Calendar.DAY_OF_YEAR, 1);
+		}
+		map.put("nowTime", date.getTime());
+		map.put("endTime", cal.getTime().getTime());
+		
+		return map;
+	}
+}

@@ -1,0 +1,220 @@
+package com.zfj.xmy.common;  
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.Date;
+import java.util.List;
+
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.NumberUtil;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.freight.vo.FreightGoods;
+
+/** 
+ * @Title: FreightUtil.java 
+ * @Package com.zfj.xmy.common 
+ * @Description:  xmy运费计算规则
+ * @author hexw
+ * @date 2017年10月17日 下午5:08:51 
+ */
+public  class FreightUtil {
+	
+	/**
+	 * 重庆主城
+	 */
+	private static final String cqMainCity = "渝中区,江北区,沙坪坝区,南岸区,九龙坡区,渝北区,北碚区,大渡口区,巴南区";
+	
+	/**
+	 * 价格点
+	 */
+	private static final BigDecimal basePrice = new BigDecimal(38);
+
+	/**
+	 * 一区
+	 */
+	private static final String first_Provinces = "重庆,上海,北京,天津,江苏,浙江,安徽,广东,四川,广西,河北,河南,湖南,湖北,山东,云南,贵州,福建,江西,陕西" ;
+	private static final BigDecimal first_Freight = new BigDecimal(4.5);  //5公斤以下的基本价格
+	private static final BigDecimal first_beyond_Freight = new BigDecimal(1.5);  //续重的计算金额
+	/**
+	 * 二区
+	 */
+	private static final String second_Provinces ="甘肃,宁夏,青海";
+	private static final BigDecimal second_Freight = new BigDecimal(7);  //5公斤以下的基本价格
+	private static final BigDecimal second_beyond_Freight = new BigDecimal(3.5);  //续重的计算金额
+	/**
+	 * 三区
+	 */
+	private static final String three_Provinces = "黑龙江,辽宁,吉林";
+	private static final BigDecimal three_Freight = new BigDecimal(7);  //5公斤以下的基本价格
+	private static final BigDecimal three_beyond_Freight = new BigDecimal(5);  //续重的计算金额
+	/**
+	 * 四区
+	 */
+	private static final String four_Provinces = "山西,海南";
+	private static final BigDecimal four_Freight = new BigDecimal(9);  //5公斤以下的基本价格
+	private static final BigDecimal four_beyond_Freight = new BigDecimal(5);  //续重的计算金额
+	/**
+	 * 五区
+	 */
+	private static final String five_Provinces = "内蒙古自治区";
+	private static final BigDecimal five_Freight = new BigDecimal(10);  //5公斤以下的基本价格
+	private static final BigDecimal five_beyond_Freight = new BigDecimal(8);  //续重的计算金额
+	/**
+	 * 六区
+	 */
+	private static final String six_Provinces = "新疆,西藏";
+	private static final BigDecimal six_Freight = new BigDecimal(15);  //5公斤以下的基本价格
+	private static final BigDecimal six_beyond_Freight = new BigDecimal(15);  //续重的计算金额
+	
+	
+	public static BigDecimal getFreight(String provinces,String arae,double weight,BigDecimal sumPrice) {
+		BigDecimal  freight = new BigDecimal(0);
+		if (provinces.contains("省")) {
+			provinces = provinces.substring(0, provinces.indexOf("省"));
+		}
+		if (provinces.contains("市")) {
+			provinces = provinces.substring(0, provinces.indexOf("市"));
+		}
+		if (weight > 0) {
+			freight = calculateFreight(provinces,arae,weight,sumPrice)  ;
+		}
+		return freight;
+	}
+	
+	
+	public static BigDecimal calculateFreight(String provinces,String area,double weight,BigDecimal sumPrice) {
+		BigDecimal  freight = new BigDecimal(0);
+		 DecimalFormat deicmalFormat =new DecimalFormat("#.00");
+		if (sumPrice.compareTo(basePrice) == 1 || sumPrice.compareTo(basePrice) == 0 ) { //满38元  重庆主城区不收费，主城以外按运费计算规则超过7元 用计算的出的减去7元 ，未超过7元不收费
+			if (!checkMainCity(provinces,area)) {
+				freight = calculateFreight(provinces,weight);
+				if (freight.compareTo(new BigDecimal(7)) ==1 ){
+					freight = freight.subtract(new BigDecimal(7));
+				} else {
+					freight = new BigDecimal(0);
+				}
+			} 
+		} else {  //重庆主城区收7元，主城以外按运费计算规则（最低7元）
+			if (!checkMainCity(provinces,area)) {
+				freight = calculateFreight(provinces,weight);
+				if (freight.compareTo(new BigDecimal(7)) == -1) {
+					freight = new BigDecimal(7);
+				} 
+			} else {
+				freight = new BigDecimal(7);
+			}
+		}
+		freight = new BigDecimal(deicmalFormat.format(freight)) ;
+		return freight;
+	}
+	
+	/**
+	 * 运算规则
+	 * @param provinces
+	 * @param weight
+	 * @return    
+	 * @return BigDecimal    
+	 * Date:2017年10月18日 下午2:42:04 
+	 * @author hexw
+	 */
+	public static BigDecimal calculateFreight(String provinces,double weight){
+		BigDecimal freight = new BigDecimal(0);
+		DecimalFormat deicmalFormat =new DecimalFormat("#.00");
+		if (first_Provinces.contains(provinces)) {
+			freight = getProvincesFreight(weight,first_Freight,first_beyond_Freight);
+		}
+		if (second_Provinces.contains(provinces)) {
+			freight = getProvincesFreight(weight,second_Freight,second_beyond_Freight);	
+		}
+		if (three_Provinces.contains(provinces)) {
+			freight = getProvincesFreight(weight,three_Freight,three_beyond_Freight);
+		}
+		if (four_Provinces.contains(provinces)) {
+			freight = getProvincesFreight(weight,four_Freight,four_beyond_Freight);
+		}
+		if (five_Provinces.contains(provinces)) {
+			freight = getProvincesFreight(weight,five_Freight,five_beyond_Freight);
+		}
+		if (six_Provinces.contains(provinces)) {
+			freight = getProvincesFreight(weight,six_Freight,six_beyond_Freight);
+		}
+		if (weight > 30) {  //超过30公斤 每公斤增加3角配送费
+			double beyondWeight = weight -30;
+			BigDecimal beyond = new BigDecimal(Math.ceil(beyondWeight)).multiply(new BigDecimal(0.3));
+			freight = freight.add(beyond);
+		}
+		freight = new BigDecimal(deicmalFormat.format(freight)) ;
+		return freight;
+	}
+	
+	/**
+	 * 计算续重的金额
+	 * @param weight
+	 * @param freight
+	 * @param beyondWeight
+	 * @return    
+	 * @return BigDecimal    
+	 * Date:2017年10月18日 下午2:38:30 
+	 * @author hexw
+	 */
+	public static  BigDecimal getProvincesFreight(double weight,BigDecimal freight,BigDecimal beyondWeight){
+		weight = NumberUtil.round(weight, 2); //保留两位小数
+		BigDecimal allFreight = new  BigDecimal(0); 
+ 		if (weight > 5) {
+			double remainder = weight - 1;  //首重一公斤
+			BigDecimal beyond = new BigDecimal(Math.ceil(remainder));
+			allFreight = freight.add(beyond.multiply(beyondWeight));
+		} else {
+			allFreight = freight;
+		}
+		return allFreight;
+	}
+	
+	
+	/**
+	 * 判断是不是重庆主城区
+	 * @param provinces
+	 * @param arae
+	 * @return    
+	 * @return boolean    
+	 * Date:2017年10月18日 下午2:44:43 
+	 * @author hexw
+	 */
+	public static boolean checkMainCity(String provinces,String arae){
+		boolean flag = false;
+		if (provinces.equals("重庆")) {
+			if (cqMainCity.contains(arae)) {
+				flag = true;
+			}
+		}
+		return flag;
+	}
+	
+	/**
+	 * 根据商品列表获取重量
+	 * @param freightGoods
+	 * @return
+	 * @Description 
+	 * @date 2017年10月25日  下午7:44:38
+	 * @author wy
+	 * 2017
+	 * @return double
+	 */
+	public static double getWeightByGoods(List<FreightGoods> freightGoods) {
+		double weight = 0;
+		for (FreightGoods freightGoodssingle : freightGoods) {
+			Goods goods = freightGoodssingle.getGoods(); //商品
+			int num = freightGoodssingle.getNum();//数量
+			String goodweight = goods.getWeight();
+			if (StringUtil.isEmpty(goodweight)) {
+				goodweight = "0";
+			}
+			weight = weight + Double.parseDouble(goodweight)*num;
+		}
+		return weight;
+		
+	}
+	
+}
+  

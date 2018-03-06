@@ -1,0 +1,198 @@
+package com.zfj.xmy.activity.service.pc.impl;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.util.common.DateUtil;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.activity.persistence.pc.dao.PcPointsGoodsExMapper;
+import com.zfj.xmy.activity.persistence.pc.pojo.dto.PcPointsGoodsDto;
+import com.zfj.xmy.activity.service.pc.PcPointsStoreService;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.PointsActivityMapper;
+import com.zfj.xmy.common.persistence.dao.PointsGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.dao.UserSpendPointsMapper;
+import com.zfj.xmy.common.persistence.pojo.PointsActivity;
+import com.zfj.xmy.common.persistence.pojo.PointsGoods;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.common.persistence.pojo.UserSpendPoints;
+import com.zfj.xmy.common.service.CommonGoodsService;
+
+@Service
+public class PcPointsStoreServiceImpl extends BaseService implements PcPointsStoreService{
+
+	@Autowired
+	private PointsActivityMapper pointsActivityMapper;
+	
+	@Autowired
+	private PcPointsGoodsExMapper pointsGoodsExMapper;
+	
+	@Autowired
+	private UserSpendPointsMapper userSpendPointsMapper;
+	
+	@Autowired
+	private PointsGoodsMapper pointsGoodsMapper;
+	
+	@Autowired
+	private UserInfoMapper userInfoMapper;
+	
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	private final static int STATUS=0;
+	private final static int SIGN=0;
+	
+	@Override
+	public List<PointsActivity> findPointsActivity() {
+		ReqData reqData=new ReqData();
+		reqData.putValue("status", STATUS,SystemConstant.REQ_PARAMETER_EQ);
+		List<PointsActivity> list=pointsActivityMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return list;
+	}
+
+	@Override
+	public List<PcPointsGoodsDto> findPointsGoodsDto(Long id) {
+		List<PcPointsGoodsDto> goods=new ArrayList<PcPointsGoodsDto>();
+		
+		ReqData reqData=new ReqData();
+		reqData.putValue("points_id", id,SystemConstant.REQ_PARAMETER_EQ);
+		List<PcPointsGoodsDto> list=pointsGoodsExMapper.selectPointsGoods(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for(PcPointsGoodsDto pGoods:list){
+			String img=commonGoodsService.getFirstGoodsImg(pGoods.getGoodsId());
+			if(StringUtil.isEmpty(img)){
+				img="resource/commons/images/defaultgoods.jpg";
+			}
+			pGoods.setImgPath(img);
+			goods.add(pGoods);
+		}
+		return goods;
+	}
+
+	@Override
+	public void addPoints(long userId) {
+		ReqData reqData=new ReqData();
+		Date date=new Date();
+		String today=DateUtil.format(date, "yyyy-mm-dd");
+		String yesterday=DateUtil.format(DateUtil.addDayOfYear(date, -1), "yyyy-MM-dd");
+		
+		UserSpendPoints usp=new UserSpendPoints();
+		reqData.putValue("user_id", userId,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("sign", SIGN,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("creat_time", yesterday,SystemConstant.REQ_PARAMETER_GE);
+		reqData.putValue("creat_time", today,SystemConstant.REQ_PARAMETER_LE);
+		List<UserSpendPoints> userPoints=userSpendPointsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		int points=0;
+		UserInfo userinfo=userInfoMapper.selectByPrimaryKey(userId);
+		if(userPoints!=null&&userPoints.size()>0){
+			int days=userPoints.get(0).getDays();
+			usp.setUserId(userId);
+			usp.setType(2);
+			if(days>=7){
+				usp.setMoneyPoint(new BigDecimal(5));
+				usp.setDays(1);
+				points=5;
+			}else{
+				usp.setMoneyPoint(new BigDecimal((days+1)*5));
+				usp.setDays(days+1);
+				points=(days+1)*5;
+			}
+			usp.setSpendType(1);
+			usp.setRemarks("签到得"+(days+1)*5+"积分！");
+			usp.setIsDel(1);
+			usp.setSign(0);
+			usp.setCreatTime(new Date());
+			usp.setConsole(userinfo.getRealName());
+			userSpendPointsMapper.insert(usp);
+			
+		}
+		if(userPoints==null||userPoints.size()==0){
+			usp.setUserId(userId);
+			usp.setType(2);
+			usp.setMoneyPoint(new BigDecimal(5));
+			usp.setDays(1);
+			usp.setSpendType(1);
+			usp.setRemarks("签到得5积分！");
+			usp.setIsDel(1);
+			usp.setSign(0);
+			usp.setCreatTime(new Date());
+			usp.setConsole(userinfo.getRealName());
+			userSpendPointsMapper.insert(usp);
+			
+			points=5;
+		}
+		
+		if(userinfo.getAccPoints()==null||"".equals(userinfo.getAccPoints())){
+			userinfo.setAccPoints(points);
+		}else {
+			userinfo.setAccPoints(userinfo.getAccPoints()+points);
+		}
+		
+		userInfoMapper.updateByPrimaryKeySelective(userinfo);
+	}
+
+	@Override
+	public int findPoints(long userId) {
+		//0.没签过 1.签过
+		ReqData reqData=new ReqData();
+		String date=DateUtil.format(new Date(), "yyyy-MM-dd");
+		reqData.putValue("user_id", userId,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("sign", SIGN,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("creat_time", date,SystemConstant.REQ_PARAMETER_GE);
+		List<UserSpendPoints> userPoints=userSpendPointsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if(userPoints!=null&&userPoints.size()>0){
+			return 1;
+		}else{
+			return 0;
+		}
+		
+	}
+
+	@Override
+	public int findDays(long userId) {
+		ReqData reqData=new ReqData();
+		String date=DateUtil.format(new Date(), "yyyy-MM-dd");
+		reqData.putValue("user_id", userId,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("sign", SIGN,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("creat_time", date,SystemConstant.REQ_PARAMETER_GE);
+		List<UserSpendPoints> userPoints=userSpendPointsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if(userPoints!=null&&userPoints.size()>0){
+			return userPoints.get(0).getDays();
+		}
+		return 0;
+	}
+
+	@Override
+	public PointsGoods findPointGoods(Long id) {
+		PointsGoods pointsGoods=pointsGoodsMapper.selectByPrimaryKey(id);
+		return pointsGoods;
+	}
+
+	@Override
+	public PointsActivity findPointsAct(long actId) {
+		return pointsActivityMapper.selectByPrimaryKey(actId);
+	}
+
+	@Override
+	public PointsGoods findPoGoods(long goodsId, long actId) {
+		ReqData reqData=new ReqData();
+		reqData.putValue("goods_id", goodsId,SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("points_id", actId,SystemConstant.REQ_PARAMETER_EQ);
+		List<PointsGoods> list=pointsGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return list.get(0);
+	}
+	
+	@Override
+	public PointsGoods getPointsGoods(Long id){
+		return pointsGoodsMapper.selectByPrimaryKey(id);
+				
+	}
+}

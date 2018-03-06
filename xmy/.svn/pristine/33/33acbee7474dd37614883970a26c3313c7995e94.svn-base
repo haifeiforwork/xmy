@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.activity.persistence.pc.dao.PcTermDataExMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.activity.persistence.pc.pojo.dto.PcDownColumDto" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="parent_id" property="parentId" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="vid" property="vid" jdbcType="BIGINT" />
+    <result column="sn" property="sn" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="weight" property="weight" jdbcType="INTEGER" />
+    <result column="icon" property="icon" jdbcType="VARCHAR" />
+    <result column="is_show" property="isShow" jdbcType="INTEGER" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="pc_backgroud_img" property="pcBackgroudImg" jdbcType="VARCHAR" />
+    <result column="background_img_url" property="backgroundImgUrl" jdbcType="VARCHAR" />
+  </resultMap>
+ <!-- @auth lij @date 2017年8月10日19:42:12 查询底部栏目全部返回扩展的底部栏目DTO -->
+ <select id="selectDownColum" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+	select * from term_data<if test="_parameter != null" ><include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+ </select>
+</mapper>

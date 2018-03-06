@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+  	<artifactId>xmy</artifactId>
+  	<groupId>com.zfj.xmy</groupId>
+  	<version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <groupId>com.zfj.xmy.pay</groupId>
+  <artifactId>xmy-pay-service</artifactId>
+  <packaging>jar</packaging>
+
+  <name>xmy-pay-service</name>
+  <url>http://maven.apache.org</url>
+  
+  <dependencies>  	
+	<dependency>
+	    <groupId>com.zfj.xmy.common</groupId>
+  		<artifactId>xmy-common-service</artifactId>
+  		<version>${xmy.version}</version>
+	</dependency>		
+	<dependency>
+	  <groupId>com.alipay.api</groupId>
+	  <artifactId>alipay-sdk</artifactId>
+	</dependency>
+	<dependency>
+	    <groupId>org.bouncycastle</groupId>
+	    <artifactId>bcprov-jdk15on</artifactId>
+	    <version>1.54</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
+	<dependency>
+		<groupId>commons-httpclient</groupId>
+		<artifactId>commons-httpclient</artifactId>
+		<version>3.1</version>
+	</dependency>
+	
+  </dependencies>
+  
+  <build>
+  	<plugins>
+  		<plugin>
+  			<artifactId>maven-compiler-plugin</artifactId>
+  		</plugin>
+  		<plugin>
+  			<artifactId>maven-resources-plugin</artifactId>
+  		</plugin>
+  		<plugin>
+  			<artifactId>maven-source-plugin</artifactId>
+  		</plugin>  		
+  	</plugins>
+  </build>
+</project>

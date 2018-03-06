@@ -1,0 +1,107 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>评价管理</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/center/center_appraise.css">
+  </head>
+  
+  <body>
+  <%@include file="/WEB-INF/jsp/commons/nav/nav_personal.jsp" %>
+  <div class="content">
+    <div class="w-1250">
+        <%@include file="/WEB-INF/jsp/commons/nav/personal_left_menu.jsp" %>
+        <div class="content-right">
+            <div class="category">
+                <div class="category-title">评价管理</div>
+                <div class="category-content">
+                    <div class="cate-content-title clearfix">
+                        <ul class="cate-nav">
+                            <a style="color: #767676" href="center/toAppraise?pageIndex=1&status=99&set=15"><li ${status==99?'class="first active"':'' }>我的全部评论</li></a>
+                            <a style="color: #767676" href="center/toAppraise?pageIndex=1&status=0&set=15"><li ${status==0?'class="first active"':'' }>待评价订单</li></a>
+                            <a style="color: #767676" href="center/toAppraise?pageIndex=1&status=1&set=15"><li ${status==1?'class="first active"':'' }>已评价订单</li></a>
+                            <a style="color: #767676" href="center/toAppraise?pageIndex=1&status=4&set=15"><li ${status==4?'class="first active"':'' }>好评</li></a>
+                            <a style="color: #767676" href="center/toAppraise?pageIndex=1&status=3&set=15"><li ${status==3?'class="first active"':'' }>中评</li></a>
+                            <a style="color: #767676" href="center/toAppraise?pageIndex=1&status=2&set=15"><li ${status==2?'class="first active"':'' }>差评</li></a>
+                        </ul>
+                    </div>
+                    <div class="cate-table">
+                        <div>
+                            <table cellspacing="0">
+                                <tr class="th">
+                                    <th class="text-center first sug-default">评价</th>
+                                    <th class="text-center sug-most-default">评价</th>
+                                    <th class="text-center sug-default">被评论商家</th>
+                                    <th class="text-center sug-lg-default">宝贝信息</th>
+                                    <th class="text-center last last-default">操作</th>
+                                </tr>
+                                <c:if test="${empty comm }">
+                                	<tr class="table-list">
+                                		<td class="text-center" colspan="9">暂无相关数据！</td>
+                                	</tr>
+                                </c:if>
+                                <c:if test="${!empty comm }">
+	                                <c:forEach items="${comm }" var="comm">
+	                                	<tr class="table-list">
+		                                    <td class="text-center" style="display: ${comm.commentStar==1?'':'none'};"><i class="iconfont">&#xe627;</i></td>
+		                                    <td class="text-center" style="display: ${comm.commentStar==2?'':'none'};"><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i></td>
+		                                    <td class="text-center" style="display: ${comm.commentStar==3?'':'none'};"><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i></td>
+		                                    <td class="text-center" style="display: ${comm.commentStar==4?'':'none'};"><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i></td>
+		                                    <td class="text-center" style="display: ${comm.commentStar==5?'':'none'};"><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i><i class="iconfont">&#xe627;</i></td>
+		                                    <td class="td-content">${comm.commentConten }</td>
+		                                    <td class="text-center">夫唱妇随</td>
+		                                    <td class="text-center">念及盒撒子鬼撒子鬼 250/g一盒</td>
+		                                    <td class="add-theme-color text-center"></td>
+	                                	</tr>
+	                                </c:forEach>
+                                </c:if>
+                            </table>
+                        </div>
+                    </div>
+                    <c:if test="${pageBean.totalPage!=0 }">
+                    <div class="paging btn-group">
+                        <button type="button" style="cursor: pointer;" class="btn-default btn-top" onclick="window.location='/center/toAppraise?pageIndex=1&set=10&status=${status}'">首页</button>
+                        <c:if test="${pageBean.pageIndex==1}">
+                        	<button type="button" style="cursor: pointer;" class="btn-default btn-prevee">上一页</button>
+                        </c:if>
+                         <c:if test="${pageBean.pageIndex==0}">
+                        	<button type="button" style="cursor: pointer;" class="btn-default btn-prevee">上一页</button>
+                        </c:if>
+                        <c:if test="${pageBean.pageIndex!=0}">
+                        <c:if test="${pageBean.pageIndex!=1}">
+                        	<button type="button" style="cursor: pointer;" class="btn-default btn-prevee" onclick="window.location='/center/toAppraise?pageIndex=${pageBean.pageIndex-1}&set=10&status=${status}'">上一页</button>
+                        </c:if>
+                        </c:if>
+                        ${pageBean.pageIndex }/${pageBean.totalPage }
+                        <c:if test="${pageBean.totalPage==0 || pageBean.pageIndex==pageBean.totalPage }">
+                        	<button type="button" style="cursor: pointer;" class="btn-default btn-nextt">下一页</button>
+                        </c:if>
+                        
+                        <c:if test="${pageBean.pageIndex!=pageBean.totalPage&&pageBean.totalPage!=0 }">
+                        	<button type="button" style="cursor: pointer;" class="btn-default btn-nextt" onclick="window.location='/center/toAppraise?pageIndex=${pageBean.pageIndex+1}&set=10&status=${status}'">下一页</button>
+                        </c:if>
+                        <button type="button" style="cursor: pointer;" class="btn-default btn-last" onclick="window.location='/center/toAppraise?pageIndex=${pageBean.totalPage }&set=10&status=${status}'">末页</button>
+                     </div>
+                    </c:if>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  
+<%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %>
+<script>
+$(document).ready(function () {
+    $(".cate-table>div:gt(0)").hide();
+    $(".cate-nav li").click(function () {
+        $(this).addClass("active").siblings().removeClass("active")
+        var index=$(".cate-nav li").index(this);
+        $("div.cate-table>div").eq(index).show().siblings().hide()
+
+    })
+})
+</script>
+  </body>
+</html>

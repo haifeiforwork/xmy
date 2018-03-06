@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.goods.persistence.app.dao.AppShoppingCartExMapper">
+	<resultMap type="com.zfj.xmy.goods.persistence.app.pojo.dto.AppShoppingCartDir" id="BaseResultMap">
+		<id column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="goodsId" property="goodsId" jdbcType="BIGINT" />
+		<result column="activityId" property="activityId" jdbcType="BIGINT" />
+		<result column="presentGoodsId" property="presentGoodsId" jdbcType="BIGINT" />
+		<result column="presentName" property="presentName" jdbcType="VARCHAR" />
+		<result column="activityPrice" property="activityPrice" jdbcType="DECIMAL" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="remark_num" property="remarkNum" jdbcType="VARCHAR" />
+		<result column="unit_name" property="unitName" jdbcType="VARCHAR" />
+		<result column="weight" property="weight" jdbcType="VARCHAR" />
+		<result column="standard" property="standard" jdbcType="VARCHAR" />
+		<result column="price" property="price" jdbcType="DECIMAL" />
+		<result column="vip_price" property="vipPrice" jdbcType="DECIMAL" />
+		<result column="supplier_name" property="supplierName" jdbcType="VARCHAR" />
+		<result column="is_putway" property="isPutway" jdbcType="INTEGER" />
+		<result column="activityType" property="activityType" jdbcType="INTEGER" />
+		<result column="num" property="num" jdbcType="INTEGER" />
+		<result column="goodsNum" property="goodsNum" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<!-- @author hexw 查询购物车信息-->
+	<select id="selectShoppingCart" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+	    select a.user_id userId,b.id goodsId,a.activity_id activityId,a.present_goods_id presentGoodsId,a.activity_price activityPrice,c.name presentName, b.name,b.remark_num, b.unit_name,b.weight,b.standard,b.price,b.vip_price,b.supplier_name,b.is_putway,b.num goodsNum, a.num num 
+	    ,a.activity_type activityType from shopping_cart a
+		LEFT JOIN goods b on a.goods_id = b.id
+	   	LEFT JOIN goods c on a.present_goods_id = c.id 
+	   <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+	   </if>
+	   <if test="orderByClause != null" >
+	     order by ${orderByClause}
+	  </if>
+	</select>
+	
+	<!-- 查询用户参与活动的次数    @auther  hexw -->
+	<select id="countLimitAcivity" parameterType="com.appdev.db.common.CriteriaParameter" resultType="Integer">
+			select count(DISTINCT(a.id)) from `order` a LEFT JOIN order_goods b on a.id = b.order_id
+			<if test="_parameter != null" ><include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	</select>
+
+</mapper>

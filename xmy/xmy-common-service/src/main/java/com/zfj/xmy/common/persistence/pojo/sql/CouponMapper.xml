@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.CouponMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.Coupon" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="coupon_count" property="couponCount" jdbcType="BIGINT" />
+    <result column="coupon_value" property="couponValue" jdbcType="DECIMAL" />
+    <result column="quota" property="quota" jdbcType="INTEGER" />
+    <result column="coupon_img" property="couponImg" jdbcType="VARCHAR" />
+    <result column="effective_start_time" property="effectiveStartTime" jdbcType="TIMESTAMP" />
+    <result column="effective_end_time" property="effectiveEndTime" jdbcType="TIMESTAMP" />
+    <result column="use_strategy" property="useStrategy" jdbcType="INTEGER" />
+    <result column="use_with_others" property="useWithOthers" jdbcType="INTEGER" />
+    <result column="supplier_ids" property="supplierIds" jdbcType="VARCHAR" />
+    <result column="use_range" property="useRange" jdbcType="INTEGER" />
+    <result column="use_range_ids" property="useRangeIds" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="use_num" property="useNum" jdbcType="BIGINT" />
+    <result column="show_in_coupon_center" property="showInCouponCenter" jdbcType="BIGINT" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.zfj.xmy.common.persistence.pojo.Coupon" extends="BaseResultMap" >
+    <result column="des" property="des" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, `name`, coupon_count, coupon_value, quota, coupon_img, effective_start_time, 
+    effective_end_time, use_strategy, use_with_others, supplier_ids, use_range, use_range_ids, 
+    `status`, use_num, show_in_coupon_center
+  </sql>
+  <sql id="Blob_Column_List" >
+    des
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from coupon
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from coupon
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleWithBLOBsAndPage" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from coupon
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from coupon
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from coupon
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from coupon
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update coupon
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null" >
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.couponCount != null" >
+        coupon_count = #{record.couponCount,jdbcType=BIGINT},
+      </if>
+      <if test="record.couponValue != null" >
+        coupon_value = #{record.couponValue,jdbcType=DECIMAL},
+      </if>
+      <if test="record.quota != null" >
+        quota = #{record.quota,jdbcType=INTEGER},
+      </if>
+      <if test="record.couponImg != null" >
+        coupon_img = #{record.couponImg,jdbcType=VARCHAR},
+      </if>
+      <if test="record.effectiveStartTime != null" >
+        effective_start_time = #{record.effectiveStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.effectiveEndTime != null" >
+        effective_end_time = #{record.effectiveEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.useStrategy != null" >
+        use_strategy = #{record.useStrategy,jdbcType=INTEGER},
+      </if>
+      <if test="record.useWithOthers != null" >
+        use_with_others = #{record.useWithOthers,jdbcType=INTEGER},
+      </if>
+      <if test="record.supplierIds != null" >
+        supplier_ids = #{record.supplierIds,jdbcType=VARCHAR},
+      </if>
+      <if test="record.useRange != null" >
+        use_range = #{record.useRange,jdbcType=INTEGER},
+      </if>
+      <if test="record.useRangeIds != null" >
+        use_range_ids = #{record.useRangeIds,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
+        `status` = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.useNum != null" >
+        use_num = #{record.useNum,jdbcType=BIGINT},
+      </if>
+      <if test="record.showInCouponCenter != null" >
+        show_in_coupon_center = #{record.showInCouponCenter,jdbcType=BIGINT},
+      </if>
+      <if test="record.des != null" >
+        des = #{record.des,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update coupon
+    set id = #{record.id,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      coupon_count = #{record.couponCount,jdbcType=BIGINT},
+      coupon_value = #{record.couponValue,jdbcType=DECIMAL},
+      quota = #{record.quota,jdbcType=INTEGER},
+      coupon_img = #{record.couponImg,jdbcType=VARCHAR},
+      effective_start_time = #{record.effectiveStartTime,jdbcType=TIMESTAMP},
+      effective_end_time = #{record.effectiveEndTime,jdbcType=TIMESTAMP},
+      use_strategy = #{record.useStrategy,jdbcType=INTEGER},
+      use_with_others = #{record.useWithOthers,jdbcType=INTEGER},
+      supplier_ids = #{record.supplierIds,jdbcType=VARCHAR},
+      use_range = #{record.useRange,jdbcType=INTEGER},
+      use_range_ids = #{record.useRangeIds,jdbcType=VARCHAR},
+      `status` = #{record.status,jdbcType=INTEGER},
+      use_num = #{record.useNum,jdbcType=BIGINT},
+      show_in_coupon_center = #{record.showInCouponCenter,jdbcType=BIGINT},
+      des = #{record.des,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update coupon
+    set id = #{record.id,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      coupon_count = #{record.couponCount,jdbcType=BIGINT},
+      coupon_value = #{record.couponValue,jdbcType=DECIMAL},
+      quota = #{record.quota,jdbcType=INTEGER},
+      coupon_img = #{record.couponImg,jdbcType=VARCHAR},
+      effective_start_time = #{record.effectiveStartTime,jdbcType=TIMESTAMP},
+      effective_end_time = #{record.effectiveEndTime,jdbcType=TIMESTAMP},
+      use_strategy = #{record.useStrategy,jdbcType=INTEGER},
+      use_with_others = #{record.useWithOthers,jdbcType=INTEGER},
+      supplier_ids = #{record.supplierIds,jdbcType=VARCHAR},
+      use_range = #{record.useRange,jdbcType=INTEGER},
+      use_range_ids = #{record.useRangeIds,jdbcType=VARCHAR},
+      `status` = #{record.status,jdbcType=INTEGER},
+      use_num = #{record.useNum,jdbcType=BIGINT},
+      show_in_coupon_center = #{record.showInCouponCenter,jdbcType=BIGINT}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from coupon
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from coupon
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.Coupon" useGeneratedKeys="true" keyProperty="id" >
+    insert into coupon (`name`, coupon_count, coupon_value, 
+      quota, coupon_img, effective_start_time, 
+      effective_end_time, use_strategy, use_with_others, 
+      supplier_ids, use_range, use_range_ids, 
+      `status`, use_num, show_in_coupon_center, 
+      des)
+    values (#{name,jdbcType=VARCHAR}, #{couponCount,jdbcType=BIGINT}, #{couponValue,jdbcType=DECIMAL}, 
+      #{quota,jdbcType=INTEGER}, #{couponImg,jdbcType=VARCHAR}, #{effectiveStartTime,jdbcType=TIMESTAMP}, 
+      #{effectiveEndTime,jdbcType=TIMESTAMP}, #{useStrategy,jdbcType=INTEGER}, #{useWithOthers,jdbcType=INTEGER}, 
+      #{supplierIds,jdbcType=VARCHAR}, #{useRange,jdbcType=INTEGER}, #{useRangeIds,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER}, #{useNum,jdbcType=BIGINT}, #{showInCouponCenter,jdbcType=BIGINT}, 
+      #{des,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.Coupon" useGeneratedKeys="true" keyProperty="id" >
+    insert into coupon
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        `name`,
+      </if>
+      <if test="couponCount != null" >
+        coupon_count,
+      </if>
+      <if test="couponValue != null" >
+        coupon_value,
+      </if>
+      <if test="quota != null" >
+        quota,
+      </if>
+      <if test="couponImg != null" >
+        coupon_img,
+      </if>
+      <if test="effectiveStartTime != null" >
+        effective_start_time,
+      </if>
+      <if test="effectiveEndTime != null" >
+        effective_end_time,
+      </if>
+      <if test="useStrategy != null" >
+        use_strategy,
+      </if>
+      <if test="useWithOthers != null" >
+        use_with_others,
+      </if>
+      <if test="supplierIds != null" >
+        supplier_ids,
+      </if>
+      <if test="useRange != null" >
+        use_range,
+      </if>
+      <if test="useRangeIds != null" >
+        use_range_ids,
+      </if>
+      <if test="status != null" >
+        `status`,
+      </if>
+      <if test="useNum != null" >
+        use_num,
+      </if>
+      <if test="showInCouponCenter != null" >
+        show_in_coupon_center,
+      </if>
+      <if test="des != null" >
+        des,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="couponCount != null" >
+        #{couponCount,jdbcType=BIGINT},
+      </if>
+      <if test="couponValue != null" >
+        #{couponValue,jdbcType=DECIMAL},
+      </if>
+      <if test="quota != null" >
+        #{quota,jdbcType=INTEGER},
+      </if>
+      <if test="couponImg != null" >
+        #{couponImg,jdbcType=VARCHAR},
+      </if>
+      <if test="effectiveStartTime != null" >
+        #{effectiveStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="effectiveEndTime != null" >
+        #{effectiveEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="useStrategy != null" >
+        #{useStrategy,jdbcType=INTEGER},
+      </if>
+      <if test="useWithOthers != null" >
+        #{useWithOthers,jdbcType=INTEGER},
+      </if>
+      <if test="supplierIds != null" >
+        #{supplierIds,jdbcType=VARCHAR},
+      </if>
+      <if test="useRange != null" >
+        #{useRange,jdbcType=INTEGER},
+      </if>
+      <if test="useRangeIds != null" >
+        #{useRangeIds,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="useNum != null" >
+        #{useNum,jdbcType=BIGINT},
+      </if>
+      <if test="showInCouponCenter != null" >
+        #{showInCouponCenter,jdbcType=BIGINT},
+      </if>
+      <if test="des != null" >
+        #{des,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.Coupon" >
+    update coupon
+    <set >
+      <if test="name != null" >
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="couponCount != null" >
+        coupon_count = #{couponCount,jdbcType=BIGINT},
+      </if>
+      <if test="couponValue != null" >
+        coupon_value = #{couponValue,jdbcType=DECIMAL},
+      </if>
+      <if test="quota != null" >
+        quota = #{quota,jdbcType=INTEGER},
+      </if>
+      <if test="couponImg != null" >
+        coupon_img = #{couponImg,jdbcType=VARCHAR},
+      </if>
+      <if test="effectiveStartTime != null" >
+        effective_start_time = #{effectiveStartTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="effectiveEndTime != null" >
+        effective_end_time = #{effectiveEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="useStrategy != null" >
+        use_strategy = #{useStrategy,jdbcType=INTEGER},
+      </if>
+      <if test="useWithOthers != null" >
+        use_with_others = #{useWithOthers,jdbcType=INTEGER},
+      </if>
+      <if test="supplierIds != null" >
+        supplier_ids = #{supplierIds,jdbcType=VARCHAR},
+      </if>
+      <if test="useRange != null" >
+        use_range = #{useRange,jdbcType=INTEGER},
+      </if>
+      <if test="useRangeIds != null" >
+        use_range_ids = #{useRangeIds,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="useNum != null" >
+        use_num = #{useNum,jdbcType=BIGINT},
+      </if>
+      <if test="showInCouponCenter != null" >
+        show_in_coupon_center = #{showInCouponCenter,jdbcType=BIGINT},
+      </if>
+      <if test="des != null" >
+        des = #{des,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.zfj.xmy.common.persistence.pojo.Coupon" >
+    update coupon
+    set `name` = #{name,jdbcType=VARCHAR},
+      coupon_count = #{couponCount,jdbcType=BIGINT},
+      coupon_value = #{couponValue,jdbcType=DECIMAL},
+      quota = #{quota,jdbcType=INTEGER},
+      coupon_img = #{couponImg,jdbcType=VARCHAR},
+      effective_start_time = #{effectiveStartTime,jdbcType=TIMESTAMP},
+      effective_end_time = #{effectiveEndTime,jdbcType=TIMESTAMP},
+      use_strategy = #{useStrategy,jdbcType=INTEGER},
+      use_with_others = #{useWithOthers,jdbcType=INTEGER},
+      supplier_ids = #{supplierIds,jdbcType=VARCHAR},
+      use_range = #{useRange,jdbcType=INTEGER},
+      use_range_ids = #{useRangeIds,jdbcType=VARCHAR},
+      `status` = #{status,jdbcType=INTEGER},
+      use_num = #{useNum,jdbcType=BIGINT},
+      show_in_coupon_center = #{showInCouponCenter,jdbcType=BIGINT},
+      des = #{des,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.Coupon" >
+    update coupon
+    set `name` = #{name,jdbcType=VARCHAR},
+      coupon_count = #{couponCount,jdbcType=BIGINT},
+      coupon_value = #{couponValue,jdbcType=DECIMAL},
+      quota = #{quota,jdbcType=INTEGER},
+      coupon_img = #{couponImg,jdbcType=VARCHAR},
+      effective_start_time = #{effectiveStartTime,jdbcType=TIMESTAMP},
+      effective_end_time = #{effectiveEndTime,jdbcType=TIMESTAMP},
+      use_strategy = #{useStrategy,jdbcType=INTEGER},
+      use_with_others = #{useWithOthers,jdbcType=INTEGER},
+      supplier_ids = #{supplierIds,jdbcType=VARCHAR},
+      use_range = #{useRange,jdbcType=INTEGER},
+      use_range_ids = #{useRangeIds,jdbcType=VARCHAR},
+      `status` = #{status,jdbcType=INTEGER},
+      use_num = #{useNum,jdbcType=BIGINT},
+      show_in_coupon_center = #{showInCouponCenter,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

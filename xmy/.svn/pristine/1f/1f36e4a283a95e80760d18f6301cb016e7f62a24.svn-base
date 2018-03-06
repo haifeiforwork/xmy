@@ -1,0 +1,384 @@
+package com.zfj.xmy.common.service.impl;  
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.xmy.common.DateUtils;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.SystemConstant.ORDER;
+import com.zfj.xmy.common.SystemConstant.TRADEPRODUCTION;
+import com.zfj.xmy.common.persistence.dao.GoodsCommExMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OrderGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OrderMapper;
+import com.zfj.xmy.common.persistence.dao.ShoppingCardMapper;
+import com.zfj.xmy.common.persistence.dao.ShoppingCardRecordMapper;
+import com.zfj.xmy.common.persistence.dao.TradeProductionMapper;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.OrderGoods;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCard;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCardRecord;
+import com.zfj.xmy.common.persistence.pojo.TradeProduction;
+import com.zfj.xmy.common.service.CommonPayOrderService;
+import com.zfj.xmy.util.SendSMSUtil;
+
+/** 
+ * @Title: CommonOrderServiceImpl.java 
+ * @Package com.zfj.xmy.common.service.impl 
+ * @Description: 
+ * @author hexw
+ * @date 2017年11月18日 下午3:57:14 
+ */
+@Service		
+public class CommonPayOrderServiceImpl extends BaseService implements CommonPayOrderService {
+	
+	@Autowired
+	private OrderMapper orderMapper;
+	
+	@Autowired
+	private ShoppingCardMapper shoppingCardMapper;
+	
+	@Autowired
+	private ShoppingCardRecordMapper shoppingCardRecordMapper;
+	
+	@Autowired
+	private TradeProductionMapper tradeProductionMapper;
+	
+	@Autowired
+	private OrderGoodsMapper orderGoodsMapper;
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Autowired
+	private GoodsCommExMapper goodsCommExMapper;
+	
+	/**
+	 * 混合支付 （购物卡和第三方支付）* 支付后的回调 
+	 * @param orderId
+	 * @param userId
+	 * @param shoppingCardPayPrices   购物卡支付金额  
+	 * @return void    
+	 * Date:2017年11月18日 下午4:00:57 
+	 * @author hexw
+	 */
+	@Transactional(rollbackFor=Exception.class)
+	public void mixPayment(Long orderId,BigDecimal shoppingCardPayPrice){
+		// 1. 查询订单
+		Order order = orderMapper.selectByPrimaryKey(orderId);
+		if (ObjectUtil.isNotNull(order)) {
+			if (ObjectUtil.isNotNull(order.getUserId()) && 0 != order.getUserId() ) {
+		// 2. 获取用户所有购物卡的余额	记住“所有”后面要考
+				BigDecimal userAllBalance = getUserAllBalance(order.getUserId());
+				if (userAllBalance.compareTo(shoppingCardPayPrice) >= 0) {
+		// 3. 扣取用户购物卡余额
+					reduceShoppingCardBalance(shoppingCardPayPrice,order);
+					order.setPay(shoppingCardPayPrice);
+					order.setShipStatus(SystemConstant.ORDER.SHIP_STATUS_SUPPLY); //确认供货状态
+					orderMapper.updateByPrimaryKeySelective(order);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 获取用户所有的购物卡余额
+	 * @param userId
+	 * @return    
+	 * @return BigDecimal    
+	 * Date:2017年11月18日 下午4:09:18 
+	 * @author hexw
+	 */
+	@Override
+	public BigDecimal getUserAllBalance(Long userId){
+		DecimalFormat deicmalFormat =new DecimalFormat("#.00");
+		BigDecimal allBalance = new BigDecimal("0");
+		if (ObjectUtil.isNotNull(userId)) {
+			//查询所有已激活购物卡记录
+			ReqData reqData = new ReqData();
+			reqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("status", SystemConstant.SHOPPING_CARD.ACTIVE, SystemConstant.REQ_PARAMETER_EQ);//已激活的
+			List<ShoppingCard> cards = shoppingCardMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			if (ObjectUtil.isNotNull(cards)) {
+				for (ShoppingCard shopingCard : cards) {
+					allBalance = allBalance.add(ObjectUtils.isEmpty(shopingCard.getBalance()) ? new BigDecimal("0.00") : shopingCard.getBalance());
+				}
+			}
+		}
+		return new BigDecimal(deicmalFormat.format(allBalance)) ;
+	}
+	
+	/**
+	 * 扣取购物卡余额
+	 * @param payPrice    
+	 * @return void    
+	 * Date:2017年11月18日 下午4:29:58 
+	 * @author hexw
+	 */
+	@Transactional(rollbackFor=Exception.class)
+	public void reduceShoppingCardBalance(BigDecimal payPrice,Order order){
+		// 1. 查询用户所有有效的购物卡
+		ReqData reqData = new ReqData();
+		reqData.putValue("user_id", order.getUserId(), SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("status", SystemConstant.SHOPPING_CARD.ACTIVE, SystemConstant.REQ_PARAMETER_EQ);
+		List<ShoppingCard> selectByExample = shoppingCardMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (ShoppingCard shopingCard : selectByExample) {
+		// 2. 扣取金额 （若一张购物卡金额不足则扣取另一张）	
+			int compare = payPrice.compareTo(shopingCard.getBalance());
+			if (compare <= 0) { //当前购物可以全部抵扣
+				shopingCard.setBalance( shopingCard.getBalance().subtract(payPrice));
+				shoppingCardMapper.updateByPrimaryKey(shopingCard);
+				insertShoppingCardRecord(shopingCard,order.getId(),payPrice); //购物卡使用记录
+				break;
+			} else {
+				shopingCard.setBalance(BigDecimal.valueOf(0.00));//更改该购物卡的余额为0
+				payPrice = payPrice.subtract(shopingCard.getBalance());//修改支付的金额
+				shoppingCardMapper.updateByPrimaryKey(shopingCard);
+				insertShoppingCardRecord(shopingCard,order.getId(),shopingCard.getBalance());
+			}
+		}
+	}
+	
+	public void insertShoppingCardRecord(ShoppingCard shopingCard,Long orderId,BigDecimal payPrice){
+		ShoppingCardRecord shoppingCardRecord = new ShoppingCardRecord();
+		shoppingCardRecord.setShoppingCardId(shopingCard.getId());
+		shoppingCardRecord.setUserId(shopingCard.getUserId());
+		shoppingCardRecord.setUseTime(new Date());
+		shoppingCardRecord.setOrderId(orderId);
+		shoppingCardRecord.setRemark("订单消费了"+payPrice+"元");
+		shoppingCardRecordMapper.insertSelective(shoppingCardRecord);
+	}
+	
+	@Override
+	public int getIsPaySuccess(Long orderId){
+		int result = 1;
+		ReqData reqData = new ReqData();
+		reqData.putValue("business_order_id", orderId, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("transtate", TRADEPRODUCTION.TRANSTATE_SUCCESS, SystemConstant.REQ_PARAMETER_EQ);
+		List<TradeProduction> list = tradeProductionMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if (list.size() > 0) {
+			result = 0;
+		}
+		return result;
+	}
+	
+	@Override
+	public int checkPaySucessOrderIsCancle(Long orderId){
+		int result = 1 ; // 0 能取消 1不能取消
+		Order order = orderMapper.selectByPrimaryKey(orderId);
+		if (ObjectUtil.isNotNull(order)) {
+			Date payTime = null;  // 订单支付时间
+			if (ObjectUtil.isNotNull(order.getPayType())) {
+				if (ORDER.PAY_TYPE_PAYDELIVERY == order.getPayType() || ORDER.PAY_TYPE_GIFTCARD == order.getPayType() ) { //货到付款的 或者购物卡全额支付 
+					payTime = order.getPayTime();
+				} else {  //第三方全额支付 和混合支付的
+					ReqData reqData = new ReqData();
+					reqData.putValue("business_order_id", orderId, SystemConstant.REQ_PARAMETER_EQ);
+					reqData.putValue("transtate", TRADEPRODUCTION.TRANSTATE_SUCCESS, SystemConstant.REQ_PARAMETER_EQ);
+					// 查询第三方支付成功的支付记录
+					List<TradeProduction> list = tradeProductionMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+					if (list.size() > 0) {
+						payTime = list.get(0).getTrantime();
+					} 
+				} 
+				if (ObjectUtil.isNotNull(payTime)) {
+					//获取支付那天下午12点的时间
+					Date limitTime = DateUtils.getTwelveTimePM(payTime);
+					Date nowTime = new Date();
+					if (nowTime.getTime() < limitTime.getTime()) { //小于当天支付时间的下午12点 大于12点都不能取消
+						if (ObjectUtil.isNotNull(order.getShipStatus())) {
+							if (ORDER.PAY_TYPE_PAYDELIVERY == order.getPayType()) { //货到付款为待审核状态
+								if (ORDER.SHIP_STATUS_AUDIT == order.getShipStatus()) {
+									result = 0; 
+								}
+							} else {
+								if (ORDER.SHIP_STATUS_DELIVERY > order.getShipStatus()) { //备货未完成可以取消
+									result = 0; 
+								}
+							}
+						}
+					} 
+				}
+			} 
+		} else {
+			throw new BusinessException("订单不存在");
+		}
+		return result;
+	}
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void cancelOrderTimer(){
+		//1. 查询未支付的订单
+		ReqData reqData = new ReqData();
+		reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("status", SystemConstant.ORDER.STATUS_UNPAID, SystemConstant.REQ_PARAMETER_EQ);
+		List<Order> list = orderMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		//2. 查询订单的时间是否在下的单后的3天范围类 超过自动取消订单
+		for (Order order : list) {
+			Date createTime = order.getCreateTime();
+			if (ObjectUtil.isNotNull(createTime)) {
+				Date threeDayAfterTime = DateUtils.getTreeDateAfterTime(createTime);
+			    Date nowDate = new Date();
+			    if (nowDate.getTime() > threeDayAfterTime.getTime()) {
+			    	order.setIsDel(SystemConstant.ORDER.IS_DEL_DELETE);
+			    	orderMapper.updateByPrimaryKeySelective(order); //取消订单
+			    }
+			}
+		}	
+	}
+	
+	
+	// 扩展订单定时器
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void extensionOrderTimer(){
+		// 1. 查询可扩展的订单
+		ReqData reqData = new ReqData();
+		reqData.putValue("ship_status", SystemConstant.ORDER.SHIP_STATUS_SUPPLY, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("create_time", DateUtil.format(DateUtils.getDayBegin(), "yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_GE);
+		reqData.putValue("create_time", DateUtil.format(DateUtils.getDayEnd(), "yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_LE);
+		List<Order> list = orderMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (Order order : list) {
+			Date parsetTime = order.getParsetTime() ; //用户指定配送时间
+			if (ObjectUtil.isNotNull(parsetTime)) {
+				// 2. 扩展订单
+				order.setShipStatus(SystemConstant.ORDER.SHIP_STATUS_PREPARE);
+				Date extensionTime = DateUtils.getExtensionTime(parsetTime);
+				order.setUpdateTime(extensionTime); //设置扩展时间
+				orderMapper.updateByPrimaryKeySelective(order);
+			}
+		}
+	}
+	
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void countExtensionOrderTimer(){
+		//1. 查询昨天已供货的的订单
+		ReqData reqData = new ReqData();
+		reqData.putValue("ship_status", SystemConstant.ORDER.SHIP_STATUS_PREPARE,SystemConstant.REQ_PARAMETER_EQ );
+		reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("create_time", DateUtil.format(DateUtils.getBeginDayOfYesterday(), "yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_GE);
+		reqData.putValue("create_time", DateUtil.format(DateUtils.getEndDayOfYesterDay(), "yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_LE);
+		List<Order> list = orderMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		//2. 编辑发送短信
+		String sendSMS = SendSMSUtil.sign+"今日订单："+list.size()+"单，需要配送的订单："+list.size()+"单，自提的订单：0单";
+		SendSMSUtil.sendFullSMS("13883845238", sendSMS);
+		SendSMSUtil.sendFullSMS("15909373811", sendSMS);
+		SendSMSUtil.sendFullSMS("13657658252", sendSMS);
+	}
+	
+	
+	
+	/**
+	 * 定时修改订单备注
+	 */
+	@Override
+	@Transactional()
+	public void updateOrderRemark() {
+		//1.查询供货确认的订单
+		ReqData reqData = new ReqData();
+		reqData.putValue("ship_status", SystemConstant.ORDER.SHIP_STATUS_SUPPLY, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+		List<Order> orderList = orderMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		for (Order order : orderList) {
+			//2.查询订单对应的商品id
+			String goodsId = "0";
+			reqData.putValue("order_id", order.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			List<OrderGoods> list = orderGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (OrderGoods orderGoods : list) {
+				goodsId+=","+orderGoods.getGoodsId();
+			}
+			//3.判断是否包含跨境商品
+			boolean findGoodsIsOut = findGoodsIsOut(goodsId);
+			if(findGoodsIsOut){
+				if(ObjectUtils.isEmpty(order.getOrderRemark())){
+					order.setOrderRemark("包含跨境商品");
+				}else{
+					if(!order.getOrderRemark().contains("包含跨境商品")){
+						order.setOrderRemark(order.getOrderRemark()+"包含跨境商品");
+					}
+				}
+			}
+			//4.判断是否包含id为6974的订单
+			if(goodsId.contains("6974")){
+				if(ObjectUtils.isEmpty(order.getOrderRemark())){
+					order.setOrderRemark("包含蛋黄酥");
+				}else{
+					if(!order.getOrderRemark().contains("包含蛋黄酥")){
+						order.setOrderRemark(order.getOrderRemark()+" 包含蛋黄酥");
+					}
+				}
+			}
+			//5.判断是否包含商家多多小饼
+			boolean duoDuo = findGoodsIsContainsDuoDuo(goodsId);
+			if(duoDuo){
+				if(ObjectUtils.isEmpty(order.getOrderRemark())){
+					order.setOrderRemark("多多小饼周二或周五配送");
+				}else{
+					if(!order.getOrderRemark().contains("多多小饼周二或周五配送")){
+						order.setOrderRemark(order.getOrderRemark()+" 多多小饼周二或周五配送");
+					}
+				}
+			}
+			//提交
+			orderMapper.updateByPrimaryKey(order);
+		}
+	}
+	
+	public boolean findGoodsIsOut(String goodsId) {
+		boolean flag = false;
+		//1.查询商品的二级分类
+		ReqData reqData = new ReqData();
+		reqData.putValue("a.id", goodsId, SystemConstant.REQ_PARAMETER_IN);
+		List<String> findGoodsIsOut = goodsCommExMapper.findGoodsIsOut(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (String string : findGoodsIsOut) {
+			if(string.indexOf(SystemConstant.TERMDATA.ACROSSBORDERS)!=-1){
+				flag = true;
+			}
+		}
+		return flag;
+	}
+	/**
+	 * 判断是否包含多多小饼
+	 * @param goodsId
+	 * @return boolean
+	 * @author ***
+	 * @date 2018年1月5日 上午10:28:48
+	 */
+	public boolean findGoodsIsContainsDuoDuo(String goodsId){
+		boolean flag = false;
+		ReqData reqData = new ReqData();
+		reqData.putValue("id", goodsId, SystemConstant.REQ_PARAMETER_IN);
+		List<Goods> goods = goodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (Goods goods2 : goods) {
+			if(!ObjectUtils.isEmpty(goods2.getSupplierName())){
+				if(goods2.getSupplierName().contains("多多小饼")){
+					flag = true;
+					break;
+				}
+			}
+		}
+		return flag;
+	}
+	
+}
+  

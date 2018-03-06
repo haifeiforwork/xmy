@@ -1,0 +1,5 @@
+package com.zfj.xmy.common.service;
+
+public interface CommonPresentCouponActivityService {
+
+}

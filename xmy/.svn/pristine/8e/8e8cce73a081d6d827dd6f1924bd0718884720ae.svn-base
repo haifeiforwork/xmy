@@ -1,0 +1,103 @@
+package com.zfj.xmy.common.persistence.pojo;
+
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.Column;
+
+public class ShoppingCardRecord implements Serializable {
+
+    /**
+     * shopping_card_record.id (购物卡使用明细记录表id)
+     * @ibatorgenerated 2017-08-03 20:26:42
+     */
+    @Column(name = "id")
+    private Long id;
+
+
+    /**
+     * shopping_card_record.shopping_card_id (购物卡id)
+     * @ibatorgenerated 2017-08-03 20:26:42
+     */
+    @Column(name = "shopping_card_id")
+    private Long shoppingCardId;
+
+
+    /**
+     * shopping_card_record.user_id (用户id)
+     * @ibatorgenerated 2017-08-03 20:26:42
+     */
+    @Column(name = "user_id")
+    private Long userId;
+
+
+    /**
+     * shopping_card_record.use_time (使用时间)
+     * @ibatorgenerated 2017-08-03 20:26:42
+     */
+    @Column(name = "use_time")
+    private Date useTime;
+
+
+    /**
+     * shopping_card_record.value (消费金额)
+     * @ibatorgenerated 2017-08-03 20:26:42
+     */
+    @Column(name = "value")
+    private Short value;
+
+
+    /**
+     * shopping_card_record.remark
+     * @ibatorgenerated 2017-08-03 20:26:42
+     */
+    @Column(name = "remark")
+    private String remark;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getShoppingCardId() {
+        return shoppingCardId;
+    }
+
+    public void setShoppingCardId(Long shoppingCardId) {
+        this.shoppingCardId = shoppingCardId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Date getUseTime() {
+        return useTime;
+    }
+
+    public void setUseTime(Date useTime) {
+        this.useTime = useTime;
+    }
+
+    public Short getValue() {
+        return value;
+    }
+
+    public void setValue(Short value) {
+        this.value = value;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+}

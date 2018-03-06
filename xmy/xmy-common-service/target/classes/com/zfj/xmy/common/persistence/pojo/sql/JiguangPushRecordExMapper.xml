@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.JiguangPushRecordExMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.JiguangPushRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="result" property="result" jdbcType="VARCHAR" />
+    <result column="create_timestamp" property="createTimestamp" jdbcType="TIMESTAMP" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="label_id" property="labelId" jdbcType="BIGINT" />
+  </resultMap>
+  <resultMap id="findJiguangPushRecordListResultMap" type="com.zfj.xmy.common.persistence.pojo.common.push.findJiguangPushRecordListResultDto"  extends="BaseResultMap" >
+     <result column="label" property="label" jdbcType="VARCHAR" />
+     <result column="username" property="username" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, content, `result`, create_timestamp, `type`, label_id
+  </sql>
+  <select id="findJiguangPushRecordList" resultMap="findJiguangPushRecordListResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    SELECT
+		*
+	FROM
+		(
+			SELECT
+				jpr.*, la.label AS label,
+				u.`name` AS username
+			FROM
+				jiguang_push_record jpr
+			LEFT JOIN jiguang_push_label la ON jpr.label_id = la.id
+			LEFT JOIN `user` u ON jpr.user_id = u.id
+		) AS jiguang_push_record    
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据用户id查询推送记录 -->
+  <sql id="findRecordsByUserMain">
+            SELECT
+			*
+            FROM
+				jiguang_push_record
+			WHERE
+				type = 0
+			OR (
+				type = 1
+				AND label_id IN (
+					SELECT
+						label_id
+					FROM
+						jiguang_push_user_label
+					WHERE
+						user_id = #{userid}
+				)
+			)
+			OR (type = 2 AND user_id = #{userid} )
+  </sql>
+  <select id="findRecordsByUser" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    	<include refid="findRecordsByUserMain" />
+		ORDER BY create_timestamp DESC
+  </select>
+  <select id="findRecordsByUserCount" parameterType="java.lang.Long" resultType="java.lang.Integer" >
+    select count(*) from (
+        <include refid="findRecordsByUserMain" />
+    ) as counttb
+  </select>
+</mapper>

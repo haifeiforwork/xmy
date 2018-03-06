@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.IndexConfigMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.IndexConfig" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="top_ad_id" property="topAdId" jdbcType="BIGINT" />
+    <result column="top_ad_name" property="topAdName" jdbcType="VARCHAR" />
+    <result column="first_ad_id" property="firstAdId" jdbcType="BIGINT" />
+    <result column="first_ad_name" property="firstAdName" jdbcType="VARCHAR" />
+    <result column="container_ids" property="containerIds" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, top_ad_id, top_ad_name, first_ad_id, first_ad_name, container_ids
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from index_config
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from index_config
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from index_config
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from index_config
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update index_config
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.topAdId != null" >
+        top_ad_id = #{record.topAdId,jdbcType=BIGINT},
+      </if>
+      <if test="record.topAdName != null" >
+        top_ad_name = #{record.topAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.firstAdId != null" >
+        first_ad_id = #{record.firstAdId,jdbcType=BIGINT},
+      </if>
+      <if test="record.firstAdName != null" >
+        first_ad_name = #{record.firstAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.containerIds != null" >
+        container_ids = #{record.containerIds,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update index_config
+    set id = #{record.id,jdbcType=BIGINT},
+      top_ad_id = #{record.topAdId,jdbcType=BIGINT},
+      top_ad_name = #{record.topAdName,jdbcType=VARCHAR},
+      first_ad_id = #{record.firstAdId,jdbcType=BIGINT},
+      first_ad_name = #{record.firstAdName,jdbcType=VARCHAR},
+      container_ids = #{record.containerIds,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from index_config
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from index_config
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.IndexConfig" useGeneratedKeys="true" keyProperty="id" >
+    insert into index_config (top_ad_id, top_ad_name, first_ad_id, 
+      first_ad_name, container_ids)
+    values (#{topAdId,jdbcType=BIGINT}, #{topAdName,jdbcType=VARCHAR}, #{firstAdId,jdbcType=BIGINT}, 
+      #{firstAdName,jdbcType=VARCHAR}, #{containerIds,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.IndexConfig" useGeneratedKeys="true" keyProperty="id" >
+    insert into index_config
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="topAdId != null" >
+        top_ad_id,
+      </if>
+      <if test="topAdName != null" >
+        top_ad_name,
+      </if>
+      <if test="firstAdId != null" >
+        first_ad_id,
+      </if>
+      <if test="firstAdName != null" >
+        first_ad_name,
+      </if>
+      <if test="containerIds != null" >
+        container_ids,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="topAdId != null" >
+        #{topAdId,jdbcType=BIGINT},
+      </if>
+      <if test="topAdName != null" >
+        #{topAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="firstAdId != null" >
+        #{firstAdId,jdbcType=BIGINT},
+      </if>
+      <if test="firstAdName != null" >
+        #{firstAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="containerIds != null" >
+        #{containerIds,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.IndexConfig" >
+    update index_config
+    <set >
+      <if test="topAdId != null" >
+        top_ad_id = #{topAdId,jdbcType=BIGINT},
+      </if>
+      <if test="topAdName != null" >
+        top_ad_name = #{topAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="firstAdId != null" >
+        first_ad_id = #{firstAdId,jdbcType=BIGINT},
+      </if>
+      <if test="firstAdName != null" >
+        first_ad_name = #{firstAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="containerIds != null" >
+        container_ids = #{containerIds,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.IndexConfig" >
+    update index_config
+    set top_ad_id = #{topAdId,jdbcType=BIGINT},
+      top_ad_name = #{topAdName,jdbcType=VARCHAR},
+      first_ad_id = #{firstAdId,jdbcType=BIGINT},
+      first_ad_name = #{firstAdName,jdbcType=VARCHAR},
+      container_ids = #{containerIds,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

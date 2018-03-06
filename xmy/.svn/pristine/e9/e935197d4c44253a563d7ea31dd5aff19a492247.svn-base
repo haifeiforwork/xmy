@@ -1,0 +1,58 @@
+.dNav{height: 46px;background-color: #fff;}
+.dNav .list{width: 1250px;height: 100%;margin: 0 auto;min-width: 1250px;}
+.dNav .list .list-ul{list-style-type: none;background-color: #fff;height: 100%;line-height: 45px;position: relative;}
+.dNav .list .list-ul .rr{width: 122px;height: 63px;position: absolute;top: -20px;right: 90px;}
+.dNav .list .list-ul .rr img{width: 100%;height: 100%;}
+.dNav .list .list-ul .list-li{float: left;font-size: 16px;}
+.dNav .list .list-ul .front{background-color: #358912;color: #fff;width: 150px;position: relative;}
+.dNav .list .list-ul .front .all i{font-size: 26px;
+    position: absolute;
+    top: 0px;
+    right: 0px;}
+.dNav .list .list-ul .front .classify-ul{z-index: 9999;background-color: #3EA600;position: absolute;top: 45px;left: 0px;width: 100%;font-size: 13px;}
+.dNav .list .list-ul .front .classify-ul .classify-li:hover{background-color: #21650B;cursor: pointer;}
+.dNav .list .list-ul .cross{color: #358912;}
+.icon{background: url(../../commons/images/icon.png) no-repeat;display: inline-block;vertical-align: middle;}
+.icon1{background-position: 7px 4px;width: 25px;height: 25px;margin-right: 10px;}
+.icon2{background-position: 7px -32px;width: 25px;height: 25px;margin-right: 10px;}
+.icon3{background-position: 7px -70px;width: 25px;height: 25px;margin-right: 10px;}
+.icon4{background-position: 7px -105px;width: 25px;height: 25px;margin-right: 10px;}
+.icon5{background-position: 7px -140px;width: 25px;height: 25px;margin-right: 10px;}
+.icon6{background-position: 7px -178px;width: 25px;height: 25px;margin-right: 10px;}
+.icon7{background-position: 7px -216px;width: 25px;height: 25px;margin-right: 10px;}
+.icon8{background-position: 7px -249px;width: 25px;height: 25px;margin-right: 10px;}
+.icon9{background-position: 7px -285px;width: 25px;height: 25px;margin-right: 10px;}
+.icon10{background-position: 7px -321px;width: 25px;height: 25px;margin-right: 10px;}
+.icon11{background-position: 7px -357px;width: 25px;height: 25px;margin-right: 10px;}
+
+/* 新增头部样式*/
+nav .outer .header .second-tell img{margin-top: 10px;}
+.dNav .list .list-ul .out-cross{color: #FCFE14;}
+
+/*新增导航*/
+.add-bg-theam2{background-color: #358812!important;color: #FFF;}
+.dNav .list .list-ul .front2{background-color: #24690c;}
+
+.text-center{text-align: center;}
+.add-bg-w{background:#FFF;}
+.det-mar{margin-bottom:0;}
+/* .card-list .title4{background-image:  url("../../commons/images/jz-title.png") } */
+/*内容部分*/
+.all-the{width: 100%;background: url("../../commons/images/back-all.png") no-repeat;background-size: 100% 100%;min-width: 1250px;min-height: 2500px;}
+ .all-the .card-imgwrap{width: 1250px;margin: 0 auto;position: relative;}
+ .all-the .card-imgwrap.add-ap{margin-top: 50px;margin-bottom: 90px;}
+ .all-the .card-imgwrap img{width: 100%;}
+ .card-list .title{display: inline-block;background:no-repeat;background-size: 100% 100%;width: 300px;height: 34px;}
+ .card-list .title3{background-image:  url("../../commons/images/jr-title.png") }
+ .tab-card li{display: inline-block;padding: 5px 25px;color: #733329;font-weight: 600;}
+ .tab-card li.active{background: url("images/card-tab.png") no-repeat;background-size: 100% 100%;}
+ .tab-content .add-gutter{margin-top: 25px;position: relative;z-index: 33}
+ .m-ban img{position: absolute;top: -45px;z-index: 1}
+ .tab-content .card-items{width: 1150px;margin: 0 auto;background: url("../../commons/images/card-ban.png") no-repeat;background-size:100% 150px;background-position:0 90px;margin-bottom: 20px;padding:0 70px 100px;}
+ .tab-content .card-items.card-ul li{}
+ .tab-content li{display: inline-block;width: 20%;margin:0 2%;text-align: center;position: relative;}
+ .all-the .tab-content li img{width: 213px;position: relative;z-index: 444;}
+ .all-the .box li img{top: -11px;}
+ .all-the .tab-content li a{display: block;}
+ .all-the .tab-content li span{display:block;background: url("../../commons/images/card-word.png") no-repeat;background-size: 100% 100%;padding: 5px 15px;position: absolute;z-index: 555;
+     font-size: 14px;  color: #904b22;bottom: -15px;left: 25%;height: 48px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;width: 123px;}

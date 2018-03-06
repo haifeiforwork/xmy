@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.order.persistence.app.dao.AppOrderExMapper">
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.order.persistence.app.pojo.dto.AppOrderGoodsDir" >
+    <id column="id" property="goodsId" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="supplier_name" property="supplierName" jdbcType="VARCHAR" />
+    <result column="unit_name" property="unitName" jdbcType="VARCHAR" />
+    <result column="standard" property="standard" jdbcType="VARCHAR" />
+    <result column="weight" property="weight" jdbcType="VARCHAR" />
+    <result column="categoryName" property="categoryName" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="points" property="points" jdbcType="INTEGER" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="sum_price" property="sumPrice" jdbcType="DECIMAL" />
+    <result column="path" property="img" jdbcType="VARCHAR" />
+  </resultMap>
+
+
+  <select id="findOrderGoods" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+		 select id,`name`,supplier_name,standard,weight,points,price from goods 
+	<if test="_parameter != null" >
+	  <include refid="sqlcriteria.util.Example_Where_Clause" />
+	</if>
+	<if test="orderByClause != null" >
+	  order by ${orderByClause}
+	</if>
+  </select>
+  
+  	<!-- 查询一级分类名称 -->
+    <select id="findCategoryName" parameterType="com.appdev.db.common.CriteriaParameter" resultType="String" >
+    	select c.name from goods_category a
+    	inner join term_data b on a.cid=b.id
+    	iNNER JOIN term_data c on b.parent_id = c.id
+	<if test="_parameter != null" >
+	  <include refid="sqlcriteria.util.Example_Where_Clause" />
+	</if>
+	<if test="orderByClause != null" >
+	  order by ${orderByClause}
+	</if>
+  </select>
+  
+  <!-- 查询发票内容 -->
+   <select id="findInvoiceContent" parameterType="com.appdev.db.common.CriteriaParameter"  resultType="String">
+   		select  des from term_data
+	   <if test="_parameter != null" >
+		  <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null" >
+		  order by ${orderByClause}
+		</if>
+   </select>
+  
+  <!-- 查询订单号最大值 -->
+   <select id="findMaxNum" parameterType="com.appdev.db.common.CriteriaParameter" resultType="String">
+   		select max(no+0) as code from `order` 
+   		<if test="_parameter != null" >
+		  <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null" >
+		  order by ${orderByClause}
+		</if>
+   </select>
+
+</mapper>

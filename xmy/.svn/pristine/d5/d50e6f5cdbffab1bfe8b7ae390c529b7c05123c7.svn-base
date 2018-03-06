@@ -1,0 +1,85 @@
+package com.zfj.xmy.common.service;  
+
+import java.math.BigDecimal;
+
+import com.zfj.xmy.common.persistence.pojo.Order;
+
+/** 
+ * @Title: OnLineActivityService.java 
+ * @Package com.zfj.xmy.common.service 
+ * @Description: 
+ * @author hexw
+ * @date 2017年11月12日 下午11:11:47 
+ */
+public interface OnLineActivityService {
+	/**
+	 * 全场活动打折促销
+	 * @param order
+	 * @param goodsId
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年11月9日 下午2:10:56
+	 */
+	Integer activiOrder(Order order,String goodsId,Long userId,String province);
+	/**
+	 * 判断用户是否满足优惠条件
+	 * @param userId
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年11月10日 下午3:48:53
+	 */
+	Integer checkUserOrders(Long userId);
+	/**
+	 * 判断商品是否属于企业定制商品
+	 * @param goodsId
+	 * @return Integer
+	 * @author ***
+	 * @date 2017年11月10日 下午3:57:29
+	 */
+	Integer chekGoods(String goodsId);
+	/**
+	 * 判断是全部活动时间
+	 * @return Integer
+	 * @author ***
+	 * @date 2017年11月10日 下午3:58:24
+	 */
+	Integer chekActiviDate();
+	/**
+	 * 判断是否属于重庆活动时间
+	 * @return Integer
+	 * @author ***
+	 * @date 2017年11月10日 下午3:58:48
+	 */
+	Integer chekCqActiviDate();
+	
+	/**
+	 * 
+	 * @param userId    
+	 * @return void    
+	 * Date:2017年11月13日 上午7:55:16 
+	 * @author hexw
+	 */
+	Integer checkUserOrder(Long userId);
+	
+	/**
+	 * 
+	 * @param userId    
+	 * @return void    
+	 * Date:2017年11月13日 上午7:55:16 
+	 * @author hexw
+	 */
+	Integer checkDate();
+	
+	/**
+	 * 
+	 * @return    
+	 * @return Integer    
+	 * Date:2017年11月13日 上午7:58:39 
+	 * @author hexw
+	 */
+	Integer checkCQDate();
+	
+	BigDecimal getDiscountPrice(BigDecimal goodsSumPrice, Long userId,
+			String province);
+}
+  

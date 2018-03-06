@@ -1,0 +1,163 @@
+layui.use(["layer","form","pager","laydate"],function(){
+	 var $ = layui.jquery, layer = layui.layer ,form = layui.form() ,tool = layui.tool,laydate=layui.laydate; 
+	 var active = {
+			 offset: function(othis){
+			      var type = othis.data('type')
+			      ,text = othis.text();
+			      
+			      layer.open({
+			        type: 1
+			        ,offset: type //具体配置参考：http://www.layui.com/doc/modules/layer.html#offset
+			        ,id: 'LAY_demo'+type //防止重复弹出
+			        ,content: $("#consignee")
+			        ,btn: '关闭窗口'
+			        ,btnAlign: 'c' //按钮居中
+			        ,shade: 0 //不显示遮罩
+			        ,area: '600px;'
+			        ,yes: function(){
+			          layer.closeAll();
+			        }
+			      });
+			    }
+			 ,delivery : function(othis){
+			      var type = othis.data('type')
+			      ,text = othis.text();
+			      
+			      layer.open({
+			        type: 1
+			        ,offset: type //具体配置参考：http://www.layui.com/doc/modules/layer.html#offset
+			        ,id: 'LAY_demo'+type //防止重复弹出
+			        ,content:$("#delivery")
+			        ,btn: '关闭全部'
+			        ,btnAlign: 'c' //按钮居中
+			        ,shade: 0 //不显示遮罩
+				        ,area: ['600px', '200px']
+			        ,yes: function(){
+			          layer.closeAll();
+			        }
+			      });
+			    }
+			 ,btnremark : function(othis){
+			      var type = othis.data('type')
+			      ,text = othis.text();
+			      
+			      layer.open({
+			        type: 1
+			        ,offset: type //具体配置参考：http://www.layui.com/doc/modules/layer.html#offset
+			        ,id: 'LAY_demo'+type //防止重复弹出
+			        ,content:$("#busremark")
+			        ,btnAlign: 'c' //按钮居中
+			        ,shade: 0 //不显示遮罩
+				        ,area: ['600px', '248px']
+			        ,yes: function(){
+			          layer.closeAll();
+			        }
+			      });
+			    }
+			 ,btninvoce : function(othis){
+			      var type = othis.data('type')
+			      ,text = othis.text();
+			      
+			      layer.open({
+			        type: 1
+			        ,offset: type //具体配置参考：http://www.layui.com/doc/modules/layer.html#offset
+			        ,id: 'LAY_demo'+type //防止重复弹出
+			        ,content:$("#btninvoce")
+			        ,btnAlign: 'c' //按钮居中
+			        ,shade: 0 //不显示遮罩
+				        ,area: ['600px', '248px']
+			        ,yes: function(){
+			          layer.closeAll();
+			        }
+			      });
+			    }
+			  };
+			  
+			  $('.site-demo-button .layui-icon').on('click', function(){
+			    var othis = $(this), method = othis.data('method');
+			    active[method] ? active[method].call(this, othis) : '';
+			  });
+			$(function($){
+				if($("#mes").val()!=""){
+					tool.info($("#mes").val())
+				}
+				//修改订单商品数量
+				$(".updateGoodsnum").click(function(){
+					//tool.info(this.value);
+					var num = $(this).parents("tr").find("input").val();
+					window.location.href="updateOrderGoodsNum/"+this.value+"/"+num+"/"+$("#orderid").val();
+				});
+				//删除订单商品信息
+				$(".delOrderGoods").click(function(){
+					var id=$(this).attr("value");
+					window.location.href="deleteOrderGoods/"+$("#orderid").val()+"/"+id;
+				})
+			})  
+			  
+			//订单审核  
+			$("#audit").click(function(){
+				tool.operInfo("您确认审核通过该订单？",function(){
+					window.location.href="order/updetaStatus/"+$("#orderid").val()+"/3"
+					tool.info("操作完成");
+				})
+			});
+			  //自定义验证规则
+			  form.verify({
+				 username: function(value){
+			      if(value.length < 1){
+			        return '收货人名称不能为空';
+			      }else if(value.length > 20){
+			    	  return '收货人名称过长';
+			      }
+			    }
+			    ,content: function(value){
+			      layedit.sync(editIndex);
+			    }
+			  });
+			//备货确认
+			$("#prepare").click(function(){
+				tool.operInfo("您确认备货该订单？",function(){
+					window.location.href="order/updetaStatus/"+$("#orderid").val()+"/5"
+				});
+			});
+			//修改订单 总金额
+			$("#updateTotal").click(function(){
+				var total=$("#total").val().trim();
+				regTotal = /^\d+(\.\d+)?$/;
+				if(regTotal.test(total)){
+					tool.operInfo("您确认要修改该订单总金额？",function(){
+						window.location.href = "order/updateTotal?orderId="+$("#orderid").val()+"&total="+total;
+					});
+				}else{
+					tool.warning("你输入的订单金额不对!");
+				}
+				return false;
+			})
+			//订单完成
+			$("#finish").click(function(){
+				tool.operInfo("您确认该订单已完成？",function(){
+					window.location.href="order/updetaStatus/"+$("#orderid").val()+"/7"
+				});
+			})
+			//订单作废
+			$("#delete").click(function(){
+				tool.operInfo("您确定作废该订单？",function(){
+					window.location.href="order/deleteOrders/"+$("#orderid").val()+"/0"
+				});
+			})
+			//订单发货
+			form.on('select', function(data){
+				  //console.log(data.value); //得到被选中的值
+				  //$("#send").val("亲：您的订单将于今日配送，配送人："+data.value+"，请保持电话畅通，如有疑问，请及时与配送人联系。祝您购物愉快！【香满园】");
+				  //tool.info(data.elem.name);
+				  $('#sel option').each(function () {
+					    var $option = $(this);
+					    var html = $option.html();
+					    var value = $option.val();
+					    if(data.value==value){
+					    	$("#send").val("亲：您的订单将于今日配送，配送人："+html+"，请保持电话畅通，如有疑问，请及时与配送人联系。祝您购物愉快！【香满园】");
+					    	return false;
+					    }
+					});
+			});
+}) ;

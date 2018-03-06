@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.ContainerMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.Container" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="icon_img" property="iconImg" jdbcType="VARCHAR" />
+    <result column="bg_img" property="bgImg" jdbcType="VARCHAR" />
+    <result column="slogan" property="slogan" jdbcType="VARCHAR" />
+    <result column="category_id" property="categoryId" jdbcType="BIGINT" />
+    <result column="ad_id" property="adId" jdbcType="BIGINT" />
+    <result column="pc_ad_id" property="pcAdId" jdbcType="BIGINT" />
+    <result column="ad_name" property="adName" jdbcType="VARCHAR" />
+    <result column="pc_ad_name" property="pcAdName" jdbcType="VARCHAR" />
+    <result column="goods_ids" property="goodsIds" jdbcType="VARCHAR" />
+    <result column="goods_names" property="goodsNames" jdbcType="VARCHAR" />
+    <result column="weight" property="weight" jdbcType="INTEGER" />
+    <result column="font_color" property="fontColor" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="key_words" property="keyWords" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, `name`, icon_img, bg_img, slogan, category_id, ad_id, pc_ad_id, ad_name, pc_ad_name, 
+    goods_ids, goods_names, weight, font_color, `type`, key_words
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from container
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from container
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from container
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from container
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update container
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null" >
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.iconImg != null" >
+        icon_img = #{record.iconImg,jdbcType=VARCHAR},
+      </if>
+      <if test="record.bgImg != null" >
+        bg_img = #{record.bgImg,jdbcType=VARCHAR},
+      </if>
+      <if test="record.slogan != null" >
+        slogan = #{record.slogan,jdbcType=VARCHAR},
+      </if>
+      <if test="record.categoryId != null" >
+        category_id = #{record.categoryId,jdbcType=BIGINT},
+      </if>
+      <if test="record.adId != null" >
+        ad_id = #{record.adId,jdbcType=BIGINT},
+      </if>
+      <if test="record.pcAdId != null" >
+        pc_ad_id = #{record.pcAdId,jdbcType=BIGINT},
+      </if>
+      <if test="record.adName != null" >
+        ad_name = #{record.adName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.pcAdName != null" >
+        pc_ad_name = #{record.pcAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.goodsIds != null" >
+        goods_ids = #{record.goodsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="record.goodsNames != null" >
+        goods_names = #{record.goodsNames,jdbcType=VARCHAR},
+      </if>
+      <if test="record.weight != null" >
+        weight = #{record.weight,jdbcType=INTEGER},
+      </if>
+      <if test="record.fontColor != null" >
+        font_color = #{record.fontColor,jdbcType=VARCHAR},
+      </if>
+      <if test="record.type != null" >
+        `type` = #{record.type,jdbcType=INTEGER},
+      </if>
+      <if test="record.keyWords != null" >
+        key_words = #{record.keyWords,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update container
+    set id = #{record.id,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      icon_img = #{record.iconImg,jdbcType=VARCHAR},
+      bg_img = #{record.bgImg,jdbcType=VARCHAR},
+      slogan = #{record.slogan,jdbcType=VARCHAR},
+      category_id = #{record.categoryId,jdbcType=BIGINT},
+      ad_id = #{record.adId,jdbcType=BIGINT},
+      pc_ad_id = #{record.pcAdId,jdbcType=BIGINT},
+      ad_name = #{record.adName,jdbcType=VARCHAR},
+      pc_ad_name = #{record.pcAdName,jdbcType=VARCHAR},
+      goods_ids = #{record.goodsIds,jdbcType=VARCHAR},
+      goods_names = #{record.goodsNames,jdbcType=VARCHAR},
+      weight = #{record.weight,jdbcType=INTEGER},
+      font_color = #{record.fontColor,jdbcType=VARCHAR},
+      `type` = #{record.type,jdbcType=INTEGER},
+      key_words = #{record.keyWords,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from container
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from container
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.Container" useGeneratedKeys="true" keyProperty="id" >
+    insert into container (`name`, icon_img, bg_img, 
+      slogan, category_id, ad_id, 
+      pc_ad_id, ad_name, pc_ad_name, 
+      goods_ids, goods_names, weight, 
+      font_color, `type`, key_words
+      )
+    values (#{name,jdbcType=VARCHAR}, #{iconImg,jdbcType=VARCHAR}, #{bgImg,jdbcType=VARCHAR}, 
+      #{slogan,jdbcType=VARCHAR}, #{categoryId,jdbcType=BIGINT}, #{adId,jdbcType=BIGINT}, 
+      #{pcAdId,jdbcType=BIGINT}, #{adName,jdbcType=VARCHAR}, #{pcAdName,jdbcType=VARCHAR}, 
+      #{goodsIds,jdbcType=VARCHAR}, #{goodsNames,jdbcType=VARCHAR}, #{weight,jdbcType=INTEGER}, 
+      #{fontColor,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{keyWords,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.Container" useGeneratedKeys="true" keyProperty="id" >
+    insert into container
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        `name`,
+      </if>
+      <if test="iconImg != null" >
+        icon_img,
+      </if>
+      <if test="bgImg != null" >
+        bg_img,
+      </if>
+      <if test="slogan != null" >
+        slogan,
+      </if>
+      <if test="categoryId != null" >
+        category_id,
+      </if>
+      <if test="adId != null" >
+        ad_id,
+      </if>
+      <if test="pcAdId != null" >
+        pc_ad_id,
+      </if>
+      <if test="adName != null" >
+        ad_name,
+      </if>
+      <if test="pcAdName != null" >
+        pc_ad_name,
+      </if>
+      <if test="goodsIds != null" >
+        goods_ids,
+      </if>
+      <if test="goodsNames != null" >
+        goods_names,
+      </if>
+      <if test="weight != null" >
+        weight,
+      </if>
+      <if test="fontColor != null" >
+        font_color,
+      </if>
+      <if test="type != null" >
+        `type`,
+      </if>
+      <if test="keyWords != null" >
+        key_words,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="iconImg != null" >
+        #{iconImg,jdbcType=VARCHAR},
+      </if>
+      <if test="bgImg != null" >
+        #{bgImg,jdbcType=VARCHAR},
+      </if>
+      <if test="slogan != null" >
+        #{slogan,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryId != null" >
+        #{categoryId,jdbcType=BIGINT},
+      </if>
+      <if test="adId != null" >
+        #{adId,jdbcType=BIGINT},
+      </if>
+      <if test="pcAdId != null" >
+        #{pcAdId,jdbcType=BIGINT},
+      </if>
+      <if test="adName != null" >
+        #{adName,jdbcType=VARCHAR},
+      </if>
+      <if test="pcAdName != null" >
+        #{pcAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsIds != null" >
+        #{goodsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsNames != null" >
+        #{goodsNames,jdbcType=VARCHAR},
+      </if>
+      <if test="weight != null" >
+        #{weight,jdbcType=INTEGER},
+      </if>
+      <if test="fontColor != null" >
+        #{fontColor,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="keyWords != null" >
+        #{keyWords,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.Container" >
+    update container
+    <set >
+      <if test="name != null" >
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="iconImg != null" >
+        icon_img = #{iconImg,jdbcType=VARCHAR},
+      </if>
+      <if test="bgImg != null" >
+        bg_img = #{bgImg,jdbcType=VARCHAR},
+      </if>
+      <if test="slogan != null" >
+        slogan = #{slogan,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryId != null" >
+        category_id = #{categoryId,jdbcType=BIGINT},
+      </if>
+      <if test="adId != null" >
+        ad_id = #{adId,jdbcType=BIGINT},
+      </if>
+      <if test="pcAdId != null" >
+        pc_ad_id = #{pcAdId,jdbcType=BIGINT},
+      </if>
+      <if test="adName != null" >
+        ad_name = #{adName,jdbcType=VARCHAR},
+      </if>
+      <if test="pcAdName != null" >
+        pc_ad_name = #{pcAdName,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsIds != null" >
+        goods_ids = #{goodsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="goodsNames != null" >
+        goods_names = #{goodsNames,jdbcType=VARCHAR},
+      </if>
+      <if test="weight != null" >
+        weight = #{weight,jdbcType=INTEGER},
+      </if>
+      <if test="fontColor != null" >
+        font_color = #{fontColor,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        `type` = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="keyWords != null" >
+        key_words = #{keyWords,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.Container" >
+    update container
+    set `name` = #{name,jdbcType=VARCHAR},
+      icon_img = #{iconImg,jdbcType=VARCHAR},
+      bg_img = #{bgImg,jdbcType=VARCHAR},
+      slogan = #{slogan,jdbcType=VARCHAR},
+      category_id = #{categoryId,jdbcType=BIGINT},
+      ad_id = #{adId,jdbcType=BIGINT},
+      pc_ad_id = #{pcAdId,jdbcType=BIGINT},
+      ad_name = #{adName,jdbcType=VARCHAR},
+      pc_ad_name = #{pcAdName,jdbcType=VARCHAR},
+      goods_ids = #{goodsIds,jdbcType=VARCHAR},
+      goods_names = #{goodsNames,jdbcType=VARCHAR},
+      weight = #{weight,jdbcType=INTEGER},
+      font_color = #{fontColor,jdbcType=VARCHAR},
+      `type` = #{type,jdbcType=INTEGER},
+      key_words = #{keyWords,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

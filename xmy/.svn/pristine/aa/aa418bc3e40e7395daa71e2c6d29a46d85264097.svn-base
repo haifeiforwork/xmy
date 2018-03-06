@@ -1,0 +1,100 @@
+package com.zfj.xmy.cms.web.controller.push;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.xmy.common.service.CommonPushUtilService;
+import com.zfj.xmy.quartz.dto.PushReturnDto;
+
+@RequestMapping("/push")
+@RestController
+public class PushController {
+
+	@Autowired
+	private CommonPushUtilService commonPushUtilService;
+	
+	/**
+	 * 推送列表页面
+	 * @return
+	 * @Description 
+	 * @date 2017年12月20日  下午4:46:58
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/list")
+	public ModelAndView list(HttpServletRequest request){
+		return new ModelAndView("/push/push_list");
+	}
+	
+	/**
+	 * 推送列表数据
+	 * @param request
+	 * @return
+	 * @Description 
+	 * @date 2017年12月21日  上午9:43:27
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/list_page")
+	public ModelAndView listPage(HttpServletRequest request){
+		
+		List<PushReturnDto> returnDtos = commonPushUtilService.queryAllPush();
+		request.setAttribute("pushs", returnDtos);
+		return new ModelAndView("/push/push_list");
+	}
+	
+	
+	@RequestMapping("/listJson")
+	public RespData listjson(HttpServletRequest request){
+		
+		RespData respData = new RespData();
+		try {
+			List<PushReturnDto> returnDtos = commonPushUtilService.queryAllPush();
+			respData.setData(returnDtos);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "查询失败");
+		}
+		return respData;
+	}
+	
+	/**
+	 * 添加推送定时任务
+	 * @param request
+	 * @param msg
+	 * @param addTimestamp
+	 * @return
+	 * @Description 
+	 * @date 2017年12月20日  下午4:51:31
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping("/add")
+	public RespData add(HttpServletRequest request,
+			@RequestParam(value="msg",required=true) String msg,
+			@RequestParam(value="time",required=true) Long addTimestamp){
+		
+		RespData respData = new RespData();
+		try {
+			commonPushUtilService.addPush(msg, DateUtil.date(addTimestamp));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "添加失败");
+		}
+		return respData;
+	}
+	
+}

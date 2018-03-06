@@ -1,0 +1,69 @@
+header{height: 95px;}
+header .header-top-bg{background-color: #DFDFDF;}
+header .header-top .pull-center{height: 50px;}
+header .header-top .pull-center input{outline:0;height: 35px;width: 70%;margin-left: -10%;border-radius: 35px;border:0;padding: 0 20px;font-size: 0.7rem;color: #348811;line-height: 35px;position: relative;top: 8px;}
+header .header-top .pull-center input::-webkit-input-placeholder{color:#348811;}
+.content{bottom: 0;top: 95px;}
+
+
+.self-pannel{margin-top: 0;}
+.self-pannel:after, .self-pannel:before{position: static}
+.self-pannel .weui-media-box:before{left: 0;}
+.self-pannel .weui-media-box{padding: 15px 10px;}
+.self-pannel .weui-media-box_appmsg .weui-media-box__hd{width: 90px;height: 90px;}
+.self-pannel .weui-media-box__desc{color: #333;height: 38px;margin-top: 15px; margin-bottom: 15px;font-size: 0.7rem;color: #1F1F1F;}
+.self-pannel .price{color: #FA222F;font-size: 0.8rem;}
+.self-pannel .sale-say{font-size: 0.6rem;color: #666;position: relative}
+.self-pannel .sale-say .sale{margin-right: 10%;}
+.self-pannel .sale-say img{position: absolute;right: 0;width: 25px;height: 25px;top: -6px;}
+
+.list .list-ul{overflow: hidden;list-style-type: none;}
+.list .list-ul li{width: 49%;float: left;padding: 10px 10px;background-color: #fff;margin-right: 1%;margin-top: 0.15rem;}
+.list .list-ul li:nth-child(2n){margin-right: 0;margin-left: 1%;}
+.list .list-ul li img{width: 100%;height:auto;}
+.showimage{width:100%;}
+.showimage img{width:100%;height:100%;display:block;}
+.list .list-ul li .details{margin-top: 0.25rem;color:#333;font-size: 0.6rem;line-height: 0.8rem;overflow : hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical;height: 1.7rem;}
+.list .list-ul li .money{font-size: 0.8rem;color: #F42D30;margin-top: 0.15rem;}
+
+/*妞ゅ爼鍎撮幒鎺戠碍闁瀚*/
+.row{background-color: #FFF;margin-bottom: 1px;border-top: 1px solid #b2b2b2;overflow: hidden;font-size: 0.7rem;color: #666;border-bottom: 1px solid #b2b2b2;width: 100%}
+.row .down1{background: url("../images/ico-scj-more-u@2x.png")no-repeat;background-size: 12px 12px;background-position: right center;}
+.row .weui-flex__item span{display: block;width: 137%;margin: 0 auto}
+.row .down span{width:73px;margin-left: 15%}
+.row .sale span{margin-left: 47%}
+.row .price-down span{width:73px;margin-left: 59%;position:relative;}
+/* .row .sequencing span{width:73px;margin-left: 28%} */
+.row .col-80{width: 78%;float: left;padding: 0.5rem 0;}
+.row .col-20{width: 22%;float: left;position: relative;border-left: 1px solid #b2b2b2;padding: 0.5rem;}
+.row .col-20 img{width: 22px;height: 22px;position: absolute;margin-left: 0px;}
+.row .col-80 .sequencingOne img{width: 17px;height: 17px;position: absolute;margin-left:31px;margin-top:3px;}
+.row .col-80 .active{color: #358812}
+.row .col-80 .price-down img{width:15px;height:16px;position:absolute;top:3px;left:28px;transition:all 0.5s linear;}
+.row .col-80 .price-down.active img{transform:rotate(180deg)}
+.row .col-80 .active .down1{background: url("../images/ico-scj-more-g@2x.png")no-repeat;background-size: 12px 12px;background-position: right center;}
+.row .col-80 .active .price-down1{background:  url("../images/icon_nav_up.png")no-repeat;background-size: 14px 14px;background-position: 30px;}
+.row .col-80 .active .price-down11{background:  url("../images/icon_nav-down.png")no-repeat;background-size: 14px 14px;background-position:30px;}
+/*閸欏厖鏅跺鎴濆毉閸愬懎顔*/
+.page{display: none;}
+.page{width: 100%;height: 100%;z-index: 9999;position: absolute}
+.overlay{width: 100%;height: 100%;background-color: rgba(0,0,0,0.1);position: fixed;}
+.page-content{width: 70%;height: 100%;position: absolute;left: 100%;top: 0;background-color: #FFF;overflow: scroll;padding-bottom: 45px;}
+.page-item{padding: 0.3rem;border-bottom: 1px solid #F1F1F1;margin-bottom: 0.4rem;}
+.page-item .item-title{color: #676767;position: relative;font-size: 0.7rem;}
+.page-item .item-title .img-wrap{width: 25px;height: 25px;position: absolute;right: 0;}
+.page-item .item-title .down{background: url("../images/btn-sssx-up@2x.png") no-repeat;background-size: 100% 100%;}
+.page-item .item-title .up{background: url("../images/btn-sssx-down@2x.png") no-repeat;background-size: 100% 100%;}
+.page-item .page-list{color: #666;font-size: 0.6rem;margin-top: 0.5rem;overflow: hidden}
+.page-item .page-list li{width: 31.333%;margin-right: 3%;text-align: center;background-color: #f0f0f0;float: left;padding: 0.5rem 0;margin-bottom: 0.3rem;text-overflow: ellipsis;white-space: nowrap;overflow: hidden}
+.page-item .page-list li:nth-of-type(3n){margin-right: 0;}
+.prcie-area{border-bottom: none;}
+.prcie-area .page-list li{width: 100%;padding: 0.25rem 0.3rem;}
+.prcie-area .price-input{width:43%;border: 1px solid #CBCBCB;color: #666;height: 1.5rem;text-align: center;}
+.prcie-area .f-line{font-weight: 600;color: #AAA;font-size: 35px;line-height: 0;position: relative;top: 0.3rem;margin: 0 3.1%;}
+.fix-btn{position: fixed;bottom: 0;width: 70%;color: #FFF;font-size: 0.8rem;}
+.fix-btn .weui-flex__item{padding: 0.4rem 0;text-align: center}
+.fix-btn .esc{background-color: #4AB409;}
+.fix-btn .finish{background-color: #358812;}
+.choose-type{color:rgb(53, 136, 18)}
+.weui-dialog{z-index:9999}

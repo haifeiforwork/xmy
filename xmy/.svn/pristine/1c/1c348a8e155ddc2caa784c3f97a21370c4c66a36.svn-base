@@ -1,0 +1,20 @@
+package com.zfj.xmy.comment.service.cms;
+
+import java.util.List;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.comment.persistence.app.pojo.dto.FeedbackDto;
+import com.zfj.xmy.common.ReqData;
+
+public interface CmsFeedbackService {
+	/**
+	 * 分页查询建议信息
+	 * @param reqData
+	 * @param pageBean
+	 * @return List<FeedbackDto>
+	 * @author lij
+	 * @date 2017年10月31日 下午9:11:56
+	 */
+	List<FeedbackDto> findAllFeedbackDtoList(ReqData reqData,PageBean pageBean);
+	
+}

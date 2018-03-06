@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.user.persistence.dao.ShoppingCartExMapper">
+
+	<resultMap id="shoppingCartCount" type="com.zfj.xmy.user.persistence.wap.dto.ShoppingCartOutDto">
+		<id column="user_id" property="userId" />
+		<result column="count" property="count" />
+	</resultMap>
+
+	<select id="findShoppingCartGoodsCount" parameterType="java.lang.Long" resultMap="shoppingCartCount">
+		SELECT
+			user_id,
+			sum(num) count
+		FROM
+			shopping_cart
+		WHERE
+			user_id = #{userId}
+		GROUP BY
+			user_id,goods_id
+	</select>
+	
+
+</mapper>

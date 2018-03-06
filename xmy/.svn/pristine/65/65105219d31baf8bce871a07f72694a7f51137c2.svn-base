@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+header .header-top{border-bottom: 1px solid #C3C3C3;}
+        .content{bottom: 0;}
+        .list .weui-cells{background-color: #fff;margin: 0;background-color: #F0F0F0;}
+        .list .weui-cells .weui-cell{padding: 13px 10px;border-bottom: 1px solid #E5E5E5;background-color: #fff;}
+        .list .weui-cells .weui-cell .weui-cell__bd{font-size: 0.7rem;color: #444;}
+        .list .weui-cells .weui-cell .weui-cell__ft{font-size: 0.5rem;color: #999;}
+        .weui-cells:after, .weui-cells:before, .weui-cell:before{display: none;}
+        .list .weui-cells .safety{margin-top: 0.25rem;}
+        .quit{width: 90%;height: 2rem;margin-left: 5%;margin-top: 2rem;}
+        .quit button{width: 100%;height: 100%;background-color: #348811;color: #fff;font-size: 0.7rem;border:0;border-radius: 5px;}

@@ -1,0 +1,99 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+  	<title>创建新帐号 | 香满圆-西部农产品电商平台,重庆菜园坝水果市场荣誉出品</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" href="resource/commons/css/drag.css">
+	<link rel="stylesheet" type="text/css" href="resource/css/home/find_password.css">
+  </head>
+  
+  <body>
+  	<%@include file="/WEB-INF/jsp/commons/nav/nav_blank.jsp" %>
+  	<div class="ad-img"></div>
+ 	<div class="container">
+	    <!--第一步-->
+	     <div class="register clearfix w-1250">
+	        <div class="step clearfix  gutter-mar">
+	            <div class="col-25 active"><span class="circle-num">1</span>填写账户名</div>
+	            <div class="col-25"><span class="circle-num">2</span>验证身份</div>
+	            <div class="col-25"><span class="circle-num">3</span>设置新密码</div>
+	            <div class="col-25"><span class="circle-num">4</span>完成</div>
+	        </div>
+	        <div class="step-content">
+	            <div class="step-item">
+	                <div class="form-group col-50">
+	                    <label>帐户名 : </label><div class="wrap-input clearfix"><input type="text" id="username"><a class="input-tips" id="forget">忘记账户名?</a></div>
+	                </div>
+	               <div class="form-group col-50">
+	                    <label>验证码 : </label><div class="wrap-input clearfix"><input type="text" class="code" id="vcode"><div id="imagecode" style="width: 132px;display: inline-block; height: 41px;"><img src="user/imagecode" style="margin-left:8px;border:8px solid #555;"/></div><a id="code" class="input-tips" style="position: relative;top: -15px;">换一个</a></div>
+	                </div>
+	                <div class="form-group col-50">
+	                    <label>  </label><div class="wrap-input clearfix"><a class="next-btn" id="first">下一步</a></div>
+	                </div>
+	            </div>
+	            <div class="step-item">
+	                <div class="form-group col-50">
+	                    <div class="redy-pick"><span class="icon"></span>账号已绑定手机 : <span class="phone">151****4654</span></div>
+	                </div>
+	                <div class="form-group col-50">
+	                    <label>手机号码 : </label><div class="wrap-input clearfix phone">151****7484</div>
+	                </div>
+	                <div class="form-group col-50">
+	                    <label>验证码 : </label><div class="wrap-input clearfix"><input type="text" class="code" id="msg"><button type="button" class="btn-get" id="getphone">获取验证码</button></div>
+	                </div>
+	                <div class="form-group col-50">
+	                    <label>  </label><div class="wrap-input clearfix"><a class="next-btn" id="two">下一步</a></div>
+	                </div>
+	            </div>
+	            <div class="step-item">
+	                <div class="form-group col-50">
+	                    <label>账户名 : </label><div class="wrap-input clearfix" id="twoName">啊啊啊啊啊阿阿啊</div>
+	                </div>
+	                <div class="form-group col-50">
+	                    <label>设置登录密码 : </label><div class="wrap-input clearfix">登录时验证 , 保护账号信息</div>
+	                </div>
+	                <div class="form-group col-50">
+	                    <label>登录密码 : </label><div class="wrap-input clearfix"><input type="password" id="pwd"></div>
+	                </div>
+	                <div class="form-group col-50">
+	                    <label>确认密码 : </label><div class="wrap-input clearfix"><input type="password" id="surePwd"></div>
+	                </div>
+	                <input type="text" id="userid" hidden="hidden"/>
+	                <div class="form-group col-50">
+	                    <label>  </label><div class="wrap-input clearfix"><a class="next-btn" id="three">确定</a></div>
+	                </div>
+	            </div>
+	            <div class="step-item">
+	                <div class="col-50 clearfix step2">
+	                    <div class="col-30"><i class="iconfont">&#xe623;</i></div>
+	                    <div class="col-70">
+	                        <p class="first-setent">设置成功 ! 您的账户为 : </p>
+	                        <p class="second-setent">登录名 : <span class="color-green na">八级大狂风</span></p>
+	                        <p class="second-setent">绑定手机 : <span class="phone">15113215665</span>( 用于接收短信验证码 )</p>
+	                        <p class="second-setent">会员名 : <span class="na">八级大狂风</span></p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    	</div>
+	</div>
+	<!-- <div class="modal check-coded">
+	    <div class="over-lay"></div>
+	    <div class="modal-content">
+	        <div class="modal-title clearfix"><span>验证码</span><span class="close" style="cursor:pointer;"><i class="iconfont">&#xe676;</i></span></div>
+	        <div class="check-check"><div id="img_code" style="height:35px;width:122px;"><img src="user/imagecode" style="width:120px;border:1px solid #555;"/></div><span class="trans">换一个</span></div>
+	        <div class="input-group clearfix">
+	            <div class="label label5">验证码 </div>
+	            <div class="item-input item-input5"><input type="text" class="default" id="vcode"></div>
+	        </div>
+	        <div class="btn-group add-distance6">
+	            <button type="button" class="btn-theme4 btn-default" id="code_confirm">确定</button>
+	        </div>
+	    </div>
+	</div> -->
+  	<%@include file="/WEB-INF/jsp/commons/comm_buttom_noright.jsp" %>
+  	<script type="text/javascript" src="resource/js/home/find_password.js"></script>
+  </body>
+</html>

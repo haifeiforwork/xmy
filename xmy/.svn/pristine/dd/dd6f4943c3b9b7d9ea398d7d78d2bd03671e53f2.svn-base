@@ -1,0 +1,62 @@
+package com.zfj.xmy.common.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.xmy.common.persistence.dao.JiguangPushRecordMapper;
+import com.zfj.xmy.common.persistence.pojo.JiguangPushRecord;
+import com.zfj.xmy.common.service.CommonPushUtilService;
+import com.zfj.xmy.util.PushUtil;
+
+@Service
+public class CommonPushUtilServiceImpl extends BaseService implements CommonPushUtilService {
+
+	@Autowired
+	private JiguangPushRecordMapper jiguangPushRecordMapper;
+	
+	@Override
+	public void testme() {
+		
+		//System.out.println("is test me .....");
+	}
+	
+	/**
+	 * 后台推送，促销 活动等(广播)
+	 * 
+	 * @param msg 推送内容信息
+	 * @Description 
+	 * @date 2017年12月19日  上午10:09:18
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	@Transactional(rollbackFor=Exception.class)
+    public void Push(String msg) {
+		//推送
+		String result = PushUtil.sendBroadcasts(msg);
+		//记录
+		JiguangPushRecord jiguangPushRecord = new JiguangPushRecord();
+		jiguangPushRecord.setContent(msg);
+		jiguangPushRecord.setCreateTimestamp(DateUtil.date());
+		jiguangPushRecord.setResult(result);
+		jiguangPushRecordMapper.insertSelective(jiguangPushRecord);
+		//System.out.println("is test me .....");
+	}
+    /**
+     * 后台定时推送，促销 活动等(广播)
+     * 
+     * @Description 
+     * @date 2017年12月19日  上午10:10:36
+     * @author wy
+     * 2017
+     * @return void
+     */
+	public void addPush() {
+		
+		//System.out.println("is test me .....");
+	}
+}

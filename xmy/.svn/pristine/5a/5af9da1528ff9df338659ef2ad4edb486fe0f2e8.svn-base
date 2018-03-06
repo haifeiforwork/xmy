@@ -1,0 +1,945 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+  	<title>我的订单</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/center/center_myorder.css">
+	<link rel="stylesheet" type="text/css" href="resource/commons/css/comment_stars.css"/>
+  </head>
+  
+  <body>
+  	<%@include file="/WEB-INF/jsp/commons/nav/nav_personal.jsp" %>
+<!--内容部分-->
+<div class="content">
+	<div class="w-1250">
+		<%@include file="/WEB-INF/jsp/commons/nav/personal_left_menu.jsp" %>
+		<div class="content-right">
+			<div class="my-order">我的订单</div>
+			<div class="order-tab">
+				<div class="all-order">
+					<div class="order-tab-top">
+						<ul class="order-tab-ul">
+							<c:if test="${status==0 }">
+								<li class="order-tab-li active chunks1 dfk">我的订单<div class="dfk-number">${unpaidCount }</div></li>
+								<li class="order-tab-li chunks2 dfk">待付款 </li>
+								<li class="order-tab-li chunks3">待发货</li>
+								<li class="order-tab-li chunks4">待收货</li>
+								<li class="order-tab-li chunks5">待评价</li>
+							</c:if>
+							<c:if test="${status==1 }">
+								<li class="order-tab-li chunks1">我的订单</li>
+								<li class="order-tab-li active chunks2 dfk">待付款 <div class="dfk-number">${unpaidCount }</div></li>
+								<li class="order-tab-li chunks3">待发货</li>
+								<li class="order-tab-li chunks4">待收货</li>
+								<li class="order-tab-li chunks5">待评价</li>
+							</c:if>
+							<c:if test="${status==2 }">
+								<li class="order-tab-li chunks1">我的订单</li>
+								<li class="order-tab-li chunks2 dfk">待付款</li>
+								<li class="order-tab-li active chunks3 dfk">待发货<div class="dfk-number">${unpaidCount }</div></li>
+								<li class="order-tab-li chunks4">待收货</li>
+								<li class="order-tab-li chunks5">待评价</li>
+							</c:if>
+							<c:if test="${status==3 }">
+								<li class="order-tab-li chunks1">我的订单</li>
+								<li class="order-tab-li chunks2 dfk">待付款 </li>
+								<li class="order-tab-li chunks3">待发货</li>
+								<li class="order-tab-li active chunks4 dfk">待收货<div class="dfk-number">${unpaidCount }</div></li>
+								<li class="order-tab-li chunks5">待评价</li>
+							</c:if>
+							<c:if test="${status==4 }">
+								<li class="order-tab-li chunks1">我的订单</li>
+								<li class="order-tab-li chunks2 dfk">待付款 </li>
+								<li class="order-tab-li chunks3">待发货</li>
+								<li class="order-tab-li chunks4">待收货</li>
+								<li class="order-tab-li active chunks5 dfk">待评价<div class="dfk-number">${unpaidCount }</div></li>
+							</c:if>
+						</ul>
+					</div>
+					<input id="stu" value="${status }" type="hidden"/>
+					<input id="countPage" value="${countPage }" type="hidden"/>
+					<input id="pageIndex" value="${pageIndex }" type="hidden"/>
+					<a href="center/toCollect?pageIndex=1&set=14&category=null"><div class="my-shop">我的常购商品<span>NEW</span></div></a>
+					<div class="commodity-search">
+						<input type="text" name="searchOrder" placeholder="商品编码/订单号" />
+						<button type="text">搜索</button>
+					</div>
+				</div>
+				<!-- 全部订单 -->
+				<div class="table chunk1">
+					<div class="table-head">
+						<div class="ly-314">宝贝</div>
+						<div class="ly-100">单价(元)</div>
+						<div class="ly-100">数量</div>
+						<div class="ly-100">商品操作</div>
+						<div class="ly-100">实付款(元)</div>
+						<div class="ly-151">交易状态</div>
+						<div class="ly-161">交易操作</div>
+					</div>
+					<div class="table-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all"/>全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<span class="active btnup" >上一页</span>
+							<span class="btndown">下一页</span>
+						</div>
+					</div>
+					<c:if test="${empty allOrder }">
+						<div style="text-align: center;font-size: 12px;background-color: gainsboro;">暂无该数据内容！</div>
+					</c:if>
+					<c:if test="${!empty allOrder }">
+						<c:forEach items="${allOrder }" var="order">
+						<div class="commodity-table">
+							<div class="table-order">
+								<input type="checkbox" class="order" value="${order.id }" sta="${order.status }"/>
+								<span class="time"><fmt:formatDate value="${order.createTime }" pattern="yyyy-MM-dd hh:mm:ss"/></span>
+								订单号:<span class="number">${order.no }</span>
+							</div>
+							<div class="table-tr">
+								<div class="table-td ly-634 order-listing obligation">
+									<c:forEach items="${order.orderGoodsDto }" var="orderGoods">
+										<div class="commodity-list">
+											<div class="ly-104 img"><img src="${orderGoods.imgPath }"/></div>
+											<div class="ly-200 commodity-name">${orderGoods.name }
+												<c:if test="${!empty orderGoods.presentName }">
+				                             		<br/>
+				                             		<p class="info-des-title" style="color: red;">赠品：${orderGoods.presentName }</p>
+				                             	</c:if>
+											</div>
+											<div class="ly-110 center">
+											<c:if test="${orderGoods.sumPoints!=null && orderGoods.sumPoints!=0}">
+												${orderGoods.sumPoints}积分
+											</c:if>
+											<c:if test="${orderGoods.sumPrice!=null && orderGoods.sumPrice!=0}">
+												<fmt:formatNumber value="${orderGoods.sumPrice }" pattern="#.00"/>
+											</c:if>
+											</div>
+											<div class="ly-110 center">${orderGoods.num }</div>
+											<div class="ly-110 center complaint">
+												<ul class="del-ul">
+													<a href="center/toAddAdvise?set=16&orderNo=${order.no }" style="color: black;">
+														<li class="del-li">投诉与建议</li>
+													</a>
+												</ul>
+											</div>
+										</div>
+									</c:forEach>
+								</div>
+								<div class="ly-110 money obligations">
+									<div class="number">总金额：￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+									<div class="units">应付</div><div class="units">￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+								</div>
+								<div class="table-td ly-150 obligations" value="${order.id }">
+									<c:if test="${order.isDel == 1 }">
+										<c:if test="${order.status==1 }">
+											<ul class="del-ul">
+												<li class="del-li dd-obligation">等待付款</li>
+												<li class="del-li">订单详情</li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==2 }">
+											<ul class="del-ul">
+												<li class="del-li">已付款</li>
+												<li class="del-li dd-obligation">正在备货</li>
+												<li class="del-li">订单详情</li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==3 }">
+											<ul class="del-ul">
+												<li class="del-li">交易成功</li>
+												<li class="del-li">订单详情</li>
+												<li class="del-li">查看物流</li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==4 }">
+											<ul class="del-ul">
+												<li class="del-li">交易成功</li>
+												<li class="del-li">订单详情</li>
+											</ul>
+										</c:if>
+									</c:if>
+									<c:if test="${order.isDel == 0 }"><ul class="del-ul">该订单已取消</ul></c:if>	
+								</div>
+								<c:if test="${order.isDel == 1 }">
+									<div class="table-td ly-160 obligations">
+										<input type="hidden" value="${order.id }"/>
+										<c:if test="${order.status==1 }">
+											<ul class="appraise-ul take-ul">
+												<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+												<li class="appraise-li"><button type="button" value="付款">付款</button></li>
+												<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==2 }">
+											<ul class="appraise-ul take-ul">
+												<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+												<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==3 }">
+											<ul class="appraise-ul take-ul">
+												<li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li>
+												<li class="take-li"><button type="button" value="确认收货">确认收货</button></li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==4 }">
+											<ul class="appraise-ul take-ul">
+												<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+												<li class="appraise-li"><button type="button" value="待评价">待评价</button></li>
+												<li class="appraise-li"><button type="button" value="再次购买">再次购买</button></li>
+											</ul>
+										</c:if>
+									</div>
+								</c:if>	
+							</div>
+						</div>
+						</c:forEach>
+						</c:if>
+					<div class="table-fy bottom-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all" />全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<ul class="paging-ul">
+								<li><i class="iconfont">&#xe645;</i></li>
+								<c:forEach items="${pageList }" var="page">
+									<c:if test="${page==pageIndex }">
+										<li class="paged active" value="${page }">${page }</li>
+									</c:if>
+									<c:if test="${page!=pageIndex }">
+										<li class="paged" value="${page }">${page }</li>
+									</c:if>
+								</c:forEach>
+								<li><i class="iconfont">&#xe6e8;</i></li>
+							</ul>
+							<div class="skip">
+								跳至<input type="text" value=""/>页
+								<button type="text">跳转</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 待付款 -->
+				<div class="table chunk2">
+					<div class="table-head">
+						<div class="ly-314">宝贝</div>
+						<div class="ly-100">单价(元)</div>
+						<div class="ly-100">数量</div>
+						<div class="ly-100">商品操作</div>
+						<div class="ly-100">总金额(元)</div>
+						<div class="ly-151">交易状态</div>
+						<div class="ly-161">交易操作</div>
+					</div>
+					<div class="table-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all" />全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<span class="active btnup" >上一页</span>
+							<span class="btndown">下一页</span>
+						</div>
+					</div>
+					<c:if test="${empty allOrder }">
+						<div style="text-align: center;font-size: 12px;background-color: gainsboro;">暂无该数据内容！</div>
+					</c:if>
+					<c:if test="${!empty allOrder }">
+						<c:forEach items="${allOrder }" var="order">
+						<div class="commodity-table">
+							<div class="table-order">
+								<input type="checkbox" class="order" value="${order.id }" sta="${order.status }"/>
+								<span class="time"><fmt:formatDate value="${order.createTime }" pattern="yyyy-MM-dd hh:mm:ss"/></span>
+								订单号:<span class="number">${order.no }</span>
+							</div>
+							<div class="table-tr">
+								<div class="table-td ly-634 order-listing obligation">
+									<c:forEach items="${order.orderGoodsDto }" var="orderGoods">
+										<div class="commodity-list">
+											<div class="ly-104 img"><img src="${orderGoods.imgPath }"/></div>
+											<div class="ly-200 commodity-name">${orderGoods.name }
+												<c:if test="${!empty orderGoods.presentName }">
+				                             		<br/>
+				                             		<p class="info-des-title" style="color: red;">赠品：${orderGoods.presentName }</p>
+				                             	</c:if>
+											</div>
+											<div class="ly-110 center">
+											<c:if test="${orderGoods.sumPoints!=null && orderGoods.sumPoints!=0}">
+												${orderGoods.sumPoints}积分
+											</c:if>
+											<c:if test="${orderGoods.sumPrice!=null && orderGoods.sumPrice!=0}">
+												<fmt:formatNumber value="${orderGoods.sumPrice }" pattern="#.00"/>
+											</c:if>
+											</div>
+											<div class="ly-110 center">${orderGoods.num }</div>
+											<div class="ly-110 center complaint">
+												<ul class="del-ul">
+													<a href="center/toAddAdvise?set=16&orderNo=${order.no }" style="color: black;">
+														<li class="del-li">投诉与建议</li>
+													</a>
+												</ul>
+											</div>
+										</div>
+									</c:forEach>
+								</div>
+								<div class="ly-110 money obligations">
+									<div class="number">总金额：￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+									<div class="units">应付</div><div class="units">￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+								</div>
+								<div class="table-td ly-150 obligations" value="${order.id }">
+									<c:if test="${order.status==1 }">
+										<ul class="del-ul">
+											<li class="del-li dd-obligation">等待付款</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==2 }">
+										<ul class="del-ul">
+											<li class="del-li">已付款</li>
+											<li class="del-li dd-obligation">正在备货</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==3 }">
+										<ul class="del-ul">
+											<li class="del-li">交易成功</li>
+											<li class="del-li">订单详情</li>
+											<li class="del-li">查看物流</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==4 }">
+										<ul class="del-ul">
+											<li class="del-li">交易成功</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+								</div>
+									<div class="table-td ly-160 obligations">
+										<input type="hidden" value="${order.id }"/>
+										<c:if test="${order.status==1 }">
+											<ul class="appraise-ul take-ul">
+												<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+												<li class="appraise-li"><button type="button" value="付款">付款</button></li>
+												<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==2 }">
+											<ul class="appraise-ul take-ul">
+												<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+												<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==3 }">
+											<ul class="appraise-ul take-ul">
+												<li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li>
+												<li class="take-li"><button type="button" value="确认收货">确认收货</button></li>
+											</ul>
+										</c:if>
+										<c:if test="${order.status==4 }">
+											<ul class="appraise-ul take-ul">
+												<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+												<li class="appraise-li"><button type="button" value="待评价">待评价</button></li>
+												<li class="appraise-li"><button type="button" value="再次购买">再次购买</button></li>
+											</ul>
+										</c:if>
+									</div>
+							</div>
+						</div>
+						</c:forEach>
+						</c:if>
+					<div class="table-fy bottom-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all" />全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<ul class="paging-ul">
+								<li><i class="iconfont">&#xe645;</i></li>
+								<c:forEach items="${pageList }" var="page">
+									<c:if test="${page==pageIndex }">
+										<li class="paged active" value="${page }">${page }</li>
+									</c:if>
+									<c:if test="${page!=pageIndex }">
+										<li class="paged" value="${page }">${page }</li>
+									</c:if>
+								</c:forEach>
+								<li><i class="iconfont">&#xe6e8;</i></li>
+							</ul>
+							<div class="skip">
+								跳至<input type="text"/>页
+								<button type="text">跳转</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 代发货 -->
+				<div class="table chunk3">
+					<div class="table-head">
+						<div class="ly-314">宝贝</div>
+						<div class="ly-100">单价(元)</div>
+						<div class="ly-100">数量</div>
+						<div class="ly-100">商品操作</div>
+						<div class="ly-100">总金额(元)</div>
+						<div class="ly-151">交易状态</div>
+						<div class="ly-161">交易操作</div>
+					</div>
+					<div class="table-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all" />全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<span class="active btnup" >上一页</span>
+							<span class="btndown">下一页</span>
+						</div>
+					</div>
+					<c:if test="${empty allOrder }">
+						<div style="text-align: center;font-size: 12px;background-color: gainsboro;">暂无该数据内容！</div>
+					</c:if>
+					<c:if test="${!empty allOrder }">
+						<c:forEach items="${allOrder }" var="order">
+						<div class="commodity-table">
+							<div class="table-order">
+								<input type="checkbox" class="order" value="${order.id }" sta="${order.status }"/>
+								<span class="time"><fmt:formatDate value="${order.createTime }" pattern="yyyy-MM-dd hh:mm:ss"/></span>
+								订单号:<span class="number">${order.no }</span>
+							</div>
+							<div class="table-tr">
+								<div class="table-td ly-634 order-listing obligation">
+									<c:forEach items="${order.orderGoodsDto }" var="orderGoods">
+										<div class="commodity-list">
+											<div class="ly-104 img"><img src="${orderGoods.imgPath }"/></div>
+											<div class="ly-200 commodity-name">${orderGoods.name }
+												<c:if test="${!empty orderGoods.presentName }">
+				                             		<br/>
+				                             		<p class="info-des-title" style="color: red;">赠品：${orderGoods.presentName }</p>
+				                             	</c:if>
+											</div>
+											<div class="ly-110 center">
+											<c:if test="${orderGoods.sumPoints!=null && orderGoods.sumPoints!=0}">
+												${orderGoods.sumPoints}积分
+											</c:if>
+											<c:if test="${orderGoods.sumPrice!=null && orderGoods.sumPrice!=0}">
+												<fmt:formatNumber value="${orderGoods.sumPrice }" pattern="#.00"/>
+											</c:if>
+											</div>
+											<div class="ly-110 center">${orderGoods.num }</div>
+											<div class="ly-110 center complaint">
+												<ul class="del-ul">
+													<a href="center/toAddAdvise?set=16&orderNo=${order.no }" style="color: black;">
+														<li class="del-li">投诉与建议</li>
+													</a>
+												</ul>
+											</div>
+										</div>
+									</c:forEach>
+								</div>
+								<div class="ly-110 money obligations">
+									<div class="number">总金额：￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+									<div class="units">应付</div><div class="units">￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+								</div>
+								<div class="table-td ly-150 obligations" value="${order.id }">
+									<c:if test="${order.status==1 }">
+										<ul class="del-ul">
+											<li class="del-li dd-obligation">等待付款</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==2 }">
+										<ul class="del-ul">
+											<li class="del-li">已付款</li>
+											<li class="del-li dd-obligation">正在备货</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==3 }">
+										<ul class="del-ul">
+											<li class="del-li">交易成功</li>
+											<li class="del-li">订单详情</li>
+											<li class="del-li">查看物流</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==4 }">
+										<ul class="del-ul">
+											<li class="del-li">交易成功</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+								</div>
+								<div class="table-td ly-160 obligations">
+									<input type="hidden" value="${order.id }"/>
+									<c:if test="${order.status==1 }">
+										<ul class="appraise-ul take-ul">
+											<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+											<li class="appraise-li"><button type="button" value="付款">付款</button></li>
+											<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==2 }">
+										<ul class="appraise-ul take-ul">
+											<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+											<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==3 }">
+										<ul class="appraise-ul take-ul">
+											<li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li>
+											<li class="take-li"><button type="button" value="确认收货">确认收货</button></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==4 }">
+										<ul class="appraise-ul take-ul">
+											<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+											<li class="appraise-li"><button type="button" value="待评价">待评价</button></li>
+											<li class="appraise-li"><button type="button" value="再次购买">再次购买</button></li>
+										</ul>
+									</c:if>
+								</div>
+							</div>
+						</div>
+						</c:forEach>
+						</c:if>
+					<div class="table-fy bottom-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all"/>全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<ul class="paging-ul">
+								<li><i class="iconfont">&#xe645;</i></li>
+								<c:forEach items="${pageList }" var="page">
+									<c:if test="${page==pageIndex }">
+										<li class="paged active" value="${page }">${page }</li>
+									</c:if>
+									<c:if test="${page!=pageIndex }">
+										<li class="paged" value="${page }">${page }</li>
+									</c:if>
+								</c:forEach>
+								<li><i class="iconfont">&#xe6e8;</i></li>
+							</ul>
+							<div class="skip">
+								跳至<input type="text"/>页
+								<button type="text">跳转</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 代收货 -->
+				<div class="table chunk4">
+					<div class="table-head">
+						<div class="ly-314">宝贝</div>
+						<div class="ly-100">单价(元)</div>
+						<div class="ly-100">数量</div>
+						<div class="ly-100">商品操作</div>
+						<div class="ly-100">总金额(元)</div>
+						<div class="ly-151">交易状态</div>
+						<div class="ly-161">交易操作</div>
+					</div>
+					<div class="table-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all" />全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<span class="active btnup" >上一页</span>
+							<span class="btndown">下一页</span>
+						</div>
+					</div>
+					<c:if test="${empty allOrder }">
+						<div style="text-align: center;font-size: 12px;background-color: gainsboro;">暂无该数据内容！</div>
+					</c:if>
+					<c:if test="${!empty allOrder }">
+						<c:forEach items="${allOrder }" var="order">
+						<div class="commodity-table">
+							<div class="table-order">
+								<input type="checkbox" class="order" value="${order.id }" sta="${order.status }"/>
+								<span class="time"><fmt:formatDate value="${order.createTime }" pattern="yyyy-MM-dd hh:mm:ss"/></span>
+								订单号:<span class="number">${order.no }</span>
+							</div>
+							<div class="table-tr">
+								<div class="table-td ly-634 order-listing obligation">
+									<c:forEach items="${order.orderGoodsDto }" var="orderGoods">
+										<div class="commodity-list">
+											<div class="ly-104 img"><img src="${orderGoods.imgPath }"/></div>
+											<div class="ly-200 commodity-name">${orderGoods.name }
+												<c:if test="${!empty orderGoods.presentName }">
+				                             		<br/>
+				                             		<p class="info-des-title" style="color: red;">赠品：${orderGoods.presentName }</p>
+				                             	</c:if>
+											</div>
+											<div class="ly-110 center">
+											<c:if test="${orderGoods.sumPoints!=null && orderGoods.sumPoints!=0}">
+												${orderGoods.sumPoints}积分
+											</c:if>
+											<c:if test="${orderGoods.sumPrice!=null && orderGoods.sumPrice!=0}">
+												<fmt:formatNumber value="${orderGoods.sumPrice }" pattern="#.00"/>
+											</c:if>
+											</div>
+											<div class="ly-110 center">${orderGoods.num }</div>
+											<div class="ly-110 center complaint">
+												<ul class="del-ul">
+													<a href="center/toAddAdvise?set=16&orderNo=${order.no }" style="color: black;">
+														<li class="del-li">投诉与建议</li>
+													</a>
+												</ul>
+											</div>
+										</div>
+									</c:forEach>
+								</div>
+								<div class="ly-110 money obligations">
+									<div class="number">总金额：￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+									<div class="units">应付</div><div class="units">￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+								</div>
+								<div class="table-td ly-150 obligations" value="${order.id }">
+									<c:if test="${order.status==1 }">
+										<ul class="del-ul">
+											<li class="del-li dd-obligation">等待付款</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==2 }">
+										<ul class="del-ul">
+											<li class="del-li">已付款</li>
+											<li class="del-li dd-obligation">正在备货</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==3 }">
+										<ul class="del-ul">
+											<li class="del-li">交易成功</li>
+											<li class="del-li">订单详情</li>
+											<li class="del-li">查看物流</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==4 }">
+										<ul class="del-ul">
+											<li class="del-li">交易成功</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+								</div>
+								<div class="table-td ly-160 obligations">
+									<input type="hidden" value="${order.id }"/>
+									<c:if test="${order.status==1 }">
+										<ul class="appraise-ul take-ul">
+											<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+											<li class="appraise-li"><button type="button" value="付款">付款</button></li>
+											<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==2 }">
+										<ul class="appraise-ul take-ul">
+											<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+											<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==3 }">
+										<ul class="appraise-ul take-ul">
+											<li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li>
+											<li class="take-li"><button type="button" value="确认收货">确认收货</button></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==4 }">
+										<ul class="appraise-ul take-ul">
+											<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+											<li class="appraise-li appraise-btn"><button type="button" value="待评价">待评价</button></li>
+											<li class="appraise-li"><button type="button" value="再次购买">再次购买</button></li>
+										</ul>
+									</c:if>
+								</div>
+							</div>
+						</div>
+						</c:forEach>
+					</c:if>
+					<div class="table-fy bottom-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all" />全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<ul class="paging-ul">
+								<li><i class="iconfont">&#xe645;</i></li>
+								<c:forEach items="${pageList }" var="page">
+									<c:if test="${page==pageIndex }">
+										<li class="paged active" value="${page }">${page }</li>
+									</c:if>
+									<c:if test="${page!=pageIndex }">
+										<li class="paged" value="${page }">${page }</li>
+									</c:if>
+								</c:forEach>
+								<li><i class="iconfont">&#xe6e8;</i></li>
+							</ul>
+							<div class="skip">
+								跳至<input type="text"/>页
+								<button type="text">跳转</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 待评价 -->
+				<div class="table chunk5">
+					<div class="table-head">
+						<div class="ly-314">宝贝</div>
+						<div class="ly-100">单价(元)</div>
+						<div class="ly-100">数量</div>
+						<div class="ly-100">商品操作</div>
+						<div class="ly-100">总金额(元)</div>
+						<div class="ly-151">交易状态</div>
+						<div class="ly-161">交易操作</div>
+					</div>
+					<div class="table-fy">
+						<div class="table-fy-left">
+							<input type="checkbox" class="all" />全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<span class="active btnup" >上一页</span>
+							<span class="btndown">下一页</span>
+						</div>
+					</div>
+					<c:if test="${empty allOrder }">
+						<div style="text-align: center;font-size: 12px;background-color: gainsboro;">暂无该数据内容！</div>
+					</c:if>
+					<c:if test="${!empty allOrder }">
+						<c:forEach items="${allOrder }" var="order">
+						<div class="commodity-table">
+							<div class="table-order">
+								<input type="checkbox" class="order" value="${order.id }" sta="${order.status }"/>
+								<span class="time"><fmt:formatDate value="${order.createTime }" pattern="yyyy-MM-dd hh:mm:ss"/></span>
+								订单号:<span class="number">${order.no }</span>
+							</div>
+							<div class="table-tr">
+								<div class="table-td ly-634 order-listing obligation">
+									<c:forEach items="${order.orderGoodsDto }" var="orderGoods">
+										<div class="commodity-list">
+											<div class="ly-104 img"><img src="${orderGoods.imgPath }"/></div>
+											<div class="ly-200 commodity-name">${orderGoods.name }
+												<c:if test="${!empty orderGoods.presentName }">
+				                             		<br/>
+				                             		<p class="info-des-title" style="color: red;">赠品：${orderGoods.presentName }</p>
+				                             	</c:if>
+											</div>
+											<div class="ly-110 center">
+											<c:if test="${orderGoods.sumPoints!=null && orderGoods.sumPoints!=0}">
+												${orderGoods.sumPoints}积分
+											</c:if>
+											<c:if test="${orderGoods.sumPrice!=null && orderGoods.sumPrice!=0}">
+												<fmt:formatNumber value="${orderGoods.sumPrice }" pattern="#.00"/>
+											</c:if>
+											</div>
+											<div class="ly-110 center">${orderGoods.num }</div>
+											<div class="ly-110 center complaint">
+												<ul class="del-ul">
+													<a href="center/toAddAdvise?set=16&orderNo=${order.no }" style="color: black;">
+														<li class="del-li">投诉与建议</li>
+													</a>
+												</ul>
+											</div>
+										</div>
+									</c:forEach>
+								</div>
+								<div class="ly-110 money obligations">
+									<div class="number">总金额：￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+									<div class="units">应付</div><div class="units">￥<fmt:formatNumber value="${order.total }" pattern="#.00"/></div>
+								</div>
+								<div class="table-td ly-150 obligations" value="${order.id }">
+									<c:if test="${order.status==1 }">
+										<ul class="del-ul">
+											<li class="del-li dd-obligation">等待付款</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==2 }">
+										<ul class="del-ul">
+											<li class="del-li">已付款</li>
+											<li class="del-li dd-obligation">正在备货</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==3 }">
+										<ul class="del-ul">
+											<li class="del-li">交易成功</li>
+											<li class="del-li">订单详情</li>
+											<li class="del-li">查看物流</li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==4 }">
+										<ul class="del-ul">
+											<li class="del-li">交易成功</li>
+											<li class="del-li">订单详情</li>
+										</ul>
+									</c:if>
+								</div>
+								<div class="table-td ly-160 obligations">
+									<input type="hidden" value="${order.id }"/>
+									<c:if test="${order.status==1 }">
+										<ul class="appraise-ul take-ul">
+											<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+											<li class="appraise-li"><button type="button" value="付款">付款</button></li>
+											<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==2 }">
+										<ul class="appraise-ul take-ul">
+											<!-- <li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li> -->
+											<li class="appraise-li"><p value="取消订单">取消订单</p></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==3 }">
+										<ul class="appraise-ul take-ul">
+											<li class="take-li"><i class="iconfont">&#xe675;</i>还剩9天23时</li>
+											<li class="take-li"><button type="button" value="确认收货">确认收货</button></li>
+										</ul>
+									</c:if>
+									<c:if test="${order.status==4 }">
+										<ul class="appraise-ul take-ul">
+											<li class="appraise-li appraise-btn" data-orderid="${order.id }"><button type="button" value="待评价">去评价</button></li>
+											<!-- <li class="appraise-li"><button type="button" value="再次购买">再次购买</button></li> -->
+										</ul>
+									</c:if>
+								</div>
+							</div>
+						</div>
+						</c:forEach>
+					</c:if>
+					<div class="table-fy bottom-fy">
+						<div class="table-fy-left">
+							<input type="checkbox"class="all" />全选
+							<button type="button" class="relust">批量确认收货</button>
+						</div>
+						<div class="table-fy-right">
+							<ul class="paging-ul">
+								<li><i class="iconfont">&#xe645;</i></li>
+								<c:forEach items="${pageList }" var="page">
+									<c:if test="${page==pageIndex }">
+										<li class="paged active" value="${page }">${page }</li>
+									</c:if>
+									<c:if test="${page!=pageIndex }">
+										<li class="paged" value="${page }">${page }</li>
+									</c:if>
+								</c:forEach>
+								<li><i class="iconfont">&#xe6e8;</i></li>
+							</ul>
+							<div class="skip">
+								跳至<input type="text"/>页
+								<button type="text">跳转</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--内容部分完-->
+<!-- 2017-11-1-->
+<!-- 评价弹窗  -->
+<div class="evaluation">
+	<div class="eval-550">
+		<div class="content">
+	  		<div class="list-block">
+				<ul>
+				<!-- Text inputs -->
+					<li>
+					    <div class="item-content">
+					        <style>
+					        	.starfont i.iconfont{font-size: 1.2rem; cursor: pointer;}
+					        </style>
+					        <div class="item-inner">
+					        	<span>评价</span>
+					        	<div style="width:90%;position: absolute;top:0px;left: 3rem;overflow: hidden">
+									<div id="star"></div>
+									<div id="hint"></div>
+								</div>
+					            <!-- <div style="width:90%;position: absolute;top:0px;left: 3rem;">
+						            <div id="cstars"  class="cblock clearfix cstars">
+										<div class="star_score"></div>
+										<input type="hidden" value="0" name="comment_score" class="fenshu" />
+										<div class="pull-right text-c999"><span class="fenshu_score">10</span>分<span class="attitude">完美</span></div>
+									</div>
+					            </div> -->
+					        </div>
+					    </div>
+					</li>
+				</ul>
+			</div>
+			<form id="commentform">
+				<input type="hidden" name="commentStar">
+				<input type="hidden" name="orderId"> 
+				<textarea name="commentConten" class="eval-textarea" placeholder="您对本次购买产品的评价" ></textarea>
+				<p class="eval-p">您对我们的评价很重要</p>
+				<button type="button" class="evalp-btn">提交</button>
+			</form>
+		</div>
+	</div>
+</div>	
+  <%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %>
+  <script type="text/javascript" src="resource/commons/js/jquery.raty.min.js"></script>
+  <script type="text/javascript" src="resource/js/center/center_myorder.js"></script>
+  <script type="text/javascript">
+
+	//2017-11-1  
+	/* 评价弹窗 */
+	//星星评分
+$('#star').raty({
+
+    cancel    : false,
+
+    target    : '#hint',
+
+    targetType: 'number',
+
+    path: 'resource/commons/images',
+    starOn: 'star_on24.png',
+    starOff: 'star_off_24.png',
+});
+	//弹出评价窗
+	$(".appraise-btn").click(function(){
+		$(".evaluation").fadeIn();
+		$("#commentform").find("input[name='orderId']").val($(this).data("orderid"));
+	});
+	$(".evaluation").click(function () {
+		$(this).fadeOut();
+	})
+	$(".evaluation .eval-550").click(function (e) {
+		e.stopPropagation();
+	});
+	$(".eval-textarea").bind('input propertychange',function(){
+		var $lenght=$(this).val().length;
+		if($lenght>=1){
+			$(".evalp-btn").addClass("evalp-btn-cf2");
+		}
+		else{
+			$(".evalp-btn").removeClass("evalp-btn-cf2");
+		}
+	});
+	
+	//提交评论
+	$(".evalp-btn").click(function (){
+		var commentStar = $(document).find("input[name='score']").val();
+		$("#commentform").find("input[name='commentStar']").val(Math.round(commentStar));  //评论星级
+		if ($(this).hasClass("evalp-btn-cf2")) {
+			$.ajax({
+				url:"center/saveOrderComment",
+				type:"post",
+				data:$("#commentform").serialize(),
+				asyn:false,
+				success:function(data){
+					if (data.data > 0) {
+						location.reload(true);
+					}
+				}
+			})
+		}
+	})
+	
+	//2017-11-1end
+  	//订单评价
+  	
+  </script>
+  </body>
+</html>

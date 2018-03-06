@@ -1,0 +1,201 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/common/common_tag.jsp"%>
+
+<!-- 商品详情页面 -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>${goods.name }</title>
+	    <!-- 公共css区域 -->
+	    <%@ include file="/WEB-INF/jsp/common/common_css.jsp" %>
+	    <!-- 公共css完区域 -->
+	    <!-- 该页面应用css区域 -->
+	    <link href="resources/goods/css/goods_info.css" rel="stylesheet">
+	    <!-- 该页面应用css区域 -->
+    </head>
+    <body ontouchstart>	
+    <header>
+    	<div class="header-top">
+    		<div class="pull-left page-return"><div class="return"><img src="resources/common/images/btn-back-w@2x.png"/></div></div>
+    		<div class="pull-center"></div>
+    		<div class="pull-right">
+    			<!-- <span class="shrink"><img src="resources/common/images/btn-index-share@2x.png"/></span> -->
+                <span class="shrink"><img src="resources/common/images/btn-more-w@2x.png"/>
+                	<div class="modal-some">
+                    
+                	</div>
+                </span>
+    		</div>
+    	</div>
+    </header>
+    <div class="add-shop-cart add-shopping">
+        <img src="resources/common/images/btn-spxq-tjgwc@2x.png"/>
+    </div>
+	<div class="content">
+		<input type="hidden" id="activityId" value="${goods.activityId }">
+		<input type="hidden" id="activityType" value="${goods.activityType }">
+		<input type="hidden" id="nowTime" value="${data.nowTime }">
+		<input type="hidden" id="endTime" value="${data.endTime }">
+		<input type="hidden" id="resetTime" value="${millis }"> 
+		<input type="hidden" id="weekTime" value="${sum }">
+		<input type="hidden" id="pointsId" value="${pointsId }">
+    	<div class="flexslider" style="box-shadow:none;">
+            <ul class="slides">
+                <c:forEach items="${goods.images }" var="image">
+                	<li><img src="${image }"></li>
+                </c:forEach>
+            </ul>
+        </div>
+      <!-- activityId=5-7&activityType=0买即赠   activityId=36&activityType=2天天特价   activityId=38&activityType=2 每周特价   activityId=35&activityType=2冰点价   activityId=37&activityType=2整件惠 -->
+        <c:if test="${activityType==2&&activityId==35}"><!-- 冰点价 -->
+        	<div class="finish-time time-esc"></div>
+        </c:if>
+        <c:if test="${activityType==0&&activityId==5||activityId==6||activityId==7}"><!-- 买即赠 -->
+        	<div class="finish-time time-esc"></div>
+        </c:if>
+        <c:if test="${activityType==2&&activityId==36}"><!-- 天天特价 -->
+        	<div class="finish-time time-esc1"></div>
+        </c:if>
+        <c:if test="${activityType==2&&activityId==38}"><!-- 每周特价-->
+        	<div class="finish-time time-esc2"></div>
+        </c:if>
+        
+        <div class="head-top">
+            <div class="title">${goods.name }</div>
+            <div class="money">
+            	<c:if test="${!empty pointsId }">
+            		<span>
+            			${pointsGoods.points }积分
+            		</span>
+            	</c:if>
+            	<c:if test="${empty pointsId }">
+	                <span>￥
+		                <a id="activityPrice">
+							<c:if test="${!empty goods.activityPrice }">${goods.activityPrice }</c:if>
+							<c:if test="${ empty goods.activityPrice }">${goods.price }</c:if>
+						</a>
+					</span>
+				</c:if>
+                <div class="count">
+                    <div class="gw_num">
+                        <em class="jian">-</em>
+                        <input type="text" value="1" class="num" id="goodsNum" disabled="disabled"/>
+                        <em class="add">+</em>
+                        <input type="hidden" class="limitNum" id="limitNum" value="${limit.limitNum }"/>
+                        <input type="hidden" class="leftNum" id="leftNum" value="${limit.allNum - limit.limitNum}"/>
+                    </div>
+                </div>
+            </div>
+            <div class="line">
+                <span class="left">销量:<span>
+                	<c:if test="${goods.sumDeal==null }">0</c:if>
+					<c:if test="${goods.sumDeal!=null }">${goods.sumDeal }</c:if>
+				</span>
+				</span>
+                <span class="right">赠送积分:<span>
+                <c:if test="${empty pointsId }">
+	                <c:if test="${!empty goods.activityPrice }"><fmt:formatNumber value="${goods.activityPrice }" pattern="#"/></c:if>
+					<c:if test="${ empty goods.activityPrice }"><fmt:formatNumber value="${goods.price }" pattern="#"/></c:if>
+                </c:if>
+                <c:if test="${!empty pointsId }">
+                	0
+                </c:if>
+                </span></span>
+            </div>
+            <c:if test="${not empty goods.presentFullName }">
+            	<div class="line" style="color: #FD4442;">
+					<span class="left">赠品:<span>
+	                	${goods.presentFullName }
+					</span>
+					</span>
+				</div>
+			</c:if>
+            <div class="line">
+                <span class="left green">配送范围:<span><c:if test="${goods.isDelivery==0 }">全国配送</c:if><c:if test="${goods.isDelivery==1 }">重庆主城</c:if></span></span>
+                <c:if test="${not empty wap_session && goods.isCollect == 0 }"><span class="right collect active"><img class="img" src="resources/common/images/btn-spxq-sc@2x.png"/>收藏</span></c:if>
+                <c:if test="${empty wap_session || goods.isCollect == 1 }"><span class="right collect"><img class="img" src="resources/common/images/btn-spxq-wsc@2x.png"/>收藏</span></c:if>
+            </div>
+        </div>
+        <div class="message">
+            <div class="norms">
+                <div class="ly-20">规格</div>
+                <div class="ly-80">
+                    <ul class="chunk-ul">
+						<c:forEach items="${goods.goodsstandards }" var="stan">
+								<li class="chunk-li goods-standards ${goods.goodsId==stan.goodId?'active':''}" goods-id="${stan.goodId }">${stan.standard }</li>
+						</c:forEach>
+                    </ul>
+                </div>
+            </div>
+            <div class="norms">
+                <div class="ly-20">信息</div>
+                <div class="ly-80 lump">
+                    <p class="carry"><span>商品：<a>${goods.name }</a></span><span>商家：<a>[${fn:substring(fn:substringBefore(goods.name,"]"), 1, 9) }]</a></span></p>
+                    <div class="down"><img src="resources/common/images/btn-fenl-down@2x.png"/></div>
+                </div>
+            </div>
+            <div class="weui-cells list">
+                <a class="weui-cell weui-cell_access" href="comment/${goods.goodsId }" >
+                    <div class="weui-cell__bd">
+                        <p>商品评价</p>
+                    </div>
+                    <div class="weui-cell__ft">
+                    <span>${empty sumComment ? 0 : sumComment }</span>好评
+                    </div>
+                </a>
+               <!-- 2017-11-2-->
+                <a class="weui-cell weui-cell_access img-word" href="javascript:;" class="open-popup" data-target="#imgword-info">
+                    <div class="weui-cell__bd">
+                        <p>图文详情(建议在WIFI下查看)</p>
+                    </div>
+                    <div class="weui-cell__ft">
+                    </div>
+                </a>
+                <!-- 2017-11-2end-->
+            </div>
+        </div>
+        <div class="recommend">
+            <div class="title">商品推荐</div>
+            <ul class="list-ul you-like">
+                <c:forEach items="${huaGoods }" var="goods">
+					<li class="lsit-li" goods-id="${goods.id }">
+	                    <img src="${goods.imgPath }"/>
+	                    <p class="titled">${goods.name }</p>
+	                    <p class="money">￥${goods.price }</p>
+	                </li>
+				</c:forEach>
+            </ul>
+        </div>
+        <div class="banner">
+			<img src="resources/common/images/img-index-bt@2x.png" alt="">
+		</div>
+   	</div>
+   	   <!-- 2017-11-2-->
+    <div id="imgword-info" class="weui-popup__container">
+        <div class="weui-popup__overlay"></div>
+        <div class="weui-popup__modal">
+	        <header>
+		    	<div class="header-top">
+		    		<div class="pull-left"><img src="resources/common/images/btn-fenl-back@2x.png"/></div>
+		    		<div class="pull-center" style="font-size: 14px;">${goods.name }</div>
+		    	</div>
+	    	</header>
+            <div class="modal-bd">
+                <div class="txtarea">
+                    <!-- <img src="resources/common/images/t-head1.jpg" alt=""> -->
+                    ${goods.phIntroduced }
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 2017-11-2end-->
+   	<input type="hidden" id="goodsId" value="${goods.goodsId }">
+    <%@include file="/WEB-INF/jsp/common/common_footer.jsp"%>
+    <!-- 公共js区域 --> 
+	<%@include file="/WEB-INF/jsp/common/common_js.jsp" %>
+    <!-- 公共js区域完 -->
+    <!-- 该页面应用js区域 -->
+    <script type="text/javascript" src="resources/goods/js/goods_info.js"></script>
+    <!-- 该页面应用js区域 -->
+    </body>
+</html>

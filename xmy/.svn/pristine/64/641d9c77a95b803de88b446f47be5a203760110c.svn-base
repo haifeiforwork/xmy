@@ -1,0 +1,580 @@
+package com.zfj.xmy.common.persistence.pojo;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+import javax.persistence.Column;
+
+public class Order implements Serializable {
+
+    private Long id;
+
+
+    private String no;
+
+
+    private String serialNumber;
+
+
+    private Long userId;
+
+
+    private Integer payType;
+
+
+    private BigDecimal pay;
+
+
+    private BigDecimal actual;
+
+
+    private Integer usedPoints;
+
+
+    private BigDecimal total;
+
+
+    private String email;
+
+
+    private String paymentName;
+
+
+    private String consigneeName;
+
+
+    private String consigneeIdcard;
+
+
+    private String consigneePhone;
+
+
+    private String consigneeAddress;
+
+
+    private String deliveryName;
+
+
+    private String deliveryPhone;
+
+
+    private Integer deliveryMethod;
+
+
+    private Integer paymentStatus;
+
+
+    private Integer shipStatus;
+
+
+    private Integer status;
+
+
+    private Integer weight;
+
+
+    private Long accPoints;
+
+
+    private Integer isDel;
+
+
+    private Date createTime;
+
+
+    private Date payTime;
+
+
+    private Date updateTime;
+
+
+    private Date sendTime;
+
+
+    private Date arrivalTime;
+
+
+    private Date parsetTime;
+
+
+    private String updator;
+
+
+    private String orderRemark;
+
+
+    private String businessRemark;
+
+
+    private Integer returnStatus;
+
+
+    private String returnReason;
+
+
+    private String companyName;
+
+
+    private String invoiceContent;
+
+
+    private Integer invoiceType;
+
+
+    private String taxpayerNum;
+
+
+    private String deviceId;
+
+
+    private String logisticsNo;
+
+
+    private Long couponId;
+
+
+    private BigDecimal freight;
+
+
+    private String province;
+
+
+    private String city;
+
+
+    private String area;
+
+
+    private Integer thirdPartyPayType;
+
+
+    private Integer orderSource;
+
+
+    private BigDecimal fee;
+
+
+    private BigDecimal discountPrice;
+
+
+    private Long logisticsType;
+
+
+    private String kdniaoExpCode;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNo() {
+        return no;
+    }
+
+    public void setNo(String no) {
+        this.no = no;
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Integer getPayType() {
+        return payType;
+    }
+
+    public void setPayType(Integer payType) {
+        this.payType = payType;
+    }
+
+    public BigDecimal getPay() {
+        return pay;
+    }
+
+    public void setPay(BigDecimal pay) {
+        this.pay = pay;
+    }
+
+    public BigDecimal getActual() {
+        return actual;
+    }
+
+    public void setActual(BigDecimal actual) {
+        this.actual = actual;
+    }
+
+    public Integer getUsedPoints() {
+        return usedPoints;
+    }
+
+    public void setUsedPoints(Integer usedPoints) {
+        this.usedPoints = usedPoints;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPaymentName() {
+        return paymentName;
+    }
+
+    public void setPaymentName(String paymentName) {
+        this.paymentName = paymentName;
+    }
+
+    public String getConsigneeName() {
+        return consigneeName;
+    }
+
+    public void setConsigneeName(String consigneeName) {
+        this.consigneeName = consigneeName;
+    }
+
+    public String getConsigneeIdcard() {
+        return consigneeIdcard;
+    }
+
+    public void setConsigneeIdcard(String consigneeIdcard) {
+        this.consigneeIdcard = consigneeIdcard;
+    }
+
+    public String getConsigneePhone() {
+        return consigneePhone;
+    }
+
+    public void setConsigneePhone(String consigneePhone) {
+        this.consigneePhone = consigneePhone;
+    }
+
+    public String getConsigneeAddress() {
+        return consigneeAddress;
+    }
+
+    public void setConsigneeAddress(String consigneeAddress) {
+        this.consigneeAddress = consigneeAddress;
+    }
+
+    public String getDeliveryName() {
+        return deliveryName;
+    }
+
+    public void setDeliveryName(String deliveryName) {
+        this.deliveryName = deliveryName;
+    }
+
+    public String getDeliveryPhone() {
+        return deliveryPhone;
+    }
+
+    public void setDeliveryPhone(String deliveryPhone) {
+        this.deliveryPhone = deliveryPhone;
+    }
+
+    public Integer getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
+    public void setDeliveryMethod(Integer deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+    }
+
+    public Integer getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(Integer paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public Integer getShipStatus() {
+        return shipStatus;
+    }
+
+    public void setShipStatus(Integer shipStatus) {
+        this.shipStatus = shipStatus;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+    }
+
+    public Long getAccPoints() {
+        return accPoints;
+    }
+
+    public void setAccPoints(Long accPoints) {
+        this.accPoints = accPoints;
+    }
+
+    public Integer getIsDel() {
+        return isDel;
+    }
+
+    public void setIsDel(Integer isDel) {
+        this.isDel = isDel;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getPayTime() {
+        return payTime;
+    }
+
+    public void setPayTime(Date payTime) {
+        this.payTime = payTime;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Date getSendTime() {
+        return sendTime;
+    }
+
+    public void setSendTime(Date sendTime) {
+        this.sendTime = sendTime;
+    }
+
+    public Date getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public void setArrivalTime(Date arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }
+
+    public Date getParsetTime() {
+        return parsetTime;
+    }
+
+    public void setParsetTime(Date parsetTime) {
+        this.parsetTime = parsetTime;
+    }
+
+    public String getUpdator() {
+        return updator;
+    }
+
+    public void setUpdator(String updator) {
+        this.updator = updator;
+    }
+
+    public String getOrderRemark() {
+        return orderRemark;
+    }
+
+    public void setOrderRemark(String orderRemark) {
+        this.orderRemark = orderRemark;
+    }
+
+    public String getBusinessRemark() {
+        return businessRemark;
+    }
+
+    public void setBusinessRemark(String businessRemark) {
+        this.businessRemark = businessRemark;
+    }
+
+    public Integer getReturnStatus() {
+        return returnStatus;
+    }
+
+    public void setReturnStatus(Integer returnStatus) {
+        this.returnStatus = returnStatus;
+    }
+
+    public String getReturnReason() {
+        return returnReason;
+    }
+
+    public void setReturnReason(String returnReason) {
+        this.returnReason = returnReason;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getInvoiceContent() {
+        return invoiceContent;
+    }
+
+    public void setInvoiceContent(String invoiceContent) {
+        this.invoiceContent = invoiceContent;
+    }
+
+    public Integer getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(Integer invoiceType) {
+        this.invoiceType = invoiceType;
+    }
+
+    public String getTaxpayerNum() {
+        return taxpayerNum;
+    }
+
+    public void setTaxpayerNum(String taxpayerNum) {
+        this.taxpayerNum = taxpayerNum;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public String getLogisticsNo() {
+        return logisticsNo;
+    }
+
+    public void setLogisticsNo(String logisticsNo) {
+        this.logisticsNo = logisticsNo;
+    }
+
+    public Long getCouponId() {
+        return couponId;
+    }
+
+    public void setCouponId(Long couponId) {
+        this.couponId = couponId;
+    }
+
+    public BigDecimal getFreight() {
+        return freight;
+    }
+
+    public void setFreight(BigDecimal freight) {
+        this.freight = freight;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
+    }
+
+    public Integer getThirdPartyPayType() {
+        return thirdPartyPayType;
+    }
+
+    public void setThirdPartyPayType(Integer thirdPartyPayType) {
+        this.thirdPartyPayType = thirdPartyPayType;
+    }
+
+    public Integer getOrderSource() {
+        return orderSource;
+    }
+
+    public void setOrderSource(Integer orderSource) {
+        this.orderSource = orderSource;
+    }
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
+    }
+
+    public BigDecimal getDiscountPrice() {
+        return discountPrice;
+    }
+
+    public void setDiscountPrice(BigDecimal discountPrice) {
+        this.discountPrice = discountPrice;
+    }
+
+    public Long getLogisticsType() {
+        return logisticsType;
+    }
+
+    public void setLogisticsType(Long logisticsType) {
+        this.logisticsType = logisticsType;
+    }
+
+    public String getKdniaoExpCode() {
+        return kdniaoExpCode;
+    }
+
+    public void setKdniaoExpCode(String kdniaoExpCode) {
+        this.kdniaoExpCode = kdniaoExpCode;
+    }
+}

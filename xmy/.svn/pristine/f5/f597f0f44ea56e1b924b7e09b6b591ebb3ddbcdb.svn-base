@@ -1,0 +1,23 @@
+@CHARSET "UTF-8";
+@font-face {
+		  font-family: 'iconfont';  /* project id 376896 */
+		  src: url('http://at.alicdn.com/t/font_dunxhgmb2k9sh5mi.eot');
+		  src: url('http://at.alicdn.com/t/font_dunxhgmb2k9sh5mi.eot?#iefix') format('embedded-opentype'),
+		  url('http://at.alicdn.com/t/font_dunxhgmb2k9sh5mi.woff') format('woff'),
+		  url('http://at.alicdn.com/t/font_dunxhgmb2k9sh5mi.ttf') format('truetype'),
+		  url('http://at.alicdn.com/t/font_dunxhgmb2k9sh5mi.svg#iconfont') format('svg');
+		}
+        header .header-top{border-bottom: 1px solid #C3C3C3;}
+        header .header-top .pull-right .edit{font-size: 0.7rem;position: relative;top: -7px;}
+        .content{bottom: 0;}
+        .list .weui-media-box{background-color: #fff;border-bottom: 1px solid #f0f0f0;}
+        .list .weui-media-box:before{display: none;}
+        .list .weui-media-box .weui-media-box__hd{width: 4rem;height: 4rem;margin-right: 0.5rem;}
+        .list .weui-media-box .weui-media-box__bd{height: 4rem;}
+        .list .weui-media-box .weui-media-box__bd .weui-media-box__desc{color: #444;line-height: 0.8rem;height: 1.6rem;margin-top:0.4rem}
+        .list .weui-media-box .weui-media-box__bd .money{font-size: 0.7rem;color: #F62C31;margin-top:0.5rem;}
+        .list .weui-media-box .weui-media-box__bd .money span{font-size: 0.9rem;}
+        .list .weui-media-box .weui-media-box__bd .count .number{font-size: 0.6rem;color: #999;margin-left: 0.25rem;}
+        .list .weui-media-box .weui-media-box__bd .count .title{font-size: 0.6rem;color: #F62C31;border:1px solid #F62C31;padding: 0 3px;}
+        .removeBtn {position:relative;top:1.8rem;}
+        .removeBtn .remove{background:#FF2307;color:#FFF;padding:0.2rem 0.6rem;border:none;font-size:0.6rem;border-radius:0.1rem;display:none;}

@@ -1,0 +1,139 @@
+package com.zfj.xmy.goods.service.pc;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcSearchDto;
+
+public interface PcSearchService {
+	/**
+	 * @param name
+	 * @return List<PcSearchDto>
+	 * @author lij
+	 * @date 2017年8月24日 下午2:17:14
+	 * 根据商品名称查询pc筛选条件
+	 */
+	List<PcSearchDto> findSearchDto(String name);
+	/**
+	 * 根据商品搜索关键字查询相关分类
+	 * @param name
+	 * @return List<PcSearchDto>
+	 * @author lij
+	 * @date 2017年10月20日 下午3:02:21
+	 */
+	List<PcSearchDto> testSearchDto(String name);
+	/**
+	 * 根据商品名称筛选相关分类
+	 * @param name
+	 * @return List<PcSearchDto>
+	 * @author lij
+	 * @date 2017年10月24日 下午3:45:55
+	 */
+	List<PcSearchDto> querySearchDto(String name,String typeName,Integer mianLand);
+	/**
+	 * 根据分词或二级分类查询筛选条件
+	 * @param id
+	 * @return String
+	 * @author lij
+	 * @date 2017年11月8日 下午2:35:43
+	 */
+	String queryWordByTypeIdOrwordId(String	wordName,Long typeId);
+	
+	/**
+	 * @param name
+	 * @param orderMethod 0.综合排序 1.人气排序 2.销量排序 3.价格排序 4.新品上架
+	 * @param pageBean
+	 * @return List<Goods>
+	 * @author lij
+	 * @date 2017年8月24日 下午3:42:30
+	 * 根据商品名称查询商品
+	 */
+	List<Goods> findSearchGoods(String name,Integer orderMethod,PageBean pageBean,String sreach,Integer isDelvi,BigDecimal beginPrice,BigDecimal endPrice,Boolean priceOrder);
+	/**
+	 * @return List<Goods>
+	 * @author lij
+	 * @date 2017年8月24日 下午4:36:05
+	 * 查询销量前五的商品
+	 */
+	List<Goods> findTopFiveGoods();
+	/**
+	 * @param goodsName
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年9月5日 上午11:20:11
+	 * 查询总页数
+	 */
+	Integer findCountGoods(String goodsName);
+	/**
+	 * @param typeId
+	 * @return List<PcSearchDto>
+	 * @author lij
+	 * @date 2017年9月6日 上午10:22:11
+	 * 根据二级分类ID查询分类条件
+	 */
+	List<PcSearchDto> findSearchDtoByTypeId(Long typeId);
+	
+	/**
+	 * 根据分词id查询分类条件
+	 * @param wordId
+	 * @return List<PcSearchDto>
+	 * @author lij
+	 * @date 2017年10月24日 下午1:49:09
+	 */
+	List<PcSearchDto> findSearchDtoByWord(Long wordId);
+	
+	/**
+	 * 根据一级分类ID查询筛选条件
+	 * @param oneId
+	 * @return List<PcSearchDto>
+	 * @author lij
+	 * @date 2017年11月2日 下午8:16:39
+	 */
+	List<PcSearchDto> findSearchDtoByoneId(Long oneId);
+	
+	/**
+	 * @param typeId
+	 * @param orderMethod
+	 * @param pageBean
+	 * @param sreach
+	 * @return List<Goods>
+	 * @author lij
+	 * @date 2017年9月6日 上午10:47:29
+	 * 根据二级分类ID查询商品信息
+	 */
+	List<Goods> findSearchGoodsByTypeId(Long typeId,Long wordId,Integer orderMethod,PageBean pageBean,String sreach,boolean priceOrder,Integer isdelivery,BigDecimal beginPice,BigDecimal endPrice);
+	/**
+	 * 根据一级分类查询商品信息
+	 * @param oneId
+	 * @param orderMethod
+	 * @param pageBean
+	 * @param sreach
+	 * @param priceOrder
+	 * @param isdelivery
+	 * @param beginPice
+	 * @param endPrice
+	 * @return List<Goods>
+	 * @author lij
+	 * @date 2017年11月2日 下午8:47:38
+	 */
+	List<Goods> findSearchGoodsByOneId(Long oneId,Integer orderMethod,PageBean pageBean,String typeName,String sreach,boolean priceOrder,Integer isdelivery,BigDecimal beginPice,BigDecimal endPrice);
+	/**
+	 * @param count
+	 * @return int
+	 * @author lij
+	 * @date 2017年9月22日 下午2:44:08
+	 * 返回总页数根据总条数
+	 */
+	int countPage(int count);
+	/**
+	 * 判读数据几集分类
+	 * @param id
+	 * @return Integer 1.一级分类  2.二级分类
+	 * @author ***
+	 * @date 2017年11月4日 下午1:40:40
+	 */
+	Integer checkId(Long id);
+	
+}

@@ -1,0 +1,16 @@
+package com.zfj.xmy.cms.web.controller.push;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+@RequestMapping("/push")
+@RestController
+public class PushController {
+
+	@RequestMapping("/list")
+	public ModelAndView list(){
+		
+		return new ModelAndView("/push/push_list");
+	}
+}

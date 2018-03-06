@@ -1,0 +1,36 @@
+package com.zfj.xmy.pc.web.controller.pay;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.zfj.base.commons.mini.annotation.Exclusion;
+import com.zfj.base.commons.mini.bean.ReqSecurityVo;
+import com.zfj.base.util.web.WebUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.order.service.common.PayService;
+import com.zfj.xmy.pay.persistence.pojo.vo.LaunchPayGoodsVo;
+import com.zfj.xmy.pc.web.common.SessionInfo;
+import com.zfj.xmy.pc.web.controller.BaseController;
+@RestController
+public class PayController extends BaseController{
+	
+	@Autowired
+	private PayService payService;
+	
+	@RequestMapping(value="/pay/goods",method=RequestMethod.POST)
+	public Object pay(HttpServletRequest request,LaunchPayGoodsVo goodsVo){
+		String ip = WebUtil.getRealIp();
+		goodsVo.setClientIp(ip);
+		SessionInfo sessionInfo = SessionInfo.get();
+		Long userId = sessionInfo.getUserId();
+		Object returnStr = payService.beforebuyGoods(goodsVo, userId);
+		return returnStr;
+	}
+	
+}

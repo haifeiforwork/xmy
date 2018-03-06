@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.ShoppingCardRecordMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.ShoppingCardRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="shopping_card_id" property="shoppingCardId" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="use_time" property="useTime" jdbcType="TIMESTAMP" />
+    <result column="value" property="value" jdbcType="DECIMAL" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, shopping_card_id, user_id, use_time, `value`, remark
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from shopping_card_record
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from shopping_card_record
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from shopping_card_record
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from shopping_card_record
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update shopping_card_record
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.shoppingCardId != null" >
+        shopping_card_id = #{record.shoppingCardId,jdbcType=BIGINT},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.useTime != null" >
+        use_time = #{record.useTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.value != null" >
+        `value` = #{record.value,jdbcType=DECIMAL},
+      </if>
+      <if test="record.remark != null" >
+        remark = #{record.remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update shopping_card_record
+    set id = #{record.id,jdbcType=BIGINT},
+      shopping_card_id = #{record.shoppingCardId,jdbcType=BIGINT},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      use_time = #{record.useTime,jdbcType=TIMESTAMP},
+      `value` = #{record.value,jdbcType=DECIMAL},
+      remark = #{record.remark,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from shopping_card_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from shopping_card_record
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.ShoppingCardRecord" useGeneratedKeys="true" keyProperty="id" >
+    insert into shopping_card_record (shopping_card_id, user_id, use_time, 
+      `value`, remark)
+    values (#{shoppingCardId,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{useTime,jdbcType=TIMESTAMP}, 
+      #{value,jdbcType=DECIMAL}, #{remark,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.ShoppingCardRecord" useGeneratedKeys="true" keyProperty="id" >
+    insert into shopping_card_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="shoppingCardId != null" >
+        shopping_card_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="useTime != null" >
+        use_time,
+      </if>
+      <if test="value != null" >
+        `value`,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="shoppingCardId != null" >
+        #{shoppingCardId,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="useTime != null" >
+        #{useTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="value != null" >
+        #{value,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.ShoppingCardRecord" >
+    update shopping_card_record
+    <set >
+      <if test="shoppingCardId != null" >
+        shopping_card_id = #{shoppingCardId,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="useTime != null" >
+        use_time = #{useTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="value != null" >
+        `value` = #{value,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.ShoppingCardRecord" >
+    update shopping_card_record
+    set shopping_card_id = #{shoppingCardId,jdbcType=BIGINT},
+      user_id = #{userId,jdbcType=BIGINT},
+      use_time = #{useTime,jdbcType=TIMESTAMP},
+      `value` = #{value,jdbcType=DECIMAL},
+      remark = #{remark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

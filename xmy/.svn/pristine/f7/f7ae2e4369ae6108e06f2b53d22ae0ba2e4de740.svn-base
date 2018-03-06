@@ -1,0 +1,22 @@
+package com.zfj.xmy.quartz.job;
+
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.scheduling.quartz.QuartzJobBean;
+
+/**
+ * 
+ * 极光推送定时任务
+ * @author wy
+ *
+ */
+public class JiguangPushQuartz extends QuartzJobBean {
+
+	@Override
+	protected void executeInternal(JobExecutionContext context)
+			throws JobExecutionException {
+		// TODO Auto-generated method stub
+
+	}
+
+}

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.order.persistence.wap.dao.WapOrderExMapper" >
+
+	<resultMap id="fullOrder" type="com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto" autoMapping="true">
+		<id column="id" property="id" />
+		<collection property="orderGoods" ofType="com.zfj.xmy.common.persistence.pojo.OrderGoods" autoMapping="true">
+			<id column="ogId" property="id" />
+		</collection>
+		<collection property="orderGoodsDto" ofType="com.zfj.xmy.order.persistence.pc.pojo.dto.PcOrderGoodsDto" autoMapping="true">
+			<id column="ogId" property="id" />
+		</collection>
+	</resultMap>
+
+	<select id="findOrders" parameterType="com.zfj.xmy.order.persistence.wap.pojo.dto.WapOrderQueryDto" resultMap="fullOrder">
+		SELECT
+			orderGoods.*, pg.points_id pointsId
+		FROM
+			(
+				SELECT
+					orderGoods.*, bap.presentName
+				FROM
+					(
+						SELECT
+							orderGoods.*, la.`name` activityName
+						FROM
+							(
+								SELECT
+									oog.*, im.imgPath
+								FROM
+									(
+										SELECT
+											o.id,
+											o.acc_points accPoints,
+											o.actual,
+											o.area,
+											o.arrival_time arrivalTime,
+											o.business_remark businessRemark,
+											o.city,
+											o.company_name companyName,
+											o.consignee_address consigneeAddress,
+											o.consignee_idcard consigneeIdcard,
+											o.consignee_name consigneeName,
+											o.consignee_phone consigneePhone,
+											o.coupon_id couponId,
+											o.create_time createTime,
+											o.delivery_method deliveryMethod,
+											o.delivery_name diliveryName,
+											o.delivery_phone deliveryPhone,
+											o.device_id deviceId,
+											o.discount_price discountPrice,
+											o.email,
+											o.fee,
+											o.freight,
+											o.invoice_content invoiceContent,
+											o.invoice_type invoiceType,
+											o.is_del isDel,
+											o.logistics_no logisticsNo,
+											o.logistics_type logisticsType,
+											o.`no`,
+											o.order_remark orderRemark,
+											o.order_source orderSource,
+											o.parset_time parsetTime,
+											o.pay,
+											o.payment_name paymentName,
+											o.payment_status paymentStatus,
+											o.pay_time payTime,
+											o.pay_type payType,
+											o.province,
+											o.return_reason returnReason,
+											o.return_status returnStatus,
+											o.send_time sendTime,
+											o.`status`,
+											o.serial_number serialNumber,
+											o.ship_status shipStatus,
+											o.taxpayer_num taxpayerNum,
+											o.third_party_pay_type thirdPartyPayType,
+											o.total,
+											o.update_time updateTime,
+											o.updator,
+											o.used_points usedPoints,
+											o.user_id userId,
+											o.weight,
+											og.id ogId,
+											og.activity_id activityId,
+											og.activity_type activityType,
+											og.goods_id goodsId,
+											og.`name`,
+											og.`no` goodsNo,
+											og.num,
+											og.order_id orderId,
+											og.points,
+											og.present_goods_id presentGoodsId,
+											og.present_goods_name presentGoodsName,
+											og.price,
+											og.sum_points sumPoints,
+											og.sum_price sumPrice,
+											og.supplier,
+											og.type_name typeName
+										FROM
+											(
+												SELECT
+													*
+												FROM
+													`order`
+												WHERE
+													user_id = #{userId}
+												<if test="status != 0">
+													AND `status` = #{status}
+													AND is_del = 1
+												</if>
+												order by create_time desc
+												LIMIT #{startRow}, #{endRow}
+											) o
+										JOIN order_goods og ON o.id = og.order_id
+									) oog
+								JOIN (
+									SELECT
+										goods_id,
+										path imgPath
+									FROM
+										goods_image
+									GROUP BY
+										goods_id
+								) im ON oog.goodsId = im.goods_id
+							) orderGoods
+						LEFT JOIN limit_activity la ON orderGoods.activityId = la.id
+					) orderGoods
+				LEFT JOIN (
+					SELECT
+						bap.main_goods_ids,
+						g.`name` presentName
+					FROM
+						buy_and_present bap
+					JOIN goods g ON g.id IN (bap.gift_goods_ids)
+				) bap ON orderGoods.goodsId IN (bap.main_goods_ids)
+			) orderGoods
+		LEFT JOIN points_goods pg ON orderGoods.goodsId = pg.goods_id
+		AND orderGoods.sumPoints != 0
+		order by orderGoods.createTime desc
+	</select> 
+
+</mapper>

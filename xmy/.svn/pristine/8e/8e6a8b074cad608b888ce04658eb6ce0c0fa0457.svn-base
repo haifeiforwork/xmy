@@ -1,0 +1,41 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/common/common_tag.jsp"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+ <div class="rob">
+       <div class="weui-panel self-pannel">
+       <div class="weui-panel__bd goods-list">
+<!-- 商品搜索页面 -->
+		<c:forEach items="${goodsList }" var="goods">
+			<div class="weui-media-box weui-media-box_appmsg goods-div">
+			    <div class="weui-media-box__hd">
+			        <img class="weui-media-box__thumb" src="${goods.imgPath }?x-oss-process=image/resize,m_fixed,h_90,w_90">
+			    </div>
+			    <div class="weui-media-box__bd">
+			   	    <c:if test="${searchType eq 'name' }">
+				        <p class="weui-media-box__desc">
+				        	${goods.fullName }
+				        </p> 
+				        <p class="text-right price">¥ <fmt:formatNumber pattern="0.00" value="${goods.price/100 }"></fmt:formatNumber></p>
+			        </c:if>
+			        <c:if test="${searchType eq 'type' }">
+			        	<p class="weui-media-box__desc">
+				        	${goods.name }
+				        </p> 
+				        <p class="text-right price">¥ ${goods.phonePrice }</p>
+			        </c:if>
+			        <p class="sale-say">
+			            <span class="sale">累计成交<span> ${empty goods.sumDeal ? 0 : goods.sumDeal } </span>笔</span> <span>评价 <span>${goods.sumComment }</span></span>
+			            <img goods_id="${goods.id }" class="add-shopping" src="resources/common/images/btn-tjgwc@2x.png" alt="">
+			        </p>
+			    </div>
+			</div>
+		</c:forEach>
+		<input type="hidden" id="goodsCount" value="${fn: length(goodsList) }" />
+		</div>
+        </div>
+        <div class="weui-loadmore" style="display:none">
+            <i class="weui-loading"></i>
+            <span class="weui-loadmore__tips">正在加载</span>
+        </div>
+  </div>
+<input type="hidden" id="pageIndexPage" value="${pageBean.pageIndex }">

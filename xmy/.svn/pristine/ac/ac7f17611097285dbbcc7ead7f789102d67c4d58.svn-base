@@ -1,0 +1,316 @@
+package com.zfj.xmy.goods.service.pc.impl;  
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.AdImageMapper;
+import com.zfj.xmy.common.persistence.dao.AdInfoMapper;
+import com.zfj.xmy.common.persistence.dao.CategoryWordSegMapper;
+import com.zfj.xmy.common.persistence.dao.ContainerMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsCategoryMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.IndexConfigMapper;
+import com.zfj.xmy.common.persistence.dao.PcSecondLevelClassificationMapper;
+import com.zfj.xmy.common.persistence.dao.TermDataMapper;
+import com.zfj.xmy.common.persistence.pojo.AdImage;
+import com.zfj.xmy.common.persistence.pojo.AdInfo;
+import com.zfj.xmy.common.persistence.pojo.CategoryWordSeg;
+import com.zfj.xmy.common.persistence.pojo.Container;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.GoodsCategory;
+import com.zfj.xmy.common.persistence.pojo.IndexConfig;
+import com.zfj.xmy.common.persistence.pojo.PcSecondLevelClassification;
+import com.zfj.xmy.common.persistence.pojo.TermData;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.goods.persistence.app.dao.AppTermDataExMapper;
+import com.zfj.xmy.goods.persistence.pc.dao.PcCategoryGoodsExMapper;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcCategoryDir;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcCategoryGoodsDir;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcContainerDto;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcGoodsDir;
+import com.zfj.xmy.goods.service.app.TermDataExService;
+import com.zfj.xmy.goods.service.common.GoodsService;
+import com.zfj.xmy.goods.service.pc.PcCategoryService;
+
+/** 
+ * @Title: PcCategoryServiceImpl.java 
+ * @Package com.zfj.xmy.goods.service.pc.impl 
+ * @Description: 
+ * @author hexw
+ * @date 2017年8月10日 下午4:41:44 
+ */
+@Service
+public class PcCategoryServiceImpl extends BaseService  implements PcCategoryService {
+	
+	@Autowired
+	private TermDataMapper termDataMapper;
+	
+	@Autowired
+	private PcCategoryGoodsExMapper pcCategoryGoodsExMapper;
+	
+	@Autowired
+	private CategoryWordSegMapper categoryWordSegMapper;
+	
+	@Autowired
+	private GoodsService goodsService;
+	
+	@Autowired
+	private TermDataExService termDataExService;
+	
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	@Autowired
+	private AppTermDataExMapper	appTermDataExMapper;	
+	
+	@Autowired
+	private AdInfoMapper adInfoMapper;
+	
+	@Autowired
+	private AdImageMapper adImageMapper;
+	
+	@Autowired
+	private PcSecondLevelClassificationMapper pcSecondLevelClassificationMapper;
+	
+	@Autowired
+	private IndexConfigMapper indexConfigMapper;
+	
+	@Autowired
+	private ContainerMapper containerMapper;
+	
+	@Autowired
+	private GoodsCategoryMapper categoryMapper;
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Override
+	public List<PcCategoryGoodsDir> findCategoryGoods(long parentId){
+		//1. 先查询出二级分类
+		ReqData reqData = new  ReqData();
+		reqData.putValue("a.parent_id", parentId, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("a.status", SystemConstant.TERMDATA.YES, SystemConstant.REQ_PARAMETER_EQ);
+		List<PcCategoryGoodsDir> list = pcCategoryGoodsExMapper.findCategorys(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		//2. 查询出二级分类对应的商品
+		if (list.size() > 0) {
+			for (PcCategoryGoodsDir pcCategoryDir : list) {
+				ReqData goodsReqData = new  ReqData();
+				goodsReqData.putValue("b.cid", pcCategoryDir.getCategoryId(),SystemConstant.REQ_PARAMETER_EQ);
+				goodsReqData.putValue("a.is_recycle", SystemConstant.GoodsConstant.NOT_RECYCLE, SystemConstant.REQ_PARAMETER_EQ);
+				PageBean pageBean = new PageBean() ;
+				pageBean.setPageIndex(1) ;
+				pageBean.setPageSize(10) ;
+				List<PcGoodsDir> goodsList = pcCategoryGoodsExMapper.findGoods(ReqUtil.reqParameterToCriteriaParameter(goodsReqData),pageBean.getRowBounds());
+				if (goodsList.size() > 0) {
+					pcCategoryDir.setList(goodsList);
+				}
+			}
+		}
+		return list;
+	}
+	
+	@Override
+	public PcCategoryDir findCategoryMenu(long parentId){
+		TermData termData = termDataMapper.selectByPrimaryKey(parentId);
+		PcCategoryDir pcCategoryDir = new  PcCategoryDir();
+		pcCategoryDir.setId(parentId);
+		pcCategoryDir.setName(termData.getName());
+		pcCategoryDir.setIcon(termData.getIcon());
+		// 查询二级分类
+		ReqData reqData = new  ReqData();
+		reqData.putValue("parent_id", parentId, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("status", SystemConstant.TERMDATA.YES, SystemConstant.REQ_PARAMETER_EQ);
+		List<TermData> list = termDataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		List<PcCategoryDir> childList = new ArrayList<PcCategoryDir>();
+		if (list.size() > 0) {
+			for (TermData childTermData : list) {
+				PcCategoryDir child  = new  PcCategoryDir();
+				child.setId(childTermData.getId());
+				child.setName(childTermData.getName());
+				child.setIcon(childTermData.getIcon());
+				//查询二级分类下的分词
+				ReqData wordSegreqData = new  ReqData();
+				wordSegreqData.putValue("cid", childTermData.getId(), SystemConstant.REQ_PARAMETER_EQ);
+				wordSegreqData.putValue("type", SystemConstant.CATEGORY_SPEC.TYPE_MENU, SystemConstant.REQ_PARAMETER_EQ);
+				wordSegreqData.putValue("parent_id", SystemConstant.CATEGORY_SPEC.PARENT_ID, SystemConstant.REQ_PARAMETER_NE);
+				wordSegreqData.setSortname("seq");
+				wordSegreqData.setSortorder("asc");
+				List<CategoryWordSeg>  wordSegList = categoryWordSegMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(wordSegreqData));
+				child.setWordSegList(wordSegList);
+				childList.add(child);
+			}
+			pcCategoryDir.setChidleCategory(childList);
+		}
+		return pcCategoryDir;
+	}
+	
+	
+	
+	/**
+	 *   鲜一下(一级分类销量前20 的商品)  
+	 * @return    
+	 * @return List<>    
+	 * Date:2017年8月24日 上午9:44:33 
+	 * @author hexw
+	 */
+	@Override
+	public List<PcGoodsDir> findFreshGoods(long categoryId){
+		List<PcGoodsDir> goodsDirList = new  ArrayList<PcGoodsDir>();
+		List<Goods> list = goodsService.findGoodsSold(categoryId);
+		for (Goods goods : list) {
+			PcGoodsDir pcGoodsDir = new  PcGoodsDir();
+			pcGoodsDir.setGoodsId(goods.getId());
+			pcGoodsDir.setGoodsName(goods.getName());
+			pcGoodsDir.setPrice(goods.getPrice());
+			pcGoodsDir.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+			goodsDirList.add(pcGoodsDir);
+		}
+		return goodsDirList;
+	}
+	
+	@Override
+	public Map<String,Object> findSecondCategoryContainer(long categoryId){
+		Map<String,Object> result = new  HashMap<String, Object>();
+		// 1.根据一级分类配置表
+		ReqData reqData = new  ReqData();
+		reqData.putValue("category_id", categoryId, SystemConstant.REQ_PARAMETER_EQ);
+		List<PcSecondLevelClassification> list = pcSecondLevelClassificationMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		PcSecondLevelClassification pcSecondLevelClassification = null;  
+		if (list.size() > 0) {
+			pcSecondLevelClassification = list.get(0);
+			IndexConfig indexConfig = indexConfigMapper.selectByPrimaryKey(pcSecondLevelClassification.getConfigId());
+			if (ObjectUtil.isNotNull(indexConfig)) {
+				// 2. 根据分类top广告 id查询分类对应的top图
+				List<AdImage> topImg = findAdImageByAdId(indexConfig.getTopAdId());
+				// 3. 根据一号广告位id查询 一号广告位图片
+				List<AdImage> firstAdImg = findAdImageByAdId(indexConfig.getFirstAdId());
+				// 4. 查询货柜
+				Object[] containerIds = indexConfig.getContainerIds().split(",");
+				List<PcContainerDto> containers = new ArrayList<PcContainerDto>();
+					for (Object containerId : containerIds) {
+						Container container = containerMapper.selectByPrimaryKey(Long.parseLong(containerId.toString()));
+						if (ObjectUtil.isNotNull(container)) {
+							PcContainerDto pcContainerDto = new PcContainerDto();
+							pcContainerDto.setName(container.getName());
+							pcContainerDto.setSlogan(container.getSlogan());
+							pcContainerDto.setFontColor(container.getFontColor());
+							if (findAdImageByAdId(container.getAdId()).size() > 0){
+								//货柜广告
+								pcContainerDto.setAdImage(findAdImageByAdId(container.getAdId()).get(0));  
+							}
+							// 5. 查询货柜商品
+							reqData.clearValue();
+							reqData.putValue("a.id", container.getGoodsIds(), SystemConstant.REQ_PARAMETER_IN);
+							reqData.putValue("a.is_recycle", SystemConstant.GoodsConstant.NOT_RECYCLE, SystemConstant.REQ_PARAMETER_EQ);
+							reqData.putValue("a.is_putway", SystemConstant.GoodsConstant.PUTWAY,  SystemConstant.REQ_PARAMETER_EQ);
+							PageBean pageBean = new PageBean() ;
+							pageBean.setPageIndex(1) ;
+							pageBean.setPageSize(10) ;
+							List<PcGoodsDir> goodsList = pcCategoryGoodsExMapper.findGoodsByIds(ReqUtil.reqParameterToCriteriaParameter(reqData),pageBean.getRowBounds());
+							pcContainerDto.setGoodsList(goodsList);
+							containers.add(pcContainerDto);
+						}
+				}
+				result.put("topImg", topImg);
+				result.put("firstAdImg", firstAdImg);
+				result.put("containers", containers);
+			}
+		}
+		return result;
+	}
+	
+	public List<AdImage> findAdImageByAdId(Long adId){
+		List<AdImage> list = new ArrayList<AdImage>();
+		if (ObjectUtil.isNotNull(adId) && adId !=0 ){
+			ReqData reqData = new  ReqData();
+			reqData.putValue("ad_id", adId, SystemConstant.REQ_PARAMETER_EQ);
+			reqData.setSortname("weight");
+			reqData.setSortorder("asc");
+			list = adImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		}
+		return list;
+	}
+
+	@Override
+	public List<AdImage> findAdimageById(long id) {
+		ReqData reqData = new  ReqData();
+		reqData.putValue("category_id", id, SystemConstant.REQ_PARAMETER_EQ);
+		List<PcSecondLevelClassification> list = pcSecondLevelClassificationMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		PcSecondLevelClassification pcSecondLevelClassification = null;  
+		List<AdImage> topImg=new ArrayList<AdImage>();
+		if (list.size() > 0) {
+			pcSecondLevelClassification = list.get(0);
+			IndexConfig indexConfig = indexConfigMapper.selectByPrimaryKey(pcSecondLevelClassification.getConfigId());
+			if (ObjectUtil.isNotNull(indexConfig)) {
+				// 2. 根据分类top广告 id查询分类对应的top图
+				topImg= findAdImageByAdId(indexConfig.getTopAdId());
+			}
+		}
+		return topImg;
+	}
+
+	@Override
+	public List<AdImage> findPointsAd(String name) {
+		ReqData reqData=new ReqData();
+		reqData.putValue("name", name,SystemConstant.REQ_PARAMETER_EQ);
+		List<AdInfo> adinfo = adInfoMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		List<AdImage> topImg=new ArrayList<AdImage>();
+		if(adinfo.size()>0){
+			AdInfo indexConfig = adinfo.get(0);
+			if (ObjectUtil.isNotNull(indexConfig)) {
+				// 2. 根据分类top广告 id查询分类对应的top图
+				topImg= findAdImageByAdId(indexConfig.getId());
+			}
+		}
+		return topImg;
+	}
+	/**
+	 * 根据一级分类查询商品信息
+	 */
+	@Override
+	public List<Goods> findChangeGoods(Long id, Integer pageIndex) {
+		String termId = "0";
+		String goodsId = "0";
+		//1.查询对应的二级分类ID
+		ReqData reqData = new ReqData();
+		reqData.putValue("parent_id", id, SystemConstant.REQ_PARAMETER_EQ);
+		List<TermData> termdata = termDataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		for (TermData termData2 : termdata) {
+			termId+=","+termData2.getId();
+		}
+		//2.根据二级分类ID分页查询商品id
+		reqData.putValue("cid", termId, SystemConstant.REQ_PARAMETER_IN);
+		List<GoodsCategory> goodsCategory = categoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		for (GoodsCategory goodsCategory2 : goodsCategory) {
+			goodsId+=","+goodsCategory2.getGoodsId();
+		}
+		//3.分页查询商品
+		PageBean pageBean = new PageBean();
+		pageBean.setPageIndex(pageIndex);
+		pageBean.setPageSize(50);
+		reqData.putValue("id", goodsId, SystemConstant.REQ_PARAMETER_IN);
+		reqData.putValue("is_putway", SystemConstant.GoodsConstant.PUTWAY, SystemConstant.REQ_PARAMETER_EQ);
+		List<Goods> selectByExampleAndPage = goodsMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		for (Goods goods : selectByExampleAndPage) {
+			goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+		}
+		return selectByExampleAndPage;
+	}
+	
+}
+  

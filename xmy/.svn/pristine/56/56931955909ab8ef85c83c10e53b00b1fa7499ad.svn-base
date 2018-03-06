@@ -1,0 +1,44 @@
+require(["common"],function(){
+	//后退
+	$(".pull-left").click(function(){
+		location.href = "home/home" ;
+	}) ;
+	$(".swiper-container").swiper({
+	    autoplay: 2000,
+	    speed: 400,
+	    spaceBetween: 100,
+	    pagination: '.swiper-pagination',
+	    paginationClickable: true
+	    
+	});
+	
+	//查看商品详情
+	$(".goods-div").click(function(){
+		if($.isPutaway($(this).attr("goods-id"))){
+			$.alert("该商品已下架") ;
+			return ;
+		}
+		location.href = "goods/goodsInfo?goodsId=" + $(this).attr("goods-id") ;
+	}) ;
+	
+	//查看更多
+	$(".more").click(function(){
+		location.href = "goods/searchGoods?typeId=" + $(this).attr("category-id") ;
+	}) ;
+	
+	//广告图片link
+	$(".content").on("click",".img-link",function(){
+		if($(this).attr("type") == 1){
+			if($.isPutaway($(this).attr("data"))){
+				$.alert("该商品已下架") ;
+				return ;
+			}
+			location.href = "goods/goodsInfo?goodsId=" + $(this).attr("data") ;
+			return ;
+		}
+		if($(this).attr("type") == 0){
+			location.href = $(this).attr("data") ;
+			return ;
+		}
+	}) ;
+});

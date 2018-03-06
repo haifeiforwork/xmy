@@ -1,0 +1,24 @@
+.navigation .navigation-left .left-chunk3 ul .L-index:after{content: "";display: block;width: 0px;height: 0px;border: none;}
+.category *{-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+.category .text-center{text-align: center;}
+.category-title{width: 100%;background-color: #FFF;height: 58px;line-height: 58px;padding-left: 20px;margin-bottom: 18px;font-weight: 600;color: #525354}
+.category-title2 span{font-size: 21px;font-weight: 600;position: relative;top: 3px;margin-left: 15px;}
+.category-content{background-color: #FFF;border: 1px solid #ddd;padding: 20px;min-height: 485px;position: relative;color: #666;}
+.category-content .cate-table table{font-size: 14px;width: 100%;color: #525354;}
+.category-content .cate-table table .th{background-color: #f5f5f5;height: 28px;}
+.category-content .cate-table table .th th{border:1px solid #ddd;border-right: none;border-left: none;}
+.category-content .cate-table table .th th.first{border-left: 1px solid #ddd}
+.category-content .cate-table table .th th.last{border-right: 1px solid #ddd}
+.category-content .cate-table table .table-list{height: 61px;}
+.category-content .cate-table table .table-list td{border-bottom: 1px solid #ddd}
+.category-content .cate-table table th{font-weight: normal;}
+.category-content .cate-table table th.sm-default{width: 66px;}
+.category-content .cate-table table th.suging-default{width: 130px;}
+.category-content .cate-table table th.idetails-default{width: 191px;}
+.category-content .paging{text-align: right;position: absolute;bottom: 28px;right: 20px;}
+.category-content .paging button{height: 22px;margin-right: 2px;font-size: 12px;line-height: 15.5px;color: #999}
+.cate-nav .first{margin-right: 30px;}
+.btn-group .btn-default{border: 1px solid #ddd;margin-right: 10px;color: #525354;border-radius: 3px;background-color: #FFF;outline: none;font-family: "微软雅黑", "黑体", arial;}
+.idetails .cate-table table{border-collapse: collapse;}
+.idetails .cate-table table .table-list{height: 28px;}
+.idetails .cate-table table .table-list td{border: 1px solid #ddd}

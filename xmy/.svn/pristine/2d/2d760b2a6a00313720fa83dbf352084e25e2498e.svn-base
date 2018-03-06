@@ -1,0 +1,182 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html style="width:100%;height:100%;background:#FFF;">
+  <head>
+  	<title>登录香满圆 | 香满圆-西部农产品电商平台,重庆菜园坝水果市场荣誉出品</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/home/login.css">
+  </head>
+  
+  <body>
+  	<%@include file="/WEB-INF/jsp/commons/nav/nav_blank.jsp" %>
+ 	<div class="bg-container">
+		<div class="container add-bg w-1250">
+		    <div class="login-wrap clearfix">
+		        <div class="code-wrapp">
+		            <div class="item-wrap"> <img src="resource/commons/images/B2Cwx.jpg" alt=""><p>扫码关注微信端</p></div>
+		            <div class="item-wrap"> <img src="resource/commons/images/B2Cpc.png" alt=""><p>扫码进入移动端</p></div>
+		        </div>
+		        <div class="login clearfix">
+		        	<div class="word-login">
+			        	<div class="img-code"><i class="iconfont">&#xe681;</i></div>
+					    <div class="tips"><span class="inner-tips"><i class="iconfont">&#xe6e7;</i>扫码登录更安全</span>
+					    </div>
+					    <form method="post" id="myform">
+						    <div class="login-group">
+						        <p>已验证手机</p>
+						        <p><span class="i-control"><i class="iconfont">&#xe66f;</i></span><input type="text" name="name" value="${username}"></p>
+						    </div>
+						    <div class="login-group">
+						        <p>密码</p>
+						        <p><span class="i-control"><i class="iconfont psword">&#xe601;</i></span><input type="password" name="password" value="${pwd}"></p>
+						    </div>
+						    <div class="login-group" style="color:red;" id="msg">
+						    	<c:if test="${not empty(msg)}">
+						    		<p>${msg}</p>
+						    	</c:if>
+						    </div>
+						    
+						    <div class="login-des clearfix">
+						        <div class="col-50"><input type="checkbox" id="resize" name="remind" <c:if test="${isChecked}">checked="checked"</c:if> > <label for="resize">记住账号</label></div>
+						        <div class="col-50"><a href="user/findPwd">忘记密码?</a></div>
+						    </div>
+						    <div class="login-des"><button type="button" class="login-btn">登 录</button></div>
+					    </form>
+					    <div class="login-des clearfix word-g-color">
+					        <div class="col-50">其他登录方式 :</div>
+					        <div class="col-50 color-green"><a href="user/register">免费注册</a></div>
+					    </div>
+					    <div class="login-des i-list">
+					        <ul>
+					            <li id="qqloginbtn" data-url="${qqloginurl }"  ><img src="resource/commons/images/login-qq.png" alt=""></li>
+					            <li id="wechatloginbtn" data-url="${wechatloginurl }" ><img src="resource/commons/images/login-wechat.png" alt=""></li>
+					        </ul>
+					    </div>
+		        	</div>
+		        	 <div class="scaning-login" style="display:none;">
+		                <div class="img-code"><i class="iconfont">&#xe618;</i></div>
+		                <div class="tips"><span class="inner-tips"><i class="iconfont">&#xe6e7;</i>密码登录在这里</span></div>
+		                <h3 class="tips-title">手机登录,更安全</h3>
+		                <div class="qrcode-mod">
+		                    <div class="qrcode-main">
+		                        <div class="qrcode-img">
+		                            <!-- <img src="resource/commons/images/code2.png" alt=""> -->
+		                            <div id="qrcode"></div>
+		                        </div>
+		                        <div class="qrcode-word">
+		                            <i class="iconfont">&#xe9ad;</i>
+		                            <p>打开 <a href="#">手机香满圆</a>扫一扫登录</p>
+		                        </div>
+		                    </div>
+		                </div>
+		                <div class="login-links">
+		                    <a href="javascript:void(0);" class="password-log">密码登录</a>
+		                    <a href="user/register">免费注册</a>
+		                </div>
+		             </div>
+				</div>
+		    </div>
+		</div>
+	</div>
+ <footer>
+    <div class="footer-auto L-foot">
+        <p>
+            <a style="color: #909090;text-decoration:none;" href="news/index?ter=0&chd=0">关于我们</a><span>|</span>
+            <a style="color: #909090;text-decoration:none;" href="news/index?ter=0&chd=2">合作伙伴</a><span>|</span>
+            <a style="color: #909090;text-decoration:none;" href="news/index?ter=0&chd=0">营销中心</a><span>|</span>
+            <a style="color: #909090;text-decoration:none;" href="news/index?ter=0&chd=0">诚征英才</a><span>|</span>
+            <a style="color: #909090;text-decoration:none;" href="news/index?ter=4&chd=3">联系我们</a>
+        </p>
+        <p class="mt10">Copyright © 2009-2013 网上购物  All Rights Reserved 重庆香满圆农产品有限公司</p>
+        <p class="mt10">渝ICP14001106号-1 增值电信业务经营许可证：渝B2-20120004</p>
+    </div>
+</footer>
+<%@include file="/WEB-INF/jsp/commons/comm_footer_js.jsp" %>
+<script type="text/javascript" src="resource/js/order/jquery.qrcode.min.js"></script>
+<script type="text/javascript">
+  var $form = $("#myform") ,$un = $form.find("input[name='name']") ,$pwd = $form.find("input[name='password']") ,$msg = $("#msg") ;
+  $(".login-btn").click(function(){
+	  if(!$.trim($un.val()) && !$.trim($pwd.val())){
+		  $msg.html("<p>用户名或者密码不能空</p>").show() ;
+		  return ;
+	  }
+	  $form[0].submit() ;
+  }) ;
+  $(document).keyup(function(event){  
+	  if(event.keyCode ==13){  
+		  $form[0].submit() ;
+	  }  
+  });
+  
+  var intervalId;
+  $("body").on("click",".img-code",function () {
+        $(this).parent().hide().siblings().show();
+        if ($(".scaning-login").is(':hidden')) {
+	        clearInterval(intervalId);
+	        $("#qrcode").empty();
+	    } else {
+		    var code = generateUUID();
+	        $("#qrcode").qrcode(code); //展示二维码
+	        //intervalId = setInterval(getloginResult, 3000,code);
+	        getloginResult(code);
+	    } 
+    });
+  
+  $(".password-log").click(function(){
+	  $(this).parent().parent().hide().siblings().show();
+	  clearInterval(intervalId);
+	  $("#qrcode").empty();
+  })
+  
+
+  
+  //循环方法
+  function getloginResult(code){
+      $.get("user/scancodelogin",{code:code},function(data){
+            if (data.resultCode == 201) {
+                if ($(".scaning-login").is(':visible')) {
+					//如果二维码在界面可见则继续轮循
+				    getloginResult(code);
+				}
+			}else if (data.resultCode == 200) {
+				location.href = "/user/index" ;//登录成功
+			}else{
+			    
+			}
+        });
+  }; 
+  
+  function generateUUID(){
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+    });
+    return uuid;
+  };
+  
+  //威信登陆按键
+  $("body").on("click","#wechatloginbtn",function () {
+      var url = $(this).data("url");
+      //location.href = url;
+      window.open(url);
+  });
+  //qq登录按钮
+  var loginw;
+   $("body").on("click","#qqloginbtn",function () {
+      var url = $(this).data("url");
+      //location.href = url;
+      loginw = window.open(url,"TencentLogin","width=450,height=320,menubar=0,scrollbars=1,resizable=1,status=1,titlebar=0,toolbar=0,location=1");
+      //loginw.close();
+  });
+  
+  //登录成功并跳转
+  function closeQQWindow(){
+      loginw.close();
+      location.href = "/user/index";
+  }
+  </script>
+  </body>
+</html>

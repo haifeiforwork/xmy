@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.activity.persistence.app.dao.CouponExMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.activity.persistence.app.pojo.dto.AppCouponOutDto" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="couponValue" property="couponValue" jdbcType="BIGINT" />
+    <result column="couponImg" property="couponImg" jdbcType="VARCHAR" />
+    <result column="effectiveStartTime" property="effectiveStartTime" jdbcType="DATE" />
+    <result column="effectiveEndTime" property="effectiveEndTime" jdbcType="DATE" />
+    <result column="quota" property="quota" jdbcType="INTEGER" />
+    <result column="useRange" property="useRange" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="usePercent" property="usePercent" jdbcType="INTEGER" />
+    <collection property="goodsList" ofType="com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsOut">
+    	<id column="gid" property="id" jdbcType="BIGINT" />
+    	<result column="gname" property="name" jdbcType="VARCHAR" />
+    	<result column="gimgPath" property="imgPath" jdbcType="VARCHAR" />
+    	<result column="price" property="price" />
+    </collection>
+  </resultMap>
+  
+  <resultMap id="GetAvailbleCouponOutMap" type="com.zfj.xmy.activity.persistence.app.pojo.dto.coupon.GetAvailbleCouponOutDto" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="couponValue" property="couponValue" jdbcType="BIGINT" />
+    <result column="couponImg" property="couponImg" jdbcType="VARCHAR" />
+    <result column="effectiveStartTime" property="effectiveStartTime" jdbcType="DATE" />
+    <result column="effectiveEndTime" property="effectiveEndTime" jdbcType="DATE" />
+    <result column="useRange" property="useRange" jdbcType="INTEGER" />
+    <result column="status" property="useStatus" jdbcType="INTEGER" />
+  </resultMap>
+  
+  
+  <resultMap id="AppGoodsOut" type="com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsOut" >
+   	<id column="id" property="id" jdbcType="BIGINT" />
+   	<result column="path" property="imgPath" jdbcType="VARCHAR" />
+  </resultMap>
+  
+ <!-- @auth @date 2017年8月14日16:20:18 查询优惠券 -->
+ <select id="findCoupon" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+	SELECT * FROM `table` WHERE id >= (SELECT floor( RAND() * ((SELECT MAX(id) FROM `table`)-(SELECT MIN(id) FROM `table`)) + (SELECT MIN(id) FROM `table`))) ORDER BY id LIMIT 
+ </select>
+  <!-- @auth@date 2017年8月14日16:20:18 随机选择商品 -->
+ <select id="findRandomGoods"  resultMap="AppGoodsOut" parameterType="java.lang.Integer" > 
+    SELECT
+		sql_no_cache g.id,gi.path,g.price
+	FROM
+		goods g
+	INNER JOIN goods_image gi on gi.goods_id =g.id
+	WHERE
+		g.id >= (
+			SELECT
+				floor(
+					RAND() * (
+						(SELECT MAX(id) FROM goods) - (SELECT MIN(id) FROM goods)
+					) + (SELECT MIN(id) FROM goods)
+				)
+		)
+	and is_putway=0 and g.create_time &lt;= NOW() 
+	GROUP BY id
+	LIMIT 0,#{count}
+ </select>
+ 
+ <!-- 获取用户优惠劵 -->
+ <select id="findUserCoupon" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="GetAvailbleCouponOutMap" >
+    SELECT
+		cu.id id,
+	  cp.`name` name,
+	  cp.coupon_value couponValue,
+	  cp.coupon_img couponImg,
+	  cp.effective_start_time effectiveStartTime,
+	  cp.effective_end_time effectiveEndTime,
+	  cp.use_range useRange,
+	  cu.`status` status
+	FROM
+		coupon_user cu
+	LEFT JOIN coupon cp ON cp.id = cu.coupon_id
+	<if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+ </select>
+ 
+ 
+ <resultMap id="couponCenterOutDto" type="com.zfj.xmy.activity.persistence.app.pojo.dto.coupon.CouponCenterOutDto" >
+     <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="couponValue" property="couponValue" jdbcType="BIGINT" />
+    <result column="couponImg" property="couponImg" jdbcType="VARCHAR" />
+    <result column="effectiveStartTime" property="effectiveStartTime" jdbcType="DATE" />
+    <result column="effectiveEndTime" property="effectiveEndTime" jdbcType="DATE" />
+    <result column="quota" property="quota" jdbcType="INTEGER" />
+    <result column="useRange" property="useRange" jdbcType="INTEGER" />
+    <result column="isUserGet" property="isUserGet" jdbcType="INTEGER" />
+    <result column="allAvable" property="allAvable" jdbcType="INTEGER" />
+    <result column="usePercent" property="usePercent" jdbcType="INTEGER" />
+ </resultMap>
+
+ <select id="findCouponCenters" parameterType="java.lang.Long" resultMap="couponCenterOutDto" >
+    SELECT
+		cp.id id,
+		cp.`name` name,
+		cp.coupon_value couponValue,
+		cp.coupon_img couponImg,
+		cp.effective_start_time effectiveStartTime,
+		cp.effective_end_time effectiveEndTime,
+		cp.quota quota,
+		cp.use_range useRange,
+	  CASE WHEN isUserGet.id IS NOT NULL THEN 1 ELSE 0 END isUserGet,
+	  CASE WHEN allAvable.id IS NOT NULL THEN 1 ELSE 0 END allAvable,
+		user_percent_tb.percent usePercent
+	FROM
+		coupon cp
+	LEFT JOIN (
+		SELECT
+			cpin.id id
+		FROM
+			coupon cpin
+		LEFT JOIN coupon_user cu ON cu.coupon_id = cpin.id
+		WHERE
+			cpin.effective_end_time > NOW()
+		AND cu.user_id = #{userid}
+		GROUP BY
+			cpin.id
+	) AS isUserGet ON isUserGet.id = cp.id
+	LEFT JOIN (
+		SELECT
+			cp.id id
+		FROM
+			coupon cp
+		INNER JOIN coupon_user cu ON cu.coupon_id = cp.id
+		WHERE
+			cp.effective_end_time > NOW()
+		AND cu.user_id IS NULL
+		GROUP BY
+			cp.id
+	) AS allAvable ON allAvable.id = cp.id
+	LEFT JOIN (
+		SELECT
+			COUNT(coupon_id) coupon_count,
+	    SUM( CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END ) user_id_count,
+	    SUM( CASE WHEN user_id IS NULL THEN 1 ELSE 0 END ) null_user_id_count,
+	    ( SUM( CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END ) / COUNT(coupon_id)) * 100 percent,
+			coupon_id
+		FROM
+			coupon_user
+		GROUP BY
+			coupon_id
+	) AS user_percent_tb ON user_percent_tb.coupon_id = cp.id
+	WHERE
+		cp.effective_end_time > NOW()
+	AND cp.id IN (
+		SELECT
+			cu.coupon_id id
+		FROM
+			coupon_user cu
+	)
+ </select>
+ 
+</mapper>

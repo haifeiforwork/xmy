@@ -1,0 +1,6 @@
+@CHARSET "UTF-8";
+header .header-top{border-bottom: 1px solid #C3C3C3;}
+        .content{bottom: 0;}
+        .weui-form-preview .weui-form-preview__bd{padding: 10px 10px;border-bottom: 1px solid #f0f0f0;}
+        .weui-form-preview .weui-form-preview__bd .weui-form-preview__item .weui-form-preview__label{font-size: 0.7rem;color: #444;}
+        .weui-form-preview .weui-form-preview__bd .weui-form-preview__item .weui-form-preview__value{font-size: 0.7rem;color: #999;}

@@ -1,0 +1,67 @@
+.container{margin-bottom: 0;}
+.gutter{padding: 0 94px;}
+.gutter-mar{margin: 0 94px;}
+.clearfix:before,.clearfix:after {content: ".";display: block;height: 0;visibility: hidden;}
+.clearfix:after {clear: both;}
+.clearfix {zoom: 1;}/*兼容IE6/7*/
+.col-50{width: 50%;}
+div[class^="col"]{float: left;}
+.step{text-align: center;padding: 45px 0 35px;}
+.step .col-50{border-bottom: 2px solid #DDDDDD;padding-bottom: 16px;color: #999;}
+.step i{font-size: 26px;margin-right: 8px;position: relative;top: 3px;}
+.step>.active{border-color: #358912;color: #358912;}
+.form-group {margin: 22px auto;height: 41px;line-height: 41px;}
+.form-group:nth-last-child(3){margin-bottom: 10px;}
+.form-group:nth-last-child(2){margin: 0 auto 22px;height: 20px;line-height: 20px;}
+.form-group:last-child{height: 53px;margin:40px auto 130px;}
+.form-group label{display: inline-block;width: 30%;text-align: right;float: left;color: #525355;}
+.form-group .wrap-input{display: inline-block;width: 60%;float: left;margin-left: 23px;position: relative;}
+.form-group .wp-add{width: 66%;float: right;font-size: 13px;}
+.form-group .wp-add .checkbox{width: auto;height: auto;margin: 0 5px 0 0;position: relative;top: 4px;}
+.form-group .wp-add .toregister{width: 248px;background-color: #358912;height: 53px;border: none;border-radius: 3px;color: #FFF;font-size: 15px;}
+.form-group .wp-add label{width: auto;}
+.form-group .wp-add a{text-decoration: none;color: #358912;}
+.form-group .wrap-input input{height: 40px;border: 1px solid #DDDDDD;padding-left: 10px;float: left;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;width: 340px;}
+.form-group input#code-c{width: 213px;}
+.form-group .code-num{float: left;margin-left: 15px;}
+.form-group .btn-get{background-color: #F2F2F2;height: 31px;border: 1px solid #dddddd;width:105px;position: absolute;right: 40px;top: 4.5px;cursor: pointer;line-height: 31px;}
+
+.input-group{width: 100%;margin-bottom: 20px;}
+.input-group .label{width: 10%;text-align: right;float: left;height: 34px;line-height: 33px;font-size: 14px;}
+.input-group .label5{width: 32%;color: #000;}
+.input-group .item-input{width: 88%;margin-left: 2%;float: left}
+.input-group .item-input5{width: 64%;margin-left: 4%;}
+.input-group .item-input .default{width: 235px;border: 1px solid #ddd;height: 33px;padding-left: 10px;}
+.btn-group .btn-default{border: 1px solid #ddd;margin-right: 10px;color: #525354;border-radius: 3px;background-color: #FFF;outline: none;font-family: "微软雅黑", "黑体", arial;}
+.btn-group .btn-theme4{padding: 8px 35px;color: #FFF;border: none;background-color: #358912;border-radius: 3px;}
+.add-distance6{width: 64%;margin: 20px 0 0 36%;}
+
+.check-coded{display: none;}
+.modal{position: fixed;width: 100%;height: 100%;z-index: 555;color: #525354;left: 0;top: 0;}
+.modal .over-lay{position: absolute;background-color: #000;opacity: 0.4;z-index: 666;width: 100%;height: 100%;}
+.modal .modal-content{background-color: #FFF;position:absolute;margin: auto;left: 0;right: 0;bottom: 0;top: 0;width: 394px;height: 238px;z-index: 777;}
+.modal .modal-content .modal-title{background-color: #359812;height: 40px;color:#FFF;line-height: 40px;padding: 0 15px 0 23px;}
+.modal .modal-content .modal-title .close{float: right}
+.modal .modal-content .modal-title .close i{font-size: 20px;font-weight:600;color: #C7F4BB;}
+.modal .modal-content .input-group .item-input .default{width:137px;height: 28px;border-color: #525354;}
+.modal .modal-content .check-check{padding:20px 0;margin-left: 36%;width:125px;position: relative;}
+.modal .modal-content .check-check .trans{color: #359812;font-size: 14px;position: absolute;top:27px;right:-50px;cursor: pointer;}
+
+#easyDialogBox{margin: -375px 0px 0px -375px !important;}
+.easyDialog_wrapper{width: 750px;}
+.easyDialog_wrapper .easyDialog_content{width: 750px;height: 420px !important;overflow: auto;}
+
+input[type="checkbox"], input[type="radio"]{ 
+    background: transparent; 
+    border: 0; 
+}
+#agree{border:none;}
+#agree:focus {border:none;
+    outline: 0 !important; // 这里一定要设置当前行代码得的优先级
+}
+input::-moz-focus-inner {
+    border-color: transparent !important; // 这里一定要设置当前行代码得的优先级
+}

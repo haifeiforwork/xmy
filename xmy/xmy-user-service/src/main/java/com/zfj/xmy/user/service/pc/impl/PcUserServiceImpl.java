@@ -1,0 +1,421 @@
+package com.zfj.xmy.user.service.pc.impl;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.lucene.store.SleepingLockWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.xiaoleilu.hutool.lang.StrSpliter;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.xiaoleilu.hutool.util.RandomUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.commons.mini.constant.BaseConstant;
+import com.zfj.base.encryption.MD5Utils;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.log.LogExp;
+import com.zfj.base.util.collection.CollectionExtUtils;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.CommonUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.UUIDUtil;
+import com.zfj.xmy.common.persistence.dao.OrderMapper;
+import com.zfj.xmy.common.persistence.dao.ShoppingCardMapper;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.dao.UserMapper;
+import com.zfj.xmy.common.persistence.dao.UserSpendPointsMapper;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCard;
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.common.persistence.pojo.UserSpendPoints;
+import com.zfj.xmy.common.service.CommonPresentCouponActivityService;
+import com.zfj.xmy.redis.TokenManager;
+import com.zfj.xmy.user.service.common.UserService;
+import com.zfj.xmy.user.service.pc.PcSmsLogService;
+import com.zfj.xmy.user.service.pc.PcUserService;
+import com.zfj.xmy.util.QQLogin;
+import com.zfj.xmy.util.StringUtils;
+import com.zfj.xmy.util.WechatLogin;
+@Service
+public class PcUserServiceImpl extends BaseService implements PcUserService {
+
+	@Autowired
+	private UserMapper userMapper ;
+	
+	@Autowired
+	private UserInfoMapper userInfoMapper ;
+	
+	@Autowired
+	private PcSmsLogService pcSmsLogService ;
+	
+	@Autowired
+	private ShoppingCardMapper shopingCardMapper;
+	
+	@Autowired
+	private TokenManager tokenManager ;
+	
+	@Autowired
+	private OrderMapper orderMapper;
+	
+	@Autowired
+	private UserSpendPointsMapper userSpendPointsMapper;
+	
+	@Autowired
+	private  CommonPresentCouponActivityService commonPresentCouponActivityService;
+	
+	@Autowired
+	private UserService userService;
+	
+	@Override
+	public User login(User user) {
+		if(StringUtil.isEmpty(user.getName()) || StringUtil.isEmpty(user.getPassword())){
+			LogExp.error(logger,"用户名或者密码不能为空") ;
+		}
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		//boolean isEmail = CommonUtil.checkEmail(user.getName()) ;
+		boolean isMobilePhone = CommonUtil.checkMobilePhone(user.getName()) ;
+		User old = null ;
+		if(isMobilePhone){
+			//取消了 邮箱登录全部用用户名或者绑定手机登录 lij 2018年1月4日15:15:41
+			/*if(isEmail){
+				//邮箱登录
+				criteria.equalTo("email",user.getName()) ;
+			}else{*/
+				//手机号登录
+				criteria.equalTo("mobile_phone",user.getName()) ;
+			//}
+			List<UserInfo> uiList = userInfoMapper.selectByExample(parameter) ;
+			CommonUtil.validEmpty(uiList,"用户名或者密码不正确") ;
+			old = userMapper.selectByPrimaryKey(uiList.get(0).getId()) ;
+		}else{
+			//用户名登录
+			criteria.equalTo("name",user.getName()) ;
+			List<User> usrList = userMapper.selectByExample(parameter) ;
+			CommonUtil.validEmpty(usrList,"用户名或者密码不正确") ;
+			old = usrList.get(0) ;
+		}
+		if(!MD5Utils.encodeString(user.getPassword()).equals(old.getPassword())){
+			LogExp.error(logger,"用户名或者密码不正确") ;
+		}
+		if(SystemConstant.USER.STATUS_DISABLE.equals(old.getStatus())){
+			LogExp.error(logger,"您已经被停用，请联系管理员") ;
+		}
+		//登录赠送优惠券
+		commonPresentCouponActivityService.presentCouponLogin(old.getId());
+		
+		return old ;
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void sendMobileCode(String mobilePhone) {
+		//1、验证该手机号码是否已经被注册
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		criteria.equalTo("mobile_phone",mobilePhone) ;
+		List<UserInfo> uList = userInfoMapper.selectByExample(parameter) ;
+		if(!CollectionExtUtils.isEmpty(uList)){
+			LogExp.error(logger,"该手机号码已经被注册") ;
+		}
+		//2、发送短信
+		pcSmsLogService.sendMessage(mobilePhone) ;
+	}
+
+	@Override
+	public boolean validUserNameOrMobilePhone(String key, Integer type) {
+		if(0 != type && 1 != type){
+			return false ;
+		}
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		if(0 == type){//验证用户名是否已经存在
+			criteria.equalTo("name",key) ;
+			List<User> uList = userMapper.selectByExample(parameter) ;
+			if(!CollectionExtUtils.isEmpty(uList)){
+				return false ;
+			}
+		}else{//验证手机号码
+			criteria.equalTo("mobile_phone",key) ;
+			List<UserInfo> uiList = userInfoMapper.selectByExample(parameter) ;
+			if(!CollectionExtUtils.isEmpty(uiList)){
+				return false ;
+			}
+		}
+		return true ;
+	}
+
+	@Override
+	public Long save(String name, String password, String mobilePhone,String mobileCode) {
+		//1、空验证及格式验证
+		CommonUtil.validEmpty(name,"用户名不能为空") ;
+		if(!CommonUtil.checkEmail(name) && !CommonUtil.checkMobilePhone(name)){
+			LogExp.error(logger, "用户名格式不正确") ;
+		}
+		CommonUtil.validEmpty(password,"登录密码不能为空") ;
+		CommonUtil.validEmpty(mobilePhone,"手机号码不能为空") ;
+		CommonUtil.validEmpty(mobileCode,"手机校验码不能为空") ;
+		//2、校验手机验证码是否过期
+		pcSmsLogService.valid(mobileCode,mobilePhone) ;
+		//3、校验手机号码是否被注册
+		boolean isExist = validUserNameOrMobilePhone(mobilePhone,1) ;
+		if(!isExist){
+			LogExp.error(logger,"该手机号码已经被注册") ;
+		}
+		//4、校验用户名是否已经存在
+		isExist = validUserNameOrMobilePhone(name,0) ;
+		if(!isExist){
+			LogExp.error(logger,"该用户名已经被注册") ;
+		}
+		//5 、判断用户名是否被其它用户绑定为电话号码
+		boolean validName = userService.validUserName(name);
+		if (validName) {
+			LogExp.error(logger,"该用户名已被其它用户绑定为电话号码") ;
+		}
+		//6、注册用户
+		return register(name, password, mobilePhone, null,null, null, null).getId();
+	}
+	
+	private User register(String name, String password, String mobilePhone,String wechatopenid,String wechatunoinid, String qqopenid, String qqunionid){
+		Date curr = new Date() ;
+		User user = new User() ;
+		user.setName(name) ;
+		//设置用户名
+		//user.setName(RandomUtil.randomString(7)) ;
+		user.setPassword(MD5Utils.encodeString(password)) ;
+		user.setCreateTime(curr) ;
+		user.setStatus(BaseConstant.STATUS_ENABLE) ;
+		user.setWechatOpenid(wechatopenid);
+		user.setWechatUnionid(wechatunoinid);
+		user.setQqOpenid(qqopenid);
+		user.setQqUnionid(qqunionid);
+		user.setAppToken(UUIDUtil.generateToken());
+		user.setAppTokenExpire(DateUtil.lastMonth());
+		userMapper.insertSelective(user) ;
+		UserInfo userInfo = new UserInfo() ; 
+		userInfo.setId(user.getId()) ;
+		userInfo.setMobilePhone(mobilePhone) ;
+		userInfo.setUpdateTime(curr) ;
+		userInfo.setAccPoints(SystemConstant.USER.PRESENT_POINTS);
+		userInfo.setAvatar("defaultheadimg.png");
+		userInfoMapper.insertSelective(userInfo) ;
+		//插入赠送积分记录
+		UserSpendPoints usp=new UserSpendPoints();
+		usp.setType(SystemConstant.userSpendPoints.TYPE_POINT_POINT);
+		usp.setUserId(user.getId());
+		usp.setMoneyPoint(new BigDecimal(SystemConstant.USER.PRESENT_POINTS));
+		usp.setRemarks("注册赠送50积分！");
+		usp.setCreatTime(new Date());
+		usp.setIsDel(SystemConstant.userSpendPoints.STATUS_NODELETE);
+		usp.setSpendType(SystemConstant.userSpendPoints.SPEND_TYPE_SAVE);
+		userSpendPointsMapper.insert(usp);
+		return user ;
+	}
+	
+	/**
+	 * 根据手机号查找用户id
+	 * @Description 
+	 * @param mobilePhone
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年9月28日下午5:25:48
+	 */
+	@Override
+	public Long getIdBymobilePhone(String mobilePhone){
+		 CriteriaParameter param=new CriteriaParameter();
+		 Criteria createCriteria = param.createCriteria();
+		 createCriteria.equalTo("mobile_phone", mobilePhone);
+		 List<UserInfo> selectByExample = userInfoMapper.selectByExample(param);
+		 if(CollectionUtils.isEmpty(selectByExample)||selectByExample.size()<1){
+			 LogExp.error(logger,"系统没有该手机号，请重新注册!") ;
+		 }
+		 //正常情况下，绑定的就只有一个手机号，取一个就行了
+		 UserInfo userInfo = selectByExample.get(0);
+		 return userInfo.getId();
+	}
+	/**
+	 * 找回密码
+	 * @Description 
+	 * @param password
+	 * @param mobilePhone
+	 * @param mobileCode
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年9月28日下午5:30:27
+	 */
+	@Override
+	public Long updateForgotpass( String password, String mobilePhone,String mobileCode) {
+		
+		CommonUtil.validEmpty(password,"登录密码不能为空") ;
+		CommonUtil.validEmpty(mobilePhone,"手机号码不能为空") ;
+		CommonUtil.validEmpty(mobileCode,"手机校验码不能为空") ;
+		//2、校验手机验证码是否过期
+		pcSmsLogService.valid(mobileCode,mobilePhone) ;
+		Long userId = this.getIdBymobilePhone(mobilePhone);
+		
+		//设置密码
+		Date curr = new Date() ;
+		User user = new User() ;
+		user.setId(userId);
+		user.setPassword(MD5Utils.encodeString(password)) ;
+		user.setStatus(BaseConstant.STATUS_ENABLE) ;
+		user.setAppTokenExpire(DateUtil.lastMonth());
+		userMapper.updateByPrimaryKeySelective(user);
+		
+		UserInfo userInfo = new UserInfo() ; 
+		userInfo.setId(userId) ;
+		userInfo.setUpdateTime(curr) ;
+		userInfoMapper.updateByPrimaryKeySelective(userInfo);
+		return user.getId() ;
+	}
+	/**
+	 * 查询用户详细信息
+	 */
+	@Override
+	public UserInfo getUserInfo(Long id) {
+		UserInfo userInfo = userInfoMapper.selectByPrimaryKey(id);
+		//查询已激活购物卡记录
+		ReqData reqData = new ReqData();
+		reqData.putValue("user_id", id, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("status", SystemConstant.SHOPPING_CARD.ACTIVE, SystemConstant.REQ_PARAMETER_EQ);//已激活的
+		List<ShoppingCard> card = shopingCardMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if(ObjectUtils.isEmpty(card)){
+			userInfo.setBalance(new BigDecimal(0));
+		}else{
+			BigDecimal balance = new BigDecimal("0.00");
+			for (ShoppingCard shopingCard : card) {
+				balance = balance.add(ObjectUtils.isEmpty(shopingCard.getBalance()) ? new BigDecimal("0.00") : shopingCard.getBalance());
+			}
+			userInfo.setBalance(balance);
+		}
+		return userInfo;
+	}
+
+	@Override
+	public User scancodeLogin(String code) {
+		
+		//1.redis查询
+		String getcode ="";
+		for (int i = 0; i < 40; i++) {
+			try {
+				getcode =  tokenManager.get(SystemConstant.REDIS_SCANCODE_PREF + code);
+				if (StringUtil.isEmpty(getcode)) {
+					Thread.sleep(500L);
+					
+				}else {
+					break;
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (StringUtil.isEmpty(getcode)) {
+			throw new BusinessException("暂未查询到用户");
+		}
+		//2.数据库查询
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("scancode", code);
+		List<User> users = userMapper.selectByExample(parameter);
+		if (CollectionUtils.isEmpty(users)) {
+			throw new BusinessException("暂未查询到用户");
+		}else {
+			return users.get(0);
+		}
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public User wechatLogin(String openid,String token) {
+		//1.获取微信用户信息
+		JSONObject jo = WechatLogin.getUserInfo(token, openid);
+		String wechatunionid = jo.getStr("unionid");
+		//2.查询用户在系统是否存在
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("wechat_unionid", wechatunionid);
+		List<User> users = userMapper.selectByExample(parameter);
+		if (!CollectionUtils.isEmpty(users)) {
+			return users.get(0);
+		}
+		//3.不存在则新注册个
+		jo.getStr("nickname");
+		return register(RandomUtil.randomString(8), UUIDUtil.generateToken(), null,openid,wechatunionid, null, null);		
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public User qqLogin(String openid,String unionid,String token) {
+		//1.查询用户
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria();
+		criteria.equalTo("qq_unionid", unionid);
+		List<User> users = userMapper.selectByExample(parameter);
+		if (!CollectionUtils.isEmpty(users)) {
+			return users.get(0);
+		}
+		
+		//2.没有用户时注册一个
+		JSONObject jo = QQLogin.getUserInfo(token, openid);
+		return register(jo.getStr("nickname"), UUIDUtil.generateToken(), null,null,null,openid,unionid);	
+	}
+
+	@Override
+	public UserInfo findUserByName(String name) {
+		ReqData reqData = new ReqData();
+		reqData.putValue("name", name, SystemConstant.REQ_PARAMETER_EQ);
+		List<User> selectByExample = userMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		if(!ObjectUtils.isEmpty(selectByExample)){
+			User user = selectByExample.get(0);
+			UserInfo usreInfo = userInfoMapper.selectByPrimaryKey(user.getId());
+			return usreInfo;
+		}else{
+			return new UserInfo();
+		}
+	}
+
+	@Override
+	public int updatePwd(Long userid, String pwd) {
+		
+		User user = userMapper.selectByPrimaryKey(userid);
+		user.setPassword(MD5Utils.encodeString(pwd));
+		int i = userMapper.updateByPrimaryKey(user);
+		return i;
+	}
+	
+	@Override
+	public void insertOrderUserSpendPoints(Long userId,Long orderId,Integer points){
+		UserSpendPoints userSpendPoints = new UserSpendPoints();
+		userSpendPoints.setUserId(userId);
+		userSpendPoints.setType(SystemConstant.userSpendPoints.TYPE_POINT_POINT);
+		userSpendPoints.setMoneyPoint(new BigDecimal(points));
+		userSpendPoints.setSpendType(SystemConstant.userSpendPoints.SPEND_TYPE_SPEND);
+		Order order = orderMapper.selectByPrimaryKey(orderId) ;
+		if (ObjectUtil.isNotNull(order)) {
+			userSpendPoints.setNo(order.getNo());
+		}
+		userSpendPoints.setCreatTime(new Date());
+		userSpendPoints.setRemarks("购买商品消费"+points+"积分");
+		userSpendPoints.setSign(SystemConstant.userSpendPoints.TYPE_SPEND);
+		userSpendPointsMapper.insertSelective(userSpendPoints);
+	}
+	
+	@Override
+	public User getUser(Long id){
+		return userMapper.selectByPrimaryKey(id);
+	}
+}

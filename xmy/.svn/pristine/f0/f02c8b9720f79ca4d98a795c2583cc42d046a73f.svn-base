@@ -1,0 +1,307 @@
+package com.zfj.xmy.cms.web.controller.activity;
+
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.xmy.activity.service.cms.CouponService;
+import com.zfj.xmy.cms.web.controller.BaseController;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs;
+import com.zfj.xmy.common.persistence.pojo.TermData;
+import com.zfj.xmy.common.persistence.pojo.Vocabulary;
+import com.zfj.xmy.goods.service.cms.CmsGoodsService;
+import com.zfj.xmy.goods.service.cms.TermDataService;
+import com.zfj.xmy.goods.service.cms.VocabularyService;
+import com.zfj.xmy.order.service.cms.OrderService;
+
+/**
+ * 
+ * @Description 优惠卷
+ * @Author liuw
+ * @Date 2017年7月5日下午5:06:48
+ */
+@RequestMapping("/coupon")
+@RestController
+public class CouponController extends BaseController {
+
+	@Autowired
+	private CmsGoodsService goodsService;
+	@Autowired
+	private TermDataService termDataService;
+	@Autowired
+	private OrderService orderService;
+	@Autowired
+	private CouponService couponService;
+	@Autowired
+	private VocabularyService vocabularyService;
+
+	// 自定义类型转换器
+	@InitBinder
+	public void initBinder(HttpServletRequest request,
+			ServletRequestDataBinder binder) throws Exception {
+
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(
+				new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"), true));
+	}
+
+	@RequestMapping("/index")
+	public RespData index() {
+		RespData respData = new RespData();
+		respData.setResultCode(200);
+		respData.setData("ok coupon");
+		return respData;
+	}
+
+	/**
+	 * 
+	 * @Description 添加优惠券页面
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年7月7日下午5:48:22
+	 */
+//	@RequestMapping("/addCoupon")
+//	public ModelAndView addCoupon() {
+//		ModelAndView modelAndView = new ModelAndView();
+//		modelAndView.setViewName("/coupon/addCoupon");
+//		return modelAndView;
+//	}
+
+	/**
+	 * 
+	 * @Description 返回供应商列表，弹窗的时候显示
+	 * @param request
+	 * @param vid
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年7月5日下午8:44:01
+	 */
+	@RequestMapping("/chooseSupplierList")
+	public ModelAndView chooseList(HttpServletRequest request, String vid) {
+		request.setAttribute("vid", vid);
+		request.setAttribute("totalCount", SystemConstant.CONTENT.PAGE_SIZE);
+		return new ModelAndView("/coupon/chooseSupplier_list");
+	}
+
+	@RequestMapping("/chooseSupplierList/{pageIndex}")
+	public ModelAndView chooseList(
+			@PathVariable("pageIndex") Integer pageIndex,
+			HttpServletRequest request, ReqData reqData, String vid) {
+		reqData2Params(reqData);
+		List<TermData> list = termDataService.selectTermDataByVid(reqData);
+		request.setAttribute("list", list);
+		return new ModelAndView("/coupon/chooseSupplier_list_page");
+	}
+
+	/**
+	 * 
+	 * @Description 返回商品列表，弹窗的时候需要
+	 * @param request
+	 * @param reqData
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年7月12日下午8:52:30
+	 */
+	@RequestMapping("/chooseGoodList")
+	public ModelAndView chooseGoodList(HttpServletRequest request,
+			ReqData reqData) {
+		PageBean pageBean = new PageBean();
+		reqData2Params(reqData);
+		goodsService.selectGoodsAndPage(reqData, pageBean);
+		request.setAttribute("pageCount", pageBean.getTotalCount());
+		return new ModelAndView("/coupon/chooseGood_list");
+	}
+
+	@RequestMapping("/chooseGoodList/{pageIndex}")
+	public ModelAndView chooseGoodList(
+			@PathVariable("pageIndex") Integer pageIndex,
+			HttpServletRequest request, ReqData reqData, PageBean pageBean) {
+		reqData2Params(reqData);
+		pageBean.setPageIndex(pageIndex);
+		reqData.setSortname("putwayTime");
+		reqData.setSortorder("desc");
+		goodsService.selectGoodsAndPage(reqData, pageBean);
+		request.setAttribute("glist", pageBean.getData());
+		return new ModelAndView("/coupon/chooseGood_list_page");
+	}
+
+	/**
+	 * 生成优惠劵
+	 * @Description 新增加保存插入
+	 * @param coupon
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年7月10日下午4:01:58
+	 */
+	@RequestMapping("/saveCoupon")
+	public ModelAndView saveCoupon(Coupon coupon) {
+		ModelAndView modelAndView = new ModelAndView();
+		couponService.insertCoupon(coupon);
+		modelAndView.setViewName("redirect:couponList");
+		return modelAndView;
+	}
+
+	/**
+	 * 导出优惠劵
+	 * @param request
+	 * @param response
+	 * @param couponId
+	 * @return
+	 * @Description 
+	 * @date 2017年12月15日  下午3:36:53
+	 * @author wy
+	 * 2017
+	 * @return RespData
+	 */
+	@RequestMapping("/ExportCoupon")
+	public RespData ExportCoupon(HttpServletRequest request,
+			HttpServletResponse response,
+			@RequestParam(value="id",required=true) Long couponId) {
+		RespData respData = new RespData();
+		try {
+			HSSFWorkbook workbook = couponService.exportCoupon(couponId, response);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RespData.getRespData(e, "导出失败");
+		}
+		return respData;
+	}
+	
+	
+	
+	/**
+	 * 
+	 * @Description 编辑后保存
+	 * @param coupon
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年7月11日下午2:04:04
+	 */
+	@RequestMapping("/editSaveCoupon")
+	public ModelAndView editSaveCoupon(Coupon coupon) {
+		ModelAndView modelAndView = new ModelAndView();
+		couponService.updateCoupon(coupon);
+		modelAndView.setViewName("redirect:couponList");
+		return modelAndView;
+	}
+
+	@RequestMapping("/couponList")
+	public ModelAndView couponList(HttpServletRequest request, ReqData reqData) {
+		PageBean pageBean = new PageBean();
+		reqData2Params(reqData);
+		couponService.findCouponsAndPage(reqData, pageBean);
+		request.setAttribute("pageCount", pageBean.getTotalPage());
+		return new ModelAndView("/coupon/coupon_list");
+	}
+
+	@RequestMapping("/couponList/{pageIndex}")
+	public ModelAndView couponList(
+			@PathVariable("pageIndex") Integer pageIndex,
+			HttpServletRequest request, ReqData reqData, PageBean pageBean) {
+		reqData2Params(reqData);
+		pageBean.setPageIndex(pageIndex);
+		couponService.findCouponsAndPage(reqData, pageBean);
+		request.setAttribute("couponList", pageBean.getData());
+		return new ModelAndView("/coupon/coupon_list_page");
+	}
+
+	@RequestMapping("/delCoupon")
+	public RespData coupnDel(@RequestParam("id") Long id,
+			HttpServletRequest request) {
+		RespData respData = new RespData();
+		int deleteByPrimeryKey = couponService.deleteByPrimeryKey(id);
+		respData.setData("成功删除了" + deleteByPrimeryKey + "条数据");
+		respData.setResultCode(200);
+		return respData;
+	}
+
+	/**
+	 * 
+	 * @Description 编辑优惠券
+	 * @param id
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年7月10日下午1:55:49
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/editCoupon/{id}")
+	public ModelAndView couponEdit(@PathVariable("id") Long id) {
+		ReqData reqData = new ReqData();
+		ReqData reqDataVocabulary = new ReqData();
+		ModelAndView modelAndView = new ModelAndView();
+		List<TermData> categoryTermDatas = null;
+		//根据词汇表中的mark标识取出vid，再根据vid去查询
+		reqDataVocabulary.putValue(SystemConstant.TERMDATA.MARK,SystemConstant.TERMDATA.SUPPLIER,SystemConstant.REQ_PARAMETER_EQ);
+		Vocabulary vocabularyByMark = vocabularyService.getVocabularyByMark(reqDataVocabulary);
+		reqData.putValue(SystemConstant.TERMDATA.VID, vocabularyByMark.getId(),SystemConstant.REQ_PARAMETER_EQ);
+
+		ReqData reqDataCateGoryTremData=new ReqData();
+		ReqData reqDataVocabularyTremData=new ReqData();
+		
+		//根据词汇表中的mark标识取出vid，再根据vid去查询
+		reqDataVocabularyTremData.putValue(SystemConstant.TERMDATA.MARK, SystemConstant.TERMDATA.CATEGORY, SystemConstant.REQ_PARAMETER_EQ);
+		Vocabulary vocabularyByMarkCategory = vocabularyService.getVocabularyByMark(reqDataVocabularyTremData);
+		reqDataCateGoryTremData.putValue(SystemConstant.TERMDATA.VID,vocabularyByMarkCategory.getId() ,SystemConstant.REQ_PARAMETER_EQ);
+		
+		categoryTermDatas = termDataService.selectTermDataByVid(reqDataCateGoryTremData);
+		
+		Coupon coupon = couponService.findCouponById(id);
+		String couponSupplierIds = coupon.getSupplierIds();
+		List<TermData> supplierTermDatas = termDataService.selectTermDataByVid(reqData);
+		
+		// 把供应商ID集合转为供应商名称并传到前台，以便显示
+		String couponSupplierNames = couponService.getCouponSupplierNames(couponSupplierIds, supplierTermDatas);
+		String useRangeIds =coupon.getUseRangeIds();
+		
+		String useRangeNames = "";
+		Integer useRangeType = coupon.getUseRange();
+		ReqData reqDataGoods = new ReqData();
+		PageBean pageBeanGoods = new PageBean();
+		List<Goods> goodsData =null;
+		goodsService.selectGoodsAndPage(reqDataGoods, pageBeanGoods);
+		
+		//获得商品或者分类的详情
+		useRangeNames = couponService.getRangesNames(useRangeType, useRangeIds, vocabularyByMark, categoryTermDatas,pageBeanGoods);
+		
+		reqDataGoods = new ReqData();
+		
+		if(useRangeIds.length()>SystemConstant.CONTENT.ZERO)
+		{
+			reqDataGoods.putValue(SystemConstant.TERMDATA.CODE, useRangeIds,SystemConstant.REQ_PARAMETER_IN);
+			goodsData = goodsService.findGoods(reqDataGoods);
+		}
+		
+		PageBean pageBeanCoupon = new PageBean();
+		ReqData reqDataCoupon = new ReqData();
+		couponService.findCouponsAndPage(reqDataCoupon, pageBeanCoupon);
+		int pageCount=pageBeanCoupon.getPageSize();
+		modelAndView.addObject("goodsData", goodsData);
+		modelAndView.addObject("pageCount", pageCount);
+		modelAndView.addObject("supplierNames", couponSupplierNames);
+		modelAndView.addObject("useRangeNames", useRangeNames);
+		modelAndView.addObject("coupon", coupon);
+		modelAndView.setViewName("/coupon/editCoupon");
+		return modelAndView;	
+		}
+}

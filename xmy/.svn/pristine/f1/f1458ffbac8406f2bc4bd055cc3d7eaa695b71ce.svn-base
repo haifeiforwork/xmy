@@ -1,0 +1,12 @@
+package com.zfj.xmy.order.persistence.wap.dao;
+
+import java.util.List;
+
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto;
+import com.zfj.xmy.order.persistence.wap.pojo.dto.WapOrderQueryDto;
+
+public interface WapOrderExMapper {
+	
+	List<OrderDto> findOrders(WapOrderQueryDto dto);
+	
+}

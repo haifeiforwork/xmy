@@ -1,0 +1,514 @@
+package com.zfj.xmy.pc.web.controller.user;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
+
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.log.LogExp;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.activity.persistence.pc.pojo.dto.PcDownColumDto;
+import com.zfj.xmy.activity.service.pc.PcColumService;
+import com.zfj.xmy.common.UUIDUtil;
+import com.zfj.xmy.common.VocabularyConstant;
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+import com.zfj.xmy.pc.web.common.SessionInfo;
+import com.zfj.xmy.pc.web.common.image.ValidateCode;
+import com.zfj.xmy.pc.web.controller.BaseController;
+import com.zfj.xmy.user.service.pc.PcSmsLogService;
+import com.zfj.xmy.user.service.pc.PcUserService;
+import com.zfj.xmy.util.QQLogin;
+import com.zfj.xmy.util.WechatLogin;
+/**
+ * 用户登录、注册页面
+ * @author dengq
+ * @createDate 2017年8月1日
+ * @desription
+ */
+@RestController
+@RequestMapping("/user")
+public class HomeController extends BaseController {
+
+	@Autowired
+	private PcUserService pcUserService ;
+	
+	@Autowired
+	private PcColumService columService;
+	@Autowired
+	private PcSmsLogService pcSmsLogService ;
+	/**
+	 * 登录页面
+	 * @author dengq
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value="/login",method=RequestMethod.GET)
+	public ModelAndView index(HttpServletRequest request){
+		String userName = request.getParameter("username") ;
+		if(StringUtil.isEmpty(userName)){
+			Cookie[] cookies = request.getCookies();
+		    if(cookies!=null){
+		    	for(Cookie cookie : cookies){
+			        if(cookie.getName().equals("username")){
+			            request.setAttribute("username", cookie.getValue()) ;
+			            break ;
+			        }
+			     }
+		    }
+		}
+		//查询栏目
+		List<PcDownColumDto> findDownColum = columService.findDownColum(VocabularyConstant.VOC_COLUMN);
+		request.getSession().setAttribute("findDownColum", findDownColum);
+		//微信登录
+		request.setAttribute("wechatloginurl", WechatLogin.wechatGetCodeFullUrl());
+		//qq登录
+		request.setAttribute("qqloginurl", QQLogin.qqGetAuthorizationCodeFullUrl());
+		
+		
+		return new ModelAndView("/home/login") ;
+	}
+	
+	/**
+	 * @author dengq
+	 * @param request
+	 * @param response
+	 * @param user
+	 * @return
+	 */
+	@RequestMapping(value="/login",method=RequestMethod.POST)
+	public ModelAndView index(HttpServletRequest request,HttpServletResponse response,User user){
+		User usr = null ;
+		try {
+			usr = pcUserService.login(user) ;
+		} catch (Exception ex) {
+			request.setAttribute("username",user.getName()) ;
+			request.setAttribute("pwd",user.getPassword()) ;
+			request.setAttribute("msg",ex instanceof BusinessException ? ex.getMessage() : "登录失败") ;
+			request.setAttribute("isChecked",!StringUtil.isEmpty(request.getParameter("remind")));
+			return new ModelAndView("/home/login") ;
+		}
+		afterLogin(request, response, usr);
+		return new ModelAndView("redirect:/user/index") ;
+	}
+	/**
+	 * 记住用户名
+	 * @param request
+	 * @param response
+	 * @param userName
+	 */
+	private void remind(HttpServletRequest request,HttpServletResponse response,String userName){
+		String remind = request.getParameter("remind") ;
+		if(!StringUtil.isEmpty(remind)){
+			Cookie cookie = new Cookie("username",userName) ;
+			cookie.setMaxAge(60 * 60 * 24 * 30) ;
+			response.addCookie(cookie) ;
+		}
+	}
+	/**
+	 * 图形验证码
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws IOException
+	 */
+	@SuppressWarnings("static-access")
+	@RequestMapping("/imagecode")
+	public ModelAndView imageDraw(HttpServletRequest request,HttpServletResponse response) throws IOException{
+		response.setContentType("image/jpeg");  
+        //禁止图像缓存。  
+        response.setHeader("Pragma", "no-cache");  
+        response.setHeader("Cache-Control", "no-cache");  
+        response.setDateHeader("Expires", 0);  
+        HttpSession session = request.getSession();  
+        ValidateCode vCode = new ValidateCode(100,25,4,10);  
+        session.setAttribute("code", vCode.getCode());  
+        vCode.write(response.getOutputStream());  
+		return null ;
+	}
+	/**
+	 * 图片验证码的验证及发送短信
+	 * @param vcode
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping("/valid/code")
+	public RespData validCode(@RequestParam("vcode") String vcode
+			,@RequestParam("mobilePhone") String mobilePhone,HttpSession session){
+		RespData respData = new RespData() ;
+		respData.setResultCode(RespData.CODE_FAILURE) ;
+		//1、验证图片验证码
+		String code = (String) session.getAttribute("code") ;
+		if(StringUtil.isEmpty(code) || StringUtil.isEmpty(vcode) || !code.equalsIgnoreCase(vcode)){
+			respData.setData("验证码不正确") ;
+			return respData ;
+		}
+		//2、验证手机号码
+		if(StringUtil.isEmpty(mobilePhone)){
+			respData.setData("手机号码不能为空") ;
+			return respData ;
+		}
+		//3、发送手机校验码
+		try {
+			pcUserService.sendMobileCode(mobilePhone) ;
+		} catch (Exception e) {
+			e.printStackTrace() ;
+			respData.setData(e instanceof BusinessException ? e.getMessage() : "发送手机校验码失败") ;
+			return respData ;
+		}
+		//4、移除图形验证码
+		session.removeAttribute("code") ;
+		respData.setResultCode(RespData.CODE_SUCCESS) ;
+		return respData ;
+	}
+	
+	/**
+	 * 远程校验用户名或者手机号码是否已经被注册
+	 * @param type 0：验证用户名，1：验证手机号码
+	 * @param key 接受的信息
+	 * @return
+	 */
+	@RequestMapping("/valid/{type}/exist")
+	public boolean validUserNameOrMobilePhone(@PathVariable("type") Integer type
+			,HttpServletRequest request){
+		String key = 0 == type ? request.getParameter("name") : request.getParameter("mobilePhone") ;
+		return pcUserService.validUserNameOrMobilePhone(key,type) ;
+	}
+	
+	
+	/**
+	 * 用户注册
+	 * @return
+	 */
+	@RequestMapping(value="/register",method=RequestMethod.GET)
+	public ModelAndView register(HttpSession session){
+		SessionInfo sessionInfo = SessionInfo.get() ;
+		if(null != sessionInfo){
+			//TODO 如果已经登录，跳转的页面
+			return new ModelAndView("/index") ;
+		}
+		//防重复提交
+		session.setAttribute("token",UUIDUtil.generateToken()) ;
+		return new ModelAndView("/home/register") ;
+	}
+	/**
+	 * 用户注册
+	 * @param name
+	 * @param password
+	 * @param mobilePhone
+	 * @param mobileCode
+	 * @return
+	 */
+	@RequestMapping(value="/register",method=RequestMethod.POST)
+	public RespData registerPost(@RequestParam("name") String name,@RequestParam("password") String password
+			,@RequestParam("mobilePhone") String mobilePhone,@RequestParam("mobileCode") String mobileCode
+			,HttpServletRequest request){
+		RespData respData = new RespData() ;
+		HttpSession session = request.getSession() ;
+		String _token = (String) session.getAttribute("token") ;
+		session.removeAttribute("token") ;
+		String token = request.getParameter("token") ;
+		if(StringUtil.isEmpty(_token) || StringUtil.isEmpty(token) || !token.equals(_token)){
+			throw new BusinessException("此次数据提交无效") ;
+		}
+		Long userId = null ;
+		try {
+			userId = pcUserService.save(name, password, mobilePhone, mobileCode) ;
+			//注册成功之后立即登录
+		} catch (Exception e) {
+			e.printStackTrace() ;
+			respData.setResultCode(RespData.CODE_FAILURE) ;
+			respData.setData(e instanceof BusinessException ? e.getMessage() : "用户注册失败") ;
+			session.setAttribute("token",token) ;
+			return respData ;
+		}
+		User user = new User() ;
+		user.setName(name) ;
+		user.setId(userId) ;
+		user.setPassword(password);
+		setSessionInfo(user) ;
+		return respData ;
+	}
+	/**
+	 * 用户注册:第二步完成
+	 * @return
+	 */
+	@RequestMapping(value="/register/success")
+	public ModelAndView registerSuccess(HttpServletRequest request){
+		request.setAttribute("name",SessionInfo.get().getUserName()) ;
+		request.setAttribute("password",SessionInfo.get().getPassword());
+		return new ModelAndView("/home/register_success") ;
+	}
+	/**
+	 * 找回密码
+	 * @Description 
+	 * @param session
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年9月28日下午4:58:10
+	 */
+	@RequestMapping(value="/forgotpass",method=RequestMethod.GET)
+	public ModelAndView forgotpass(HttpSession session){
+		SessionInfo sessionInfo = SessionInfo.get() ;
+		if(null != sessionInfo){
+			//TODO 如果已经登录，跳转的页面
+			return new ModelAndView("/index") ;
+		}
+		//防重复提交
+		session.setAttribute("token",UUIDUtil.generateToken()) ;
+		return new ModelAndView("/home/forgotpass") ;
+	}
+	/**
+	 * 找回密码
+	 * @Description 
+	 * @param password
+	 * @param mobilePhone
+	 * @param mobileCode
+	 * @param request
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年9月28日下午5:38:58
+	 */
+	@RequestMapping(value="/forgotpass",method=RequestMethod.POST)
+	public RespData forgotpass(@RequestParam("password") String password
+			,@RequestParam("mobilePhone") String mobilePhone,@RequestParam("mobileCode") String mobileCode
+			,HttpServletRequest request){
+		RespData respData = new RespData() ;
+		HttpSession session = request.getSession() ;
+		String _token = (String) session.getAttribute("token") ;
+		session.removeAttribute("token") ;
+		String token = request.getParameter("token") ;
+		if(StringUtil.isEmpty(_token) || StringUtil.isEmpty(token) || !token.equals(_token)){
+			throw new BusinessException("此次数据提交无效") ;
+		}
+		Long userId = null ;
+		try {
+			userId = pcUserService.updateForgotpass(password, mobilePhone, mobileCode);
+			//注册成功之后立即登录
+		} catch (Exception e) {
+			e.printStackTrace() ;
+			respData.setResultCode(RespData.CODE_FAILURE) ;
+			respData.setData(e instanceof BusinessException ? e.getMessage() : "用户注册失败") ;
+			session.setAttribute("token",token) ;
+			return respData ;
+		}
+		User user = new User() ;
+		user.setId(userId) ;
+		user.setName(mobilePhone);
+		setSessionInfo(user) ;
+		return respData ;
+	}
+	/**
+	 * 找回密码:第二步完成
+	 * @return
+	 */
+	@RequestMapping(value="/forgotpass/success")
+	public ModelAndView forgotpassSuccess(HttpServletRequest request){
+		request.setAttribute("name",SessionInfo.get().getUserName()) ;
+		return new ModelAndView("/home/forgotpass_success") ;
+	}
+	
+	/**
+	 * 扫码登录 -  会被轮循
+	 * @param request
+	 * @return
+	 * @Description 
+	 * @date 2017年9月29日  上午10:37:55
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping(value="/scancodelogin")
+	public RespData scancodeLogin(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam("code") String code){
+		SessionInfo sessionInfo = SessionInfo.get();
+		RespData respData = new RespData() ;
+		try {
+			User user = pcUserService.scancodeLogin(code);
+			afterLogin(request, response, user);
+		} catch (BusinessException e) {
+			e.printStackTrace();
+			respData.setResultCode(201) ; //还没查询到记录
+		} catch (Exception e) {
+			e.printStackTrace();
+			respData.setResultCode(RespData.CODE_FAILURE) ;
+		}
+		
+		return respData;
+	}
+	
+	/**
+	 * 登录成功后处理
+	 * @param request
+	 * @param response
+	 * @param user
+	 * @Description 
+	 * @date 2017年9月30日  上午11:40:15
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	private void afterLogin(HttpServletRequest request,HttpServletResponse response,User user){
+		
+		System.out.println("用户id"+user.getId() + "用户名" + user.getName());
+		setSessionInfo(user) ;
+		remind(request, response,user.getName()) ;
+	}
+	
+	/***
+	 * 获取二维码页面
+	 * @param request
+	 * @param response
+	 * @return
+	 * @Description 
+	 * @date 2017年9月30日  上午11:06:51
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	@RequestMapping(value="/qrcodeconnect")
+	public RespData scancodeLogin(HttpServletRequest request,HttpServletResponse response){
+		
+		RespData respData = new RespData() ;
+		try {
+			respData.setData(WechatLogin.wechatGetCodeFullUrl());
+		} catch (Exception e) {
+			e.printStackTrace();
+			respData.setResultCode(RespData.CODE_FAILURE) ;
+		}
+		return respData;
+	}
+	/***
+	 * 微信登录返回
+	 * @param request
+	 * @param code
+	 * @param response
+	 * @return
+	 * @Description 
+	 * @date 2017年9月30日  下午4:07:31
+	 * @author wy
+	 * 2017
+	 * @return ModelAndView
+	 */
+	
+	@RequestMapping(value="/wechatlogincallback")
+	public ModelAndView wechatLoginCallback(HttpServletRequest request,
+			@RequestParam("code") String code, HttpServletResponse response){
+		//1获取openid
+		JSONObject jsono = WechatLogin.wechatcodeToGetInfo(code);
+		String openid = jsono.getStr("openid");
+		String token = jsono.getStr("access_token");
+		//2.根据openid查询用户，没有就注册一个
+		User user = pcUserService.wechatLogin(openid, token);
+		//3.登录成功设置session
+		afterLogin(request, response, user);
+		return new ModelAndView("redirect:/user/index") ;
+	}
+	
+	@RequestMapping(value="/qqlogincallback")
+	public ModelAndView qqLoginCallback(HttpServletRequest request,
+			@RequestParam("code") String code, HttpServletResponse response){
+		//1获取token
+		String token = QQLogin.qqAuthorizationcodeToGetToken(code);
+		//2.根据 token 获取 openid
+		String openid = QQLogin.qqTokenToGetOpenid(token);
+		// 获取unionid
+		String unionid = QQLogin.qqGetUnionid(openid);
+		//3.根据openid查询用户，没有就注册一个
+		User user = pcUserService.qqLogin(openid, unionid, token);
+		//4.登录成功设置session
+		afterLogin(request, response, user);
+		return new ModelAndView("/home/closeQQwindow");
+	}
+	/**
+	 * 找回密码页面
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年10月11日 上午10:36:13
+	 */
+	@RequestMapping("/findPwd")
+	public ModelAndView findPwd(){
+		return new ModelAndView("/home/find_password");
+	}
+	
+	
+	/**
+	 * 找回密码验证码
+	 * */
+	@RequestMapping("/valid/codes")
+	public Object validCodes(@Param("codes") String codes,HttpSession session,@Param("userName") String userName){
+		int i = 0;//通过
+		String code = (String) session.getAttribute("code") ;
+		if(!code.equals(codes)){
+			i=1;//不通过
+		}
+		return i;
+	}
+	/**
+	 * 用户验证
+	 */
+	@RequestMapping("/valid/user")
+	public Object validUser(@Param("userName") String userName){
+		UserInfo userByName = pcUserService.findUserByName(userName);
+		
+		return userByName;
+	}
+	
+	/**
+	 * 发送验证码
+	 */
+	@RequestMapping("/send/msg")
+	public int sendMsg(@Param("phone") String phone){
+		int i=0;//发送成功！
+		try {
+			pcSmsLogService.sendMessage(phone) ;
+		} catch (Exception e) {
+			i=1;//发送短信异常
+		}
+		return i;
+	}
+	/**
+	 * @param code
+	 * @param phone
+	 * @return int
+	 * @author lij
+	 * @date 2017年10月10日 下午5:57:15
+	 * 校验短信验证码
+	 */
+	@RequestMapping("/valid/msg")
+	public int validMsg(@Param("code") String code,@Param("phone") String phone){
+		return pcSmsLogService.validCode(code, phone);
+	}
+	/**
+	 * 修改密码
+	 * @param userid
+	 * @param pwd
+	 * @return int
+	 * @author lij
+	 * @date 2017年10月11日 上午10:16:36
+	 */
+	@RequestMapping("/updata/pwd")
+	public int updatePwd(@Param("userid") Long userid,@Param("pwd") String pwd){
+		System.out.println(userid+"-----------");
+		return pcUserService.updatePwd(userid, pwd);
+	}
+	
+}

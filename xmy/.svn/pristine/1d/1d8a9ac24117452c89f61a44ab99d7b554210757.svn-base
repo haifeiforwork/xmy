@@ -1,0 +1,138 @@
+package com.zfj.xmy.user.service.wap;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.UserAddrees;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+
+/**
+ * @author cj
+ * 返回值是int，统一是修改影响行数
+ */
+public interface WapUserService {
+	
+	
+	/**
+	 *@author mu
+	 * @param user  传入user对象，查找对应的userinfo
+	 * @return
+	 */
+	UserInfo queryInfo(User user);
+	
+	/**
+	 * 登录验证
+	 * @author cj
+	 * @param user
+	 * @return
+	 */
+    User login(User user) ;
+	
+	/**
+	 * 验证手机验证码
+	 * @param key
+	 * @return
+	 */
+	Boolean checkCode(String key);
+	
+	/**
+	 * 注册用户
+	 * @param user
+	 * @return
+	 */
+	User saveUser(User user);
+	
+	/**
+	 * 检验用户是否存在
+	 * @param key
+	 * @param type
+	 * @return
+	 */
+	boolean validUserNameOrMobilePhone(String key, Integer type);
+
+	/**
+	 *@author mu
+	 * @return 根据用户查出地址
+	 */
+	List<UserAddrees> queryAddress(User user);
+
+	int updateSex(Long id, Integer sex);
+	
+
+	/**
+	 *@author cj
+	 *更新用户信息的最后修改时间
+	 * @param info
+	 */
+	void updateLastModifyDate(UserInfo info);
+
+	/**
+	 *@author cj
+	 * @param user
+	 * 设置最后登录时间
+	 */
+	void updateLastLoginDate(User user);
+
+	/**
+	 *@author cj
+	 * @param id
+	 * @param nick
+	 * 传入用户id，用户昵称修改用户昵称
+	 * @return
+	 */
+	int updateNick(Long id, String nick);
+
+	/**
+	 *@author cj
+	 * @param id
+	 * @param phone
+	 * 根据id， 座机号修改座机号
+	 * @return
+	 */
+	int updatePhone(Long id, String phone);
+
+	/**
+	 *@author cj
+	 * @param id
+	 * @param birthday
+	 * 根据id， 日期修改生日
+	 * @return
+	 */
+	int updateBirthday(Long id, Date birthday);
+
+	/**
+	 *@author cj
+	 * @param id
+	 * @return
+	 * 根据id查询用户
+	 */
+	User getUser(Long id);
+
+	int modifyPassword(User user, String old, String neu, String re);
+
+	Integer sendSms(String phone);
+
+	boolean limitSmsCount(String mobilePhone, int min);
+
+	Integer updateUserInfo(UserInfo userInfo);
+
+	User getUser(String openId);
+
+	Integer updateUser(User user2);
+
+	Integer add(User user2);
+	
+	Integer add(UserInfo userInfo);
+
+	List<User> findWeChatOpenid(String openId);
+
+	Integer updateBalance(Long userId, BigDecimal cost);
+
+	boolean checkIfUserNameIsUnique(String userName);
+
+	int updateName(Long id, String nick);
+
+	User findUserByUnionId(String unionId);
+}

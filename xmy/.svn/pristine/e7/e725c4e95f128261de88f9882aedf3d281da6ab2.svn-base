@@ -1,0 +1,30 @@
+package com.zfj.xmy.comment.service.cms.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.comment.persistence.app.pojo.dao.FeedbackExMapper;
+import com.zfj.xmy.comment.persistence.app.pojo.dto.FeedbackDto;
+import com.zfj.xmy.comment.service.cms.CmsFeedbackService;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+@Service
+public class CmsFeedbackServiceImpl implements CmsFeedbackService{
+	
+	@Autowired
+	private FeedbackExMapper exMapper;
+	
+	/**
+	 * 分页查建议信息
+	 */
+	@Override
+	public List<FeedbackDto> findAllFeedbackDtoList(ReqData reqData, PageBean pageBean) {
+		List<FeedbackDto> list = exMapper.findFeedback(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		pageBean.setTotalCount(exMapper.countFeedback(ReqUtil.reqParameterToCriteriaParameter(reqData)));
+		return list;
+	}
+
+}

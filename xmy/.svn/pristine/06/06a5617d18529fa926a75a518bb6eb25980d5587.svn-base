@@ -1,0 +1,44 @@
+@charset "utf-8";
+/* CSS Document */
+/*放大镜*/
+
+
+.preview{width:400px;
+    position:relative;
+    margin:0px auto;}
+
+/* smallImg */
+
+.smallImg{position:relative; height:55px; margin-top:1px; background-color:#FFf; padding:6px 0; width:390px; overflow:hidden;float:left;}
+
+.scrollbutton{width:14px; height:55px; overflow:hidden; position:relative; float:left; cursor:pointer; }
+
+.scrollbutton.smallImgUp , .scrollbutton.smallImgUp.disabled{background:url('../images/d_08.png') no-repeat;}
+
+.scrollbutton.smallImgDown , .scrollbutton.smallImgDown.disabled{background:url('../images/d_09.png') no-repeat; margin-left:375px; margin-top:-55px;}
+
+
+
+#imageMenu {height:55px; width:360px; overflow:hidden; margin-left:0; float:left;}
+
+#imageMenu li {height:55px; width:70px; overflow:hidden; float:left; text-align:center;margin:0 1px;}
+
+#imageMenu li img{width:48px; height:48px;cursor:pointer;border:  2px solid #FFF;}
+#imageMenu .acline{border: 2px solid rgb(228, 57, 60);}
+/*#imageMenu li#onlickImg img, #imageMenu li:hover img{ border:3px solid #959595;}*/
+
+/* bigImg */
+
+.bigImg{position:relative; float:left; width:400px; height:400px; overflow:hidden;}
+
+.bigImg #midimg{width:390px; height:390px;}
+
+.bigImg #winSelector{width:235px; height:210px;}
+
+#winSelector{position:absolute; cursor:crosshair; filter:alpha(opacity=15); -moz-opacity:0.15; opacity:0.15; background-color:#000; border:1px solid #fff;}
+
+/* bigView */
+
+#bigView{position:absolute; overflow: hidden; z-index:999;left:410px!important;top:0!important;}
+
+#bigView img{position:absolute;}

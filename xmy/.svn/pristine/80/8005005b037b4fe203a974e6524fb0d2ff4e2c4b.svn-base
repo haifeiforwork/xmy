@@ -1,0 +1,6 @@
+package com.zfj.xmy.common.persistence.dao;
+
+import com.zfj.xmy.common.persistence.pojo.OnlineActivity;
+
+public interface OnlineActivityMapper extends BaseMapper<OnlineActivity>{
+}

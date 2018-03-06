@@ -1,0 +1,9 @@
+@CHARSET "UTF-8";
+        header .header-top{border-bottom: 1px solid #C3C3C3;}
+        .content{bottom: 0;}
+        .ad-gutter-sm{margin-top: 0.3rem;margin-left: 0.5rem;margin-right: 0.5rem;border-radius: 5px;}
+        .weui-cell:before{display: none;}
+        .weui-cell{font-size: 0.7rem;}
+        textarea{font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;}
+        .btn-back{margin: 2rem 0.5rem;font-size: 0.75rem;}
+        .btn-back.weui-btn_primary{background-color: #358812;}

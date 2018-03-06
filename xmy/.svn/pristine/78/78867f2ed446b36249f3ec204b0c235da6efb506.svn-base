@@ -1,0 +1,137 @@
+
+package com.zfj.xmy.util;
+
+import java.util.Collection;
+
+import com.zfj.base.enu.BaseProp;
+
+import cn.jiguang.common.ClientConfig;
+import cn.jiguang.common.resp.APIConnectionException;
+import cn.jiguang.common.resp.APIRequestException;
+import cn.jpush.api.JPushClient;
+import cn.jpush.api.push.PushResult;
+import cn.jpush.api.push.model.Platform;
+import cn.jpush.api.push.model.PushPayload;
+import cn.jpush.api.push.model.audience.Audience;
+import cn.jpush.api.push.model.notification.Notification;
+
+/**
+ * 推送公共类 
+ * @author wy
+ *
+ */
+public class PushUtil {
+
+	
+	
+	public static void main(String[] args) {
+		//sendBroadcasts("喵喵？");
+
+		//sendToUserByToken("244707DC0DD0430CAE4C5C803D8A5B1E","顾甄枯干坧");
+		
+		sendToUserByToken("38EB364956154145AE991C735BA8F3EE","淡淡淡淡淡炒之之之之之2333");
+
+	}
+	
+	
+	
+	
+	/**
+	 * 发送广播
+	 * @param msg
+	 * @Description 
+	 * @date 2017年8月28日  下午2:51:38
+	 * @author wy
+	 * 2017
+	 * @return 
+	 * @return void
+	 */
+	public static String sendBroadcasts(String msg){
+		return push(PushPayload.alertAll(msg));
+	}
+	
+	/**
+	 * 推送给单一用户 
+	 * @param msg 推送信息
+	 * @param registrationId 极光 app 端的 注册ID
+	 * @Description 
+	 * @date 2017年8月28日  下午3:59:33
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	public static void sendToUser(String msg,String registrationId){
+		push(getPushPayloadByRegistrationId(registrationId));
+	}
+	
+	/**
+	 * 推送给单一用户 
+	 * @param appToken 用户 token
+	 *  @param msg 推送信息
+	 * @Description 
+	 * @date 2017年8月28日  下午4:00:33
+	 * @author wy
+	 * 2017
+	 * @return 
+	 * @return void
+	 */
+	public static String sendToUserByToken(String appToken,String msg){
+		return push(getPushPayloadByAlias(appToken, msg));
+	}
+	
+	/**
+	 * 推送主方法
+	 * @param pushPayload
+	 * @Description 
+	 * @date 2017年8月28日  下午2:54:57
+	 * @author wy
+	 * 2017
+	 * @return 
+	 * @return void
+	 */
+	private static String push(PushPayload pushPayload){
+//		String appKey =  BaseProp.BASE.getValue("JPUSH_APPKEY");
+//		String masterSecret = BaseProp.BASE.getValue("JPUSH_MASTERSECRET");
+		
+		String appKey = "99b64d40ce4fc95173aaf02b";
+		String masterSecret = "e53b5eef89308127cd2e5635";
+		
+		JPushClient client = new JPushClient(masterSecret, appKey, null, ClientConfig.getInstance());
+		try {
+			PushResult result = client.sendPush(pushPayload);
+			client.close();
+			System.out.println(result.toString());
+			return result.toString();
+		} catch ( APIRequestException e) {
+			e.printStackTrace();
+			System.out.println("HTTP Status: " + e.getStatus());
+			System.out.println("Error Code: " + e.getErrorCode());
+			System.out.println("Error Message: " + e.getErrorMessage());
+			
+			System.out.println("response: " + e.getMessage());
+		} catch (APIConnectionException e) {
+			e.printStackTrace();
+			System.out.println("Connection error, should retry later");
+		}
+		return null;
+	}
+	
+	
+	private static PushPayload getPushPayloadByRegistrationId(String registrationId){
+		return PushPayload.newBuilder()
+				.setAudience(Audience.registrationId(registrationId)).build();
+	}
+	
+	private static PushPayload getPushPayloadByRegistrationIds(Collection<String> registrationIds){
+		return PushPayload.newBuilder()
+				.setAudience(Audience.registrationId(registrationIds)).build();
+	}
+	
+	private static PushPayload getPushPayloadByAlias(String alias,String alert){
+		return PushPayload.newBuilder()
+				.setAudience(Audience.alias(alias))
+				.setPlatform(Platform.all())
+				.setNotification(Notification.alert(alert))
+				.build();
+	}
+}

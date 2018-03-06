@@ -1,0 +1,18 @@
+@charset "utf-8";
+/*星星样式*/
+.cblock{ width:100%; margin-bottom:2px;}
+.cblock .star_score{ float:left;}
+.cblock p,.cblock .attitude{ padding-left:20px; line-height:21px; display:inline-block;}
+.cblock p span{ color:#C00; font-size:16px; font-family:Georgia, "Times New Roman", Times, serif;}
+
+.cstars .star_score {background:url(../images/cstars/star_off_24.png);width:150px; height:24px;  position:relative; }
+.cstars .star_score a{height:24px;display:block; text-indent:-999em; position:absolute;left:0;}
+.cstars.cblock{line-height:24px;}
+.cstars .star_score a:hover,.cstars .star_score a.clibg{ background:url(../images/cstars/star_on_24.png) 0 0;left:0;}
+/*星星样式*/
+.atar_Show{background:url(../images/cstars/star_off_16.png) 0 0; width:80px; height:13px; margin-bottom: 0.3rem;  position:relative; /*float:left; margin-top:4px;*/ }
+.atar_Show p{ background:url(../images/cstars/star_on_16.png) 0 0;left:0; height:13px; width:80px;}
+.show_number li span{ display:inline-block; line-height:13px;}
+
+.atar_Show2{background:url(../images/cstars/star_off_13.png) 0 0; width:65px; height:11px; margin-bottom: 0.3rem;  position:relative;}
+.atar_Show2 p{ background:url(../images/cstars/star_on_13.png) 0 0;left:0; height:11px; width:65px;}

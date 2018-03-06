@@ -1,0 +1,43 @@
+.personal{height: 200px;width: 100%;background-color: #fff;margin-top: 25px;border-radius: 200px 0 0 200px;background:url(../../commons/images/grbg.png);background-size: 100% 100%;overflow: hidden;padding: 10px 10px 10px 0;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+.personal .personal-details{width: 323px;height: 100%;float: left;border-right: 1px dashed #E2E2E2;overflow: hidden;}
+.personal .personal-details .personal-details-img{width: 110px;height: 110px;margin-top: 35px;float: left;margin-left: 20px;border-radius: 50%;text-align: center;line-height: 100px;}
+.personal .personal-details .personal-details-img img{width: 95%;height: 95%;border:4px solid #F5F5F5;border-radius: 50%;}
+.personal .personal-details .personal-details-details{width: 180px;height: 110px;margin-top: 60px;float: left;margin-left: 10px;}
+.personal .personal-details .personal-details-details .user-name{font-size: 18px;color:#333;margin-top: 10px;}
+.personal .personal-details .personal-details-details .user-phone{font-size: 12px;color: #333;margin-top: 5px;font-weight: 600;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;width: 100%;}
+.personal .personal-details .personal-details-details .uesr-safety{overflow: hidden;font-size: 12px;color: #333;font-weight: 600;margin-top: 5px;}
+.personal .personal-details .personal-details-details .uesr-safety .email{float: left;}
+.personal .personal-details .personal-details-details .uesr-safety .email-del{width: 70px;height: 10px;background-color: #EFEFEF;float: left;margin-left: 5px;margin-top: 4px;position: relative;}
+.personal .personal-details .personal-details-details .uesr-safety .email-del .plan{width: 80%;height: 100%;position: absolute;top: 0px;left: 0px;background-color: #258912;}
+.personal .personal-details .personal-details-details .uesr-safety .rank{float: right;color: #258912;font-weight: 500;margin-right: 15px;}
+.personal .all-orders{width: 270px;height: 100%;float: left;margin-left: 15px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 0px 30px;}
+.personal .all-orders .all-orders-ul{overflow: hidden;margin-top: 5px;}
+.personal .all-orders .all-orders-ul .all-orders-li{width: 105px;float: left;text-align: center;margin-top: 5px;}
+.personal .all-orders .all-orders-ul .all-orders-li img{width: 60px;height: 60px;}
+.personal .all-orders .all-orders-ul .all-orders-li p{font-size: 12px;color: #333;margin-top: -8px;}
+.personal .all-orders .all-orders-ul .all-orders-li p .money{color: #E23B3E;position: relative;left: 10px;font-weight: 600;}
+.personal .balance-del{width: 470px;height: 150px;background-color: #EFEFEF;float: left;margin-top: 15px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 45px 20px;}
+.personal .balance-del .balance-del-left, .personal .balance-del .balance-del-right{width: 212.5px;height: 100%;float: left;}
+.personal .balance-del .balance-del-left{text-align: right;border-right: 1px solid #BABABA;padding-right: 50px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+.personal .balance-del .balance-del-right{padding-left: 50px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+.personal .balance-del .balance-del-left .money{padding-right: 5px;}
+.personal .balance-del div .money{font-size: 22px;color: #FC9149;font-weight: 600;}
+.personal .balance-del div .detail{font-size: 14px;color: #767676;margin-top: 5px;margin-left: -3px;}
+.personal .balance-del div .detail i{font-size: 22px;position: relative;top: 3px;}
+.guess{overflow: hidden;margin-top: 25px;}
+.guess-left{width: 716px;background-color: #fff;float: left;padding:20px 20px;}
+.guess-left .title{margin: 0;font-size: 16px;}
+.guess-left .guess-left-ul{overflow: hidden;}
+.guess-left .guess-left-ul .guess-left-li{width: 148px;float: left;margin-right: 17px;border:1px solid #E2E2E2;padding: 10px 8px;margin-top: 12px;}
+.guess-left .guess-left-ul .guess-left-li:nth-child(4n){margin-right: 0;}
+.guess-left .guess-left-ul .guess-left-li img{width: 100%;height:148px;}
+.guess-left .guess-left-ul .guess-left-li .text{font-size: 12px;color: #666;margin-top: 5px;height:32px;display: -webkit-box;
+-webkit-box-orient: vertical;
+-webkit-line-clamp: 2;
+overflow: hidden;}
+.guess-left .guess-left-ul .guess-left-li .money{color: #E23B3E;font-size: 16px;font-weight: 600;margin-top: 5px;}
+.guess-right{width: 275px;background-color: #fff;float: left;margin-left: 25px;padding:20px 25px;height:520px;}
+.guess-right .title{margin: 0;font-size: 16px;}
+.guess-right .guess-right-ul .guess-right-li{margin-top: 10px;width:100%;height:150px;margin-top:16px;}
+/* .guess-right .guess-right-ul .guess-right-li:first-child{margin-top:0;} */
+.guess-right .guess-right-ul .guess-right-li img{width: 100%;height: 100%;}

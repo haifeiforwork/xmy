@@ -1,0 +1,1105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.GoodsMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.Goods" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="short_name" property="shortName" jdbcType="VARCHAR" />
+    <result column="full_name" property="fullName" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="brand_id" property="brandId" jdbcType="BIGINT" />
+    <result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+    <result column="brand_code" property="brandCode" jdbcType="VARCHAR" />
+    <result column="supplier_id" property="supplierId" jdbcType="BIGINT" />
+    <result column="supplier_name" property="supplierName" jdbcType="VARCHAR" />
+    <result column="supplier_code" property="supplierCode" jdbcType="VARCHAR" />
+    <result column="supply_strategy" property="supplyStrategy" jdbcType="INTEGER" />
+    <result column="unit_id" property="unitId" jdbcType="BIGINT" />
+    <result column="unit_name" property="unitName" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="remark_num" property="remarkNum" jdbcType="VARCHAR" />
+    <result column="alarm_num" property="alarmNum" jdbcType="INTEGER" />
+    <result column="weight" property="weight" jdbcType="VARCHAR" />
+    <result column="cost_price" property="costPrice" jdbcType="DECIMAL" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="market_price" property="marketPrice" jdbcType="DECIMAL" />
+    <result column="phone_price" property="phonePrice" jdbcType="DECIMAL" />
+    <result column="vip_price" property="vipPrice" jdbcType="DECIMAL" />
+    <result column="market" property="market" jdbcType="INTEGER" />
+    <result column="area" property="area" jdbcType="VARCHAR" />
+    <result column="is_putway" property="isPutway" jdbcType="INTEGER" />
+    <result column="is_sale" property="isSale" jdbcType="INTEGER" />
+    <result column="is_search" property="isSearch" jdbcType="INTEGER" />
+    <result column="is_delivery" property="isDelivery" jdbcType="INTEGER" />
+    <result column="des" property="des" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="BIGINT" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="is_desmodel" property="isDesmodel" jdbcType="INTEGER" />
+    <result column="is_recycle" property="isRecycle" jdbcType="INTEGER" />
+    <result column="category_id" property="categoryId" jdbcType="VARCHAR" />
+    <result column="category_code" property="categoryCode" jdbcType="VARCHAR" />
+    <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="putway_time" property="putwayTime" jdbcType="TIMESTAMP" />
+    <result column="outway_time" property="outwayTime" jdbcType="TIMESTAMP" />
+    <result column="standard" property="standard" jdbcType="VARCHAR" />
+    <result column="default_buynum" property="defaultBuynum" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="img_path" property="imgPath" jdbcType="VARCHAR" />
+    <result column="wm_id" property="wmId" jdbcType="BIGINT" />
+    <result column="is_ud" property="isUd" jdbcType="INTEGER" />
+    <result column="sum_deal" property="sumDeal" jdbcType="INTEGER" />
+    <result column="sum_comment" property="sumComment" jdbcType="INTEGER" />
+    <result column="is_China" property="isChina" jdbcType="INTEGER" />
+    <result column="keyword" property="keyword" jdbcType="VARCHAR" />
+    <result column="points" property="points" jdbcType="INTEGER" />
+    <result column="storage_method" property="storageMethod" jdbcType="VARCHAR" />
+    <result column="pack_method" property="packMethod" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs" extends="BaseResultMap" >
+    <result column="pc_introduced" property="pcIntroduced" jdbcType="LONGVARCHAR" />
+    <result column="ph_introduced" property="phIntroduced" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, `name`, short_name, full_name, code, brand_id, brand_name, brand_code, supplier_id, 
+    supplier_name, supplier_code, supply_strategy, unit_id, unit_name, num, remark_num, 
+    alarm_num, weight, cost_price, price, market_price, phone_price, vip_price, market, 
+    area, is_putway, is_sale, is_search, is_delivery, des, `type`, type_name, is_desmodel, 
+    is_recycle, category_id, category_code, category_name, create_time, putway_time, 
+    outway_time, `standard`, default_buynum, update_time, img_path, wm_id, is_ud, sum_deal, 
+    sum_comment, is_China, keyword, points, storage_method, pack_method
+  </sql>
+  <sql id="Blob_Column_List" >
+    pc_introduced, ph_introduced
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleWithBLOBsAndPage" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update goods
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null" >
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.shortName != null" >
+        short_name = #{record.shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fullName != null" >
+        full_name = #{record.fullName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.code != null" >
+        code = #{record.code,jdbcType=VARCHAR},
+      </if>
+      <if test="record.brandId != null" >
+        brand_id = #{record.brandId,jdbcType=BIGINT},
+      </if>
+      <if test="record.brandName != null" >
+        brand_name = #{record.brandName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.brandCode != null" >
+        brand_code = #{record.brandCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.supplierId != null" >
+        supplier_id = #{record.supplierId,jdbcType=BIGINT},
+      </if>
+      <if test="record.supplierName != null" >
+        supplier_name = #{record.supplierName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.supplierCode != null" >
+        supplier_code = #{record.supplierCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.supplyStrategy != null" >
+        supply_strategy = #{record.supplyStrategy,jdbcType=INTEGER},
+      </if>
+      <if test="record.unitId != null" >
+        unit_id = #{record.unitId,jdbcType=BIGINT},
+      </if>
+      <if test="record.unitName != null" >
+        unit_name = #{record.unitName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.num != null" >
+        num = #{record.num,jdbcType=INTEGER},
+      </if>
+      <if test="record.remarkNum != null" >
+        remark_num = #{record.remarkNum,jdbcType=VARCHAR},
+      </if>
+      <if test="record.alarmNum != null" >
+        alarm_num = #{record.alarmNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.weight != null" >
+        weight = #{record.weight,jdbcType=VARCHAR},
+      </if>
+      <if test="record.costPrice != null" >
+        cost_price = #{record.costPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.price != null" >
+        price = #{record.price,jdbcType=DECIMAL},
+      </if>
+      <if test="record.marketPrice != null" >
+        market_price = #{record.marketPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.phonePrice != null" >
+        phone_price = #{record.phonePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.vipPrice != null" >
+        vip_price = #{record.vipPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.market != null" >
+        market = #{record.market,jdbcType=INTEGER},
+      </if>
+      <if test="record.area != null" >
+        area = #{record.area,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isPutway != null" >
+        is_putway = #{record.isPutway,jdbcType=INTEGER},
+      </if>
+      <if test="record.isSale != null" >
+        is_sale = #{record.isSale,jdbcType=INTEGER},
+      </if>
+      <if test="record.isSearch != null" >
+        is_search = #{record.isSearch,jdbcType=INTEGER},
+      </if>
+      <if test="record.isDelivery != null" >
+        is_delivery = #{record.isDelivery,jdbcType=INTEGER},
+      </if>
+      <if test="record.des != null" >
+        des = #{record.des,jdbcType=VARCHAR},
+      </if>
+      <if test="record.type != null" >
+        `type` = #{record.type,jdbcType=BIGINT},
+      </if>
+      <if test="record.typeName != null" >
+        type_name = #{record.typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isDesmodel != null" >
+        is_desmodel = #{record.isDesmodel,jdbcType=INTEGER},
+      </if>
+      <if test="record.isRecycle != null" >
+        is_recycle = #{record.isRecycle,jdbcType=INTEGER},
+      </if>
+      <if test="record.categoryId != null" >
+        category_id = #{record.categoryId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.categoryCode != null" >
+        category_code = #{record.categoryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.categoryName != null" >
+        category_name = #{record.categoryName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.putwayTime != null" >
+        putway_time = #{record.putwayTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.outwayTime != null" >
+        outway_time = #{record.outwayTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.standard != null" >
+        `standard` = #{record.standard,jdbcType=VARCHAR},
+      </if>
+      <if test="record.defaultBuynum != null" >
+        default_buynum = #{record.defaultBuynum,jdbcType=INTEGER},
+      </if>
+      <if test="record.updateTime != null" >
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.imgPath != null" >
+        img_path = #{record.imgPath,jdbcType=VARCHAR},
+      </if>
+      <if test="record.wmId != null" >
+        wm_id = #{record.wmId,jdbcType=BIGINT},
+      </if>
+      <if test="record.isUd != null" >
+        is_ud = #{record.isUd,jdbcType=INTEGER},
+      </if>
+      <if test="record.sumDeal != null" >
+        sum_deal = #{record.sumDeal,jdbcType=INTEGER},
+      </if>
+      <if test="record.sumComment != null" >
+        sum_comment = #{record.sumComment,jdbcType=INTEGER},
+      </if>
+      <if test="record.isChina != null" >
+        is_China = #{record.isChina,jdbcType=INTEGER},
+      </if>
+      <if test="record.keyword != null" >
+        keyword = #{record.keyword,jdbcType=VARCHAR},
+      </if>
+      <if test="record.points != null" >
+        points = #{record.points,jdbcType=INTEGER},
+      </if>
+      <if test="record.storageMethod != null" >
+        storage_method = #{record.storageMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="record.packMethod != null" >
+        pack_method = #{record.packMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="record.pcIntroduced != null" >
+        pc_introduced = #{record.pcIntroduced,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.phIntroduced != null" >
+        ph_introduced = #{record.phIntroduced,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update goods
+    set id = #{record.id,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      short_name = #{record.shortName,jdbcType=VARCHAR},
+      full_name = #{record.fullName,jdbcType=VARCHAR},
+      code = #{record.code,jdbcType=VARCHAR},
+      brand_id = #{record.brandId,jdbcType=BIGINT},
+      brand_name = #{record.brandName,jdbcType=VARCHAR},
+      brand_code = #{record.brandCode,jdbcType=VARCHAR},
+      supplier_id = #{record.supplierId,jdbcType=BIGINT},
+      supplier_name = #{record.supplierName,jdbcType=VARCHAR},
+      supplier_code = #{record.supplierCode,jdbcType=VARCHAR},
+      supply_strategy = #{record.supplyStrategy,jdbcType=INTEGER},
+      unit_id = #{record.unitId,jdbcType=BIGINT},
+      unit_name = #{record.unitName,jdbcType=VARCHAR},
+      num = #{record.num,jdbcType=INTEGER},
+      remark_num = #{record.remarkNum,jdbcType=VARCHAR},
+      alarm_num = #{record.alarmNum,jdbcType=INTEGER},
+      weight = #{record.weight,jdbcType=VARCHAR},
+      cost_price = #{record.costPrice,jdbcType=DECIMAL},
+      price = #{record.price,jdbcType=DECIMAL},
+      market_price = #{record.marketPrice,jdbcType=DECIMAL},
+      phone_price = #{record.phonePrice,jdbcType=DECIMAL},
+      vip_price = #{record.vipPrice,jdbcType=DECIMAL},
+      market = #{record.market,jdbcType=INTEGER},
+      area = #{record.area,jdbcType=VARCHAR},
+      is_putway = #{record.isPutway,jdbcType=INTEGER},
+      is_sale = #{record.isSale,jdbcType=INTEGER},
+      is_search = #{record.isSearch,jdbcType=INTEGER},
+      is_delivery = #{record.isDelivery,jdbcType=INTEGER},
+      des = #{record.des,jdbcType=VARCHAR},
+      `type` = #{record.type,jdbcType=BIGINT},
+      type_name = #{record.typeName,jdbcType=VARCHAR},
+      is_desmodel = #{record.isDesmodel,jdbcType=INTEGER},
+      is_recycle = #{record.isRecycle,jdbcType=INTEGER},
+      category_id = #{record.categoryId,jdbcType=VARCHAR},
+      category_code = #{record.categoryCode,jdbcType=VARCHAR},
+      category_name = #{record.categoryName,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      putway_time = #{record.putwayTime,jdbcType=TIMESTAMP},
+      outway_time = #{record.outwayTime,jdbcType=TIMESTAMP},
+      `standard` = #{record.standard,jdbcType=VARCHAR},
+      default_buynum = #{record.defaultBuynum,jdbcType=INTEGER},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      img_path = #{record.imgPath,jdbcType=VARCHAR},
+      wm_id = #{record.wmId,jdbcType=BIGINT},
+      is_ud = #{record.isUd,jdbcType=INTEGER},
+      sum_deal = #{record.sumDeal,jdbcType=INTEGER},
+      sum_comment = #{record.sumComment,jdbcType=INTEGER},
+      is_China = #{record.isChina,jdbcType=INTEGER},
+      keyword = #{record.keyword,jdbcType=VARCHAR},
+      points = #{record.points,jdbcType=INTEGER},
+      storage_method = #{record.storageMethod,jdbcType=VARCHAR},
+      pack_method = #{record.packMethod,jdbcType=VARCHAR},
+      pc_introduced = #{record.pcIntroduced,jdbcType=LONGVARCHAR},
+      ph_introduced = #{record.phIntroduced,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update goods
+    set id = #{record.id,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      short_name = #{record.shortName,jdbcType=VARCHAR},
+      full_name = #{record.fullName,jdbcType=VARCHAR},
+      code = #{record.code,jdbcType=VARCHAR},
+      brand_id = #{record.brandId,jdbcType=BIGINT},
+      brand_name = #{record.brandName,jdbcType=VARCHAR},
+      brand_code = #{record.brandCode,jdbcType=VARCHAR},
+      supplier_id = #{record.supplierId,jdbcType=BIGINT},
+      supplier_name = #{record.supplierName,jdbcType=VARCHAR},
+      supplier_code = #{record.supplierCode,jdbcType=VARCHAR},
+      supply_strategy = #{record.supplyStrategy,jdbcType=INTEGER},
+      unit_id = #{record.unitId,jdbcType=BIGINT},
+      unit_name = #{record.unitName,jdbcType=VARCHAR},
+      num = #{record.num,jdbcType=INTEGER},
+      remark_num = #{record.remarkNum,jdbcType=VARCHAR},
+      alarm_num = #{record.alarmNum,jdbcType=INTEGER},
+      weight = #{record.weight,jdbcType=VARCHAR},
+      cost_price = #{record.costPrice,jdbcType=DECIMAL},
+      price = #{record.price,jdbcType=DECIMAL},
+      market_price = #{record.marketPrice,jdbcType=DECIMAL},
+      phone_price = #{record.phonePrice,jdbcType=DECIMAL},
+      vip_price = #{record.vipPrice,jdbcType=DECIMAL},
+      market = #{record.market,jdbcType=INTEGER},
+      area = #{record.area,jdbcType=VARCHAR},
+      is_putway = #{record.isPutway,jdbcType=INTEGER},
+      is_sale = #{record.isSale,jdbcType=INTEGER},
+      is_search = #{record.isSearch,jdbcType=INTEGER},
+      is_delivery = #{record.isDelivery,jdbcType=INTEGER},
+      des = #{record.des,jdbcType=VARCHAR},
+      `type` = #{record.type,jdbcType=BIGINT},
+      type_name = #{record.typeName,jdbcType=VARCHAR},
+      is_desmodel = #{record.isDesmodel,jdbcType=INTEGER},
+      is_recycle = #{record.isRecycle,jdbcType=INTEGER},
+      category_id = #{record.categoryId,jdbcType=VARCHAR},
+      category_code = #{record.categoryCode,jdbcType=VARCHAR},
+      category_name = #{record.categoryName,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      putway_time = #{record.putwayTime,jdbcType=TIMESTAMP},
+      outway_time = #{record.outwayTime,jdbcType=TIMESTAMP},
+      `standard` = #{record.standard,jdbcType=VARCHAR},
+      default_buynum = #{record.defaultBuynum,jdbcType=INTEGER},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      img_path = #{record.imgPath,jdbcType=VARCHAR},
+      wm_id = #{record.wmId,jdbcType=BIGINT},
+      is_ud = #{record.isUd,jdbcType=INTEGER},
+      sum_deal = #{record.sumDeal,jdbcType=INTEGER},
+      sum_comment = #{record.sumComment,jdbcType=INTEGER},
+      is_China = #{record.isChina,jdbcType=INTEGER},
+      keyword = #{record.keyword,jdbcType=VARCHAR},
+      points = #{record.points,jdbcType=INTEGER},
+      storage_method = #{record.storageMethod,jdbcType=VARCHAR},
+      pack_method = #{record.packMethod,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from goods
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from goods
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs" useGeneratedKeys="true" keyProperty="id" >
+    insert into goods (`name`, short_name, full_name, 
+      code, brand_id, brand_name, 
+      brand_code, supplier_id, supplier_name, 
+      supplier_code, supply_strategy, unit_id, 
+      unit_name, num, remark_num, 
+      alarm_num, weight, cost_price, 
+      price, market_price, phone_price, 
+      vip_price, market, area, 
+      is_putway, is_sale, is_search, 
+      is_delivery, des, `type`, 
+      type_name, is_desmodel, is_recycle, 
+      category_id, category_code, category_name, 
+      create_time, putway_time, outway_time, 
+      `standard`, default_buynum, update_time, 
+      img_path, wm_id, is_ud, 
+      sum_deal, sum_comment, is_China, 
+      keyword, points, storage_method, 
+      pack_method, pc_introduced, ph_introduced
+      )
+    values (#{name,jdbcType=VARCHAR}, #{shortName,jdbcType=VARCHAR}, #{fullName,jdbcType=VARCHAR}, 
+      #{code,jdbcType=VARCHAR}, #{brandId,jdbcType=BIGINT}, #{brandName,jdbcType=VARCHAR}, 
+      #{brandCode,jdbcType=VARCHAR}, #{supplierId,jdbcType=BIGINT}, #{supplierName,jdbcType=VARCHAR}, 
+      #{supplierCode,jdbcType=VARCHAR}, #{supplyStrategy,jdbcType=INTEGER}, #{unitId,jdbcType=BIGINT}, 
+      #{unitName,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, #{remarkNum,jdbcType=VARCHAR}, 
+      #{alarmNum,jdbcType=INTEGER}, #{weight,jdbcType=VARCHAR}, #{costPrice,jdbcType=DECIMAL}, 
+      #{price,jdbcType=DECIMAL}, #{marketPrice,jdbcType=DECIMAL}, #{phonePrice,jdbcType=DECIMAL}, 
+      #{vipPrice,jdbcType=DECIMAL}, #{market,jdbcType=INTEGER}, #{area,jdbcType=VARCHAR}, 
+      #{isPutway,jdbcType=INTEGER}, #{isSale,jdbcType=INTEGER}, #{isSearch,jdbcType=INTEGER}, 
+      #{isDelivery,jdbcType=INTEGER}, #{des,jdbcType=VARCHAR}, #{type,jdbcType=BIGINT}, 
+      #{typeName,jdbcType=VARCHAR}, #{isDesmodel,jdbcType=INTEGER}, #{isRecycle,jdbcType=INTEGER}, 
+      #{categoryId,jdbcType=VARCHAR}, #{categoryCode,jdbcType=VARCHAR}, #{categoryName,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{putwayTime,jdbcType=TIMESTAMP}, #{outwayTime,jdbcType=TIMESTAMP}, 
+      #{standard,jdbcType=VARCHAR}, #{defaultBuynum,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{imgPath,jdbcType=VARCHAR}, #{wmId,jdbcType=BIGINT}, #{isUd,jdbcType=INTEGER}, 
+      #{sumDeal,jdbcType=INTEGER}, #{sumComment,jdbcType=INTEGER}, #{isChina,jdbcType=INTEGER}, 
+      #{keyword,jdbcType=VARCHAR}, #{points,jdbcType=INTEGER}, #{storageMethod,jdbcType=VARCHAR}, 
+      #{packMethod,jdbcType=VARCHAR}, #{pcIntroduced,jdbcType=LONGVARCHAR}, #{phIntroduced,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs" useGeneratedKeys="true" keyProperty="id" >
+    insert into goods
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        `name`,
+      </if>
+      <if test="shortName != null" >
+        short_name,
+      </if>
+      <if test="fullName != null" >
+        full_name,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="brandId != null" >
+        brand_id,
+      </if>
+      <if test="brandName != null" >
+        brand_name,
+      </if>
+      <if test="brandCode != null" >
+        brand_code,
+      </if>
+      <if test="supplierId != null" >
+        supplier_id,
+      </if>
+      <if test="supplierName != null" >
+        supplier_name,
+      </if>
+      <if test="supplierCode != null" >
+        supplier_code,
+      </if>
+      <if test="supplyStrategy != null" >
+        supply_strategy,
+      </if>
+      <if test="unitId != null" >
+        unit_id,
+      </if>
+      <if test="unitName != null" >
+        unit_name,
+      </if>
+      <if test="num != null" >
+        num,
+      </if>
+      <if test="remarkNum != null" >
+        remark_num,
+      </if>
+      <if test="alarmNum != null" >
+        alarm_num,
+      </if>
+      <if test="weight != null" >
+        weight,
+      </if>
+      <if test="costPrice != null" >
+        cost_price,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="marketPrice != null" >
+        market_price,
+      </if>
+      <if test="phonePrice != null" >
+        phone_price,
+      </if>
+      <if test="vipPrice != null" >
+        vip_price,
+      </if>
+      <if test="market != null" >
+        market,
+      </if>
+      <if test="area != null" >
+        area,
+      </if>
+      <if test="isPutway != null" >
+        is_putway,
+      </if>
+      <if test="isSale != null" >
+        is_sale,
+      </if>
+      <if test="isSearch != null" >
+        is_search,
+      </if>
+      <if test="isDelivery != null" >
+        is_delivery,
+      </if>
+      <if test="des != null" >
+        des,
+      </if>
+      <if test="type != null" >
+        `type`,
+      </if>
+      <if test="typeName != null" >
+        type_name,
+      </if>
+      <if test="isDesmodel != null" >
+        is_desmodel,
+      </if>
+      <if test="isRecycle != null" >
+        is_recycle,
+      </if>
+      <if test="categoryId != null" >
+        category_id,
+      </if>
+      <if test="categoryCode != null" >
+        category_code,
+      </if>
+      <if test="categoryName != null" >
+        category_name,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="putwayTime != null" >
+        putway_time,
+      </if>
+      <if test="outwayTime != null" >
+        outway_time,
+      </if>
+      <if test="standard != null" >
+        `standard`,
+      </if>
+      <if test="defaultBuynum != null" >
+        default_buynum,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="imgPath != null" >
+        img_path,
+      </if>
+      <if test="wmId != null" >
+        wm_id,
+      </if>
+      <if test="isUd != null" >
+        is_ud,
+      </if>
+      <if test="sumDeal != null" >
+        sum_deal,
+      </if>
+      <if test="sumComment != null" >
+        sum_comment,
+      </if>
+      <if test="isChina != null" >
+        is_China,
+      </if>
+      <if test="keyword != null" >
+        keyword,
+      </if>
+      <if test="points != null" >
+        points,
+      </if>
+      <if test="storageMethod != null" >
+        storage_method,
+      </if>
+      <if test="packMethod != null" >
+        pack_method,
+      </if>
+      <if test="pcIntroduced != null" >
+        pc_introduced,
+      </if>
+      <if test="phIntroduced != null" >
+        ph_introduced,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="shortName != null" >
+        #{shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="fullName != null" >
+        #{fullName,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="brandId != null" >
+        #{brandId,jdbcType=BIGINT},
+      </if>
+      <if test="brandName != null" >
+        #{brandName,jdbcType=VARCHAR},
+      </if>
+      <if test="brandCode != null" >
+        #{brandCode,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierId != null" >
+        #{supplierId,jdbcType=BIGINT},
+      </if>
+      <if test="supplierName != null" >
+        #{supplierName,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierCode != null" >
+        #{supplierCode,jdbcType=VARCHAR},
+      </if>
+      <if test="supplyStrategy != null" >
+        #{supplyStrategy,jdbcType=INTEGER},
+      </if>
+      <if test="unitId != null" >
+        #{unitId,jdbcType=BIGINT},
+      </if>
+      <if test="unitName != null" >
+        #{unitName,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=INTEGER},
+      </if>
+      <if test="remarkNum != null" >
+        #{remarkNum,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmNum != null" >
+        #{alarmNum,jdbcType=INTEGER},
+      </if>
+      <if test="weight != null" >
+        #{weight,jdbcType=VARCHAR},
+      </if>
+      <if test="costPrice != null" >
+        #{costPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="marketPrice != null" >
+        #{marketPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="phonePrice != null" >
+        #{phonePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="vipPrice != null" >
+        #{vipPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="market != null" >
+        #{market,jdbcType=INTEGER},
+      </if>
+      <if test="area != null" >
+        #{area,jdbcType=VARCHAR},
+      </if>
+      <if test="isPutway != null" >
+        #{isPutway,jdbcType=INTEGER},
+      </if>
+      <if test="isSale != null" >
+        #{isSale,jdbcType=INTEGER},
+      </if>
+      <if test="isSearch != null" >
+        #{isSearch,jdbcType=INTEGER},
+      </if>
+      <if test="isDelivery != null" >
+        #{isDelivery,jdbcType=INTEGER},
+      </if>
+      <if test="des != null" >
+        #{des,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=BIGINT},
+      </if>
+      <if test="typeName != null" >
+        #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="isDesmodel != null" >
+        #{isDesmodel,jdbcType=INTEGER},
+      </if>
+      <if test="isRecycle != null" >
+        #{isRecycle,jdbcType=INTEGER},
+      </if>
+      <if test="categoryId != null" >
+        #{categoryId,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryCode != null" >
+        #{categoryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryName != null" >
+        #{categoryName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="putwayTime != null" >
+        #{putwayTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outwayTime != null" >
+        #{outwayTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="standard != null" >
+        #{standard,jdbcType=VARCHAR},
+      </if>
+      <if test="defaultBuynum != null" >
+        #{defaultBuynum,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="imgPath != null" >
+        #{imgPath,jdbcType=VARCHAR},
+      </if>
+      <if test="wmId != null" >
+        #{wmId,jdbcType=BIGINT},
+      </if>
+      <if test="isUd != null" >
+        #{isUd,jdbcType=INTEGER},
+      </if>
+      <if test="sumDeal != null" >
+        #{sumDeal,jdbcType=INTEGER},
+      </if>
+      <if test="sumComment != null" >
+        #{sumComment,jdbcType=INTEGER},
+      </if>
+      <if test="isChina != null" >
+        #{isChina,jdbcType=INTEGER},
+      </if>
+      <if test="keyword != null" >
+        #{keyword,jdbcType=VARCHAR},
+      </if>
+      <if test="points != null" >
+        #{points,jdbcType=INTEGER},
+      </if>
+      <if test="storageMethod != null" >
+        #{storageMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="packMethod != null" >
+        #{packMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="pcIntroduced != null" >
+        #{pcIntroduced,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="phIntroduced != null" >
+        #{phIntroduced,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs" >
+    update goods
+    <set >
+      <if test="name != null" >
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="shortName != null" >
+        short_name = #{shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="fullName != null" >
+        full_name = #{fullName,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="brandId != null" >
+        brand_id = #{brandId,jdbcType=BIGINT},
+      </if>
+      <if test="brandName != null" >
+        brand_name = #{brandName,jdbcType=VARCHAR},
+      </if>
+      <if test="brandCode != null" >
+        brand_code = #{brandCode,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierId != null" >
+        supplier_id = #{supplierId,jdbcType=BIGINT},
+      </if>
+      <if test="supplierName != null" >
+        supplier_name = #{supplierName,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierCode != null" >
+        supplier_code = #{supplierCode,jdbcType=VARCHAR},
+      </if>
+      <if test="supplyStrategy != null" >
+        supply_strategy = #{supplyStrategy,jdbcType=INTEGER},
+      </if>
+      <if test="unitId != null" >
+        unit_id = #{unitId,jdbcType=BIGINT},
+      </if>
+      <if test="unitName != null" >
+        unit_name = #{unitName,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=INTEGER},
+      </if>
+      <if test="remarkNum != null" >
+        remark_num = #{remarkNum,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmNum != null" >
+        alarm_num = #{alarmNum,jdbcType=INTEGER},
+      </if>
+      <if test="weight != null" >
+        weight = #{weight,jdbcType=VARCHAR},
+      </if>
+      <if test="costPrice != null" >
+        cost_price = #{costPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="marketPrice != null" >
+        market_price = #{marketPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="phonePrice != null" >
+        phone_price = #{phonePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="vipPrice != null" >
+        vip_price = #{vipPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="market != null" >
+        market = #{market,jdbcType=INTEGER},
+      </if>
+      <if test="area != null" >
+        area = #{area,jdbcType=VARCHAR},
+      </if>
+      <if test="isPutway != null" >
+        is_putway = #{isPutway,jdbcType=INTEGER},
+      </if>
+      <if test="isSale != null" >
+        is_sale = #{isSale,jdbcType=INTEGER},
+      </if>
+      <if test="isSearch != null" >
+        is_search = #{isSearch,jdbcType=INTEGER},
+      </if>
+      <if test="isDelivery != null" >
+        is_delivery = #{isDelivery,jdbcType=INTEGER},
+      </if>
+      <if test="des != null" >
+        des = #{des,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        `type` = #{type,jdbcType=BIGINT},
+      </if>
+      <if test="typeName != null" >
+        type_name = #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="isDesmodel != null" >
+        is_desmodel = #{isDesmodel,jdbcType=INTEGER},
+      </if>
+      <if test="isRecycle != null" >
+        is_recycle = #{isRecycle,jdbcType=INTEGER},
+      </if>
+      <if test="categoryId != null" >
+        category_id = #{categoryId,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryCode != null" >
+        category_code = #{categoryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryName != null" >
+        category_name = #{categoryName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="putwayTime != null" >
+        putway_time = #{putwayTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outwayTime != null" >
+        outway_time = #{outwayTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="standard != null" >
+        `standard` = #{standard,jdbcType=VARCHAR},
+      </if>
+      <if test="defaultBuynum != null" >
+        default_buynum = #{defaultBuynum,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="imgPath != null" >
+        img_path = #{imgPath,jdbcType=VARCHAR},
+      </if>
+      <if test="wmId != null" >
+        wm_id = #{wmId,jdbcType=BIGINT},
+      </if>
+      <if test="isUd != null" >
+        is_ud = #{isUd,jdbcType=INTEGER},
+      </if>
+      <if test="sumDeal != null" >
+        sum_deal = #{sumDeal,jdbcType=INTEGER},
+      </if>
+      <if test="sumComment != null" >
+        sum_comment = #{sumComment,jdbcType=INTEGER},
+      </if>
+      <if test="isChina != null" >
+        is_China = #{isChina,jdbcType=INTEGER},
+      </if>
+      <if test="keyword != null" >
+        keyword = #{keyword,jdbcType=VARCHAR},
+      </if>
+      <if test="points != null" >
+        points = #{points,jdbcType=INTEGER},
+      </if>
+      <if test="storageMethod != null" >
+        storage_method = #{storageMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="packMethod != null" >
+        pack_method = #{packMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="pcIntroduced != null" >
+        pc_introduced = #{pcIntroduced,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="phIntroduced != null" >
+        ph_introduced = #{phIntroduced,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs" >
+    update goods
+    set `name` = #{name,jdbcType=VARCHAR},
+      short_name = #{shortName,jdbcType=VARCHAR},
+      full_name = #{fullName,jdbcType=VARCHAR},
+      code = #{code,jdbcType=VARCHAR},
+      brand_id = #{brandId,jdbcType=BIGINT},
+      brand_name = #{brandName,jdbcType=VARCHAR},
+      brand_code = #{brandCode,jdbcType=VARCHAR},
+      supplier_id = #{supplierId,jdbcType=BIGINT},
+      supplier_name = #{supplierName,jdbcType=VARCHAR},
+      supplier_code = #{supplierCode,jdbcType=VARCHAR},
+      supply_strategy = #{supplyStrategy,jdbcType=INTEGER},
+      unit_id = #{unitId,jdbcType=BIGINT},
+      unit_name = #{unitName,jdbcType=VARCHAR},
+      num = #{num,jdbcType=INTEGER},
+      remark_num = #{remarkNum,jdbcType=VARCHAR},
+      alarm_num = #{alarmNum,jdbcType=INTEGER},
+      weight = #{weight,jdbcType=VARCHAR},
+      cost_price = #{costPrice,jdbcType=DECIMAL},
+      price = #{price,jdbcType=DECIMAL},
+      market_price = #{marketPrice,jdbcType=DECIMAL},
+      phone_price = #{phonePrice,jdbcType=DECIMAL},
+      vip_price = #{vipPrice,jdbcType=DECIMAL},
+      market = #{market,jdbcType=INTEGER},
+      area = #{area,jdbcType=VARCHAR},
+      is_putway = #{isPutway,jdbcType=INTEGER},
+      is_sale = #{isSale,jdbcType=INTEGER},
+      is_search = #{isSearch,jdbcType=INTEGER},
+      is_delivery = #{isDelivery,jdbcType=INTEGER},
+      des = #{des,jdbcType=VARCHAR},
+      `type` = #{type,jdbcType=BIGINT},
+      type_name = #{typeName,jdbcType=VARCHAR},
+      is_desmodel = #{isDesmodel,jdbcType=INTEGER},
+      is_recycle = #{isRecycle,jdbcType=INTEGER},
+      category_id = #{categoryId,jdbcType=VARCHAR},
+      category_code = #{categoryCode,jdbcType=VARCHAR},
+      category_name = #{categoryName,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      putway_time = #{putwayTime,jdbcType=TIMESTAMP},
+      outway_time = #{outwayTime,jdbcType=TIMESTAMP},
+      `standard` = #{standard,jdbcType=VARCHAR},
+      default_buynum = #{defaultBuynum,jdbcType=INTEGER},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      img_path = #{imgPath,jdbcType=VARCHAR},
+      wm_id = #{wmId,jdbcType=BIGINT},
+      is_ud = #{isUd,jdbcType=INTEGER},
+      sum_deal = #{sumDeal,jdbcType=INTEGER},
+      sum_comment = #{sumComment,jdbcType=INTEGER},
+      is_China = #{isChina,jdbcType=INTEGER},
+      keyword = #{keyword,jdbcType=VARCHAR},
+      points = #{points,jdbcType=INTEGER},
+      storage_method = #{storageMethod,jdbcType=VARCHAR},
+      pack_method = #{packMethod,jdbcType=VARCHAR},
+      pc_introduced = #{pcIntroduced,jdbcType=LONGVARCHAR},
+      ph_introduced = #{phIntroduced,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.Goods" >
+    update goods
+    set `name` = #{name,jdbcType=VARCHAR},
+      short_name = #{shortName,jdbcType=VARCHAR},
+      full_name = #{fullName,jdbcType=VARCHAR},
+      code = #{code,jdbcType=VARCHAR},
+      brand_id = #{brandId,jdbcType=BIGINT},
+      brand_name = #{brandName,jdbcType=VARCHAR},
+      brand_code = #{brandCode,jdbcType=VARCHAR},
+      supplier_id = #{supplierId,jdbcType=BIGINT},
+      supplier_name = #{supplierName,jdbcType=VARCHAR},
+      supplier_code = #{supplierCode,jdbcType=VARCHAR},
+      supply_strategy = #{supplyStrategy,jdbcType=INTEGER},
+      unit_id = #{unitId,jdbcType=BIGINT},
+      unit_name = #{unitName,jdbcType=VARCHAR},
+      num = #{num,jdbcType=INTEGER},
+      remark_num = #{remarkNum,jdbcType=VARCHAR},
+      alarm_num = #{alarmNum,jdbcType=INTEGER},
+      weight = #{weight,jdbcType=VARCHAR},
+      cost_price = #{costPrice,jdbcType=DECIMAL},
+      price = #{price,jdbcType=DECIMAL},
+      market_price = #{marketPrice,jdbcType=DECIMAL},
+      phone_price = #{phonePrice,jdbcType=DECIMAL},
+      vip_price = #{vipPrice,jdbcType=DECIMAL},
+      market = #{market,jdbcType=INTEGER},
+      area = #{area,jdbcType=VARCHAR},
+      is_putway = #{isPutway,jdbcType=INTEGER},
+      is_sale = #{isSale,jdbcType=INTEGER},
+      is_search = #{isSearch,jdbcType=INTEGER},
+      is_delivery = #{isDelivery,jdbcType=INTEGER},
+      des = #{des,jdbcType=VARCHAR},
+      `type` = #{type,jdbcType=BIGINT},
+      type_name = #{typeName,jdbcType=VARCHAR},
+      is_desmodel = #{isDesmodel,jdbcType=INTEGER},
+      is_recycle = #{isRecycle,jdbcType=INTEGER},
+      category_id = #{categoryId,jdbcType=VARCHAR},
+      category_code = #{categoryCode,jdbcType=VARCHAR},
+      category_name = #{categoryName,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      putway_time = #{putwayTime,jdbcType=TIMESTAMP},
+      outway_time = #{outwayTime,jdbcType=TIMESTAMP},
+      `standard` = #{standard,jdbcType=VARCHAR},
+      default_buynum = #{defaultBuynum,jdbcType=INTEGER},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      img_path = #{imgPath,jdbcType=VARCHAR},
+      wm_id = #{wmId,jdbcType=BIGINT},
+      is_ud = #{isUd,jdbcType=INTEGER},
+      sum_deal = #{sumDeal,jdbcType=INTEGER},
+      sum_comment = #{sumComment,jdbcType=INTEGER},
+      is_China = #{isChina,jdbcType=INTEGER},
+      keyword = #{keyword,jdbcType=VARCHAR},
+      points = #{points,jdbcType=INTEGER},
+      storage_method = #{storageMethod,jdbcType=VARCHAR},
+      pack_method = #{packMethod,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

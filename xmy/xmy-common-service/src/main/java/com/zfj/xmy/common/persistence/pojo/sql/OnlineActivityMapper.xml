@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.OnlineActivityMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.OnlineActivity" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="activity_name" property="activityName" jdbcType="VARCHAR" />
+    <result column="begin_time" property="beginTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="cq_begin_time" property="cqBeginTime" jdbcType="TIMESTAMP" />
+    <result column="cq_end_time" property="cqEndTime" jdbcType="TIMESTAMP" />
+    <result column="user_limit_num" property="userLimitNum" jdbcType="INTEGER" />
+    <result column="day_limit_num" property="dayLimitNum" jdbcType="INTEGER" />
+    <result column="qg_discount" property="qgDiscount" jdbcType="DECIMAL" />
+    <result column="cq_discount" property="cqDiscount" jdbcType="DECIMAL" />
+    <result column="limit_discount_price" property="limitDiscountPrice" jdbcType="DECIMAL" />
+    <result column="activity_remark" property="activityRemark" jdbcType="VARCHAR" />
+    <result column="present_caicaikan_couponid" property="presentCaicaikanCouponid" jdbcType="BIGINT" />
+    <result column="present_couponid" property="presentCouponid" jdbcType="BIGINT" />
+    <result column="present_coupon_des" property="presentCouponDes" jdbcType="VARCHAR" />
+    <result column="present_coupon_begin_time" property="presentCouponBeginTime" jdbcType="TIMESTAMP" />
+    <result column="present_coupon_end_time" property="presentCouponEndTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="app_new_userid" property="appNewUserid" jdbcType="BIGINT" />
+    <result column="present_coupon_image" property="presentCouponImage" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, activity_name, begin_time, end_time, cq_begin_time, cq_end_time, user_limit_num, 
+    day_limit_num, qg_discount, cq_discount, limit_discount_price, activity_remark, present_caicaikan_couponid, 
+    present_couponid, present_coupon_des, present_coupon_begin_time, present_coupon_end_time, 
+    `status`, app_new_userid, present_coupon_image
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from online_activity
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from online_activity
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from online_activity
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from online_activity
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update online_activity
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.activityName != null" >
+        activity_name = #{record.activityName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.beginTime != null" >
+        begin_time = #{record.beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.endTime != null" >
+        end_time = #{record.endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.cqBeginTime != null" >
+        cq_begin_time = #{record.cqBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.cqEndTime != null" >
+        cq_end_time = #{record.cqEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.userLimitNum != null" >
+        user_limit_num = #{record.userLimitNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.dayLimitNum != null" >
+        day_limit_num = #{record.dayLimitNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.qgDiscount != null" >
+        qg_discount = #{record.qgDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="record.cqDiscount != null" >
+        cq_discount = #{record.cqDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="record.limitDiscountPrice != null" >
+        limit_discount_price = #{record.limitDiscountPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.activityRemark != null" >
+        activity_remark = #{record.activityRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.presentCaicaikanCouponid != null" >
+        present_caicaikan_couponid = #{record.presentCaicaikanCouponid,jdbcType=BIGINT},
+      </if>
+      <if test="record.presentCouponid != null" >
+        present_couponid = #{record.presentCouponid,jdbcType=BIGINT},
+      </if>
+      <if test="record.presentCouponDes != null" >
+        present_coupon_des = #{record.presentCouponDes,jdbcType=VARCHAR},
+      </if>
+      <if test="record.presentCouponBeginTime != null" >
+        present_coupon_begin_time = #{record.presentCouponBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.presentCouponEndTime != null" >
+        present_coupon_end_time = #{record.presentCouponEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.status != null" >
+        `status` = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.appNewUserid != null" >
+        app_new_userid = #{record.appNewUserid,jdbcType=BIGINT},
+      </if>
+      <if test="record.presentCouponImage != null" >
+        present_coupon_image = #{record.presentCouponImage,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update online_activity
+    set id = #{record.id,jdbcType=BIGINT},
+      activity_name = #{record.activityName,jdbcType=VARCHAR},
+      begin_time = #{record.beginTime,jdbcType=TIMESTAMP},
+      end_time = #{record.endTime,jdbcType=TIMESTAMP},
+      cq_begin_time = #{record.cqBeginTime,jdbcType=TIMESTAMP},
+      cq_end_time = #{record.cqEndTime,jdbcType=TIMESTAMP},
+      user_limit_num = #{record.userLimitNum,jdbcType=INTEGER},
+      day_limit_num = #{record.dayLimitNum,jdbcType=INTEGER},
+      qg_discount = #{record.qgDiscount,jdbcType=DECIMAL},
+      cq_discount = #{record.cqDiscount,jdbcType=DECIMAL},
+      limit_discount_price = #{record.limitDiscountPrice,jdbcType=DECIMAL},
+      activity_remark = #{record.activityRemark,jdbcType=VARCHAR},
+      present_caicaikan_couponid = #{record.presentCaicaikanCouponid,jdbcType=BIGINT},
+      present_couponid = #{record.presentCouponid,jdbcType=BIGINT},
+      present_coupon_des = #{record.presentCouponDes,jdbcType=VARCHAR},
+      present_coupon_begin_time = #{record.presentCouponBeginTime,jdbcType=TIMESTAMP},
+      present_coupon_end_time = #{record.presentCouponEndTime,jdbcType=TIMESTAMP},
+      `status` = #{record.status,jdbcType=INTEGER},
+      app_new_userid = #{record.appNewUserid,jdbcType=BIGINT},
+      present_coupon_image = #{record.presentCouponImage,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from online_activity
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from online_activity
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.OnlineActivity" useGeneratedKeys="true" keyProperty="id" >
+    insert into online_activity (activity_name, begin_time, end_time, 
+      cq_begin_time, cq_end_time, user_limit_num, 
+      day_limit_num, qg_discount, cq_discount, 
+      limit_discount_price, activity_remark, present_caicaikan_couponid, 
+      present_couponid, present_coupon_des, present_coupon_begin_time, 
+      present_coupon_end_time, `status`, app_new_userid, 
+      present_coupon_image)
+    values (#{activityName,jdbcType=VARCHAR}, #{beginTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, 
+      #{cqBeginTime,jdbcType=TIMESTAMP}, #{cqEndTime,jdbcType=TIMESTAMP}, #{userLimitNum,jdbcType=INTEGER}, 
+      #{dayLimitNum,jdbcType=INTEGER}, #{qgDiscount,jdbcType=DECIMAL}, #{cqDiscount,jdbcType=DECIMAL}, 
+      #{limitDiscountPrice,jdbcType=DECIMAL}, #{activityRemark,jdbcType=VARCHAR}, #{presentCaicaikanCouponid,jdbcType=BIGINT}, 
+      #{presentCouponid,jdbcType=BIGINT}, #{presentCouponDes,jdbcType=VARCHAR}, #{presentCouponBeginTime,jdbcType=TIMESTAMP}, 
+      #{presentCouponEndTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, #{appNewUserid,jdbcType=BIGINT}, 
+      #{presentCouponImage,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.OnlineActivity" useGeneratedKeys="true" keyProperty="id" >
+    insert into online_activity
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="activityName != null" >
+        activity_name,
+      </if>
+      <if test="beginTime != null" >
+        begin_time,
+      </if>
+      <if test="endTime != null" >
+        end_time,
+      </if>
+      <if test="cqBeginTime != null" >
+        cq_begin_time,
+      </if>
+      <if test="cqEndTime != null" >
+        cq_end_time,
+      </if>
+      <if test="userLimitNum != null" >
+        user_limit_num,
+      </if>
+      <if test="dayLimitNum != null" >
+        day_limit_num,
+      </if>
+      <if test="qgDiscount != null" >
+        qg_discount,
+      </if>
+      <if test="cqDiscount != null" >
+        cq_discount,
+      </if>
+      <if test="limitDiscountPrice != null" >
+        limit_discount_price,
+      </if>
+      <if test="activityRemark != null" >
+        activity_remark,
+      </if>
+      <if test="presentCaicaikanCouponid != null" >
+        present_caicaikan_couponid,
+      </if>
+      <if test="presentCouponid != null" >
+        present_couponid,
+      </if>
+      <if test="presentCouponDes != null" >
+        present_coupon_des,
+      </if>
+      <if test="presentCouponBeginTime != null" >
+        present_coupon_begin_time,
+      </if>
+      <if test="presentCouponEndTime != null" >
+        present_coupon_end_time,
+      </if>
+      <if test="status != null" >
+        `status`,
+      </if>
+      <if test="appNewUserid != null" >
+        app_new_userid,
+      </if>
+      <if test="presentCouponImage != null" >
+        present_coupon_image,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="activityName != null" >
+        #{activityName,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null" >
+        #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cqBeginTime != null" >
+        #{cqBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cqEndTime != null" >
+        #{cqEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="userLimitNum != null" >
+        #{userLimitNum,jdbcType=INTEGER},
+      </if>
+      <if test="dayLimitNum != null" >
+        #{dayLimitNum,jdbcType=INTEGER},
+      </if>
+      <if test="qgDiscount != null" >
+        #{qgDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="cqDiscount != null" >
+        #{cqDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="limitDiscountPrice != null" >
+        #{limitDiscountPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="activityRemark != null" >
+        #{activityRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="presentCaicaikanCouponid != null" >
+        #{presentCaicaikanCouponid,jdbcType=BIGINT},
+      </if>
+      <if test="presentCouponid != null" >
+        #{presentCouponid,jdbcType=BIGINT},
+      </if>
+      <if test="presentCouponDes != null" >
+        #{presentCouponDes,jdbcType=VARCHAR},
+      </if>
+      <if test="presentCouponBeginTime != null" >
+        #{presentCouponBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="presentCouponEndTime != null" >
+        #{presentCouponEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="appNewUserid != null" >
+        #{appNewUserid,jdbcType=BIGINT},
+      </if>
+      <if test="presentCouponImage != null" >
+        #{presentCouponImage,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.OnlineActivity" >
+    update online_activity
+    <set >
+      <if test="activityName != null" >
+        activity_name = #{activityName,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null" >
+        begin_time = #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cqBeginTime != null" >
+        cq_begin_time = #{cqBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cqEndTime != null" >
+        cq_end_time = #{cqEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="userLimitNum != null" >
+        user_limit_num = #{userLimitNum,jdbcType=INTEGER},
+      </if>
+      <if test="dayLimitNum != null" >
+        day_limit_num = #{dayLimitNum,jdbcType=INTEGER},
+      </if>
+      <if test="qgDiscount != null" >
+        qg_discount = #{qgDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="cqDiscount != null" >
+        cq_discount = #{cqDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="limitDiscountPrice != null" >
+        limit_discount_price = #{limitDiscountPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="activityRemark != null" >
+        activity_remark = #{activityRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="presentCaicaikanCouponid != null" >
+        present_caicaikan_couponid = #{presentCaicaikanCouponid,jdbcType=BIGINT},
+      </if>
+      <if test="presentCouponid != null" >
+        present_couponid = #{presentCouponid,jdbcType=BIGINT},
+      </if>
+      <if test="presentCouponDes != null" >
+        present_coupon_des = #{presentCouponDes,jdbcType=VARCHAR},
+      </if>
+      <if test="presentCouponBeginTime != null" >
+        present_coupon_begin_time = #{presentCouponBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="presentCouponEndTime != null" >
+        present_coupon_end_time = #{presentCouponEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="appNewUserid != null" >
+        app_new_userid = #{appNewUserid,jdbcType=BIGINT},
+      </if>
+      <if test="presentCouponImage != null" >
+        present_coupon_image = #{presentCouponImage,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.OnlineActivity" >
+    update online_activity
+    set activity_name = #{activityName,jdbcType=VARCHAR},
+      begin_time = #{beginTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      cq_begin_time = #{cqBeginTime,jdbcType=TIMESTAMP},
+      cq_end_time = #{cqEndTime,jdbcType=TIMESTAMP},
+      user_limit_num = #{userLimitNum,jdbcType=INTEGER},
+      day_limit_num = #{dayLimitNum,jdbcType=INTEGER},
+      qg_discount = #{qgDiscount,jdbcType=DECIMAL},
+      cq_discount = #{cqDiscount,jdbcType=DECIMAL},
+      limit_discount_price = #{limitDiscountPrice,jdbcType=DECIMAL},
+      activity_remark = #{activityRemark,jdbcType=VARCHAR},
+      present_caicaikan_couponid = #{presentCaicaikanCouponid,jdbcType=BIGINT},
+      present_couponid = #{presentCouponid,jdbcType=BIGINT},
+      present_coupon_des = #{presentCouponDes,jdbcType=VARCHAR},
+      present_coupon_begin_time = #{presentCouponBeginTime,jdbcType=TIMESTAMP},
+      present_coupon_end_time = #{presentCouponEndTime,jdbcType=TIMESTAMP},
+      `status` = #{status,jdbcType=INTEGER},
+      app_new_userid = #{appNewUserid,jdbcType=BIGINT},
+      present_coupon_image = #{presentCouponImage,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

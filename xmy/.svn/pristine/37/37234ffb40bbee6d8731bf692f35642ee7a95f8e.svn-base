@@ -1,0 +1,46 @@
+/**
+ * 
+ */
+
+
+
+/*require("[common]", function() {*/
+	
+	reg = /^1[3|4|5|7|8]\d{9}$/;
+	
+	$(".pull-left").click(function() {
+		location.href = "gotoPage/mine/setting";
+	});
+	
+	$("#submit").click(function() {
+		if(!$(".phoneNum").val()) {
+			$.alert("请输入您的电话号码");
+			return;
+		}
+		if(!reg.test($(".phoneNum").val())) {
+			$.alert("手机号填写错误");
+			return;
+		}
+		if(!$("textarea").val()) {
+			$.alert("请输入您需要反馈的内容");
+			return;
+		}
+		values = $("#feedBackForm").serialize();
+		$.ajax({
+			url : $("#feedBackForm").attr("action"),
+		    data : values,
+		    type : 'post',
+		    dataType : 'json',
+		    success : function(data) {
+		    	if(data && data.status && data.status == 1) {
+		    		$.alert("提交成功", function() {
+		    			location.href = "mine/center";
+		    		});
+		    	} else {
+		    		$.alert(data.msg ? data.msg : "提交失败");
+		    	}
+		    }
+		});
+	});
+	
+/*});*/

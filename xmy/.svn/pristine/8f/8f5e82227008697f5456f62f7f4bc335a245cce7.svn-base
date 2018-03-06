@@ -1,0 +1,86 @@
+<%@ page language="java" pageEncoding="UTF-8" errorPage="/WEB-INF/jsp/commons/error/500.jsp"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%-- 右边悬浮部分 --%>
+<%@include file="/WEB-INF/jsp/commons/right_oper.jsp" %>
+<%-- 公共的底部 --%>
+<div class="add-bg-w sec-control">
+<div class="base">
+    <div class="virtue">
+        <ul class="virtue-ul">
+            <li class="virtue-li"><div class="xta"><p class="tit">香满圆</p><p class="details">100%保证商品新鲜度，及时送达顾客手中</p></div></li>
+            <li class="virtue-li"><div class="xtb"><p class="tit">所有商家经官方认证</p><p class="details">官方认证，所有商家具有合法个体经营身份或企业资质</p></div></li>
+            <li class="virtue-li remove"><div class="xtc"><p class="tit">网站担保交易</p><p class="details">网站官方担保交易，收到商品后再结算，有问题随时投诉</p></div></li>
+            <div style="clear: both;"></div>
+        </ul>
+    </div>
+    <div class="detailss">
+        <ul class="detailss-ul">
+        	<c:forEach items="${sessionScope.findDownColum }" var="termData" varStatus="ter">
+	            <li class="detailss-li">
+	           		<p class="tit">${termData.name }</p>
+	           		<c:if test="${ter.index==0 }">
+	           			<c:forEach items="${termData.childTermData }" var="childData" varStatus="chd">
+	           				<a href="news/index?ter=${ter.index}&chd=${chd.index}" style="text-decoration:none;" class="detailss-lia"><p>${childData.name}</p></a>
+	           			</c:forEach>
+	           		</c:if>
+	           		<c:if test="${ter.index!=0 }">
+	           			<c:forEach items="${termData.childTermData }" var="childData" varStatus="chd">
+	           				<a href="news/index?ter=${ter.index}&chd=${chd.index}" style="text-decoration:none;" class="detailss-lia"><p>${childData.name}</p></a>
+	           			</c:forEach>
+	           		</c:if>
+	            </li>
+            </c:forEach>
+            <li class="detailss-li last-li clearfix">
+                <p class="img-wrapp first"><img src="resource/commons/images/B2Cwx.jpg"><span class="color-green text-center">扫码关注微信端</span></p>
+                <p class="img-wrapp"><img src="resource/commons/images/B2Cpc.png"><span class="color-green">扫码进入移动端</span></p>
+            </li>
+            <div style="clear: both;"></div>
+        </ul>
+        <!-- <div class="logo-wrap" id="downShow" hidden="hidden">
+            <img src="resource/commons/images/logopic.png" alt="">
+        </div> -->
+    </div>
+
+</div>
+</div>
+<footer>
+    <div class="footer-auto">
+<!--         <p>
+            <a style="color: white;text-decoration:none;" href="news/index?ter=499&chd=493">关于我们</a><span>|</span>
+            <a style="color: white;text-decoration:none;" href="news/index?ter=499&chd=506">合作伙伴</a><span>|</span>
+            <a style="color: white;text-decoration:none;" href="news/index?ter=499&chd=507">营销中心</a><span>|</span>
+            <a style="color: white;text-decoration:none;" href="news/index?ter=499&chd=508">诚征英才</a><span>|</span>
+            <a style="color: white;text-decoration:none;" href="news/index?ter=499&chd=509">联系我们</a>
+        </p >-->
+        
+        
+		 <p>香满圆旗下：重庆菜园坝农产品市场集群（线下） |  B2C电商平台 、 社区超市订购平台（线上）</p>
+		 <p class="mt10">Copyright  2009-2013 网上购物 All Rights Reserved 重庆香满圆农产品有限公司</p>
+		 <p class="mt10">增值电信业务经营许可证：渝B2-20120004</p>
+		 <p class="mt10"><a href="http://www.miitbeian.gov.cn" style="color: white;text-decoration: underline">渝ICP14001106号-8</a></p>
+        
+        
+       <!--  <p class="mt10">Copyright © 2009-2013 网上购物  All Rights Reserved 重庆香满圆农产品有限公司</p>
+        <p class="mt10">增值电信业务经营许可证：渝B2-20120004</p>
+        <p class="mt10"><a href="http://www.miitbeian.gov.cn" style="color: white;text-decoration: underline">渝ICP14001106号-8</a> </p> -->
+    </div>
+    <div class="beian">
+        <ul class="beian-ul">
+            <a href="http://www.cqgseb.cn/ztgsgl/WebSiteMonitoring/WebUI/XFWQ/Index.aspx?xh=17" target="_blank"><li class="beian-li"><img src="resource/commons/images/biean1.png"/></li></a>
+            <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=50010302000205" target="_blank"><li class="beian-li"><img src="resource/commons/images/biean2.png"/></li></a>
+            <a href="http://113.207.120.45:7010/wljyzbs/index.html?sfdm=120150115151516296646#/index.html?sfdm=120150115151516296646" target="_blank"><li class="beian-li"><img src="resource/commons/images/biean3.png"/></li></a>
+            <a href="http://www.cqtransit.com/" target="_blank"><li class="beian-li"><img src="resource/commons/images/biean4.png"/></li></a>
+            <a href="http://www.cqgyjt.com/" target="_blank"><li class="beian-li"><img src="resource/commons/images/biean5.png"/></li></a>
+            <div style="clear: both;"></div>
+        </ul>
+    </div>  
+</footer>
+<%@include file="/WEB-INF/jsp/commons/comm_footer_js.jsp" %>
+
+<%-- 与首页雷同的nav公共部分 --%>
+<%-- 在线客户样式 --%>
+<div class="dialog-box" id="qian" style="display:none;border:1px solid #358812;">
+  	<div id="title" style=" height: 30px; line-height:30px;font-size:13px;color:#444;border-bottom:1px solid #358812;background-image: linear-gradient(to bottom,#D1F5BF 50%,#bde9AB 50%);padding-left:15px;position:relative;background-color:#bde9ab;">
+  	<i class="iconfont" style="margin-right:7px;font-size:16px;">&#xe650;</i>杨桃妹妹
+  	<i id="close" class="iconfont" style="float:right;margin-right:15px;background:#FFF;color:#358812;font-size:12px;border:1px solid #358812;line-height:normal;padding:1px 2px;border-radius:3px;position:relative;top:7px;cursor: pointer;">&#xe676;</i></div>
+</div>

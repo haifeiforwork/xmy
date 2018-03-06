@@ -1,0 +1,176 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>订单详情</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/center/center_order_detail.css">
+  </head>
+  
+  <body>
+    <%@include file="/WEB-INF/jsp/commons/nav/nav_personal.jsp" %>
+    <div class="content">
+	<div class="w-1250">
+		<!--内容部分-->
+<!--201709191554-->
+<div class="content">
+    <div class="w-1250 category">
+        <div class="title-nav">
+            <ul>
+                <li class="active">订单信息</li>
+            </ul>
+        </div>
+        <div class="order-info">
+            <div class="per-order-info">
+                <div class="per-order-info-line"><span class="ad-size">收货地址 : </span><span class="item-after">${orderDto.consigneeName }, ${orderDto.consigneePhone }, - ${orderDto.consigneeAddress }</span></div>
+                <div class="per-order-info-line"><span class="ad-size">身份证信息 : </span><span class="item-after">${empty orderDto.consigneeIdcard?'无':orderDto.consigneeIdcard }</span></div>
+                <div class="per-order-info-line"><span class="ad-size">买家留言 : </span><span class="item-after">${empty orderDto.orderRemark?'无':orderDto.orderRemark }</span></div>
+            </div>
+            <div class="order-wrap">
+                <div class="order-wrap-title ad-size">订单信息 : </div>
+                <div class="order-info-det">
+                    <ul class="item-after clearfix">
+                        <li>订单编号 : <span>${orderDto.no }</span></li>
+                        <li class="col-66">指定送货时间 : <span>
+                        	<c:if test="${not empty orderDto.parsetTime }"><fmt:formatDate value="${orderDto.parsetTime}" pattern="yyyy-MM-dd"/></c:if>
+                       	 	<c:if test="${empty orderDto.parsetTime }">无</c:if>
+                        </span>
+                        </li>
+                        <li>成交时间 : <span><c:if test="${empty orderDto.createTime }">无</c:if><c:if test="${!empty orderDto.createTime }"><fmt:formatDate value="${orderDto.createTime }" pattern="yyyy-MM-dd hh:mm:ss"/></c:if></span></li>
+                        <li>付款时间 : <span><c:if test="${empty orderDto.payTime }">无</c:if><c:if test="${!empty orderDto.payTime }"><fmt:formatDate value="${orderDto.payTime }" pattern="yyyy-MM-dd hh:mm:ss"/></c:if></span></li>
+                        <li>确认时间 : <span><c:if test="${empty orderDto.arrivalTime }">无</c:if><c:if test="${!empty orderDto.arrivalTime }"><fmt:formatDate value="${orderDto.arrivalTime }" pattern="yyyy-MM-dd hh:mm:ss"/></c:if></span></li>
+                    </ul>
+                </div>
+                <div class="order-table-wrap">
+                    <table>
+                        <tr class="head text-center">
+                            <th class="col-320">商品</th>
+                            <th class="col-100">状态</th>
+                            <th class="col-100">单价(元)</th>
+                            <th class="col-70">数量</th>
+                            <th class="col-70">税费</th>
+                            <th class="col-100">优惠</th>
+                            <th class="col-100">商品总价(元)</th>
+                        </tr>
+                        <c:forEach items="${orderDto.orderGoodsDto }" var="goodsDto">
+	                        <tr class="item-line text-center">
+	                            <td class="text-left"><div class="img-wrap"><img src="${goodsDto.imgPath }" alt=""></div>
+	                            <p>
+	                           		 ${goodsDto.name } 
+                         		 	<c:if test="${!empty goodsDto.presentName }">
+	                             		<br/>
+	                             		<p class="info-des-title" style="color: red;">赠品：${goodsDto.presentName }</p>
+	                             	</c:if>
+	                            </p>
+	                            </td>
+	                            <td>已完成</td>
+	                            <td>
+	                            <c:if test="${goodsDto.points!=null && goodsDto.points!=0}">
+	                            	${goodsDto.points }积分
+	                            </c:if>
+	                            <c:if test="${goodsDto.points==null || goodsDto.points==0}">
+	                            	<fmt:formatNumber value="${goodsDto.price }" pattern="#.00"/>
+	                            </c:if>
+	                            </td>
+	                            <td>${goodsDto.num }</td>
+	                            <td><span>0</span></td>
+	                            <td>无折扣</td>
+	                            <td>
+	                            <c:if test="${goodsDto.sumPoints!=null && goodsDto.sumPoints!=0}">
+									${goodsDto.sumPoints}积分
+								</c:if>
+								<c:if test="${goodsDto.sumPoints==null || goodsDto.sumPoints==0}">
+									<fmt:formatNumber value="${goodsDto.sumPrice }" pattern="#.00"/>
+								</c:if>
+	                            </td>
+	                        </tr>
+                        </c:forEach>
+                    </table>
+                    <div class="text-right">订单总金额: 
+	                    <span class="price">
+	                    	<fmt:formatNumber value="${orderDto.total }" pattern="#.00"/>
+	                    </span>元
+                    </div>
+                </div>
+                <div class="order-wrap-title ad-size">支付方式:
+               		<c:if test="${orderDto.payType eq 6  }">
+               				<c:forEach items="${tradeType }"  var="item">
+		               			 	 <c:if test="${item.key == orderDto.thirdPartyPayType }">购物卡  ${item.value }</c:if> 
+		               		</c:forEach>
+               		</c:if>
+                	<c:if test="${orderDto.payType eq 5  }">货到付款 ${orderDto.pay >0? '购物卡支付':'' }</c:if>
+               		<c:if test="${orderDto.payType eq 4  }">购物卡支付</c:if>
+               		<c:if test="${orderDto.payType eq 3  }">银联支付 ${orderDto.pay >0? '购物卡支付':'' }</c:if>
+               		<c:if test="${orderDto.payType eq 2  }">微信支付  ${orderDto.pay >0? '购物卡支付':'' }</c:if>
+               		<c:if test="${orderDto.payType eq 1  }">支付宝支付 ${orderDto.pay >0? '购物卡支付':'' }</c:if>
+				</div>
+            </div>
+            <div class="order-wrap">
+                <div class="order-wrap-title ad-size">结算信息 : </div>
+                <div class="order-info-det">
+                    <ul class="item-after clearfix">
+                        <li>商品总金额 ( 不含运费 ) : <span><fmt:formatNumber value="${orderDto.goodsTotalPrice }" pattern="#.00"/></span></li>
+                        <li>平台统一配送 : <span>${orderDto.deliveryMethod==0?'买家自提':'平台配送' }</span></li>
+                        <li>活动折扣 : <span>${empty orderDto.businessRemark?'无':fn:replace(orderDto.businessRemark, "null", "") }</span></li>
+                       	<li>使用优惠券：<span>${not empty orderDto.couponName ? orderDto.couponName:'无'  } 抵用金额：${not empty orderDto.couponValue ? orderDto.couponValue:0 }</span></li> 
+                       	<li>运费:<span>${orderDto.freight }</span></li>
+                        <li>应付款 : 
+                        	<span>
+                        		<c:if test="${orderDto.shipStatus==2 }">${orderDto.total }</c:if> <!-- 未支付 -->
+	  							<c:if test="${orderDto.shipStatus>=3 || orderDto.shipStatus==1 }">
+	  								<c:choose>
+	  									<c:when test="${orderDto.payType == 5 }">${orderDto.total - orderDto.pay }</c:when>
+	  									<c:otherwise>0.00</c:otherwise>
+	  								</c:choose>
+	  							</c:if>
+                        	</span>
+                        </li>
+                        <li>已付款 : <span>
+                        	<c:if test="${orderDto.shipStatus==1 && not empty orderDto.pay }">${orderDto.pay }</c:if>
+                        	<c:if test="${orderDto.shipStatus==2  }">0.00</c:if>
+  							<c:if test="${orderDto.shipStatus>=3 }">
+  								<c:choose>
+	  									<c:when test="${orderDto.payType == 5 }">${orderDto.pay }</c:when>
+	  									<c:otherwise>${orderDto.total }</c:otherwise>
+	  							</c:choose>
+  							</c:if>
+                        </span></li>
+                        <li>活动优惠 : <span><c:if test="${empty orderDto.discountPrice }">0.00</c:if><c:if test="${!empty orderDto.discountPrice }"><fmt:formatNumber value="${orderDto.discountPrice }" pattern="#.00"/></c:if></span></li>
+                        <li>订单总金额 : <span><fmt:formatNumber value="${orderDto.total }" pattern="#.00"/></span></span></li>
+                    </ul>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+<!--201709191554end-->
+<!--内容部分完-->
+<!-- <div class="floatleft">
+	<ul class="floatleft-ul">
+		<li class="floatleft-li"><span class="cart"><img src="resource/commons/images/left-cart.jpg"/></span><p>购物车</p></li>
+		<li class="floatleft-li"><span class="floatleft-img"><img src="resource/commons/images/sc.png"/></span></li>
+		<li class="floatleft-li"><span class="floatleft-img"><img src="resource/commons/images/wd.png"/></span></li>
+		<li class="floatleft-li"><span class="floatleft-img"><img src="resource/commons/images/c.png"/></span></li>
+		<li class="floatleft-li"><span class="floatleft-img"><img src="resource/commons/images/QQ.png"/></span></li>
+	</ul>
+	<ul class="floatleft-bottom-ul">
+		<li class="floatleft-bottom-li"><span class="floatleft-img"><img src="resource/commons/images/dh.jpg"/></span></li>
+		<li class="floatleft-bottom-li ewm">
+			<span class="floatleft-img"><img src="resource/commons/images/ewm.jpg"/></span>
+			<div class="pop-up">
+				<div class="app">
+					<div class="img"><img src="resource/commons/images/erweima.jpg"/></div><p class="text">扫码下载APP<br/>新人专享<span>8元</span>优惠券</p>
+				</div>
+				<div class="app yd">
+					<div class="img"><img src="resource/commons/images/erweima.jpg"/></div><p class="text">扫码进入移动端</p>
+				</div>
+			</div>
+		</li>
+		<li class="floatleft-bottom-li return-top"><span><i class="iconfont">&#xe629;</i></span><p>返回顶部</p></li>
+	</ul>
+</div> -->
+    
+    <%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %>
+  </body>
+</html>

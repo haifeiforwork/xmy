@@ -1,0 +1,257 @@
+package com.zfj.xmy.cms.web.controller.order;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.cms.web.common.PoiUtil;
+import com.zfj.xmy.cms.web.controller.BaseController;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.OrderGoods;
+import com.zfj.xmy.common.persistence.pojo.OrderPath;
+import com.zfj.xmy.common.persistence.pojo.SysUser;
+import com.zfj.xmy.order.persistence.common.dao.OrderExMapper;
+import com.zfj.xmy.order.persistence.common.pojo.dto.LableDto;
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto;
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderGoodsDto;
+import com.zfj.xmy.order.service.cms.OrderGoodsService;
+import com.zfj.xmy.order.service.cms.OrderPathService;
+import com.zfj.xmy.order.service.cms.OrderService;
+
+/**
+ * 
+ * @author ljie 6.15
+ */
+@RestController
+public class OrderGoodsController extends BaseController{
+
+	@Autowired
+	private OrderGoodsService goodsService;
+
+	@Autowired
+	private OrderService orderService;
+	
+	@Autowired
+	private OrderExMapper orderExMapper;
+	
+	@Autowired
+	private OrderPathService pathService;
+	
+	// 根据订单ID查询订单所属商品
+	@RequestMapping("/orderGood/list/{orderId}")
+	public List<OrderGoods> getOrderGoods(@PathVariable("orderId") Integer orderId, ReqData reqData, HttpServletRequest request) {
+		reqData2Params(reqData);
+		reqData.putValue("og.order_id", orderId, SystemConstant.REQ_PARAMETER_EQ);
+		List<OrderGoods> goodsByOrderId = goodsService.findOrderGoodsByOrderId(reqData,true);
+		request.setAttribute("orderGoods", goodsByOrderId);
+
+		return goodsByOrderId;
+	}
+	
+	//查询采购清单页面
+	@RequestMapping("/orderGoods/list")
+	public ModelAndView ShoppingList(HttpServletRequest request,ReqData reqData){
+		reqData3Params(reqData);
+		String orderId = "0";
+		reqData.putValue("ship_status", SystemConstant.ORDER.SHIP_STATUS_PREPARE, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+		List<Order> queryAll = orderService.findAll(reqData);
+		reqData.clearValue();
+		for (Order order : queryAll) {
+			orderId+=","+order.getId();
+		}
+		List<Object> ordersid = new ArrayList<Object>();
+		ordersid.add(0);
+		for (int i = 0; i < queryAll.size(); i++) {
+			ordersid.add(queryAll.get(i).getId());
+		}
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(10);
+		List<OrderGoodsDto> orderGoodsByOrderId = goodsService.findShoppingList(reqData, null,ordersid);
+		pageBean.setTotalCount(orderGoodsByOrderId.size());
+		request.setAttribute("orderIds", orderId);
+		request.setAttribute("countPage",pageBean.getTotalPage());
+		return new ModelAndView("/order/shopping_list");
+	}
+	
+	// 查询采购清单
+	@RequestMapping("/orderGoods/list/{pageIndex}")
+	public ModelAndView getShoppingList(HttpServletRequest request, ReqData reqData, @PathVariable("pageIndex") Integer pageIndex) {
+		reqData3Params(reqData);
+		reqData.putValue("ship_status", SystemConstant.ORDER.SHIP_STATUS_PREPARE, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+		List<Order> queryAll = orderService.findAll(reqData);
+		reqData.clearValue();
+		List<Object> ordersid = new ArrayList<Object>();
+		ordersid.add(0);
+		for (int i = 0; i < queryAll.size(); i++) {
+			ordersid.add(queryAll.get(i).getId());
+		}
+		PageBean pageBean = new PageBean();
+		pageBean.setPageIndex(pageIndex);
+		pageBean.setPageSize(10);
+		reqData.putValue("og.order_id", ordersid, SystemConstant.REQ_PARAMETER_IN);
+		List<OrderGoodsDto> orderGoodsByOrderId = goodsService.findShoppingList(reqData, pageBean,ordersid);
+		request.setAttribute("orderGoods", orderGoodsByOrderId);
+		return new ModelAndView("/order/shopping_list_page");
+	}
+	
+	// 修改订单商品数量
+	@RequestMapping("/updateOrderGoodsNum/{goodid}/{goodnum}/{orderid}")
+	public ModelAndView updateOrderGoodsNum(@PathVariable("goodid") long goodid, @PathVariable("goodnum") int goodnum, @PathVariable("orderid") long orderid, HttpServletRequest request,
+			RedirectAttributes rAttributes) {
+		goodsService.updateOrderGoods(goodid, goodnum);
+		SysUser sysUser = (SysUser) request.getSession().getAttribute("sysUser");
+		OrderPath orderPath = new OrderPath();
+		orderPath.setChangeContent("修改订单商品数量");
+		orderPath.setChangeTime(new Date());
+		orderPath.setOrderId(orderid);
+		orderPath.setUserName(sysUser.getName());
+		pathService.addOrderPath(orderPath);
+		rAttributes.addAttribute("message", "修改成功");
+		return new ModelAndView(new RedirectView("/order/detail/" + orderid));
+	}
+	/**
+	 * 删除订单商品
+	 * @param orderId
+	 * @param id
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年10月28日 下午4:54:12
+	 */
+	@RequestMapping("/deleteOrderGoods/{orderId}/{id}")
+	public ModelAndView deleteOrderGoods(@PathVariable("orderId") Long orderId,@PathVariable("id") Long id,HttpServletRequest request){
+		goodsService.deleteOrderGoods(id);
+		SysUser sysUser = (SysUser) request.getSession().getAttribute("sysUser");
+		OrderPath orderPath = new OrderPath();
+		orderPath.setChangeContent("修改订单商品数量");
+		orderPath.setChangeTime(new Date());
+		orderPath.setOrderId(orderId);
+		orderPath.setUserName(sysUser.getName());
+		pathService.addOrderPath(orderPath);
+		return new ModelAndView(new RedirectView("/order/detail/" + orderId));
+	}
+	
+	
+	@RequestMapping("/exlShoppingGoods")
+	public Integer elxShoppingGoods(ReqData reqData,@Param("type") Integer type,@Param("orderIds") String orderIds,@Param("url") String url,HttpServletResponse response) throws IOException{
+		List<OrderGoodsDto> exleGoodsList = goodsService.exleGoodsList(reqData, type, orderIds);
+		PoiUtil poiUtil = new PoiUtil();
+		if(type<2){
+			List<OrderDto> exleOrderDto = goodsService.exleOrderDto(reqData, orderIds, type);
+			poiUtil.createShoppingCart(type, url, exleGoodsList, exleOrderDto,response);
+		}else{//打印全部的商品
+			List<OrderDto> exleOrderDto = goodsService.exleOrderDto(reqData, orderIds, type);
+			poiUtil.createShoppingList(exleGoodsList, url,response,exleOrderDto);
+		}
+		return 1;
+	}
+	/**
+	 * 导出标签
+	 * @param reqData
+	 * @param orderIds
+	 * @param type
+	 * @param fileName
+	 * @param response
+	 * @return int
+	 * @author lij
+	 * @throws Exception 
+	 * @date 2017年10月18日 下午4:42:36
+	 */
+	@RequestMapping("/exlLable")
+	public int exlLable(ReqData reqData,@Param("orderIds") String orderIds,@Param("type") Integer  type,@Param("url") String fileName,HttpServletResponse response) throws Exception{
+		List<LableDto> excleLable = goodsService.excleLable(reqData, orderIds, type);
+		PoiUtil poiUtil = new PoiUtil();
+		poiUtil.exlLable(excleLable, response);
+		return 1;
+	}
+	/**
+	 * 导出白标签
+	 * @param reqData
+	 * @param orderIds
+	 * @param response
+	 * @return
+	 * @throws Exception int
+	 * @author lij
+	 * @date 2017年11月2日 下午3:51:38
+	 */
+	@RequestMapping("/exlWhriteLable")
+	public int exlWhriteLabe(ReqData reqData,@Param("orderIds") String orderIds,HttpServletResponse response) throws Exception{
+		reqData.putValue("id", orderIds, SystemConstant.REQ_PARAMETER_IN);
+		List<Order> all = orderService.findAll(reqData);
+		PoiUtil poiUtil = new PoiUtil();
+		poiUtil.exlWhriteLable(all, response);
+		return 1;
+	}
+	
+	/**
+	 * 导出特殊订单
+	 * @param reqData
+	 * @param orderIds
+	 * @param type 21:全国所有  01：全国水果 11：全国农配  22：主城所有 02:主城水果 12：主城农配
+	 * @param fileName
+	 * @param response
+	 * @return int
+	 * @author	lij
+	 * @throws Exception 
+	 * @date 2017年10月18日 下午4:43:25
+	 */
+	@RequestMapping("/exlOrder")
+	public int exlOrder(ReqData reqData,@Param("orderIds") String orderIds,@Param("type") Integer  type,@Param("url") String fileName,HttpServletResponse response) throws Exception{
+		List<OrderDto> findOrderNoCQ =null;
+		String orderids="0";
+		//1.筛选指定订单
+		reqData.putValue("id", orderIds, SystemConstant.REQ_PARAMETER_IN);
+		if(type==21||type==11||type==01){//全国订单
+			findOrderNoCQ = orderExMapper.findOrderNoCQ(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		}else{//重庆主城
+			findOrderNoCQ = orderExMapper.findOrderIsCQ(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		}
+		reqData.clearValue();
+		for (OrderDto orderDto : findOrderNoCQ) {
+			orderids+=","+orderDto.getId();
+		}
+		Integer delType=-1;
+		List<OrderGoodsDto> exleGoodsList =null;
+		if(type==21||type==22){//所有商品
+			delType=2;
+			exleGoodsList = goodsService.exleGoodsList(reqData, delType, orderids);
+		}//所有商品的
+		if(type==01||type==02){
+			delType=0;
+			exleGoodsList = goodsService.exleGoodsList(reqData, delType, orderids);
+		}
+		if(type==11||type==12){
+			delType=1;
+			exleGoodsList = goodsService.exleGoodsList(reqData, delType, orderids);
+		}
+		PoiUtil poiUtil = new PoiUtil();
+		if(delType<2){
+			List<OrderDto> exleOrderDto = goodsService.exleOrderDto(reqData, orderids, delType);
+			poiUtil.createShoppingCart(delType, fileName, exleGoodsList, exleOrderDto,response);
+		}else{//打印全部的商品
+			List<OrderDto> exleOrderDto = goodsService.exleOrderDto(reqData, orderids, delType);
+			poiUtil.createShoppingList(exleGoodsList, fileName,response,exleOrderDto);
+		}
+		return 1;
+	}
+}

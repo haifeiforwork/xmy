@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.goods.persistence.wap.dao.GoodsVoExMapper">
+	
+	<resultMap id="fullGoodsVo" type="com.zfj.xmy.goods.persistence.wap.pojo.dto.GoodsVo">
+		<id column="id" property="id" />
+		<result column="goodsId" property="goodsId" />
+		<result column="name" property="name" />
+		<result column="imgPath" property="imgPath" />
+		<result column="code" property="code" />
+		<result column="price" property="price" />
+		<result column="phonePriN" property="phonePriN" />
+		<result column="vipPriN" property="vipPricN" />
+		<result column="sumDeal" property="sumDeal" />
+		<result column="max_id" property="maxId" />
+		<result column="min_id" property="minId" />
+	</resultMap>
+	
+	<resultMap id="goodsResult" type="com.zfj.xmy.common.persistence.pojo.Goods">
+		<id column="id" property="id" jdbcType="BIGINT" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="short_name" property="shortName" jdbcType="VARCHAR" />
+	    <result column="full_name" property="fullName" jdbcType="VARCHAR" />
+	    <result column="code" property="code" jdbcType="VARCHAR" />
+	    <result column="brand_id" property="brandId" jdbcType="BIGINT" />
+	    <result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+	    <result column="unit_name" property="unitName" jdbcType="VARCHAR" />
+	    <result column="weight" property="weight" jdbcType="VARCHAR" />
+	    <result column="cost_price" property="costPrice" jdbcType="DECIMAL" />
+	    <result column="price" property="price" jdbcType="DECIMAL" />
+	    <result column="market_price" property="marketPrice" jdbcType="DECIMAL" />
+	    <result column="phone_price" property="phonePrice" jdbcType="DECIMAL" />
+	    <result column="vip_price" property="vipPrice" jdbcType="DECIMAL" />
+	    <result column="des" property="des" jdbcType="VARCHAR" />
+	    <result column="type" property="type" jdbcType="BIGINT" />
+	    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+	    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	    <result column="standard" property="standard" jdbcType="VARCHAR" />
+	    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	    <result column="img_path" property="imgPath" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	
+	<select id="findGoodsByUserId" parameterType="java.lang.Long" resultMap="fullGoodsVo">
+		SELECT
+			u.id id,
+			g.id goodsId,
+			g. NAME NAME,
+			g.img_path imgPath,
+			g.`code` CODE,
+			g.price price,
+			g.phone_price phonePriN,
+			g.vip_price vipPriN,
+			g.sum_deal sumDeal
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					collection_goods
+				WHERE
+					user_id = #{id}
+				AND type = '1'
+			) u
+		JOIN (
+			SELECT
+				*
+			FROM
+				goods
+			WHERE
+				is_putway = 0
+		) g ON u.goods_id = g.id;
+	</select>
+	
+	<select id="findGoodsByUserIdAndCategoryName" parameterType="com.zfj.xmy.goods.persistence.wap.pojo.dto.GoodsQueryVo" resultMap="fullGoodsVo">
+		SELECT
+			u.id id,
+			g.id goodsId,
+			g. NAME NAME,
+			g.img_path imgPath,
+			g.`code` CODE,
+			g.price price,
+			g.phone_price phonePriN,
+			g.vip_price vipPriN,
+			g.sum_deal sumDeal
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					collection_goods
+				WHERE
+					user_id = #{id}
+				AND type = '1'
+				AND goods_category_name = #{categoryName}
+			) u
+		JOIN goods g ON u.goods_id = g.id;
+	</select>
+	
+	<select id="roundGoods"  resultMap="goodsResult">
+		SELECT
+			g.id,
+	    g.name,
+	    g.short_name,
+	    g.full_name,
+	    g.code,
+	    g.brand_id,
+	    g.brand_name,
+	    g.unit_name,
+	    g.weight,
+	    g.cost_price,
+	    g.price,
+	   	g.market_price,
+	    g.phone_price,
+	    g.vip_price,
+	    g.des,
+	   	g.type,
+	    g.type_name,
+	    g.create_time,
+	    g.standard,
+	    g.update_time,
+	    g.img_path,
+	    SYSDATE()
+	FROM
+		goods g
+		inner join
+		(SELECT
+			ROUND(
+			RAND() * (
+				(SELECT MAX(id) FROM goods) - (SELECT MIN(id) FROM goods)
+			) + (SELECT MIN(id) FROM goods)
+		 )AS id) as c on c.id= g.id
+	WHERE
+		g.is_putway = 0
+		<if test="goodsId != null">
+			and g.id != #{goodsId}
+		</if>
+	</select>
+	
+	<select id="getGoodsId"  resultMap="fullGoodsVo">
+		SELECT MAX(id) max_id,MIN(id) min_id FROM goods
+		WHERE
+		is_putway = 0
+	</select>
+	
+</mapper>

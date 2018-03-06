@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.activity.persistence.common.dao.CouponUserExMapper" >
+
+	<!-- <resultMap id="fullContainer" type="com.zfj.xmy.activity.persistence.common.pojo.dto.WapContainerOutDto">
+		<id column="name" property="name" javaType="String" />
+		<result column="iconImg" property="iconImg" />
+		<result column="bgImg" property="bgImg" />
+		<result column="slogan" property="slogan" />
+		<result column="categoryId" property="categoryId" />
+		<collection property="containerAd" ofType="com.zfj.xmy.common.persistence.pojo.AdImage" autoMapping="true">
+			<id column="id" property="id" javaType="java.lang.Long" />
+			<result column="img_path" property="imgPath" javaType="String" />
+		</collection>
+		<collection property="goods" ofType="com.zfj.xmy.common.persistence.pojo.app.AppGoodsCondense" autoMapping="true">
+			<id column="gId" property="id" javaType="java.lang.Long" />
+		</collection>
+	</resultMap> -->
+
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" >
+	    insert into coupon_user (user_id, coupon_id, receive_time, 
+	      use_time, `status`, `type`, 
+	      paper_coupon_code, coupon_no)
+	    values 
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.userId,jdbcType=BIGINT},
+			 #{item.couponId,jdbcType=BIGINT},
+			 #{item.receiveTime,jdbcType=TIMESTAMP}, 
+	         #{item.useTime,jdbcType=TIMESTAMP},
+	         #{item.status,jdbcType=INTEGER},
+	         #{item.type,jdbcType=INTEGER}, 
+	         #{item.paperCouponCode,jdbcType=VARCHAR},
+	         #{item.couponNo,jdbcType=VARCHAR})
+		</foreach>
+	</insert>
+	
+	
+	<resultMap id="couponUserStatistisDto" type="com.zfj.xmy.activity.persistence.common.pojo.dto.CouponUserStatistisDto">
+		<result column="count" property="count" />
+		<result column="status" property="status" />
+	</resultMap>
+	
+
+	
+	<select id="getCouponUserStatistis" parameterType="java.lang.Long" resultMap="couponUserStatistisDto" >
+	    SELECT
+			COUNT(cu.id) count,cu.`status` status
+		FROM
+			coupon_user cu
+		  INNER JOIN coupon cp ON cp.id = cu.coupon_id
+		WHERE
+			cu.user_id = #{userid} 
+		GROUP BY
+			cu.`status`
+	</select>
+	<!-- 		  AND cp.effective_end_time > NOW() -->
+	<select id="getCouponUserStatistisDep" parameterType="java.lang.Long" resultMap="couponUserStatistisDto" >
+	    SELECT
+			COUNT(cu.id) count,cu.`status` status
+		FROM
+			coupon_user cu
+		  INNER JOIN coupon cp ON cp.id = cu.coupon_id
+		WHERE
+			cu.user_id = #{userid}
+		  AND cu.`status` = 0
+		  AND cp.effective_end_time <![CDATA[<=]]> NOW()
+		GROUP BY
+			cu.`status`
+	</select>
+	<!-- 查找优惠券列表 - 分页  -->
+	<select id="findCouponsAndPage" resultMap="ResultMapWithBLOBs" parameterType="com.appdev.db.common.CriteriaParameter" >
+	    SELECT
+			*
+		FROM
+			(
+				SELECT
+					c.id AS id,
+					c.`name` AS `name`,
+					COUNT(cu.id) AS coupon_count,
+					SUM(IF(cu.user_id IS NULL, 0, 1)) AS use_num,
+					c.coupon_value AS coupon_value,
+					c.quota AS quota,
+					c.coupon_img AS coupon_img,
+					c.effective_start_time AS effective_start_time,
+					c.effective_end_time AS effective_end_time,
+					c.use_strategy AS use_strategy,
+					c.use_with_others AS use_with_others,
+					c.supplier_ids AS supplier_ids,
+					c.use_range AS use_range,
+					c.use_range_ids AS use_range_ids,
+					c.`status` AS `status`,
+					c.show_in_coupon_center AS show_in_coupon_center,
+					c.des AS des
+				FROM
+					coupon c
+				LEFT JOIN coupon_user cu ON c.id = cu.coupon_id
+				GROUP BY
+					c.id
+			) AS coupon
+	    <if test="_parameter != null" >
+	      <include refid="sqlcriteria.util.Example_Where_Clause" />
+	    </if>
+	    <if test="orderByClause != null" >
+	      order by ${orderByClause}
+	    </if>
+	  </select>
+	  <resultMap id="ResultMapCoupon" type="com.zfj.xmy.common.persistence.pojo.Coupon" >
+	    <id column="id" property="id" jdbcType="BIGINT" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="coupon_count" property="couponCount" jdbcType="BIGINT" />
+	    <result column="coupon_value" property="couponValue" jdbcType="DECIMAL" />
+	    <result column="quota" property="quota" jdbcType="INTEGER" />
+	    <result column="coupon_img" property="couponImg" jdbcType="VARCHAR" />
+	    <result column="effective_start_time" property="effectiveStartTime" jdbcType="TIMESTAMP" />
+	    <result column="effective_end_time" property="effectiveEndTime" jdbcType="TIMESTAMP" />
+	    <result column="use_strategy" property="useStrategy" jdbcType="INTEGER" />
+	    <result column="use_with_others" property="useWithOthers" jdbcType="INTEGER" />
+	    <result column="supplier_ids" property="supplierIds" jdbcType="VARCHAR" />
+	    <result column="use_range" property="useRange" jdbcType="INTEGER" />
+	    <result column="use_range_ids" property="useRangeIds" jdbcType="VARCHAR" />
+	    <result column="status" property="status" jdbcType="INTEGER" />
+	    <result column="use_num" property="useNum" jdbcType="BIGINT" />
+	    <result column="show_in_coupon_center" property="showInCouponCenter" jdbcType="BIGINT" />
+	  </resultMap>
+	  <resultMap id="ResultMapWithBLOBs" type="com.zfj.xmy.common.persistence.pojo.Coupon" extends="ResultMapCoupon" >
+	    <result column="des" property="des" jdbcType="LONGVARCHAR" />
+	  </resultMap>
+</mapper>

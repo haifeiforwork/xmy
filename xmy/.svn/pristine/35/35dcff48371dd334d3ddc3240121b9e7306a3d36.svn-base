@@ -1,0 +1,571 @@
+package com.zfj.xmy.goods.service.cms.impl;  
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.GoodsCategoryMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsImageMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsSpecCategoryMapper;
+import com.zfj.xmy.common.persistence.dao.TermDataMapper;
+import com.zfj.xmy.common.persistence.dao.WatermarkImageMapper;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.GoodsCategory;
+import com.zfj.xmy.common.persistence.pojo.GoodsImage;
+import com.zfj.xmy.common.persistence.pojo.GoodsSpecCategory;
+import com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs;
+import com.zfj.xmy.common.persistence.pojo.TermData;
+import com.zfj.xmy.common.persistence.pojo.WatermarkImage;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.elasticsearch.service.GoodsDocService;
+import com.zfj.xmy.goods.persistence.app.dao.AppGoodsExMapper;
+import com.zfj.xmy.goods.service.cms.CmsGoodsService;
+import com.zfj.xmy.goods.service.cms.TermDataService;
+import com.zfj.xmy.util.DecompressionUtil;
+
+@Service
+public class CmsGoodsServiceImpl extends BaseService implements CmsGoodsService {
+
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Autowired
+	private TermDataService termDataService; 
+	
+	@Autowired
+	private GoodsCategoryMapper goodsCategoryMapper;
+	
+	@Autowired
+	private GoodsImageMapper goodsImageMapper;
+	
+	@Autowired
+	private WatermarkImageMapper waterMarkImgMapper;
+	
+	@Autowired
+	private GoodsSpecCategoryMapper goodsSpecCategoryMapper;
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	@Autowired
+	private GoodsDocService goodsDocService;
+	
+	@Autowired
+	private AppGoodsExMapper appGoodsExMapper;
+	
+	@Autowired
+	private TermDataMapper termDataMapper;
+	
+	
+	@Override
+	public void insertGood(GoodsWithBLOBs goods,String[] imgPath,String[] sort,String specIdStr) {
+		// 1. 保存商品基本信息
+		goods.setCreateTime(new Date());
+		if (goods.getIsPutway() == 0){
+			goods.setPutwayTime(new Date());	
+		}
+/*		String categoryId = goods.getCategoryId();
+		String categoryName = goods.getCategoryName();
+		goods.setCategoryId(categoryId.substring(0,categoryId.lastIndexOf(",")));
+		goods.setCategoryName(categoryName.substring(0,categoryName.lastIndexOf(",")));*/
+		goodsMapper.insertSelective(goods);
+		// 2. 保存商品分类表
+		String [] idArray = goods.getCategoryId().split("\\,");
+		for (int i = 1; i < idArray.length; i++) { // 因为id的字符串格式是",12,13"数组长度会多一位这种格式的所以从1开始取
+			GoodsCategory goodsCategory = new GoodsCategory();  //商品类别表
+			goodsCategory.setCid(Long.parseLong(idArray[i]));
+			goodsCategory.setGoodsId((long)goods.getId());
+			goodsCategoryMapper.insertSelective(goodsCategory);
+		}
+		// 3. 保存商品分类规格表
+		String[] specIdArray = specIdStr.split("\\,");
+		for (int i = 1; i < specIdArray.length; i++) { //因为id的字符串格式是",12,13"数组长度会多一位这种格式的所以从1开始取
+			GoodsSpecCategory spec = new  GoodsSpecCategory();
+			spec.setGoodsId(goods.getId());
+			spec.setSpecCategoryId(Long.parseLong(specIdArray[i]));
+			goodsSpecCategoryMapper.insertSelective(spec);
+		}
+		// 4. 保存商品图片
+		saveGoodsImage(imgPath,sort,goods.getId());
+		//elasticsearch新增商品
+		goodsDocService.addGoods(goods.getId());
+	}
+	
+	
+	/**
+	 * 商品图片保存
+	 * @param imgPath
+	 * @param sort
+	 * @param goodsId    
+	 * @return void    
+	 * Date:2017年7月13日 下午8:29:46
+	 */
+	public void saveGoodsImage(String[] imgPath, String[] sort, long goodsId){
+		if( imgPath != null && sort != null && imgPath.length == sort.length){
+			if(imgPath.length > 0){
+				//先删除商品图片
+				ReqData reqData = new ReqData();
+				reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+				reqData.putValue("type", SystemConstant.GOODS_IMAGE.GOODS_MIAN_IMAGE, SystemConstant.REQ_PARAMETER_EQ);
+				goodsImageMapper.deleteByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				for (int i = 0; i < imgPath.length; i++) {
+					GoodsImage goodsImage = new GoodsImage();
+					goodsImage.setCreateTime(new Date());
+					goodsImage.setGoodsId(goodsId);
+					goodsImage.setSeq(Integer.parseInt(sort[i]));
+					goodsImage.setPath(imgPath[i]);
+					goodsImage.setType(SystemConstant.GOODS_IMAGE.GOODS_MIAN_IMAGE);; // 1 商品图片
+					goodsImageMapper.insert(goodsImage);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void selectGoodsAndPage(ReqData reqData , PageBean pageBean){
+		reqData.putValue("is_recycle", SystemConstant.GoodsConstant.NOT_RECYCLE, SystemConstant.REQ_PARAMETER_EQ);
+		List<Goods> goodsList = goodsMapper.selectByExampleAndPage(ReqUtil.reqParameterToCriteriaParameter(reqData), pageBean.getRowBounds());
+		for (Goods goodsWithBLOBs : goodsList) {
+			ReqData imgReqData = new ReqData();
+			imgReqData.putValue("goods_id", goodsWithBLOBs.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			List<GoodsImage> list = goodsImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(imgReqData));
+			if(list.size() > 0){
+				goodsWithBLOBs.setImgPath(list.get(0).getPath());
+			}
+		}
+		pageBean.setData(goodsList) ;
+		pageBean.setTotalCount(goodsMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData)));
+	}
+	
+	@Override
+	public int updatePutwayStatus(String[] idArry, String status){
+		int state = 0;
+		for (int i = 0; i < idArry.length; i++) {
+			Goods goods = goodsMapper.selectByPrimaryKey(Long.parseLong(idArry[i]));
+			goods.setIsPutway(Integer.parseInt(status));	
+			if( "0".equals(status) ) {goods.setPutwayTime(new Date());}
+			else{ goods.setOutwayTime(new Date()); }
+			state = state+goodsMapper.updateByPrimaryKey(goods);
+			if(status.equals(SystemConstant.GoodsConstant.NO.toString())){
+				goodsDocService.deleteGoods(goods.getId());
+			}else{
+				goodsDocService.addGoods(goods.getId());
+			}
+		}
+		return state;
+	}
+	
+	@Override
+	public int deleteGoods(String[] idArry){
+		int num = 0;
+		for (String id : idArry) {
+			Goods goods =  goodsMapper.selectByPrimaryKey(Long.parseLong(id)) ;
+			goods.setIsRecycle(0);  //商品回收
+			num = num+goodsMapper.updateByPrimaryKey(goods);
+			//删除elasticsearch的数据
+			goodsDocService.deleteGoods(goods.getId());
+		}
+		return num;
+	}
+	
+	@Override
+	public GoodsWithBLOBs getGoods(long id){
+		GoodsWithBLOBs goods = goodsMapper.selectByPrimaryKey(id);
+		if ( goods != null ){
+			WatermarkImage img = waterMarkImgMapper.selectByPrimaryKey(goods.getWmId());
+			if(img != null ){
+				goods.setImgPath(img.getPath());
+			}
+		}
+		return goods;
+	}
+	
+	@Override
+	public void updateGoods(GoodsWithBLOBs goods ,String[] fileName,String[] sort,String specIdStr){
+		// 1. 修改商品基本信息
+		if (goods.getIsPutway() == 0){
+			goods.setPutwayTime(new Date());	
+		}
+		GoodsWithBLOBs goodsWithBLOBs = goodsMapper.selectByPrimaryKey(goods.getId());
+		if (StringUtils.isNotEmpty(goodsWithBLOBs.getCategoryId())) {
+			if(!goodsWithBLOBs.getCategoryId().equals(goods.getCategoryId())){  //分类涉及到修改
+				ReqData reqData = new  ReqData();
+				reqData.putValue("goods_id", goods.getId(),SystemConstant.REQ_PARAMETER_EQ );
+				goodsCategoryMapper.deleteByExample( ReqUtil.reqParameterToCriteriaParameter(reqData));  //先删除已存在的分类
+				String [] idArry = goods.getCategoryId().split("\\,");  //新添分类 id
+				for (int i = 1; i < idArry.length; i++) { // 因为id的字符串格式是",12,13,"数组长度会多一位这种格式的所以从1开始取
+					GoodsCategory goodsCategory = new GoodsCategory();  //商品类别表
+					goodsCategory.setCid(Long.parseLong(idArry[i]));
+					goodsCategory.setGoodsId((long)goods.getId());
+					goodsCategoryMapper.insertSelective(goodsCategory);	
+				}
+			}
+		}
+		goods.setUpdateTime(new Date());
+		goodsMapper.updateByPrimaryKeySelective(goods);
+		// 2. 修改商品分类规格
+		String[] specIdArray = specIdStr.split("\\,");
+		if (specIdArray.length > 1){
+			 // 2.1  先删除存在的商品分类规格
+			ReqData reqData = new  ReqData();
+			reqData.putValue("goods_id", goods.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			goodsSpecCategoryMapper.deleteByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			  //2.2 再新增商品分类规格
+			for (int i = 1; i < specIdArray.length; i++) { //因为id的字符串格式是",12,13"数组长度会多一位这种格式的所以从1开始取
+				GoodsSpecCategory spec = new  GoodsSpecCategory();
+				spec.setGoodsId(goods.getId());
+				spec.setSpecCategoryId(Long.parseLong(specIdArray[i]));
+				goodsSpecCategoryMapper.insertSelective(spec);
+			}
+		}
+		// 3. 新增图片
+		saveGoodsImage(fileName,sort,goods.getId()); 
+		//elasticsearch更新数据
+		goodsDocService.updateGoods(goods.getId());
+	}
+	
+
+	@Override
+	public List<Goods> findGoods(ReqData reqData) {
+		List<Goods> selectByExample = goodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		return selectByExample;
+	}
+	
+	@Override
+	public List<GoodsImage> findImage(long goodsId){
+		ReqData reqData = new ReqData();
+		reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+		return  goodsImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+	}
+	
+	@Override
+	public int deleteGoodsImage(String id){
+		return goodsImageMapper.deleteByPrimaryKey(Long.parseLong(id));
+	}
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public Map<String,Object> ImgCorrelation(String  fileName,String targetPath){
+		 Map<String , Object> result = new  HashMap<String , Object>();
+		 Map<String,Object> data = DecompressionUtil.zipFileRead(fileName, targetPath);
+		 GoodsWithBLOBs  goods = null;
+		 String imgName = "";
+		 boolean flag = false;
+		 if( (boolean)data.get("success") == true ){  //  1. 判断图片压缩包是否解压成功 ，并返回目标文件的路径 filePath
+			 String filePath = (String) data.get("filePath");
+			 File file = new File(filePath);
+			 File[] files = file.listFiles();
+			 for (int i = 0; i<files.length; i++) {
+					File childFile = files[i];
+		            imgName = childFile.getName();
+		            String   goodsCode = imgName.substring(0, imgName.indexOf("-",imgName.indexOf("-")) );  //商品编码
+		            List<GoodsWithBLOBs> list = findGoodsByCode(goodsCode); 
+		            if (list.size() > 0) {
+		            	  goods = list.get(0);
+		            	  if (imgName.substring(imgName.indexOf("-"),imgName.indexOf(".")).length() == 3 ){//商品详情图
+		            		  batchAddDetailImg(files[i],goods);
+		            	  }
+		            	  if (imgName.substring(imgName.indexOf("-"),imgName.indexOf(".")).length() == 4 ){//商品主图
+		            		  batchAddMainImg(files[i],goods);
+		            	  }
+		            } else {
+		            	 result.put("message", "未找到商品");		
+		            }
+			 }
+		 } else {
+			 result.put("message", "压缩包解压失败");
+		 }
+		 result.put("success", flag);
+		 return result;
+	}
+	
+	@Override
+	public void getFileGoodsCode(){
+		String codes = "";
+		 Map<String,Object> result = new  HashMap<String,Object>();
+		 String imgName = "";
+		 File file = new File("C:/Users/Administrator/Desktop/nmlgb/礼盒描述1211");
+		 File[] files = file.listFiles();
+		 for (int i = 0; i < files.length; i++){
+			GoodsWithBLOBs goods = new  GoodsWithBLOBs();
+		 	imgName = files[i].getName();
+            if (imgName.indexOf("-") > -1){
+            	String   goodsCode = imgName.substring(0, imgName.indexOf("-",imgName.indexOf("-")) );  //商品编码
+            	if (!codes.contains(goodsCode)) {
+                	codes = codes +","+ goodsCode ;
+            	}
+            }
+		 }   
+		 System.out.println("文件里面的编码："+codes);
+	}
+	
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public Map<String,Object> goodsImageCorrelation(){
+		 Map<String,Object> result = new  HashMap<String,Object>();
+		 String imgName = "";
+		 File file = new File("C:/Users/Administrator/Desktop/新商品/001/");
+		 File[] files = file.listFiles();
+		 for (int i = 0; i < files.length; i++){
+			GoodsWithBLOBs goods = new  GoodsWithBLOBs();
+		 	imgName = files[i].getName();
+            if (imgName.indexOf("-") > -1){
+            	String   goodsCode = imgName.substring(0, imgName.indexOf("-",imgName.indexOf("-")) );  //商品编码
+                List<GoodsWithBLOBs> list = findGoodsByCode(goodsCode); 
+    			if (list.size() > 0) {
+    				for (GoodsWithBLOBs goodsWithBLOBs : list) {
+    					goods = goodsWithBLOBs;
+        				if (imgName.substring(imgName.indexOf("-"),imgName.indexOf(".")).length() == 3) {  //商品详情图
+        					batchAddDetailImg(files[i],goods);
+        				}
+        				if (imgName.substring(imgName.indexOf("-"),imgName.indexOf(".")).length() == 4) {  //商品主图
+        					batchAddMainImg(files[i], goods);
+        				} 
+					}
+    			}else{
+    				System.out.println("未找到商品");
+    				result.put("error", "未能找到商品");
+    			}
+            }
+		 }
+		return result;
+	}
+	
+	
+	/**
+	 * 批量添加商品主图
+	 * Date:2017年8月29日 下午8:11:50 
+	 * @author hexw
+	 */
+	public void batchAddMainImg(File file, GoodsWithBLOBs goods){
+		String dir = "http://img.xmy365.com/goods/goods/20180108/";
+		GoodsImage goodsImage = new GoodsImage();
+		goodsImage.setGoodsId(goods.getId());
+		goodsImage.setPath(dir+file.getName());  
+		goodsImage.setSeq(0);
+		goodsImage.setCreateTime(new Date());
+		goodsImage.setType(SystemConstant.GOODS_IMAGE.GOODS_MIAN_IMAGE);
+		goodsImageMapper.insert(goodsImage);
+	}
+	
+	/**
+	 * 批量添加商品详情图
+	 * Date:2017年8月29日 下午8:12:45 
+	 * @author hexw
+	 */
+	public void batchAddDetailImg(File file, GoodsWithBLOBs goods){
+		String dir = "http://img.xmy365.com/goods/goods/20180108/";
+		if (StringUtils.isEmpty(goods.getPcIntroduced()) && StringUtils.isEmpty(goods.getPhIntroduced())) {
+			String html = "<p><img src="+dir+file.getName()+" style='float:left'><p>";
+			goods.setPcIntroduced(html);
+			goods.setPhIntroduced(html);
+		} else {
+			String html = "<img src="+dir+file.getName()+" style='float:left'>";
+			StringBuffer pc = new StringBuffer(goods.getPcIntroduced());
+			StringBuffer ph = new StringBuffer(goods.getPhIntroduced());
+			goods.setPcIntroduced(pc.insert(pc.lastIndexOf("<p>"),html).toString());
+			goods.setPhIntroduced(ph.insert(ph.lastIndexOf("<p>"), html).toString());
+		}
+		goodsMapper.updateByPrimaryKeyWithBLOBs(goods);
+	}
+	
+	/**
+	 * 根据商品编码查询商品
+	 * @param code
+	 * @return    
+	 * @return List<GoodsWithBLOBs>    
+	 * Date:2017年7月19日 下午2:35:35 
+	 * @author hexw
+	 */
+	public List<GoodsWithBLOBs> findGoodsByCode(String code){
+		ReqData reqData = new  ReqData();
+		reqData.putValue("code", code, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.setSortname("id");
+		reqData.setSortorder("desc");
+		return goodsMapper.selectByExampleWithBLOBs(ReqUtil.reqParameterToCriteriaParameter(reqData));
+	}
+	
+	@Override
+	public List<Goods> findsGoodsWithIds(List<Object> ids){
+		if(ids.size()<1){
+			return null;
+		}
+		CriteriaParameter para=new CriteriaParameter();
+		Criteria createCriteria = para.createCriteria();
+		createCriteria.in("id", ids);
+		createCriteria.equalTo("is_putway", SystemConstant.GoodsConstant.PUTWAY);
+		List<Goods> selectByExample = goodsMapper.selectByExample(para);
+		//取一张图片出来给商品
+		for (Goods goods : selectByExample) {
+			goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+		}
+		return selectByExample;
+	}
+	
+	
+	
+	@Override
+	public void updateGoodsImage(){
+		List<GoodsImage> list = appGoodsExMapper.selectGoodsImage(null);
+		if (list.size() == 2335) {
+			for (GoodsImage goodsImage : list) {
+				if (ObjectUtil.isNotNull(goodsImage)) {
+					if (!StringUtil.isEmpty(goodsImage.getPath())) {
+						String str = goodsImage.getPath();
+						String a = str.substring(0,str.indexOf("/2"));
+						String b = str.substring(str.indexOf("/07"));
+						String path = a + "/20171019" +b;
+						goodsImage.setPath(path);
+						goodsImageMapper.updateByPrimaryKey(goodsImage);
+					}
+				}
+				
+			}
+		}
+	}
+	
+	/**
+	 * 复制商品
+	 * @param goods
+	 * @return    
+	 * @return int    
+	 * Date:2017年11月7日 上午10:58:11 
+	 * @author hexw
+	 */
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public int copyGoods(Long  goodsId){
+		int result = 0;
+		GoodsWithBLOBs goods = goodsMapper.selectByPrimaryKey(goodsId);
+		if (ObjectUtil.isNotNull(goods)) {
+			// 1. 查询活动分类的id
+			ReqData reqData = new ReqData();
+			reqData.putValue("name", "活动分类", SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("parent_id",0,SystemConstant.REQ_PARAMETER_NE);
+			List<TermData> termDatas = termDataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			if (termDatas.size() > 0) {
+			// 2. 商品分类信息 	
+				TermData termData = termDatas.get(0);
+				goods.setCategoryId(","+termData.getId()+",");
+				goods.setCategoryName(","+termData.getName()+",");
+			// 3. 修改商品编码  规则  150100000001
+			String maxCode = appGoodsExMapper.findActicityGoodsMaxCode();
+			if (StringUtil.isEmpty(maxCode)) {
+				goods.setCode("150100000001");
+			} else {
+				maxCode  = String.valueOf(Long.parseLong(maxCode)+1);
+				goods.setCode(maxCode);
+			}
+			// 4. 保存商品
+				goods.setStandard(null); //复制商品规格值为空
+				goods.setIsPutway(SystemConstant.GoodsConstant.NOT_PUTWAY); //复制商品默认为下架状态
+				goodsMapper.insertSelective(goods);
+			// 5. 复制商品图片
+				reqData.clearValue();
+				reqData.putValue("goods_id", goodsId, SystemConstant.REQ_PARAMETER_EQ);
+				List<GoodsImage> images = goodsImageMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				for (GoodsImage goodsImage : images) {
+					GoodsImage copyGoodsImage = goodsImage;
+					copyGoodsImage.setGoodsId(goods.getId());  //修改商品id
+					copyGoodsImage.setCreateTime(new Date());
+					goodsImageMapper.insertSelective(copyGoodsImage);
+				}
+			// 6. 新增商品分类
+				GoodsCategory goodsCategory = new GoodsCategory();
+				goodsCategory.setCid(termData.getId());
+				goodsCategory.setGoodsId(goods.getId());
+				goodsCategoryMapper.insertSelective(goodsCategory);
+			// 7. 复制商品分类规格
+				List<GoodsSpecCategory> goodsSpecCategorys = goodsSpecCategoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				for (GoodsSpecCategory goodsSpecCategory : goodsSpecCategorys) {
+					GoodsSpecCategory copyGoodsSpecCategory = goodsSpecCategory;
+					copyGoodsSpecCategory.setGoodsId(goods.getId());
+					goodsSpecCategoryMapper.insertSelective(copyGoodsSpecCategory);
+				}
+			} else {
+				result = 1;
+			}
+		} else {
+			result = 1;
+		}
+		return result;
+	}
+	/**
+	 * 根据分类猜你喜欢
+	 * 
+	 */
+	@Override
+	public List<Goods> findYouLike(PageBean pageBean){
+		List<Goods> list = new ArrayList<>();
+		Integer size = pageBean.getPageSize();
+		ReqData reqData = new ReqData();
+		reqData.putValue("parent_id", 0, SystemConstant.REQ_PARAMETER_GT);
+		reqData.putValue("vid", 2, SystemConstant.REQ_PARAMETER_EQ);
+		List<TermData> example = termDataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		for(int i=0;list.size()<size;i++){
+			int index = new Random().nextInt(40);
+			reqData.putValue("category_name", example.get(index).getName(), SystemConstant.REQ_PARAMETER_CN);
+			reqData.putValue("is_putway", SystemConstant.GoodsConstant.PUTWAY, SystemConstant.REQ_PARAMETER_EQ);
+			List<Goods> list2 = goodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			if(!ObjectUtils.isEmpty(list2)){
+				Goods goods = list2.get(new Random().nextInt(list2.size()));
+				goods.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId()));
+				list.add(goods);
+			}
+			
+		}
+		return list;
+	}
+	
+	
+	public void updateGoodsImagePath(){
+		
+	}
+
+
+	@Override
+	public Integer findGoodsCode(String code) {
+		ReqData reqData=new ReqData();
+		reqData.putValue("code", code,SystemConstant.REQ_PARAMETER_EQ);
+		List<Goods> list=goodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		if(ObjectUtil.isNotNull(list)&&list.size()>0){
+			return 1;
+		}else{
+			return 0;
+		}
+		
+	}
+	
+	
+
+	
+}
+  

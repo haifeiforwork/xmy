@@ -1,0 +1,251 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+  	<title>购物车</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/cart/shopping_cart.css">
+  </head>
+  
+  <body>
+  	<nav>
+  	<%@include file="/WEB-INF/jsp/commons/nav/comm_top.jsp" %>
+  	</nav>
+<div class="navigation" style="display: none;">
+        <div class="w-1250">
+            <div class="navigation-left">
+            	<a href="index">
+                	<div class="left-chunk1"><img src="resource/commons/images/gr-logo.jpg"/></div>
+                </a>
+                <div class="left-chunk2">
+                    <p class="my-xmy logo-near">购物车</p>
+                </div>
+            </div>
+            <div class="navigation-right">
+                <div class="right-chunk2 L-search">
+                    <form action="/elastic/goods" method="post" id="searchForm">
+                    <input type="text" name="goodsName" placeholder="搜索">
+                    <button type="submit">搜索</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+</div>
+<!--内容部分-->
+<div class="content">
+   <div class="w-1250 category clearfix" style="overflow:visible">
+        <div class="balances-title">全部商品 <c:if test="${not empty couponData }"><span class="get-tiket-btn">领取优惠券</span></c:if>
+            <div class="get-tiket" style="display: none;" id="coupon">
+                <span class="em2"><img src="resource/commons/images/em2.png" alt="" style="margin-bottom: 3px;"></span>
+                <div class="get-tiket-title clearfix"><span class="get-tiket-close" id="closecoupon"><i class="iconfont">&#xe676;</i></span></div>
+               	<input type="hidden" id="isLogin" value="${islogin }">
+               	<input type="hidden" id="accPoints" value="${accPoints }">
+               <!-- 优惠券开始 -->
+                <div class="get-tiket-content">
+                	<c:forEach items="${couponData }" var="item">
+	                	<div class="get-tiket-line clearfix">
+	                        <div class="titket-money-wrap"><span class="titke-money">¥<span class="big-size">${item.couponValue }</span></span></div>
+	                        <div class="titket-area">
+	                            <p class="item-title">${item.name }</p>
+	                            <p class="item-after">
+	                            <span>
+	                           		 <c:if test="${item.useRange == 1 }">全场通用</c:if>
+	                           		 <c:if test="${item.useRange == 2 }">分类使用</c:if>
+	                           		 <c:if test="${item.useRange == 3 }">限定商品</c:if>
+	                           		 <c:if test="${item.useRange == 4 }">排除商品</c:if>
+	                            </span><span><fmt:formatDate value="${item.effectiveStartTime}" pattern="yyyy-MM-dd HH:mm:ss"/>-<fmt:formatDate value="${item.effectiveEndTime}" pattern="yyyy-MM-dd HH:mm:ss"/></span></p>
+	                        </div>
+	                        <div class="titket-get-btn" data-couponid="${item.id }" style="float:right;margin-right: 15px;">
+		                        <button type="button" class="btn" style="${item.isGet==0?'':'background:#999'}">
+		                        	<c:if test="${item.isGet==0 }">领取</c:if> 
+		                        	<c:if test="${item.isGet==1 }">已领取</c:if> 
+		                        	<c:if test="${item.isGet==2}">已领完</c:if> 
+		                        </button>
+	                        </div>
+	                    </div>
+                	</c:forEach>
+                </div>
+                <!-- 优惠券 结束 -->
+            </div>
+        <div class="balances-wrap balances-wrap2" id="cartGoods">
+           <table class="shoped shop-car">
+                <tr class="table-head">
+                    <td class="text-center" style="width:52px;"><input class="all" type="checkbox"></td>
+                    <td class="shoped-info"><span>全选</span>商品信息</td>
+                    <td class="text-center one-price">单价</td>
+                    <td class="text-center" style="width:160px;">购买数量</td>
+                    <td class="text-center" style="width:99px;">税费</td>
+                    <td class="text-center" style="width:101px;">总金额</td>
+                    <td class="text-center one-area">配送范围</td>
+                    <td class="text-center" style="width:70px;">积分</td>
+                    <td class="text-center" style="width:140px;">操作</td>
+                </tr>
+                <c:if test="${empty shoppingCart }">
+                	<tr>
+                		<td colspan="9" style="text-align: center;padding:20px 0;">数据为空!</td>
+                	</tr>
+                </c:if>
+                <c:forEach items="${shoppingCart }" var="cartGoods">
+                	<c:if test="${cartGoods.isPutway == 0 }">
+	                 <tr class="shoped-con">
+	                     <td class="text-center"><div class="table-item"><input class="goods" value="${cartGoods.id }" type="checkbox"></div></td>
+	                     <td class="shoped-info2">
+	                         <a href="goods/${cartGoods.id }/0/0" style="color:black;">
+		                         <div class="img-wrapa"><img src="${cartGoods.imgPath }" alt=""></div>
+		                         <div class="info-des">
+		                             <p class="info-des-title">${cartGoods.name }
+		                             	<c:if test="${!empty cartGoods.presentGoods.name }">
+		                             		<br/>
+		                             		<p class="info-des-title" style="color: red;">赠品：${cartGoods.presentGoods.name }</p>
+		                             	</c:if>
+		                             </p>
+		                         </div>
+	                         </a>
+	                     </td>
+	                     <td class="text-center">
+	                         <div class="table-item">
+	                             <p>
+	                             <c:if test="${!empty cartGoods.actId }">
+	                             	${cartGoods.actPoints }积分
+	                             </c:if>
+	                             <c:if test="${empty cartGoods.actId }">
+	                             	¥<c:if test="${empty cartGoods.activityPrice }">${cartGoods.price }</c:if>
+		                             <c:if test="${!empty cartGoods.activityPrice }">${cartGoods.activityPrice }</c:if>
+	                             </c:if>
+	                             </p>
+	                             <c:if test="${!empty cartGoods.activityName }">
+		                             <div class="c-price">
+		                                 <span class="c-btn">${cartGoods.activityName }<i class="iconfont">&#xe63b;</i>
+		                                 	 
+		                                 </span>
+		                                 <div class="c-price-des">
+		                                	  ${cartGoods.activityDescription }
+		                                	 </div>
+		                             </div>
+	                             </c:if>
+	                         </div>
+	                     </td>
+	                     <td class="text-center">
+	                         <div class="table-item" value="${cartGoods.id }">
+	                             <button type="button" class="crease" data-num ="${cartGoods.limitNum }"  data-actid="${cartGoods.actId }" data-points="${cartGoods.actPoints }" data-allnum="${cartGoods.residueNum }" >-</button>
+	                             <input type="text" class="nuum" data-num="${cartGoods.limitNum }" data-initnum="${cartGoods.cartNum }" data-actid="${cartGoods.actId }" data-points="${cartGoods.actPoints }" data-allnum="${cartGoods.residueNum }" value="${cartGoods.cartNum }"  maxlength="3">
+	                             <button type="button" class="add"  data-num ="${cartGoods.limitNum }" data-actid="${cartGoods.actId }" data-points="${cartGoods.actPoints }" data-allnum="${cartGoods.residueNum }">+</button>
+	                         </div>
+	                     </td>
+	                     <td class="text-center"><div class="table-item"><s>¥ 0.00</s></div></td>
+	                     <td class="text-center price"><div class="table-item">
+		                     <c:if test="${empty cartGoods.actId  }">${cartGoods.sumPrice }</c:if>
+		                     <c:if test="${not empty cartGoods.actId }">${cartGoods.sumPoints }积分</c:if>
+	                     </div></td>
+	                     <td class="text-center price" style="display: none;">
+		                     <div class="table-item">
+			                     <c:if test="${cartGoods.actPoints==0 }"><c:if test="${empty cartGoods.activityPrice }">${cartGoods.price }</c:if>
+				                 <c:if test="${!empty cartGoods.activityPrice }">${cartGoods.activityPrice }</c:if></c:if>
+			                     <c:if test="${cartGoods.actPoints!=0 }">${cartGoods.actPoints }积分</c:if>
+		                     </div>
+	                     </td>
+	                     <td class="text-center">
+		                     <div class="table-item">
+		                     		<c:if test="${cartGoods.isDelivery==0 }">全国配送</c:if>
+                    				<c:if test="${cartGoods.isDelivery==1 }">重庆主城</c:if>
+		                     </div>
+	                     </td>
+	                     <td class="text-center"><div class="table-item"><fmt:formatNumber value="${cartGoods.actPoints==0?cartGoods.sumPrice:0 }" pattern="#"/></div></td>
+	                     <td class="option"><div class="table-item"><p value="${cartGoods.id }" tname="${cartGoods.categoryName }" acttype="${not empty cartGoods.activityType? cartGoods.activityType:0 }" actid="${not empty cartGoods.activityId? cartGoods.activityId:0 }"  class="bookMark">移入收藏夹</p><p value="${cartGoods.id }" class="delete">删除</p></div></td>
+	                 </tr>
+	                 </c:if>
+                 </c:forEach>
+            </table>
+           <table class="shoped shop-car none-use-all">
+           		<!-- 失效商品 -->
+                <c:forEach items="${shoppingCart }" var="cartGoods">
+                	<c:if test="${cartGoods.isPutway == 1 }">
+	                 <tr class="shoped-con noneffective" data-id="${cartGoods.id }">
+	                    <td class="text-center none-use"><span>失效</span></td>
+	                     <td class="shoped-info2 shop-info3">
+	                         <div class="img-wrapa"><img src="${cartGoods.imgPath }" alt=""></div>
+	                         <div class="info-des">
+	                             <p class="info-des-title">${cartGoods.name }
+	                             	<c:if test="${!empty cartGoods.presentGoods.name }">
+	                             		<br/>
+	                             		<p class="info-des-title" style="color: red;">赠品：${cartGoods.presentGoods.name }</p>
+	                             	</c:if>
+	                             </p>
+	                         </div>
+	                     </td>
+	                     <td class="text-center one-price">
+	                         <div class="table-item">
+	                             <p>
+	                             <c:if test="${!empty cartGoods.actId }">
+	                             	${cartGoods.actPoints }积分
+	                             </c:if>
+	                             <c:if test="${empty cartGoods.actId }">
+	                             	¥<c:if test="${empty cartGoods.activityPrice }">${cartGoods.price }</c:if>
+		                             <c:if test="${!empty cartGoods.activityPrice }">${cartGoods.activityPrice }</c:if>
+	                             </c:if>
+	                             </p>
+	                             <c:if test="${!empty cartGoods.activityName }">
+		                             <div class="c-price">
+		                                 <button type="button" class="c-btn">${cartGoods.activityName }<i class="iconfont">&#xe63b;</i></button>
+		                                 <div class="c-price-des">
+		                                	  ${cartGoods.activityDescription }
+		                                 </div>
+		                             </div>
+	                             </c:if>
+	                         </div>
+	                     </td>
+	                     <td class="text-center" style="width:160px">
+	                         <div class="table-item" value="${cartGoods.id }">
+	                             <button type="button" class="crease" data-num ="${cartGoods.limitNum }"  data-actid="${cartGoods.actId }" data-points="${cartGoods.actPoints }" data-allnum="${cartGoods.residueNum }">-</button>
+	                             <input type="text" class="nuum" data-num="${cartGoods.limitNum }" data-initnum="${cartGoods.cartNum }" data-actid="${cartGoods.actId }" data-points="${cartGoods.actPoints }" data-allnum="${cartGoods.residueNum }" value="${cartGoods.cartNum }" maxlength="3">
+	                             <button type="button" class="add" data-num ="${cartGoods.limitNum }"  data-actid="${cartGoods.actId }" data-points="${cartGoods.actPoints }" data-allnum="${cartGoods.residueNum }">+</button>
+	                         </div>
+	                     </td>
+	                     <td class="text-center" style="width:99px;"><div class="table-item"><s>¥ 0.00</s></div></td>
+	                     <td class="text-center price" style="width:101px">
+		                     <div class="table-item">
+			                     <c:if test="${empty cartGoods.actId }">${cartGoods.sumPrice }</c:if>
+			                     <c:if test="${not empty cartGoods.actId }">${cartGoods.sumPoints }积分</c:if>
+		                     </div>
+	                     </td>
+	                     <td class="text-center price" style="width:101px;display: none;"><div class="table-item">
+		                     <c:if test="${cartGoods.actPoints==0 }">${cartGoods.price }</c:if>
+		                     <c:if test="${cartGoods.actPoints!=0 }">${cartGoods.actPoints }积分</c:if>
+	                     </div></td>
+	                     <td class="text-center one-area">
+		                     <div class="table-item">
+		                     		<c:if test="${cartGoods.isDelivery==0 }">全国配送</c:if>
+                    				<c:if test="${cartGoods.isDelivery==1 }">重庆主城</c:if>
+		                     </div>
+	                     </td>
+	                     <td class="text-center"><div class="table-item"><fmt:formatNumber value="${cartGoods.actPoints==0?cartGoods.sumPrice:0 }" pattern="#"/></div></td>
+	                     <td class="option"><div class="table-item"><p value="${cartGoods.id }" tname="${cartGoods.categoryName }"  class="bookMark">移入收藏夹</p><p value="${cartGoods.id }" class="delete">删除</p></div></td>
+	                 </tr>
+	                 </c:if>
+                 </c:forEach>
+            </table>
+        </div>
+        <div class="table-all">
+            <ul class="table-all-list">
+                <li class="che-wrap"><label><input class="all" type="checkbox"> 全选</label></li>
+                <a href="javascript:volid(0);" ><li class="batchDel" style="color:#3b3b3b;" >删除</li></a>
+                <a href="javascript:volid(0);"><li class="batchRemove" style="color:#3b3b3b;">清除失效宝贝</li></a>
+                <a href="javascript:volid(0);"><li class="batchCollect" style="color:#3b3b3b;">移入收藏夹</li></a>
+            </ul>
+            <div class="table-all-list2">
+                <div class="redy redy-choose">已选商品<span class="price" id="goodsNum"> 0 </span>件 <i class="iconfont">&#xe604;</i></div>
+                <div class="redy">
+                    合计 (不含运费) : <span class="price lg-price" id="sumPrice">0.00</span>
+                </div>
+                <button type="button" class="balances-all" id="sum">结算</button>
+            </div>
+        </div>
+    </div>
+</div>
+<%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %>
+<%@include file="/WEB-INF/jsp/commons/nav/search_float_top.jsp" %>
+<!-- 内容部分完 --> 
+<script type="text/javascript" src="resource/js/cart/shopping_cart.js?v=20182231453"></script>
+</body>
+</html>

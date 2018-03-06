@@ -1,0 +1,183 @@
+package com.zfj.xmy.common.persistence.pojo;
+
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.Column;
+
+public class TradeProduction implements Serializable {
+
+    /**
+     * trade_production.id
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "id")
+    private Long id;
+
+
+    /**
+     * trade_production.chanid (渠道id)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "chanid")
+    private String chanid;
+
+
+    /**
+     * trade_production.tranflowno (交易流水号)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "tranflowno")
+    private String tranflowno;
+
+
+    /**
+     * trade_production.happenmoney (发生金额)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "happenmoney")
+    private Double happenmoney;
+
+
+    /**
+     * trade_production.tranmoney (交易金额)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "tranmoney")
+    private Double tranmoney;
+
+
+    /**
+     * trade_production.created (创建时间)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "created")
+    private Date created;
+
+
+    /**
+     * trade_production.transtate (交易状态 1 待交易 2交易成功 3交易失败)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "transtate")
+    private String transtate;
+
+
+    /**
+     * trade_production.noticestate (通知状态：1 待通知 2 通知成功)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "noticestate")
+    private String noticestate;
+
+
+    /**
+     * trade_production.trantime (交易时间)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "trantime")
+    private Date trantime;
+
+
+    /**
+     * trade_production.flowno (业务流水号)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "flowno")
+    private String flowno;
+
+
+    /**
+     * trade_production.flowtype (业务类型：购买(001)、)
+     * @ibatorgenerated 2017-08-09 15:33:59
+     */
+    @Column(name = "flowtype")
+    private String flowtype;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getChanid() {
+        return chanid;
+    }
+
+    public void setChanid(String chanid) {
+        this.chanid = chanid;
+    }
+
+    public String getTranflowno() {
+        return tranflowno;
+    }
+
+    public void setTranflowno(String tranflowno) {
+        this.tranflowno = tranflowno;
+    }
+
+    public Double getHappenmoney() {
+        return happenmoney;
+    }
+
+    public void setHappenmoney(Double happenmoney) {
+        this.happenmoney = happenmoney;
+    }
+
+    public Double getTranmoney() {
+        return tranmoney;
+    }
+
+    public void setTranmoney(Double tranmoney) {
+        this.tranmoney = tranmoney;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public String getTranstate() {
+        return transtate;
+    }
+
+    public void setTranstate(String transtate) {
+        this.transtate = transtate;
+    }
+
+    public String getNoticestate() {
+        return noticestate;
+    }
+
+    public void setNoticestate(String noticestate) {
+        this.noticestate = noticestate;
+    }
+
+    public Date getTrantime() {
+        return trantime;
+    }
+
+    public void setTrantime(Date trantime) {
+        this.trantime = trantime;
+    }
+
+    public String getFlowno() {
+        return flowno;
+    }
+
+    public void setFlowno(String flowno) {
+        this.flowno = flowno;
+    }
+
+    public String getFlowtype() {
+        return flowtype;
+    }
+
+    public void setFlowtype(String flowtype) {
+        this.flowtype = flowtype;
+    }
+}

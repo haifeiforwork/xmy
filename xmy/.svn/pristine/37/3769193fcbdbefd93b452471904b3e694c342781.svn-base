@@ -1,0 +1,174 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>二级分类商品</title>
+    <%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/category/category_goods.css">
+	<link rel="stylesheet" href="resource/commons/css/main.css" />
+	<link rel="stylesheet" type="text/css" href="resource/commons/css/foundation-datepicker.css">
+	<link rel="stylesheet" href="resource/commons/css/flexslider.css">
+  </head>
+  <body>
+   <%@include file="/WEB-INF/jsp/commons/nav/nav_homepage_second.jsp" %>
+		<!-- 广告图 -->
+		
+			<!--全屏滚动-->
+<div class="ad" style="min-width: auto;">
+	<div class="b-img">
+	<c:forEach items="${topImg }" var="topImg">
+		<a href="goods/${topImg.data }/0/0" style="background:url(${topImg.imgPath }) center no-repeat;"></a>
+	</c:forEach>
+	</div>
+	<div style="position:absolute;width:1250px;top:0;left:50%;margin-left:-625px;">
+					<div style="position:absolute;width: 250px;right: 0px;top:0;z-index: 9">
+					<!-- 右侧广告 -->
+				    <div class="list-img">
+				        <ul>
+				        	<c:forEach items="${firstAdImg }" var="item">
+				        		<li><a href="goods/${item.data }/0/0"><img src="${item.imgPath }" alt=""></a></li>
+				        	</c:forEach>
+				        </ul>
+				    </div>
+					</div>
+				</div>
+	<div class="b-list"></div>
+	<!--<a class="bar-left" href="#"><em></em></a><a class="bar-right" href="#"><em></em></a>-->
+</div>
+<!--end 全屏滚动-->
+		<!--鲜一下-->
+		<div class="banner clearfix">
+		    <img src="resource/commons/images/banner-bo.png" alt="" class="ban-img">
+		    <div class="w-1250">
+		        <div class="banner-des">
+		            <ul class="clearfix" id="goods">
+		            <c:forEach items="${freshGoods }" var="item">
+		            	<a href="goods/${item.goodsId }/0/0" style="text-decoration:none;" >
+			            	<li>
+			                    <div class="img-wrap">
+			                        <c:if test="${empty item.imgPath }"><img src="resource/commons/images/defaultgoods.jpg" class="shop-img"></c:if>
+        <c:if test="${!empty item.imgPath }"><img:imghandle w="169" imgurl="${item.imgPath }" h="169"  cl="shop-img"></img:imghandle></c:if>
+        
+			                        
+			                        <span class="price"  >¥ ${item.price }</span>
+			                    </div>
+			                    <p style="color: black;">${item.goodsName }</p>
+			                </li>
+		            	</a>
+		            </c:forEach>
+		            </ul>
+		            <div class="btn-x">
+		                <a href="javascript:void(0)" id="change">
+		                <img src="resource/commons/images/btn-x.png" alt=""></a>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+		<input type="hidden" value="${param.id }" id="terId"/>
+		  <!--内容部分-->
+		<div class="container add-g-b" style="margin-bottom:0px;border-bottom:0;background:#EFEFEF url('resource/commons/images/page-bg.jpg') 50.2% no-repeat fixed;">
+			<c:forEach items="${containers }" var="item">
+				<div class="list-content w-1250 pd-40">
+			       <div class="count-title ct1">
+			        <span class="wrap-ct-word">
+				        <span class="ad-word-l title-name">${item.name }</span>
+			        </span>
+			       	 <div class="ct1-line"></div>
+			        </div>
+			        <ul class="clearfix add-bg-w" style="padding-top:0;">
+			            <li class="first-show list-item"><a href="goods/${item.adImage.data }/0/0"><img src="${item.adImage.imgPath }" ></a></li>
+				          <c:forEach items="${item.goodsList }" var="child">
+					            <li class="list-item">
+					            	<a href="goods/${child.goodsId }/0/0" style="text-decoration:none;">
+						            	<div class="list-show" data-id="${child.goodsId }">
+							                    <div class="list-show-wrap">
+							                    	<%-- <img src="${not empty child.imgPath? child.imgPath:'resource/commons/images/defaultgoods.jpg' }" alt="" class="item"> --%>
+							                    	<img:imghandle w="168" imgurl="${not empty child.imgPath? child.imgPath:'resource/commons/images/defaultgoods.jpg' }" h="168" cl="item"  ></img:imghandle>
+							                    </div>
+							                    <p class="text-elips" style="color: black;" title="${child.goodsName }">${child.goodsName }</p>
+						                    <div class="clearfix price price-dex"><span>${child.price } </span>
+						                    	<img src="resource/commons/images/gcar.png" alt="" data-id="${child.goodsId }" class="gcar">
+						                    </div>
+						                </div>
+						             </a>
+					            </li>
+				           </c:forEach>
+			        </ul>
+			    </div>
+			</c:forEach>
+			<%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %> 
+		</div>
+		  <%@include file="/WEB-INF/jsp/commons/nav/search_float_top.jsp" %>
+  </body>
+
+<script type="text/javascript" src="resource/js/common/goods_search.js"></script>
+<script src="resource/commons/js/jquery.flexslider-min.js"></script>
+<script src="resource/commons/js/sli.js"></script>
+<script src="resource/js/common/menu.js"></script>
+<script type="text/javascript">
+$(function ($) {
+    $(".flex-control-nav",".flex-control-paging").css("display","none");
+    
+    $(".list-content .count-title").each(function(){
+		var wrapW = $(this).children().first().width();
+		var res = $(this).width() - wrapW;
+		$(this).find(".ct1-line").css("width" , res-50)
+	})
+	// 点击添加到购物车
+	$(".gcar").click(function (event) {
+			var goodsId = $(this).data("id");
+			$.ajax({
+				url : "cart/add/"+goodsId+"/"+1,
+				type : "get",
+				success:function(data){
+					if(data == 0){//添加成功
+						shoppingCart();
+						//弹窗的确定按钮
+						var btnFn = function(){
+							easyDialog.close();
+						  return false;
+						};
+						easyDialog.open({
+						  container : {
+						    header : '成功',
+						    content : '商品已添加到购物车！',
+						    yesFn : btnFn
+						  }
+						});
+					}else{//商品已存在
+						var btnFn = function(){
+								easyDialog.close();
+							  return false;
+							};
+							easyDialog.open({
+							  container : {
+							    header : '成功',
+							    content : '商品已添加到购物车！',
+							    yesFn : btnFn
+							  }
+							});
+					}
+				}
+			});
+		return false;
+	});
+    var pageIndex = 1;
+    //鲜一下
+    $(document).on("click","#change",function(){
+        var id = $("#terId").val();
+        if(pageIndex>8){
+            pageIndex=1;
+        }
+        $.ajax({
+            url:"category/changeGoods/"+id+"/"+1,
+            type:"post",
+            success:function(data){
+                $("#goods").html(data);
+                pageIndex++;
+            }
+        })
+    });
+});
+</script>
+</html>

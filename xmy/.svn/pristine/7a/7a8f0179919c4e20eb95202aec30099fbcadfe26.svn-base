@@ -1,0 +1,354 @@
+package com.zfj.xmy.app.web.controller.order;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.zfj.base.commons.mini.annotation.Exclusion;
+import com.zfj.base.util.web.WebUtil;
+import com.zfj.xmy.app.web.common.AppLocalInfo;
+import com.zfj.xmy.app.web.common.AppResp;
+import com.zfj.xmy.comment.service.app.AppCommentService;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsOut;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppScreenInDto;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCart;
+import com.zfj.xmy.goods.service.app.AppGoodsService;
+import com.zfj.xmy.goods.service.app.AppShoppingCartService;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppFreightVo;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppGoodsVo;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppOrderAllDto;
+import com.zfj.xmy.order.persistence.app.pojo.dto.AppOrderVo;
+import com.zfj.xmy.order.persistence.app.pojo.dto.CancelOrderInDto;
+import com.zfj.xmy.order.persistence.app.pojo.dto.OrderOutDto;
+import com.zfj.xmy.order.persistence.app.pojo.dto.RefundInDto;
+import com.zfj.xmy.order.service.app.AppOrderService;
+import com.zfj.xmy.order.service.common.CommonOrderService;
+
+@RequestMapping(value="/order",params=SystemConstant.MOBILE_VERSION_V10)
+@RestController
+public class OrderController {
+
+	@Autowired
+	private AppOrderService appOrderService;
+	
+	@Autowired
+	private AppCommentService commentService;
+	
+	@Autowired
+	private AppGoodsService appGoodsService;
+	
+	@Autowired
+	private CommonOrderService commonOrderService;
+	
+	@Autowired
+	private AppShoppingCartService appShoppingCartService;
+	
+	/**
+	 * 查询用户所有订单
+	 * @param request
+	 * @return
+	 * @Description 
+	 * @date 2017年8月1日  上午10:30:54
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<List<OrderOutDto>>
+	 */
+	@RequestMapping("/all")
+	public ResponseEntity<AppResp> all(HttpServletRequest request,
+			@RequestBody AppOrderAllDto appOrderAll){
+		
+		Long userid = AppLocalInfo.getUserId();
+		List<OrderOutDto> dtos = appOrderService.findByUserId(userid,appOrderAll);
+		return AppResp.get(dtos);
+	} 
+	
+	
+	@RequestMapping(value="/add",method=RequestMethod.POST)
+	public ResponseEntity<AppResp> testAdd(@RequestBody AppScreenInDto appScreenInDto){
+		HttpServletRequest request = WebUtil.getRequest() ;
+		List<AppGoodsOut> findGoodsByScreen = appGoodsService.findGoodsByScreen(appScreenInDto);
+		return AppResp.get(findGoodsByScreen);
+	}
+	/**
+	 * 申请退款
+	 * @param request
+	 * @return
+	 * @Description 
+	 * @date 2017年8月1日  上午10:39:44
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<String>
+	 */
+	@RequestMapping("/refund")
+	public ResponseEntity<AppResp> refund(HttpServletRequest request,@RequestBody RefundInDto refundIn){
+		Long userid = AppLocalInfo.getUserId();
+		refundIn.setUserid(userid);
+		appOrderService.refund(refundIn);
+		return AppResp.get();
+	}
+	/**
+	 * 取消订单
+	 * @param request
+	 * @param cancelOrderIn
+	 * @return
+	 * @Description 
+	 * @date 2017年8月1日  下午4:55:14
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<String>
+	 */
+	@RequestMapping("/cancel")
+	public ResponseEntity<AppResp> cancel(HttpServletRequest request,@RequestBody CancelOrderInDto cancelOrderIn){
+		Long userid = AppLocalInfo.getUserId();
+		cancelOrderIn.setUserid(userid);
+		appOrderService.cancelOrder(cancelOrderIn);
+		return AppResp.get();
+	}
+
+	/***
+	 * 订单详情
+	 * @param request
+	 * @param cancelOrderIn
+	 * @return
+	 * @Description 
+	 * @date 2017年10月23日  上午9:20:17
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<AppResp>
+	 */
+	@RequestMapping("/detail")
+	public ResponseEntity<AppResp> detail(HttpServletRequest request,@RequestBody CancelOrderInDto cancelOrderIn){
+		Long userid = AppLocalInfo.getUserId();
+		cancelOrderIn.setUserid(userid);
+		return AppResp.get(appOrderService.OrderDetail(cancelOrderIn));
+	}
+	
+	/**
+	 * 确认收货
+	 * @param request
+	 * @param refundIn
+	 * @return
+	 * @Description 
+	 * @date 2017年8月1日  下午8:39:24
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<String>
+	 */
+	@RequestMapping("/confirmReceipt")
+	public ResponseEntity<AppResp> confirmReceipt(HttpServletRequest request,@RequestBody CancelOrderInDto cancelOrderIn){
+		Long userid = AppLocalInfo.getUserId();
+		cancelOrderIn.setUserid(userid);
+		appOrderService.confirmReceipt(cancelOrderIn);
+		return AppResp.get();
+	}
+
+	/**
+	 * 根据状态分组获取订单数量
+	 * @param request
+	 * @return
+	 * @Description 
+	 * @date 2017年8月3日  下午2:40:57
+	 * 
+	 * 
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<List<OrderStatusCountDto>>
+	 */
+	@RequestMapping("/orderCount")
+	public ResponseEntity<AppResp> getOrderCount(HttpServletRequest request){
+		Long userid = AppLocalInfo.getUserId();
+		return AppResp.get(appOrderService.getOrderCount(userid));
+	}
+	
+
+	/**
+	 * 保存订单  (登录状态)
+	 * @return    
+	 * @return ResponseEntity<AppOrderDir>    
+	 * Date:2017年8月1日 下午1:53:17 
+	 * @author hexw
+	 */
+	@RequestMapping(value="/saveOrder",method=RequestMethod.POST)
+	public ResponseEntity<AppResp> saveOrder(@RequestBody List<AppGoodsVo> vo){
+		long userId = AppLocalInfo.getUserId(); 
+		return AppResp.get(appOrderService.findOrder(vo, userId));
+	}
+	
+
+	/**
+	 *  保存订单 (匿名)
+	 * @param list
+	 * @return
+	 * @Description 
+	 * @date 2017年8月4日  下午2:23:45
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<AppOrderDir>
+	 */
+	@RequestMapping(value="/saveOrderAnonymous",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> saveOrderAnonymous(
+			HttpServletRequest request,
+			@RequestBody List<AppGoodsVo> list){
+	//	List<AppGoodsVo> list = reqSecurityVo.get(List.class);
+		Long userId = AppLocalInfo.getUserId(); 
+		return AppResp.get(appOrderService.findOrder(list, userId));
+	}
+
+	/**
+	 * 修改订单(登录状态下)
+	 * @param vo
+	 * @return    
+	 * @return ResponseEntity<Object>    
+	 * Date:2017年8月1日 下午2:15:10 
+	 * @author hexw
+	 */
+	@RequestMapping(value="/updateOrder",method=RequestMethod.POST)
+	public ResponseEntity<AppResp> updateOrder(@RequestBody AppOrderVo vo){
+		Long userId = AppLocalInfo.getUserId(); 
+		vo.setUserid(userId);
+		return AppResp.get(appOrderService.insertOrder(vo, vo.getList(), true));  
+	}
+	
+	/**
+	 * 修改订单 -完善订单地址等  (匿名)
+	 * @param vo
+	 * @return
+	 * @Description 
+	 * @date 2017年8月4日  下午2:25:40
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<List<PayWay>>
+	 */
+	@RequestMapping(value="/updateOrderAnonymous",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> updateOrderAnonymous(
+			HttpServletRequest request,
+			@RequestBody AppOrderVo vo){
+		String devId = request.getHeader("deviceid");
+		//AppOrderVo vo = reqSecurityVo.get(AppOrderVo.class);
+		vo.setDeviceid(devId);
+		return AppResp.get( appOrderService.insertOrder(vo, vo.getList(), true));  
+	}
+	
+	/**
+	 * 查询下单前的信息(登录状态下)
+	 * @param vo
+	 * @return
+	 * @Description 
+	 * @date 2017年10月26日  下午1:57:59
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<AppResp>
+	 */
+	@RequestMapping(value="/preOrder",method=RequestMethod.POST)
+	public ResponseEntity<AppResp> preOrder(@RequestBody AppOrderVo vo){
+		Long userId = AppLocalInfo.getUserId(); 
+		vo.setUserid(userId);
+		return AppResp.get(appOrderService.insertOrder(vo, vo.getList(), false));  
+	}
+	
+	/**
+	 * 查询下单前的信息   (匿名)
+	 * @param request
+	 * @param vo
+	 * @return
+	 * @Description 
+	 * @date 2017年10月26日  下午1:58:34
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<AppResp>
+	 */
+	@RequestMapping(value="/preOrderAnonymous",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> preOrderAnonymous(
+			HttpServletRequest request,
+			@RequestBody AppOrderVo vo){
+		String devId = request.getHeader("deviceid");
+		//AppOrderVo vo = reqSecurityVo.get(AppOrderVo.class);
+		vo.setDeviceid(devId);
+		return AppResp.get( appOrderService.insertOrder(vo, vo.getList(), false));  
+	}
+	
+	/***
+	 * 获取订单物流信息
+	 * @param request
+	 * @param cancelOrderIn
+	 * @return
+	 * @Description 
+	 * @date 2017年10月10日  下午4:55:39
+	 * @author wy
+	 * 2017
+	 * @return ResponseEntity<AppResp>
+	 */
+	@RequestMapping("/logistics")
+	public ResponseEntity<AppResp> getLogistics(HttpServletRequest request,@RequestBody CancelOrderInDto cancelOrderIn){
+//		Long userid = AppLocalInfo.getUserId();
+//		cancelOrderIn.setUserid(userid);
+		return AppResp.get(commonOrderService.getOrderLogisticsInfo(cancelOrderIn.getOrderId()));
+	}
+	
+	/**
+	 * 登录状态立即购买
+	 * @param shoppingCart
+	 * @return    
+	 * @return ResponseEntity<AppResp>    
+	 * Date:2017年10月30日 上午11:19:33 
+	 * @author hexw
+	 */
+	@RequestMapping("/buyNow")
+	public ResponseEntity<AppResp> buyNow(@RequestBody List<ShoppingCart> shoppingCarts){
+		Long userid = AppLocalInfo.getUserId();
+		// 1. 
+		appShoppingCartService.addGoodsToShoppingCart(shoppingCarts, userid);
+		// 2. 查询商品信息及地址等信息
+		List<AppGoodsVo>  list = new ArrayList<AppGoodsVo>();
+		for (ShoppingCart cart : shoppingCarts) {
+			list.add(appOrderService.createAppGoodsVo(cart));
+		}
+		return AppResp.get(appOrderService.findOrder(list, userid));
+	}
+	
+	/**
+	 * 未登录状态 立即购买
+	 * @param shoppingCart
+	 * @return    
+	 * @return ResponseEntity<AppResp>    
+	 * Date:2017年10月30日 上午11:46:22 
+	 * @author hexw
+	 */
+	@RequestMapping("/buyNowAnonymous")
+	@Exclusion
+	public ResponseEntity<AppResp> buyNowAnonymous(@RequestBody List<ShoppingCart> shoppingCarts){
+		List<AppGoodsVo>  list = new ArrayList<AppGoodsVo>();
+		for (ShoppingCart cart : shoppingCarts) {
+			list.add(appOrderService.createAppGoodsVo(cart));
+		}
+		return AppResp.get(appOrderService.findOrder(list, null));
+	}
+	
+	/**
+	 * 计算运费和开业活动优惠的价格
+	 * @param list
+	 * @param provinces
+	 * @param area
+	 * @return    
+	 * @return ResponseEntity<AppResp>    
+	 * Date:2017年11月13日 上午1:41:09 
+	 * @author hexw
+	 */
+	@RequestMapping("/getFreight")
+	public ResponseEntity<AppResp> getFreight(@RequestBody AppFreightVo vo){
+		Long userid = AppLocalInfo.getUserId();
+		return AppResp.get(appOrderService.getFreight(vo.getList(),vo.getProvinces(),vo.getArea(),userid));
+	}
+}

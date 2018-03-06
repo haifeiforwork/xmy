@@ -1,0 +1,40 @@
+package com.zfj.xmy.common.service.impl;  
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.xmy.common.persistence.dao.UserInfoMapper;
+import com.zfj.xmy.common.persistence.dao.UserMapper;
+import com.zfj.xmy.common.persistence.dao.UserSpendPointsMapper;
+import com.zfj.xmy.common.persistence.pojo.UserSpendPoints;
+import com.zfj.xmy.common.service.CommonUserPointsService;
+/** 
+ * @Title: CommonUserPointsServiceImpl.java 
+ * @Package com.zfj.xmy.common.service.impl 
+ * @Description: 
+ * @author hexw
+ * @date 2017年11月4日 下午2:10:54 
+ */
+@Service
+public class CommonUserPointsServiceImpl extends BaseService implements CommonUserPointsService {
+	
+	@Autowired
+	private UserMapper userMapper;
+	
+	@Autowired
+	private UserInfoMapper userInfoMapper;
+	
+	@Autowired
+	private UserSpendPointsMapper userSpendPointsMapper;
+	
+	@Override
+	public int insertUserSpendPointsMapper(){
+		UserSpendPoints userSpendPoints = new UserSpendPoints();
+		
+		return 0;
+	} 
+	
+	
+}
+  

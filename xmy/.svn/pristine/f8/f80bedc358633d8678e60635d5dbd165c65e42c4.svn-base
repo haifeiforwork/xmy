@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.activity.persistence.pc.dao.PcContainerExMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.activity.persistence.pc.pojo.dto.PcContainerDto" >
+   <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="icon_img" property="iconImg" jdbcType="VARCHAR" />
+    <result column="bg_img" property="bgImg" jdbcType="VARCHAR" />
+    <result column="slogan" property="slogan" jdbcType="VARCHAR" />
+    <result column="category_id" property="categoryId" jdbcType="BIGINT" />
+    <result column="ad_id" property="adId" jdbcType="BIGINT" />
+    <result column="pc_ad_id" property="pcAdId" jdbcType="BIGINT" />
+    <result column="ad_name" property="adName" jdbcType="VARCHAR" />
+    <result column="pc_ad_name" property="pcAdName" jdbcType="VARCHAR" />
+    <result column="goods_ids" property="goodsIds" jdbcType="VARCHAR" />
+    <result column="goods_names" property="goodsNames" jdbcType="VARCHAR" />
+    <result column="weight" property="weight" jdbcType="INTEGER" />
+    <result column="font_color" property="fontColor" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="key_words" property="keyWords" jdbcType="VARCHAR" />
+  </resultMap>
+ <!-- @auth lij @date 2017年8月14日16:14:58 查询货柜信息 -->
+ <select id="selectContainer" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+	select * from container<if test="_parameter != null" ><include refid="sqlcriteria.util.Example_Where_Clause" /></if>ORDER BY weight ASC
+ </select>
+</mapper>

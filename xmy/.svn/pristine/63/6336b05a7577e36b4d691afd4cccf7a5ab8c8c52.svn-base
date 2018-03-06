@@ -1,0 +1,38 @@
+package com.zfj.xmy.order.persistence.pc.pojo.dto;
+
+import com.zfj.xmy.common.persistence.pojo.OrderGoods;
+
+public class PcOrderGoodsDto extends OrderGoods{
+	
+	private String imgPath;//商品图片
+	
+	private String activityName;//活动名称
+	
+	private String presentName;//赠送商品名称
+	
+	public String getActivityName() {
+		return activityName;
+	}
+
+	public void setActivityName(String activityName) {
+		this.activityName = activityName;
+	}
+
+	public String getPresentName() {
+		return presentName;
+	}
+
+	public void setPresentName(String presentName) {
+		this.presentName = presentName;
+	}
+
+	public String getImgPath() {
+		return imgPath;
+	}
+
+	public void setImgPath(String imgPath) {
+		this.imgPath = imgPath;
+	}
+	
+	
+}

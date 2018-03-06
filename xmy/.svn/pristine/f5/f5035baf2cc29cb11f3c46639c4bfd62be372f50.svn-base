@@ -1,0 +1,155 @@
+package com.zfj.xmy.common.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Arrays;
+import java.util.Date;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.zfj.base.exception.BusinessException;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.OrderGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OrderMapper;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.OrderGoods;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.xmy.common.persistence.dao.ShoppingCartMapper;
+import com.zfj.xmy.common.persistence.pojo.ShoppingCart;
+import com.zfj.xmy.common.service.CommonNewActitvityService;
+
+/** 
+ * @Title: CommonNewActitvityServiceImpl.java 
+ * @Package com.zfj.xmy.common.service.impl 
+ * @Description: 
+ * @author zhangh
+ * @date 2018年1月3日 上午11:10:41 
+ */
+@Service
+public class CommonNewActitvityServiceImpl implements CommonNewActitvityService{
+	
+	@Autowired
+	private OrderMapper orderMapper;
+	
+	@Autowired
+	private OrderGoodsMapper orderGoodsMapper;
+	
+	/**
+	 * 判断用户是否购买过特殊商品(拼购商品，三免一商品)
+	 */
+	@Override
+	public Integer OrderContainSpeicleGoods(Long userId, String goodsId) {
+		int i = 0;
+		//1.判断该商品是否包含了特殊商品
+		String[] split = goodsId.split(",");
+		for (String string : split) {
+			//1.1判断是否包含了拼购商品
+			if(string.contains(SystemConstant.NEWACIVITY.LOTTERY_GOODS_ID.toString())){
+				String orderId = "0";
+				String orderGoodsId = "0";
+				ReqData reqData = new ReqData();
+				//0.查询用户以前购买的商品id
+				reqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+				List<Order> list = orderMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				reqData.clearValue();
+				for (Order order : list) {
+					orderId += ","+order.getId();
+				}
+				reqData.putValue("order_id", orderId, SystemConstant.REQ_PARAMETER_IN);
+				List<OrderGoods> selectByExample = orderGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				reqData.clearValue();
+				for (OrderGoods orderGoods : selectByExample) {
+					orderGoodsId += "0"+orderGoods.getGoodsId();
+				}
+				if(orderGoodsId.contains(SystemConstant.NEWACIVITY.LOTTERY_GOODS_ID.toString())){
+					throw new BusinessException(77,"该用户已经购买了拼购商品");//77.表示商品已经购买了拼购商品
+				}
+			}
+			//1.1判断是否包含了三免一商品
+			if(string.contains(SystemConstant.NEWACIVITY.BUY_THREE_FREE_ONE.toString())){
+				String orderId = "0";
+				String orderGoodsId = "0";
+				ReqData reqData = new ReqData();
+				//0.查询用户以前购买的商品id
+				reqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+				List<Order> list = orderMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				reqData.clearValue();
+				for (Order order : list) {
+					orderId += ","+order.getId();
+				}
+				reqData.putValue("order_id", orderId, SystemConstant.REQ_PARAMETER_IN);
+				List<OrderGoods> selectByExample = orderGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				reqData.clearValue();
+				for (OrderGoods orderGoods : selectByExample) {
+					orderGoodsId += "0"+orderGoods.getGoodsId();
+				}
+				if(orderGoodsId.contains(SystemConstant.NEWACIVITY.BUY_THREE_FREE_ONE.toString())){
+					throw new BusinessException(78,"该用户已经购买了三免一商品");//78.表示已经购买了三免一商品
+				}
+			}
+		}
+		return i;
+	}
+	@Autowired
+	private ShoppingCartMapper shoppingCartMapper;
+	@Override
+	public void addGoodsToCart(List<ShoppingCart> shoppingCarts,
+			List<ShoppingCart> list, Long goodsId,Long userId,Integer goodsNum,Integer actId,Integer points) {
+		if(SystemConstant.NEWACIVITY.LOTTERY_GOODS_ID.equals(goodsId)){//1.如果该商品是拼购抽奖
+			if(shoppingCarts.size()>0){
+				throw new BusinessException(52,"拼购商品只能单独购买，请先结算购物车其他商品后继续购买。");
+			}else{
+				ShoppingCart shoppingCart = new ShoppingCart();
+				shoppingCart.setCreateTime(new Date());
+				shoppingCart.setGoodsId(goodsId);
+				shoppingCart.setNum(1);//拼购商品只能购买一件（前台也应该要验证）
+				shoppingCart.setUserId(userId);
+				shoppingCart.setActivityPoints(0);
+				shoppingCartMapper.insert(shoppingCart);
+			}
+		}else if(!Arrays.asList(SystemConstant.NEWACIVITY.BUY_THREE_FREE_ONE).contains(goodsId)){//2.如果该商品不是拼购抽奖,也不是买三免一
+			for(ShoppingCart cart:shoppingCarts){
+				if(SystemConstant.NEWACIVITY.LOTTERY_GOODS_ID.equals(cart.getGoodsId())){
+					throw new BusinessException(53,"购物车中包含拼购商品，请先结算购物车商品后再购买。");
+				}
+			}
+			if ( list.size() > 0) {  //如果购物车已存在  只叠加商品数量
+				ShoppingCart shoppingCart = list.get(0);
+				shoppingCart.setNum(shoppingCart.getNum() + goodsNum);
+				shoppingCartMapper.updateByPrimaryKey(shoppingCart);
+			} else {
+				ShoppingCart shoppingCart = new ShoppingCart();
+				shoppingCart.setCreateTime(new Date());
+				shoppingCart.setGoodsId(goodsId);
+				shoppingCart.setNum(goodsNum);
+				shoppingCart.setUserId(userId);
+				if(ObjectUtil.isNotNull(actId)){//如果该商品是积分活动商品
+					shoppingCart.setActivityPoints(points);
+					shoppingCart.setActId(actId);
+				}
+				shoppingCartMapper.insert(shoppingCart);
+			}
+		}else{//3.如果该商品是买三免一
+			for(ShoppingCart cart:shoppingCarts){
+				if(Arrays.asList(SystemConstant.NEWACIVITY.BUY_THREE_FREE_ONE).contains(cart.getGoodsId())){
+					throw new BusinessException(54,"亲~您已经购买过或购物车已包含买三免一商品，不能重复购买哦！");
+				}
+				if(SystemConstant.NEWACIVITY.LOTTERY_GOODS_ID.equals(cart.getGoodsId())){
+					throw new BusinessException(53,"购物车中包含拼购商品，请先结算购物车商品后再购买。");
+				}
+			}
+			ShoppingCart shoppingCart = new ShoppingCart();
+			shoppingCart.setCreateTime(new Date());
+			shoppingCart.setGoodsId(goodsId);
+			shoppingCart.setNum(1);//三免一商品也只能购买一件(前台也需要验证)
+			shoppingCart.setUserId(userId);
+			shoppingCart.setActivityPoints(0);
+			shoppingCartMapper.insert(shoppingCart);
+		}
+	}
+
+}

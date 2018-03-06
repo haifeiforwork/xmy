@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.goods.persistence.common.dao.TermDataExMapper" >
+  
+<resultMap id="BaseResultMap" type="com.zfj.xmy.goods.persistence.common.pojo.dto.TermDataDir" >
+  <id column="id" property="id" jdbcType="BIGINT" />
+  <result column="name" property="name" jdbcType="VARCHAR" />
+  <result column="parent_id" property="parentId" jdbcType="BIGINT" />
+  <result column="parentName" property="parentName" jdbcType="VARCHAR" />
+  <result column="sn" property="sn" jdbcType="VARCHAR" />
+  <result column="word_seg" property="wordSeg" jdbcType="VARCHAR" />
+  <result column="weight" property="weight" jdbcType="INTEGER" />
+  <result column="icon" property="icon" jdbcType="VARCHAR" />
+  <result column="status" property="status" jdbcType="INTEGER" />
+</resultMap>
+<resultMap id="ResultMapWithBLOBs" type="com.zfj.xmy.common.persistence.pojo.TermData" extends="BaseResultMap" >
+  <result column="des" property="des" jdbcType="LONGVARCHAR" />
+</resultMap>
+  
+<resultMap id="BaseResultMap1" type="com.zfj.xmy.goods.persistence.common.pojo.dto.TermDataDto" >
+  <id column="id" property="id" jdbcType="BIGINT" />
+  <result column="parent_id" property="parentId" jdbcType="BIGINT" />
+  <result column="name" property="name" jdbcType="VARCHAR" />
+  <result column="vid" property="vid" jdbcType="BIGINT" />
+  <result column="sn" property="sn" jdbcType="VARCHAR" />
+  <result column="status" property="status" jdbcType="INTEGER" />
+  <result column="weight" property="weight" jdbcType="INTEGER" />
+  <result column="word_seg" property="wordSeg" jdbcType="VARCHAR" />
+  <result column="icon" property="icon" jdbcType="VARCHAR" />
+  <result column="parentName" property="parentName" jdbcType="VARCHAR" />
+</resultMap>
+  
+<select id="findCategory" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+	select * from term_data 
+  <if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+ 
+<!-- <select id="findCategoryList" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap1">
+	select *,(select name from term_data b where a.parent_id=b.id )   parentName  from term_data a 
+	
+  <if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select> -->
+ 
+
+<select id="findCategoryList" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+	select *,(select name from term_data b where a.parent_id=b.id )   parentName  from term_data a 
+
+  <if test="_parameter != null" >
+     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+   <if test="orderByClause != null" >
+     order by ${orderByClause}
+   </if>
+</select>
+<!--  根据goods 的分类id集合，获取到一级分类 -->
+<select id="getCategoryByGoodsCategoryIds" resultMap="ResultMapWithBLOBs">
+	select * from term_data where id in (
+select DISTINCT parent_id from term_data where id in(
+			SELECT
+					c.id
+				FROM
+					goods_category a
+				INNER JOIN goods b ON a.goods_id = b.id
+				INNER JOIN term_data c ON a.cid = c.id
+				AND c.vid = 2
+				AND c.parent_id != 0
+				WHERE
+					a.goods_id = #{0}
+)
+)
+</select>
+
+ 
+  </mapper>

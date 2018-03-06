@@ -1,0 +1,7 @@
+.navigation .navigation-left .left-chunk3 ul .index:after{display: none;}
+.successful-tip{width: 100%;background-color: #FFFFFF;height: 400px;margin-top: 50px;border: 1px solid #DADADA;width: 1248px;}
+.successful-tip .matter{width: 430px;height: 200px;margin:100px auto;text-align: center;padding-top: 20px;}
+.successful-tip .matter .state{font-size: 20px;color: #258912;font-weight: 500;}
+.successful-tip .matter .state i{font-size: 50px;margin-right: 10px;position: relative;top: 10px;}
+.successful-tip .matter .tag{margin-top: 15px;font-size: 13px;color:#6C6C6C;}
+.successful-tip .matter .tag span{border:1px solid #DDDDDD;background-color: #F5F5F4;font-size: 12px;padding: 2px 10px;margin-left: 10px;cursor: pointer;}

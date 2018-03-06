@@ -1,0 +1,51 @@
+/*.content{bottom: 0;}*/
+ .container .weui-loadmore_line .weui-loadmore__tips{background-color: f0f0f0;color: #333;font-size: 0.8rem;top: -.8em;width:50%;padding:0;}
+ .container .weui-loadmore_line{border-top: 1px solid #333;position: relative;width: 50%;margin-bottom: 0.2rem;margin-top: 1.2rem;}
+ .container-wrap .more{position: absolute;right: -50%;top: -18px;z-index: 55;font-size: 0.65rem; margin-top: 0.3rem}
+ .container-wrap .more img{width: 14px;height: 14px;position: relative;top: 1px;left: -2px;}
+ .list-wrap .container-wrap:first-child .weui-loadmore_line{margin-top: 0.8rem;}
+ 
+ /*锟皆讹拷锟斤拷式*/
+        .container .logo-area img{width: 100%;}
+        ul{list-style-type: none;padding: 0;margin: 0;}
+        .container-wrap{padding: 0 0.5rem;}
+        .classfy-second .container-wrap:first-child{padding-top:0.6rem;}
+        .classfy-second .container-wrap:not(:first-child){margin-top: -0.55rem;}
+        /*锟斤拷锟斤拷锟斤拷锟斤拷*/
+        .top-nav{margin-top: 0;color: #000;overflow: hidden;}
+        .top-nav .weui-cells{margin-top: 0;width:85%;background-color: #58B701;float: left;font-size: 0.6rem;height: 70px;overflow-y: hidden;overflow-x: scroll;white-space: nowrap;}
+        .top-nav .weui-cells::-webkit-scrollbar{height: 0px;}
+        .top-nav .weui-cells::-webkit-scrollbar-track{ display: none;}
+        .top-nav .weui-cells::-webkit-scrollbar-thumb{height: 1px;}
+        .top-nav .weui-cells:after, .weui-cells:before{position: static;}
+        .top-nav .weui-cells>.active{border-bottom: 2px solid #FFE601;}
+        .top-nav .weui-cell{display:inline-block;width: 20%;padding: 0;text-align: center;height: 70px;}
+        .top-nav .weui-cell:nth-of-type(5n){margin-right: 0;}
+        .top-nav .drow{width: 15%;float: left;height: 70px;}
+        .top-nav .drow-down{position:relative;background-color: #61CE00;}
+        .top-nav .drow-down img{width:25px;height:25px;position:absolute;top:50%;left:50%;margin-top:-12px;margin-left:-12px;}
+        .top-nav .drow-up{width: 25px;height: 25px;}
+         .top-nav .drow-up img{width:100%;height:100%;display:blcok;}
+        .top-nav .nav-img{width: 26px;height: 26px;margin-bottom:10px;}
+        .top-nav .weui-cell:before{position: static;}
+        .top-nav .weui-cell__bd{margin-top: 0.45rem;}
+        /*js锟斤拷式*/
+        .top-nav .nav-title{font-size: 0.6rem;color: #485a3a;display: none;padding: 0.5rem 0.5rem;}
+        .top-nav .nav-title .drow-up{float: right;margin-top: -0.2rem;}
+        .top-nav .col-33{width: 33.3333%;float: left;margin-right: 0;}
+        .top-nav .js-cells{width: 100%;height: 100%;}
+        .js-top-nav{position: fixed;top: 0;left: 0;width: 100%;height: 100%;background-color: #58B701;z-index: 99;padding-top: 50px;}
+
+
+        /*锟斤拷锟叫达拷图*/
+        .banner img{width: 100%;display: block}
+        .banner{position: relative;}
+        /*锟斤拷锟*/
+        .banner .more{position: absolute;right: 0;bottom: 29%;z-index: 55;font-size: 0.6rem;color: #333;}
+        .banner .more img{width: 12px;height: 12px;position: relative;top: 1px;left: -2px;display: inline-block;}
+
+        .list-content{width: 100%;overflow: hidden}
+        .list-content .item{width: 22.35%;float: left;margin-right: 3.5%;text-align: center;background-color: #FFF;padding: 0 0 0.1rem;margin-bottom: 4%;}
+        .list-content .item .shop-list-img{width: 100%;height:79px;}
+        .list-content .item .fl-name{margin-top: 0rem;font-size: 0.7rem;overflow: hidden;text-overflow:ellipsis;white-space: nowrap}
+        .list-content .item:nth-of-type(4n){margin-right: 0;}

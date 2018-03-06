@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zfj.xmy.comment.persistence.app.pojo.dao.FeedbackExMapper" >
+   <resultMap id="BaseResultMap" type="com.zfj.xmy.comment.persistence.app.pojo.dto.FeedbackDto" >
+   <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="no" property="no" jdbcType="VARCHAR" />
+    <result column="phone_num" property="phoneNum" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="merchant" property="merchant" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="handle_person_name" property="handlePersonName" jdbcType="VARCHAR" />
+    <result column="handle_time" property="handleTime" jdbcType="TIMESTAMP" />
+    <result column="genre" property="genre" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+  </resultMap>
+  <!-- 查询全部购物卡 -->
+  <select id="findFeedback" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+  	select f.*,u.`name` from feedback f INNER JOIN `user` u on f.user_id=u.id
+	  <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" /></if>
+	   <if test="orderByClause != null" >
+	     order by ${orderByClause}
+	   </if>
+  </select>
+  <select id="countFeedback" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer">
+  	select count(*) from feedback f INNER JOIN `user` u on f.user_id=u.id
+	  <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+	  </if>
+  </select>
+</mapper>

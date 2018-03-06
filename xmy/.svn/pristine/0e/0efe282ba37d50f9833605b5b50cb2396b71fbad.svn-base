@@ -1,0 +1,103 @@
+package com.zfj.xmy.pc.web.controller.activity;  
+
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.zfj.base.commons.mini.annotation.CheckLogin;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.AppBuyAndPresentOutDto;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.LimitActivityDir;
+import com.zfj.xmy.activity.persistence.pc.pojo.dto.PcDownColumDto;
+import com.zfj.xmy.activity.service.common.LimitActivityService;
+import com.zfj.xmy.common.DateUtils;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.VocabularyConstant;
+import com.zfj.xmy.common.persistence.pojo.AdImage;
+
+/** 
+ * @Title: ActivityController.java 
+ * @Package com.zfj.xmy.pc.web.controller.activity 
+ * @Description: 
+ * @author hexw
+ * @date 2017年8月11日 下午4:33:50 
+ */
+@RestController
+@RequestMapping("/activity")
+public class ActivityController {
+
+	@Autowired
+	private LimitActivityService limitActivityService;
+	
+	/**
+	 * 查询活动
+	 * @param request
+	 * @return    
+	 * @return ModelAndView    
+	 * Date:2017年8月11日 下午4:38:01 
+	 * @author hexw
+	 */
+	@RequestMapping("/findActivity")
+	public ModelAndView findActivity(HttpServletRequest request){
+		List<LimitActivityDir> list = limitActivityService.findLimitActivityList(null);
+		LimitActivityDir  iceActivity = new  LimitActivityDir();  //冰点价
+		LimitActivityDir  daydayActivity = new  LimitActivityDir();  //天天特价
+		LimitActivityDir  weekActivity = new  LimitActivityDir();  //每周特价
+		LimitActivityDir  woleActivity = new  LimitActivityDir();  //整件惠
+		for (LimitActivityDir limitActivityDir : list) {
+			if (limitActivityDir.getType() == SystemConstant.LIMITACTIVITY.FREEZING) {
+				iceActivity = limitActivityDir;
+			}
+			if (limitActivityDir.getType() == SystemConstant.LIMITACTIVITY.DAYDAY) {
+				daydayActivity = limitActivityDir;
+			}
+			if (limitActivityDir.getType() == SystemConstant.LIMITACTIVITY.WEEKWEEK) {
+				weekActivity = limitActivityDir;
+			} 
+			if (limitActivityDir.getType() == SystemConstant.LIMITACTIVITY.WOLE) {
+				woleActivity = limitActivityDir;
+			}
+		}
+		request.setAttribute("iceActivity", iceActivity);
+		request.setAttribute("daydayActivity", daydayActivity);
+		request.setAttribute("weekActivity", weekActivity);
+		request.setAttribute("woleActivity", woleActivity);
+		List<AppBuyAndPresentOutDto> buyAndPresent = limitActivityService.findBuyAndPersentActivity(); //买即赠
+		request.setAttribute("buyAndPresent", buyAndPresent);
+		List<AdImage> topImg = limitActivityService.findActivityImage(SystemConstant.AdInfoImage.BIG_IMAGE); //大图
+		request.setAttribute("topImg", topImg);
+		List<AdImage> goodsAdImage = limitActivityService.findActivityImage(SystemConstant.AdInfoImage.SMALL_IMAGE); //小图
+		if (goodsAdImage.size() > 0) {
+			AdImage rightAdImage = goodsAdImage.get(0); //取权重最小的作为右边的广告图 
+			request.setAttribute("rightAdImage", rightAdImage);
+			request.setAttribute("goodsAdImg", goodsAdImage.subList(1, goodsAdImage.size()));
+		}
+		request.setAttribute("twelveOfTomorrow", DateUtils.getTwelveOfTomorrow().getTime());  //明天12点的结束时间
+		request.setAttribute("dayEnd", DateUtils.getDayEnd().getTime()); //当天的结束时间
+		request.setAttribute("endDayOfWeek", DateUtils.getEndDayOfWeek().getTime()); //本周的结束时间
+		request.setAttribute("time", new Date());
+		return new ModelAndView("/activity/activity");
+	}
+	/**
+	 * 查询活动商品是否是在可购买范围
+	 * @param goodsId
+	 * @return Integer
+	 * @author lij
+	 * @date 2018年1月9日 下午4:04:10
+	 */
+	@RequestMapping("/selaGoods")
+	public Integer selaGoods(@Param("goodsId") Long goodsId){
+		
+		Integer integer = limitActivityService.isSelaGoodsByGoodsId(goodsId);
+		
+		return integer;
+	}
+	
+}
+  

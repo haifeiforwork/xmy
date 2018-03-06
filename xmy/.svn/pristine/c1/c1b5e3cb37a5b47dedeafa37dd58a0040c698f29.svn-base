@@ -1,0 +1,512 @@
+$(function($){
+	
+	var islogin = $("#isLogin").val();  //是否登录  0已登录 1未登录
+	var accPoints = $("#accPoints").val(); //用户积分
+	$(".dNav").hide();
+	$(".outer").hide();
+	$(".navigation").show();
+	//加减
+	function shop(increase,box,add) {
+	    var num;
+	    increase.click(function () {
+	    	var id = $(this).parent().attr("value");
+	        var boxx = $(this).parent().find(box);
+	        var price = $(this).parent().parent().parent().children().eq(6).text();
+	        var actId = $(this).data("actid"); //积分活动id
+	        var points = $(this).data("points"); //积分活动商品 单个商品的积分
+	        var limitNum = $(this).data("num");  //限购数量
+	        var allNum = $(this).data("allnum"); //商品剩余的数量
+	        num = boxx.val();
+	        num--;
+	        if (num<1){
+	            return false
+	        }
+	        var newprice = num*price;
+	        newprice = newprice.toFixed(2);
+	        point = parseInt(newprice);
+	        if (limitNum != '' && limitNum!=0) {  //检查活动商品是否超过了限购的数量
+	        	if (num > limitNum || num > allNum) {
+	        		warnPop("您已超过了活动商品的限购数量");
+	        		return;
+	        	}
+	        }
+	        if (actId != '') { //积分活动
+	        	if (points*num > accPoints) {
+	        		warnPop("积分不足");
+	        		return;
+	        	} else {
+	        		$(this).parent().parent().parent().children().eq(5).children().first().text(points*num+"积分");
+	        	}
+	        } else {
+	        	$(this).parent().parent().parent().children().eq(5).children().first().text(newprice.trim());
+	 	        $(this).parent().parent().parent().children().eq(8).children().first().text(point);
+	 	        updateSumPrice(); //动态修改总价格 
+	        }
+	        boxx.val(num);
+	        $.ajax({
+	        	url:"cart/updateShoppingCart/"+id+"/"+num,
+	        	type:"get",
+	        })
+	    });
+	    add.click(function () {
+	    	var limitNum = $(this).data("num");
+	    	var id = $(this).parent().attr("value");
+	        var boxx = $(this).parent().find(box);
+	        var price = $(this).parent().parent().parent().children().eq(6).text();
+	        var actId = $(this).data("actid"); //积分活动id
+	        var points = $(this).data("points"); //积分活动商品 单个商品的积分
+	        var allNum = $(this).data("allnum"); //商品剩余的数量
+	        num = boxx.val();
+	        num++;
+	        var mycars=new Array(7725,7726,7727,7728,7729,7730); // 三免一活动商品
+	        //var pgcGoodsId = 7158 ; //拼购凑商品
+	        if(contains(mycars,id)){
+	        	warnPop("您购买的活动商品数量超限！");
+        		return;
+	        }
+//	       if (pgcGoodsId == id ) {
+//	    	   warnPop("拼购活动商品单个会员只能限购一份");
+//       		   return;
+//	       }
+	       if (limitNum != '' && limitNum!=0) {  //检查活动商品是否超过了限购的数量
+	        	if (num > limitNum || num > allNum) {
+	        		warnPop("您已超过了活动商品的限购数量");
+	        		return;
+	        	}
+	        }
+	        var newprice = num*price;
+	        newprice = newprice.toFixed(2);
+	        var point = parseInt(newprice);
+	        if (actId != '') { //积分活动
+	        	if (points*num > accPoints) {
+	        		warnPop("积分不足");
+	        		return;
+	        	} else {
+	        		$(this).parent().parent().parent().children().eq(5).children().first().text(points*num+"积分");
+	        	}
+	        } else {
+		        $(this).parent().parent().parent().children().eq(5).children().first().text(newprice.trim());
+		        $(this).parent().parent().parent().children().eq(8).children().first().text(point);
+		        updateSumPrice(); //动态修改总价格 
+	        }
+	        boxx.val(num);
+	        $.ajax({
+	        	url:"cart/updateShoppingCart/"+id+"/"+num,
+	        	type:"get",
+	        })
+	    })
+	}
+	shop($(".crease"),$(".nuum"),$(".add"));
+	
+	//促销信息
+	$(document).ready(function () {
+	    $(".c-price").click(function () {
+	        $(this).toggleClass("active-c").parents().siblings().find(".c-price").removeClass("active-c");
+	        $(this).find(".c-price-des").toggle().parents().siblings().find(".c-price-des").hide();
+	    });
+	});
+	//购物数量变化时商品总金额也变化
+	$(".nuum").change(function(){
+		var id = $(this).parent().attr("value");
+		var price = $(this).parent().parent().parent().children().eq(6).text();
+		var num = $(this).val(); //修改过后的数量
+		var limitNum = $(this).data("num"); //商品限购数量
+		var actId = $(this).data("actid"); //积分活动id
+		var initNum = $(this).data("initnum"); //未修改之前的商品数量
+		var points = $(this).data("points"); //积分活动商品 单个商品的积分
+		var allNum = $(this).data("allnum"); //商品剩余的数量
+		var mycars=new Array(7725,7726,7727,7728,7729,7730); // 三免一活动商品
+        var pgcGoodsId = 7158 ; //拼购凑商品
+        if(contains(mycars,id)){
+        	warnPop("您购买的活动商品数量超限！");
+        	$(this).val(1);
+    		return;
+        }
+       /*if (pgcGoodsId == id ) {
+    	   warnPop("拼购活动商品单个会员只能限购一份");
+    	   $(this).val(1);
+   		   return;
+       }*/
+		var reg = /^\+?[1-9]\d*$/;
+		if (!reg.test(num)) {
+			$(this).val(initNum);
+			warnPop("请输入正确的数量");
+			return ;
+		}
+		if (limitNum != '' && limitNum!=0) {  //检查活动商品是否超过了限购的数量
+        	if (num > limitNum || num >　allNum) {
+        		$(this).val(initNum);
+        		warnPop("您购买的活动商品数量超限！");
+        		return;
+        	}
+        } 
+		var newprice = num*price;
+        newprice = newprice.toFixed(2);
+        point = parseInt(newprice);
+        if (actId != '') {
+        	if (points*num > accPoints) {
+        		$(this).val(initNum);
+        		warnPop("积分不足");
+        		return;
+        	} else {
+        		 $(this).parent().parent().parent().children().eq(5).children().first().text(points*num+"积分");
+        	}
+        } else {
+	    	 $(this).parent().parent().parent().children().eq(5).children().first().text(newprice.trim());
+	         $(this).parent().parent().parent().children().eq(8).children().first().text(point);
+	         updateSumPrice(); //动态修改总价格 
+        }
+        $.ajax({
+        	url:"cart/updateShoppingCart/"+id+"/"+num,
+        	type:"get",
+        })
+	});
+	//删除购物车的商品
+	$(".delete").click(function(){
+		var isLoad = 0;
+		var id = $(this).attr("value");
+		//弹窗的确定按钮绑定的事件
+		var btnFn = function(){
+			$.ajax({
+				url:"cart/delShoppingCart/"+id,
+				type:"get",
+				success:function(){
+					$.ajax({
+			    		url:"commons/findCart",
+			    		type:"get"
+			    	});
+					window.location.href = "/cart/shoppingCart";
+				}
+			});
+			return false;
+		};
+		//弹窗
+		easyDialog.open({
+		  container : {
+		    header : '提示',
+		    content : '您确定要删除该商品吗？',
+		    yesFn : btnFn,
+		    noFn:true
+		  }
+		});
+		
+	});
+	
+	//将商品移入收藏夹
+	$(".bookMark").click(function(){
+		var goodsId = $(this).attr("value");//商品id
+		var categoryName = $(this).attr("tname");//商品分类名称
+		var activityId = $(this).attr("actid");//活动id
+		var activityType = $(this).attr("acttype");//活动类型
+		if (islogin == 1) {
+			warnPop("登录过后才能收藏商品");
+			return ;
+		}
+		$.ajax({
+			url:"cart/addCollection",
+			type:"post",
+			data:{"goodsId":goodsId,"categoryName":categoryName,"activityType":activityType,"activityId":activityId},
+			dataType: "JSON",
+			success:function (data) {
+				warnPop("已加入收藏夹！");
+			}
+		})
+	});
+	
+	
+	//全选商品
+	$(".all").click(function(){
+		var goodsNum = 0;
+		var sumPrice = 0;
+		var mes = this.checked;
+		if(mes){
+			$("#sum").css("background-color","#358912");
+		}else{
+			$("#sum").css("background-color","#B0B0B0");
+		}
+		$(".goods").each(function(){
+			this.checked = mes;
+		});
+		$(".goods").each(function(){
+			if(this.checked){
+				goodsNum += 1;
+				var price = $(this).parent().parent().parent().children().eq(5).children().first().text();
+				if(price.indexOf("积分")==-1){
+					sumPrice += parseFloat(price);
+				}
+			}
+		})
+		$("#sumPrice").text(sumPrice.toFixed(2));
+		$("#goodsNum").text(goodsNum);
+	});
+	
+	
+	//单个勾选
+	$(".goods").click(function(){
+		var goodsNum = 0;
+		var sumPrice = 0;
+		var mes = 0;
+		$(".goods").each(function(){
+			if(this.checked){
+				goodsNum += 1;
+				var price = $(this).parent().parent().parent().children().eq(5).children().first().text();
+				if(price.indexOf("积分")==-1){
+					sumPrice += parseFloat(price);
+				}
+			}
+		});
+		$(".goods").each(function(){
+			if(this.checked){
+				mes+=1;
+			}
+		})
+		if(mes<$(".goods").length){
+			$(".all").attr("checked",false);
+		}else{
+			$(".all").attr("checked",true);
+		}
+		if(mes>0){
+			$("#sum").css("background-color","#358912");
+		}else{
+			$("#sum").css("background-color","#B0B0B0");
+		}
+		$("#sumPrice").text(sumPrice.toFixed(2));
+		$("#goodsNum").text(goodsNum);
+	});
+	
+	
+	//领取优惠卷
+	$(".get-tiket-btn").click(function(){
+		$("#coupon").toggle();
+	});
+	//关闭弹窗
+	$("#closecoupon").click(function(){
+		$("#coupon").hide();
+	})
+	
+	//结算商品
+	$(".balances-all").click(function(){
+		var goodsId = "0";
+		$(".goods").each(function(){
+			if(this.checked){
+				goodsId =goodsId + ","+$(this).val();
+			}
+		})
+		if(goodsId == "0"){
+			warnPop("请勾选需要购买的商品！");
+			return false;
+		}else{
+			$.ajax({
+				url:"commons/user",
+				type:"get",
+				dataType:"json",
+				success:function(data){
+					if(data==0){
+						window.location.href = "/order/commitOrder/"+goodsId;
+					}else{
+						//匿名购买的按钮事件
+						var btnFn = function(){
+							window.location.href = "/order/commitOrder/"+goodsId;
+						  return false;
+						};
+						//去登陆的按钮事件
+						var login = function(){
+							window.location.href ="/user/login";
+							return false;
+						}
+						//弹窗
+						easyDialog.open({
+						  container : {
+						    header : '成功',
+						    content : '您确定要匿名购买该商品吗！',
+						    yesFn : btnFn,
+						    noFn:login,
+						    noText:"去登陆"
+						  }
+						});
+					}
+				}
+			});
+		}
+	});
+	
+	$(".titket-area-use .item-title").click(function(){
+		$(this).next().toggle();
+	})
+	
+	//优惠券领取
+	$(".get-tiket-line .titket-get-btn").click(function (){
+		var couponid = $(this).data("couponid");
+		var _this = $(this);
+		  $.ajax({
+				url: "cart/getCoupon",
+				type: "POST",
+				data:{"couponId":couponid},
+				dataType: "JSON",
+				async: false,
+				success:function(data){
+					if (data.resultCode == 200) {
+						warnPop("领取优惠券成功");
+						_this.find("button").css("background","#999");
+						_this.find("button").text("已领取");
+					}else {
+						warnPop(data.data);
+					}
+				}
+			});    
+	});
+	
+	
+	//批量删除商品
+	$(".table-all-list .batchDel").click(function (){
+		var goodsIds = checkGoods();
+		$.ajax({
+			url:"cart/batchDelGoods",
+			type:"post",
+			data:{"goodsIds":goodsIds},
+			success:function(){
+				$.ajax({
+		    		url:"commons/findCart",
+		    		type:"get"
+		    	});
+				window.location.href = "/cart/shoppingCart";
+			}
+		});
+	});
+
+	//批量移除失效商品
+	$(".table-all-list .batchRemove").click(function (){
+		var goodsIds = getNoneffectiveGoods();
+		$.ajax({
+			url:"cart/batchDelGoods",
+			type:"post",
+			data:{"goodsIds":goodsIds},
+			success:function(){
+				$.ajax({
+		    		url:"commons/findCart",
+		    		type:"get"
+		    	});
+				window.location.href = "/cart/shoppingCart";
+			}
+		});
+	});
+
+	//批量移入收藏夹
+	$(".table-all-list .batchCollect").click(function (){
+		var goodsIds = checkGoods();
+		if (islogin == 1) {
+			warnPop("登录过后才能收藏商品");
+			return ;
+		}
+		$.ajax({
+			url:"cart/addBatchCollectionGoods",
+			type:"post",
+			data:{"goodsIds":goodsIds},
+			success:function(data){
+				warnPop("收藏商品成功");
+			}
+		})
+	});
+	
+	
+	checkGoods();//初始化检查有无选中的商品
+	updateSumPrice(); //初始化总价格
+});
+
+
+
+//获取选中商品的id
+function checkGoods() {
+	var goodsIds = "";
+	$(".goods").each(function() {
+		if(this.checked){
+			goodsIds = goodsIds+$(this).val()+",";
+		}
+	})
+	if (goodsIds != "") {
+		$("#sum").css("background-color","#358912");
+	}
+	return goodsIds;
+}
+
+//选取无效的商品
+function getNoneffectiveGoods() {
+	var goodsIds = "";
+	$(".noneffective").each(function() {
+		goodsIds = goodsIds+$(this).data("id")+",";
+	})
+	return goodsIds;
+}
+
+
+//提示弹框
+function warnPop(text){
+	var btnFn = function(){
+		easyDialog.close();
+		return false;
+	}
+	easyDialog.open({
+	  container : {
+	    header : "提示",
+	    content : text,
+	    yesFn : btnFn
+	  }
+	});
+}
+
+//动态修改商品总价格
+function updateSumPrice(sumPrice){
+	var sumPrice = 0,isUpdate  = false;;
+	$(".goods").each(function(){
+		if(this.checked){
+			var price = $(this).parent().parent().parent().children().eq(5).children().first().text();
+			if(price.indexOf("积分")==-1){
+				sumPrice += parseFloat(price);
+			}
+			isUpdate = true;
+		}
+	})
+	if (isUpdate) {
+		$("#sumPrice").text(sumPrice.toFixed(2));
+	}
+}
+
+
+
+//判断为火狐的时候数量框样式变化
+window.onload = function(){
+	getOs();
+};
+function getOs()  
+{  
+    var OsObject = "";  
+   if(navigator.userAgent.indexOf("MSIE")>0) {  
+        return "MSIE";  
+   }  
+   if(isFirefox=navigator.userAgent.indexOf("Firefox")>0){  
+        $(".category .balances-wrap .shop-car .nuum").css("top","1px")
+   }  
+   if(isSafari=navigator.userAgent.indexOf("Safari")>0) {  
+        return "Safari";  
+   }   
+   if(isCamino=navigator.userAgent.indexOf("Camino")>0){  
+        return "Camino";  
+   }  
+   if(isMozilla=navigator.userAgent.indexOf("Gecko/")>0){  
+        return "Gecko";  
+   }  
+     
+}  
+function contains(arr, obj) {  
+    var i = arr.length;  
+    while (i--) {  
+        if (arr[i] == obj) {  
+            return true;  
+        }  
+    }  
+    return false;  
+}  
+
+
+
+

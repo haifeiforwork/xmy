@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.ExtensionOrderExMapper" >
+
+	<!-- 扩展订单存储过程 -->
+	<select id="extendOrderTime"  parameterType="java.lang.Integer" resultType="java.lang.Integer">
+	        <![CDATA[
+	            {call xmy_extend_time ()}
+	        ]]>
+    </select>
+    
+    <!-- 订单备注存储过程 -->
+	<select id="addOrderRemark"  parameterType="java.lang.Integer" resultType="java.lang.Integer">
+	        <![CDATA[
+	            {call xmy_remark_add ()}
+	        ]]>
+    </select>
+	
+</mapper>

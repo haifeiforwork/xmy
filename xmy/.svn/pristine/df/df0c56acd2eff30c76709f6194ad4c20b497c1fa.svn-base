@@ -1,0 +1,49 @@
+/**
+ * 
+ */
+require(["common"],function(){
+	
+	detailsTag = $(".recharge-msg");
+
+    $(".container .recharge-msg:gt(0)").hide()
+    $(" .recharge-nav .item").click(function () {
+        $(this).addClass("active").siblings().removeClass("active");
+        var indexx = $(".recharge-nav .item").index(this);
+        $(".recharge-msg").eq(indexx).show().siblings().hide();
+    }) ;
+    
+    $(".pull-left").click(function() {
+    	location.href = "mine/center";
+    });
+    
+    doBind = function(cardNum, cardPassword) {
+    	$.ajax({
+    		url : 'user/shoppingCardBinding',
+    		data : {'cardNum' : cardNum, 'cardPassword' : cardPassword},
+    		dataType : 'json',
+    		type : 'post',
+    		success : function(data) {
+    			if(data.status == 1) {
+    				$.alert("绑定成功");
+    			} else {
+    				$.alert(data.msg);
+    			}
+    		}
+    	});
+    }
+    
+    $(".bind").click(function() {
+    	doBind($("#cardNum").val(), $("#cardPassword").val());
+    });
+    
+    loadDetails = function() {
+    	$.ajax({
+    		url : 'user/activateDetail',
+    		type : 'post',
+    		dataType : 'json',
+    		success : function(data) {
+    			
+    		}
+    	});
+    }
+}) ;

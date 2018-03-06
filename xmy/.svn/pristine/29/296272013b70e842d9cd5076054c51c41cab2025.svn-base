@@ -1,0 +1,30 @@
+require(["common"],function(){
+	
+	//后退
+	$(".pull-left").click(function(){
+		location.href = "home/home" ;
+	}) ;
+	
+/*	$(".col-33").click(function() {
+		location.href = "goods/goodsInfo?goodsId=" + $(this).attr("goods-id");
+	});*/
+	
+	//立即领取
+	$(".get-coupon").click(function(){
+		var that = $(this);
+		var data = {id : $(this).attr("coupon-id")} ;
+		$.commonAjax(data,"coucenter/getCoupon","json",function(sum){
+			//$.alert(sum.data.map);
+			if(sum.data.map == 1){
+				$.alert("该优惠券已经领完") ;
+				return ;
+			}
+			if(sum.data.map == 2){
+				$.alert("您已经领取过此优惠券");
+				return ;
+			}
+			$.alert("领取成功");
+			that.parent('.col-28').find('.floor-pro').html("已领"+sum.data.usePercent+"%");
+		}) ;
+	}) ;
+});

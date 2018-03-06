@@ -1,0 +1,40 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+  	<title>香满圆-西部农产品电商平台,重庆菜园坝水果市场荣誉出品</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/news/about_xmy.css">
+  </head>
+  
+  <body>
+  	<%@include file="/WEB-INF/jsp/commons/nav/nav_homepage.jsp" %>
+ <!--内容部分-->
+<div class="container-white add-top-bottomm">
+	<iframe  src="/page/${name}/${name}.html" scrolling="no" width="100%" frameborder="0" onload="proccessIframe(this)" height="1600" id="content-iframe"></iframe>
+</div>
+</div>
+  <%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %>
+  <script type="text/javascript" src="resource/commons/js/jquery-1.9.1.min.js"></script>
+  <script type="text/javascript" src="resource/js/common/menu.js"></script>
+  <script type="text/javascript" src="resource/js/news/about_xmy.js"></script>
+  <script type="text/javascript">
+  function proccessIframe(ifm) {
+          ifm.height=ifm.contentWindow.document.body.scrollHeight;
+          if (navigator.userAgent.indexOf("MSIE")>0) { // IE  
+               setTimeout(function(){
+                    ifm.height=ifm.contentWindow.document.body.scrollHeight;
+                },1000); 
+            }; 
+            load_ifmheight(ifm);
+        };
+      function load_ifmheight(ifm){
+          $("div",$(document.getElementById('content-iframe').contentWindow.document.body)).mouseover(function(){
+          ifm.height=ifm.contentWindow.document.body.scrollHeight;
+        });
+      }
+  
+</script>
+  </body>
+</html>

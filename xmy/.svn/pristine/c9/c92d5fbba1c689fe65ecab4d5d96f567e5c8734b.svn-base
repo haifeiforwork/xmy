@@ -1,0 +1,32 @@
+package com.zfj.xmy.common.service;
+
+import java.util.List;
+
+import com.zfj.xmy.common.persistence.pojo.ShoppingCart;
+
+/** 
+ * @Title: CommonNewActitvityService.java 
+ * @Package com.zfj.xmy.common.service 
+ * @Description: 
+ * @author zhangh
+ * @date 2018年1月3日 上午11:08:47 
+ */
+public interface CommonNewActitvityService {
+	/**
+	 * 商品添加购物车
+	 * 
+	 * 普通商品
+	 * @param shoppingCarts 用户购物车记录
+	 * @param list			当前商品购物车记录
+	 * @param goodsId		商品id
+	 * @param userId		用户id
+	 * @param goodsNum		商品数量
+	 * 
+	 * 积分活动商品
+	 * @param actId			积分商品活动id
+	 * @param points		积分活动购买积分
+	 * 
+	 * @author zhangh
+	 */
+	void addGoodsToCart(List<ShoppingCart> shoppingCarts,List<ShoppingCart> list,Long goodsId,Long userId,Integer goodsNum,Integer actId,Integer points);
+}

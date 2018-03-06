@@ -1,0 +1,314 @@
+package com.zfj.xmy.wap.web.controller.home;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.http.util.TextUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.alibaba.fastjson.JSONArray;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.base.util.web.WebUtil;
+import com.zfj.xmy.activity.persistence.app.pojo.dto.AppActivityInDto;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.LimitActivityDir;
+import com.zfj.xmy.activity.persistence.common.pojo.dto.WapContainerOutDto;
+import com.zfj.xmy.activity.service.cms.ContainerService;
+import com.zfj.xmy.activity.service.cms.IndexSettingService;
+import com.zfj.xmy.activity.service.common.LimitActivityService;
+import com.zfj.xmy.activity.service.wap.WapContainerService;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.pojo.AdImage;
+import com.zfj.xmy.common.persistence.pojo.IndexConfig;
+import com.zfj.xmy.goods.service.cms.CmsGoodsService;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcCartDto;
+import com.zfj.xmy.order.persistence.pc.pojo.dto.PcGoodsDto;
+import com.zfj.xmy.order.service.cms.AdvertisementService;
+import com.zfj.xmy.order.service.pc.PcShoppingCartService;
+import com.zfj.xmy.order.service.pc.ShoppingCartService;
+import com.zfj.xmy.redis.RedisTokenManager;
+import com.zfj.xmy.wap.web.common.HeadJudger;
+import com.zfj.xmy.wap.web.common.SessionInfo;
+import com.zfj.xmy.wap.web.controller.common.CommonController;
+import com.zfj.xmy.wap.web.controller.home.dto.IndexWapDataDto;
+
+/**
+ * 首页控制层
+ * @author cj
+ * @createDate 2017年10月27日
+ *
+ */
+@Controller
+@RequestMapping("/home")
+public class HomeController extends CommonController{
+	
+	@Autowired
+	private IndexSettingService indexSettingService;
+	@Autowired
+	private ContainerService containerService;
+	@Autowired
+	private AdvertisementService advertisementService;
+	@Autowired
+	private CmsGoodsService cmsGoodsService;
+	@Autowired
+	private LimitActivityService limitActivityService;
+	@Autowired
+	private WapContainerService wapContainerService;
+	@Autowired
+	private PcShoppingCartService pcShoppingCartService;
+	@Autowired
+	private ShoppingCartService cartService;
+	@Autowired
+	private RedisTokenManager redisTokenManager;
+	
+	
+	/**首页页面*/
+	private final static String HOME_PAGE = "home/home" ;
+	/**模块*/
+	private final static String MODEL = "model";
+	/**下载页面*/
+	private final static String DOWNLOAD = "index/download";
+	
+	/**
+	 * 首页信息
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws ParseException 
+	 */
+	@RequestMapping("/home")
+	public ModelAndView home(HttpServletRequest request, HttpServletResponse response,String goodsId) throws ParseException{
+		//1.判断ua
+		String agent = request.getHeader("User-Agent");
+		logger.info("浏览器:" + agent);
+		agent = agent.toLowerCase();
+		if(HeadJudger.IsDesktop(agent) || HeadJudger.isPad(agent)) {
+			return new ModelAndView("redirect:http://www.xmy888.net");
+		}
+		//2.个人购物车 - 不缓存
+		indexShopingCart(response, goodsId);	
+		//3.存入当前时间
+		setpageTime(request);
+		
+		//5.其它
+		request.setAttribute(MODEL, "home");
+		//4 .优先从缓存中取redis缓存
+		String indexData = redisTokenManager.get(SystemConstant.REDIS_B2C_WAP_INDEX_DATA);
+			if (!StringUtil.isEmpty(indexData)) {
+				Map<String, Object> data=new HashMap<String, Object>();
+				IndexWapDataDto wapData = com.alibaba.fastjson.JSONObject.parseObject(indexData, IndexWapDataDto.class) ;
+				
+				data.put("topAdInfo", wapData.getTopAdInfo());
+				data.put("firstAdInfo", wapData.getFirstAdInfo());
+				data.put("containers", wapData.getContainers());
+				data.put("limitActivityDir", wapData.getLimitActivityDir());
+				
+				data.putAll(getLimitData());
+				request.setAttribute("data", data);
+				return new ModelAndView(HOME_PAGE);
+			}
+		refreshIndex(request, response);
+		return new ModelAndView(HOME_PAGE);
+	}
+	
+	/**
+	 * 首页需要缓存的数据
+	 * @return
+	 * @Description 
+	 * @date 2017年12月27日  上午10:39:24
+	 * @author wy
+	 * 2017
+	 * @return Map<String,Object>
+	 */
+	public Map<String, Object> indexCacheData(){
+		Map<String, Object> data = new HashMap<String, Object>();
+		IndexConfig indexConfig = indexSettingService.getIndexConfig();
+		//获取top轮播图
+		Long topAdId = indexConfig.getTopAdId();
+		List<AdImage> adInfo = advertisementService.findAdImage(String.valueOf(topAdId));
+		data.put("topAdInfo", adInfo);
+		//1号广告位
+		Long firstAdId = indexConfig.getFirstAdId();
+		List<AdImage> firstAdInfo = advertisementService.findAdImage(String.valueOf(firstAdId));
+		data.put("firstAdInfo", firstAdInfo);
+		//获取货柜
+		String containerIds = indexConfig.getContainerIds();
+		List<WapContainerOutDto> containerOuts = wapContainerService.findAllContainer(containerIds);
+		
+		
+		data.put("containers", containerOuts);
+		AppActivityInDto activityInDto = new AppActivityInDto() ;
+		activityInDto.setType(1);
+		List<LimitActivityDir> limitActivityDir = limitActivityService.findLimitActivityList(activityInDto) ;
+		data.put("limitActivityDir", limitActivityDir);
+		return data;
+	}
+	
+	
+	//首页个人购物车处理
+	public void indexShopingCart(HttpServletResponse response,String goodsId){
+		List<PcGoodsDto> shoppingCart = null;//购物车商品
+		Integer temp=0;
+		HttpSession session = WebUtil.getSession() ;
+		SessionInfo sessionInfo=SessionInfo.get();
+		if(ObjectUtils.isEmpty(sessionInfo)){
+			temp++;
+			session.setAttribute("temp", temp);
+		}
+		if(!TextUtils.isEmpty(goodsId)){
+			if((!ObjectUtils.isEmpty(session.getAttribute("temp")))&&Integer.parseInt(session.getAttribute("temp").toString())==1){
+				
+				PcCartDto cartDto = new PcCartDto();
+				shoppingCart = cartService.findChooseGoods(goodsId);
+				String[] split = goodsId.split(",");
+				for (int i=0;i<shoppingCart.size();i++) {
+					
+					pcShoppingCartService.addShoppingCart(sessionInfo.getUserId(), shoppingCart.get(i).getId(), shoppingCart.get(i).getCartNum());
+					cartDto.setGoodsId(Long.parseLong(split[i]));
+					cartService.deleteShoppingCart(cartDto, response);
+				}
+				session.removeAttribute("temp");
+			}
+		}
+	}
+	/**
+	 * 设置页面时间
+	 * @param response
+	 * @param goodsId
+	 * @Description 
+	 * @date 2017年12月27日  上午10:47:46
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	public void setpageTime(HttpServletRequest request){
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("M月d日");
+
+		long mill = 0;
+		int hours = date.getHours();
+		mill += hours * 60 * 60 * 1000;
+		int minutes = date.getMinutes();
+		mill += minutes * 60 * 1000;
+		int seconds = date.getSeconds();
+		mill += seconds * 1000;
+		logger.info("当前时间毫秒数:" + mill);
+		request.setAttribute("currMill", mill);
+		String curr = sdf.format(date);
+		request.setAttribute("curr", curr);
+		
+		Date yesterday=new Date();//取时间
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(yesterday);
+		calendar.add(calendar.DATE, -1);//把日期往后增加一天.整数往后推,负数往前移动
+		yesterday=calendar.getTime(); //这个时间就是日期往后推一天的结果 
+		SimpleDateFormat formatter = new SimpleDateFormat("M月d日");
+		String yesterdayStr = formatter.format(yesterday);
+		request.setAttribute("yesterday", yesterdayStr);
+	}
+	
+	/**
+	 * 设置redis缓存
+	 * @param request
+	 * @param response
+	 * @Description 
+	 * @date 2017年12月27日  上午11:32:04
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	@RequestMapping("/refreshIndex")
+	public @ResponseBody String refreshIndex(HttpServletRequest request, HttpServletResponse response){
+		
+		// 1 .设置redis缓存
+		Map<String, Object> cacheData = indexCacheData();
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.putAll(cacheData);
+		data.putAll(getLimitData());
+		request.setAttribute("data", data);
+		redisTokenManager.setKey(SystemConstant.REDIS_B2C_WAP_INDEX_DATA, new JSONObject(cacheData).toString());
+		return "OK";
+/*		//遍历查询所属几级分类
+		for(WapContainerOutDto dto : containerOuts) {
+			dto.setLevel(wapContainerService.checkIsLevelOne(dto.getCategoryId()) ? 1 : 2);
+		}*/
+		
+		
+/*		List<Container> containers = containerService.findsContainerWithContainerIdString(containerIds);
+		List<WapContainerOutDto> containerOuts=new ArrayList<WapContainerOutDto>();
+		for (Container container : containers) {
+			WapContainerOutDto containerOutDto=new WapContainerOutDto();
+			BeanUtils.copyProperties(container, containerOutDto);
+			containerOutDto.setLevel(wapContainerService.checkIsLevelOne(container.getCategoryId()) ? 1 : 2);
+			//货柜的广告
+			Long adId = container.getAdId();
+			List<AdImage> adImage = advertisementService.findAdImage(String.valueOf(adId));
+			containerOutDto.setContainerAd(adImage);
+			//货柜的商品
+			String goodsIdsString = container.getGoodsIds();
+			List<Object> goodsIds = StringUtils.exchangeSplit(goodsIdsString);
+			List<Goods> goods = cmsGoodsService.findsGoodsWithIds(goodsIds);
+			List<AppGoodsCondense> goodsCondenses=new ArrayList<>();
+			for (Goods goods2 : goods) {
+				AppGoodsCondense appGoodsCondense=new AppGoodsCondense();
+				BeanUtils.copyProperties(goods2, appGoodsCondense);
+				goodsCondenses.add(appGoodsCondense);
+			}
+			containerOutDto.setGoods(goodsCondenses);
+			containerOuts.add(containerOutDto);
+		}*/
+		
+	}
+	
+	/**
+	 * 计算当前与结束时间
+	 * @return
+	 */
+	private Map<String,Long> getLimitData(){
+		
+		Map<String,Long> map = new HashMap<String,Long>();
+		Date date = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 12);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		if(cal.getTime().getTime() < date.getTime()){
+			cal.add(Calendar.DAY_OF_YEAR, 1);
+		}
+		map.put("nowTime", date.getTime());
+		map.put("endTime", cal.getTime().getTime());
+		
+		return map;
+	}
+	
+	/**
+	 * 下载页面
+	 * @param request
+	 * @param response
+	 * @param goodsId
+	 * @return
+	 * @throws ParseException
+	 */
+	@RequestMapping("/download")
+	public ModelAndView download(HttpServletRequest request, HttpServletResponse response, String fromWap) throws ParseException{
+		request.setAttribute("fromWap", fromWap);
+		return new ModelAndView(DOWNLOAD);
+	}
+	
+}

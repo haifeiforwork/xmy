@@ -1,0 +1,76 @@
+.navigation .navigation-left .left-chunk3 ul .index:after{display: none;}
+.navigation .navigation-left .left-chunk2 .logo-near{color: #FFF;margin-top: 15px;}
+/*上方步骤*/
+.balances{position: relative;margin-top: 41px;}    
+.step1{border-radius: 2.5px 0 0 2.5px;}
+.step4{border-radius: 0 2.5px 2.5px 0;}
+.balancess-step{position: relative;width: 140px;float: right;font-size: 14px;text-align: center;color: #32860A;background-color: #CAECB5;height: 5px;}
+.balancess-step .text{color:#CAECB5;font-size: 13px;}
+.balancess-step .circle{width: 20px;height: 20px;line-height: 20px;border-radius: 10px;background-color: #CAECB5;position: relative;z-index: 3;display: inline-block;top: -8px;}
+.balances .active{background-color: #ffab00;}
+.balances .active .circle{background-color: #ffab00;}
+.balances .active .text{color: #ffab00;}
+.status{border-bottom: 1px solid #D7D7D7;padding-bottom: 30px;}
+.status .state{font-size: 16px;color: #258912;font-weight: 600;margin-top: 30px;}
+.status .state i{font-size: 30px;margin-right: 5px;position: relative;top: 5px;}
+.status .state .payment{float: right;color: #666;font-weight: 500;}
+.status .state .payment b{color:#C80105;font-size: 18px;}
+.status .hint{font-size: 14px;color: #666;margin-top: 5px;}
+.status .hint span{color: #C80105;}
+.payment-choice{margin-top: 20px;}
+.payment-choice .account-balance{font-size: 13px;color: #444;}
+.payment-choice .account-balance .select{position: relative;top: 3px;width: 15px;height: 15px;}
+.payment-choice .account-balance .pay{margin-left: 30px;}
+.payment-choice .account-balance .pay input{width: 55px;height: 20px;text-align: center;margin:0 5px;outline: none;line-height: 20px;border:1px solid #CCCCCC;position: relative;top: -1px;}
+.payment-choice .account-balance .activate{margin-left: 20px;border:1px solid #CCCCCC;font-size: 12px;padding: 3px 10px;border-radius: 2px;cursor: pointer;}
+.payment-choice .choice{margin-top: 20px;}
+.payment-choice .choice .choice-ul{overflow: hidden;font-size: 14px;color: #666;margin-left: 20px;}
+.payment-choice .choice .choice-ul li{float: left;border:1px solid #DCDCDC;width: 120px;height: 40px;text-align: center;line-height: 40px;margin-left: 10px;cursor: pointer;position: relative;}
+.payment-choice .choice .choice-ul li .hx{width: 100%;height: 1px;background-color: #fff;position: absolute;bottom: 0px;left: 0px;z-index: 9999;display: none;}
+.payment-choice .choice .choice-ul li.active{background-color: #fff;border:2px solid #258912;border-bottom: 0px;color: #258912;}
+.payment-choice .level{width: 1248px;height: 400px;border:1px solid #DCDCDC;background-color: #fff;position: relative;top: -1px;}
+.payment-choice .level .annunciate{font-size: 12px;color: #C8CDD8;text-align: right;margin-top: 7px;margin-right: 5px;}
+.payment-choice .level .annunciate i{font-size: 16px;margin-right: 5px;position: relative;top: 1px;}
+.payment-choice .level .option{width: 840px;margin:123px auto;}
+.payment-choice .level .option .option-ul{overflow: hidden;}
+.payment-choice .level .option .option-ul li{float: left;width: 250px;margin-left: 30px;overflow: hidden;}
+.payment-choice .level .option .option-ul li input{position: relative;top: 10px;}
+.payment-choice .level .option .option-ul li:nth-child(1){margin-left: 0;}
+.payment-choice .level .option .option-ul li .chunk{width: 220px;height: 38px;border:1px solid #949494;float: right;line-height: 38px;text-align: center;font-size: 14px;color: #444;cursor: pointer;position: relative;}
+.payment-choice .level .option .option-ul li .chunk i{font-size: 24px;margin-right: 5px;}
+.payment-choice .level .option .option-ul li .chunk.active{border:1px solid #258912;color: #258912;}
+.payment-choice .level .option .option-ul li .active .xz{width: 15px;height: 15px;position: absolute;bottom: 0px;right: 0px;background: url(images/xz.png);background-size: 100% 100%;}
+.payment-choice .level .option .option-ul li .chunk1 i{position: relative;top: 2px;}
+.payment-choice .level .option .option-ul li .chunk1 span{position: relative;top: -2px;}
+.payment-choice .level .option .option-ul li .chunk2 i{position: relative;top: 2px;}
+.payment-choice .level .option .option-ul li .chunk2 span{position: relative;top: -2px;}
+.payment-choice .level .option .option-ul li .chunk3 i{position: relative;top: 0px;}
+.payment-choice .level .option .option-ul li .chunk3 span{position: relative;top: -2px;}
+.payment-choice .level .option .confirm{width: 160px;height: 40px;margin:50px auto;}
+.payment-choice .level .option .confirm button{width: 100%;height: 100%;border:0;background-color: #258912;color: #fff;border-radius: 3px;font-size: 16px;cursor: pointer;outline: none;}
+
+.payment-choice .level .options{width: 450px;margin:61px auto;overflow: hidden;}
+.payment-choice .level .options .options-left{width: 187px;float: left;}
+.payment-choice .level .options .options-left .img{width: 140px;height: 140px;border:1px solid #E7E7E7;padding: 10px 10px;float: right;margin-right: 25px;}
+.payment-choice .level .options .options-left .img img{width: 100%;height: 100%;}
+.payment-choice .level .options .options-left .img canvas{width:158px;height:158px;position:relative;left:-9.5px;top:-9.5px;}
+.payment-choice .level .options .options-left .count{width: 162px;text-align: center;font-size: 12px;color: #666;margin-top: 10px;float: left;}
+.payment-choice .level .options .options-left .count span{color: #F64147;}
+.payment-choice .level .options .options-left .scan{float: left;font-size: 14px;color: #666;padding-left: 40px;position: relative;margin-top: 20px;}
+.payment-choice .level .options .options-left .scan .ewm{position: absolute;top: 4px;left: 0px;}
+.payment-choice .level .options .options-left .scan .ewm i{font-size: 30px;color: #F64147;}
+.payment-choice .level .options .options-right{width: 263px;float: left;text-align: left;}
+.payment-choice .level .options .options-right .img{width: 220px;margin-left: 25px;}
+.payment-choice .level .options .options-right .img img{width: 100%;}
+/*弹窗*/
+#activate-modal .model{width: 400px;left: 50%;margin-left: -200px;top: 50%;margin-top: -100px;}
+#activate-modal .modal-title{background-color: #358812;color: #FFF;padding:0 10px;height: 40px;line-height: 40px;}
+#activate-modal .modal-title .close{float: right;color: #C7F488;}
+#activate-modal .modal-content{padding: 20px 7px}
+#activate-modal .gutter-top{margin-top: 20px;}
+#activate-modal .modal-content .orz-line{line-height: 34px;padding-left: 30px;}
+#activate-modal .modal-content .orz-line .yh-label{font-size: 12px;margin-right: 10px;color: #666;}
+#activate-modal .modal-content .orz-line .yh-input{width: 230px;height: 28px;border: 1px solid #ccc;padding-left: 10px;}
+#activate-modal .btn-this{text-align: center;margin-top: 20px;}
+#activate-modal .action{padding: 6px 15px;  margin-bottom: 0;  font-size: 12px;  line-height: 20px;  color: #333  text-align: center;  vertical-align: middle;  cursor: pointer;  background-color: #f5f5f5;  border: 1px solid #bbb;  -webkit-border-radius: 4px;  -moz-border-radius: 4px;  border-radius: 4px;}
+#activate-modal .action-active{color: #FFF;background-color: #358812;border:none;margin-right: 10px;}

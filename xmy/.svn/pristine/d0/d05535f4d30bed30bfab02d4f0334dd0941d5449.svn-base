@@ -1,0 +1,7 @@
+package com.zfj.xmy.common.persistence.dao;
+
+import com.zfj.xmy.common.persistence.pojo.ShoppingCardRecord;
+
+public interface ShoppingCardRecordMapper extends BaseMapper<ShoppingCardRecord>{
+	
+}

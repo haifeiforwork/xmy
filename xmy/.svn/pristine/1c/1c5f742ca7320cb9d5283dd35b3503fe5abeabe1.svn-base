@@ -1,0 +1,110 @@
+package com.zfj.xmy.user.service.wap.impl;
+
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.xmy.common.persistence.dao.UserAddreesMapper;
+import com.zfj.xmy.common.persistence.pojo.UserAddrees;
+import com.zfj.xmy.user.service.wap.WapAddressService;
+
+@Service
+public class WapAddressServiceImpl extends BaseService implements WapAddressService{
+
+	@Autowired
+	private UserAddreesMapper userAddressMapper;
+	
+	@Override
+	public List<UserAddrees> getUserAddressByUserId(Long userId) {
+		CriteriaParameter parameter = new CriteriaParameter("user_id", userId);
+		parameter.createCriteria().equalTo("type", 0);
+		List<UserAddrees> resultList = userAddressMapper.selectByExample(parameter);
+		return resultList;
+		
+	}
+
+	@Override
+	public Integer updateDefault(Long id) {
+		UserAddrees addrees = userAddressMapper.selectByPrimaryKey(id);
+		List<UserAddrees> address = getUserAddressByUserId(addrees.getUserId());
+		for(UserAddrees addr : address) {
+			if(addr.getIsDefault() == 1) {
+				addr.setIsDefault(0);
+				userAddressMapper.updateByPrimaryKey(addr);
+			}
+		}
+		addrees.setIsDefault(1);
+		int effectRow = userAddressMapper.updateByPrimaryKey(addrees);
+		return effectRow;
+	}
+
+	/**
+	 * 返回0：添加失败 1：添加成功 -1:空
+	 */
+	@Override
+	public int add(UserAddrees address) {
+		if(address.getUserId() == null 
+					|| (address.getMobilePhone() == null || address.getMobilePhone().trim().length() == 0)
+					|| (address.getProvince() == null || address.getProvince().trim().length() == 0)
+					|| (address.getCity() == null || address.getCity().trim().length() == 0)
+					|| (address.getArea() == null || address.getArea().trim().length() == 0)
+					|| (address.getAddress() == null || address.getAddress().trim().length() == 0)) {
+			return -1;
+		}
+		address.setType(0);
+		address.setIsDefault(0);
+		int effectedRow = userAddressMapper.insert(address);
+		return effectedRow;
+	}
+	
+	/**
+	 * 返回0：添加失败 1：添加成功 -1:空
+	 */
+	@Override
+	public int updateAddress(UserAddrees address) {
+		address.setType(0);
+		if(address.getUserId() == null 
+				|| (address.getMobilePhone() == null || address.getMobilePhone().trim().length() == 0)
+				|| (address.getProvince() == null || address.getProvince().trim().length() == 0)
+				|| (address.getCity() == null || address.getCity().trim().length() == 0)
+				|| (address.getArea() == null || address.getArea().trim().length() == 0)
+				|| (address.getAddress() == null || address.getAddress().trim().length() == 0)) {
+		return -1;
+	}
+		int effectedRow = userAddressMapper.updateByPrimaryKey(address);
+		return effectedRow;
+	}
+
+	@Override
+	public UserAddrees getAddress(Long id) {
+		UserAddrees addrees = userAddressMapper.selectByPrimaryKey(id);
+		return addrees;
+	}
+
+	@Override
+	public int del(Long addressId) {
+		UserAddrees addrees = userAddressMapper.selectByPrimaryKey(addressId);
+		int result = userAddressMapper.deleteByPrimaryKey(addressId);
+		if(addrees.getIsDefault() == 1) {
+			CriteriaParameter criteriaParameter = new CriteriaParameter("user_id", addrees.getUserId());
+			criteriaParameter.createCriteria().equalTo("type", 0);
+			criteriaParameter.createCriteria().equalTo("is_default", 0);
+			List<UserAddrees> list = userAddressMapper.selectByExample(criteriaParameter);
+			if(list.size() != 0) {
+				UserAddrees addrees2 = list.get(0);
+				addrees2.setIsDefault(1);
+				int result2 = userAddressMapper.updateByPrimaryKey(addrees2);
+				if(result2 == 0) {
+					return -1;
+				}
+			}
+		}
+		return result;
+	}
+
+}

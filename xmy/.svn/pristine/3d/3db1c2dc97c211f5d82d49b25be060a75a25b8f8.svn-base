@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.GoodsCommExMapper" >
+  <!-- @auth lij @createTime 2017年8月11日14:59:41 查询商品的一级分类名称判断是不是跨境商品 -->
+  <select id="findGoodsIsOut" resultType="String" parameterType="com.appdev.db.common.CriteriaParameter">
+  	select d.name  from goods a
+		INNER JOIN goods_category b on  a.id= b.goods_id
+		inner join term_data c on b.cid = c.id
+		INNER JOIN term_data d on c.parent_id = d.id 
+		<if test="_parameter != null" >
+	       <include refid="sqlcriteria.util.Example_Where_Clause" />
+	    </if>
+  </select>
+</mapper>

@@ -1,0 +1,25 @@
+package com.zfj.xmy.common.service;  
+
+import com.zfj.xmy.common.persistence.pojo.app.AppCouponInDto;
+
+
+/** 
+ * @Title: CommonCouponService.java 
+ * @Package com.zfj.xmy.common.service 
+ * @Description: 
+ * @author hexw
+ * @date 2017年11月22日 下午4:23:12 
+ */
+public interface CommonCouponService {
+	/***
+	 * 领取优惠券
+	 * @param coupon
+	 * @Description 
+	 * @date 2017年11月16日  下午4:15:32
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	void toReceiveCoupon(AppCouponInDto coupon);
+}
+  

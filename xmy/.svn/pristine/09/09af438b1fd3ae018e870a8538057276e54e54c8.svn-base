@@ -1,0 +1,21 @@
+package com.zfj.xmy.common.service;  
+/** 
+ * @Title: CommonUserPointsService.java 
+ * @Package com.zfj.xmy.common.service 
+ * @Description: 
+ * @author hexw
+ * @date 2017年11月4日 下午2:10:21 
+ */
+public interface CommonUserPointsService {
+	
+	/**
+	 * 插入用户积分使用记录
+	 * @return    
+	 * @return int    
+	 * Date:2017年11月4日 下午2:22:58 
+	 * @author hexw
+	 */
+	int insertUserSpendPointsMapper();
+
+}
+  

@@ -1,0 +1,145 @@
+package com.zfj.xmy.user.service.pc;
+
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.UserInfo;
+
+public interface PcUserService {
+
+	/**
+	 * 登录验证
+	 * @author dengq
+	 * @param user
+	 * @return
+	 */
+	public User login(User user) ;
+
+	/**
+	 * 发送手机验证码
+	 * @author dengq
+	 * @param mobilePhone
+	 */
+	public void sendMobileCode(String mobilePhone) ;
+	
+	/**
+	 * 远程校验用户名或者手机号码是否已经被注册
+	 * @author dengq
+	 * @param type 0：验证用户名，1：验证手机号码
+	 * @param key 接受的信息
+	 * @return
+	 */
+	public boolean validUserNameOrMobilePhone(String key,Integer type) ;
+	
+	/**
+	 * 用户注册
+	 * @author dengq
+	 * @param name
+	 * @param password
+	 * @param mobilePhone
+	 * @param mobileCode
+	 */
+	public Long save(String name,String password,String mobilePhone,String mobileCode) ;
+	/**
+	 * 查询用户详细信息
+	 * @param id
+	 * @return UserInfo
+	 * @author lij
+	 * @date 2017年8月7日 上午10:35:45
+	 */
+	public UserInfo getUserInfo(Long id);
+
+	/**
+	 * 根据手机号查找用户id
+	 * @Description 
+	 * @param mobilePhone
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年9月28日下午5:25:48
+	 */
+	Long getIdBymobilePhone(String mobilePhone);
+
+	/**
+	 * 找回密码
+	 * @Description 
+	 * @param password
+	 * @param mobilePhone
+	 * @param mobileCode
+	 * @return
+	 * @Author liuw
+	 * @Date 2017年9月28日下午5:30:27
+	 */
+	Long updateForgotpass(String password, String mobilePhone, String mobileCode);
+
+	/**
+	 * PC端扫码登录
+	 * @param code 获取的码
+	 * @Description 
+	 * @date 2017年9月29日  上午10:56:52
+	 * @author wy
+	 * 2017
+	 * @return void
+	 */
+	public User scancodeLogin(String code);
+
+	/**
+	 * 微信登录 -  集注册和登录
+	 * @param openid
+	 * @return
+	 * @Description 
+	 * @date 2017年9月30日  下午2:15:54
+	 * @author wy
+	 * 2017
+	 * @param token 
+	 * @return User
+	 */
+	public User wechatLogin(String openid, String token);
+
+	/**
+	 * QQ 登录 -  集注册和登录
+	 * @param openid
+	 * @return
+	 * @Description 
+	 * @date 2017年9月30日  下午5:19:18
+	 * @author wy
+	 * 2017
+	 * @return User
+	 */
+	public User qqLogin(String openid, String token);
+	/**
+	 * @param name
+	 * @return UserInfo
+	 * @author lij
+	 * @date 2017年10月10日 下午4:08:44
+	 * 根据用户名查询用户是否存在如果存在并返回用户详细信息
+	 */
+	public UserInfo findUserByName(String name);
+	/**
+	 * 修改用户密码
+	 * @param userid
+	 * @param pwd
+	 * @return int
+	 * @author lij
+	 * @date 2017年10月11日 上午10:12:58
+	 */
+	public int updatePwd(Long userid,String pwd);
+	
+	/**
+	 * 插入订单消费记录
+	 * @param userId
+	 * @param orderId
+	 * @param points    
+	 * @return void    
+	 * Date:2017年11月3日 下午2:39:56 
+	 * @author hexw
+	 */
+	void insertOrderUserSpendPoints(Long userId, Long orderId, Integer points);
+	
+	/**
+	 * 获取用户
+	 * @param id
+	 * @return    
+	 * @return User    
+	 * Date:2017年11月20日 下午3:39:03 
+	 * @author hexw
+	 */
+	User getUser(Long id);
+}

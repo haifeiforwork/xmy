@@ -1,0 +1,661 @@
+package com.zfj.xmy.elasticsearch.service.impl;
+
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import org.apache.commons.beanutils.PropertyUtilsBean;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.ToXContent.Params;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
+import org.elasticsearch.index.search.MultiMatchQuery.QueryBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.ResultsExtractor;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.redis.connection.ConnectionUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import com.appdev.db.common.CriteriaParameter;
+import com.appdev.db.common.CriteriaParameter.Criteria;
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.util.collection.CollectionExtUtils;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.CategoryWordSegMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsSpecCategoryMapper;
+import com.zfj.xmy.common.persistence.dao.TermDataMapper;
+import com.zfj.xmy.common.persistence.pojo.CategoryWordSeg;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.GoodsSpecCategory;
+import com.zfj.xmy.common.persistence.pojo.GoodsWithBLOBs;
+import com.zfj.xmy.common.persistence.pojo.TermData;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.elasticsearch.XmyIndex;
+import com.zfj.xmy.elasticsearch.document.GoodsDoc;
+import com.zfj.xmy.elasticsearch.persistence.dao.ElasticsearchExMapper;
+import com.zfj.xmy.elasticsearch.persistence.pojo.NativeSearchQueryParameter;
+import com.zfj.xmy.elasticsearch.persistence.pojo.SearchConstant.SearchOperation;
+import com.zfj.xmy.elasticsearch.repository.GoodsDocRepository;
+import com.zfj.xmy.elasticsearch.service.GoodsDocService;
+import com.zfj.xmy.util.DataPage;
+@Service
+public class GoodsDocServiceImpl extends BaseService implements GoodsDocService {
+
+	@Autowired
+	private GoodsMapper goodsMapper ;
+	@Autowired
+	private ElasticsearchTemplate elasticsearchTemplate;
+	@Autowired
+	private GoodsDocRepository goodsDocRepository ;
+	@Autowired
+	private ElasticsearchExMapper elasticsearchExMapper ;
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	@Autowired
+	private GoodsSpecCategoryMapper categoryMapper;
+	@Autowired
+	private CategoryWordSegMapper wordSegMapper;
+	@Autowired
+	private TermDataMapper dataMapper;
+	/**
+	 * 批量操作的数据量
+	 */
+	private final int limit = 100 ;
+
+	/**
+	 * 全文搜索
+	 */
+	@Override
+	public DataPage<GoodsDoc> fullTextSearch(NativeSearchQueryParameter nativeSearchQueryParameter) {
+		nativeSearchQueryParameter.setPageSize(20);
+		NativeSearchQueryBuilder nqb = nativeSearchQueryParameter.getNativeSearchQueryBuilder() ;
+		NativeSearchQueryParameter queryParameter = new NativeSearchQueryParameter();
+		MatchQueryBuilder matchQuery = QueryBuilders.matchQuery("fullName", "德国").operator(Operator.AND);
+		//matchQuery.
+		String eslq = "柑橘/柚类";
+		String replaceAll = eslq.replaceAll("/", "");
+		QueryStringQueryBuilder queryStringQuery = QueryBuilders.queryStringQuery("typeId:*133*");
+		/*MatchQueryBuilder matchQuery = QueryBuilders.matchQuery("keywords", "*火龙果*");
+		WildcardQueryBuilder wildcardQuery = QueryBuilders.wildcardQuery("keywords", "*果*");
+		nqb.withFilter(wildcardQuery);*/
+//		
+//		//String esql ="fullName:苹果 or keywords:苹果 ";
+////		QueryStringQueryBuilder queryStringQuery = QueryBuilders.queryStringQuery(esql);
+////		nqb.withQuery(queryStringQuery);
+////		return new DataPage<>(elasticsearchTemplate.queryForPage(nqb.build(),GoodsDoc.class));
+//		NativeSearchQueryParameter nqb = new NativeSearchQueryParameter();
+//		NativeSearchQueryBuilder nsq = nqb.getNativeSearchQueryBuilder() ;
+//        String esql ="categoryName:德国生活馆,厨房清洁";
+//        
+//        QueryStringQueryBuilder queryStringQuery = QueryBuilders.queryStringQuery(esql);
+//        //分词筛选
+        //MatchQueryBuilder matchQuery = QueryBuilders.matchQuery("wordSeg", wordSeg);
+		//nqb.withQuery(queryStringQuery);
+		nqb.withQuery(queryStringQuery);
+		//List<GoodsDoc> list = elasticsearchTemplate.queryForList(nqb.build(), GoodsDoc.class);
+		return new DataPage<>(elasticsearchTemplate.queryForPage(nqb.build(),GoodsDoc.class));
+	}
+
+	/**
+	 * 重构全部索引
+	 * 
+	 * @return
+	 */
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public int rebuildAllIndex() {
+		//删除索引
+		Client client = elasticsearchTemplate.getClient();
+		//client.admin().indices().prepareDelete(XmyIndex.GOODS_INDEX_NAME).execute().actionGet();
+		//创建索引
+		//client.prepareIndex(XmyIndex.GOODS_INDEX_NAME, XmyIndex.GOODS_TYPE).execute().actionGet();
+		// 先删除全部
+		//goodsDocRepository.deleteAll();
+		List<GoodsDoc> listGoodsDoc = elasticsearchExMapper.listGoodsDoc(null);
+		for (GoodsDoc goodsDoc : listGoodsDoc) {
+			goodsDoc.setPublishTime(null);
+			goodsDoc.setKeywords(goodsDoc.getKeywords().trim());
+			goodsDoc.setImgPath(commonGoodsService.getFirstGoodsImg(goodsDoc.getId()));
+		}
+		//int count = batchBulk(SearchOperation.SAVE,parameter) ;
+		/*List<Goods> gList = goodsMapper.selectByExample(null) ;
+		List<GoodsDoc> gdList = new ArrayList<GoodsDoc>() ;
+		for(Goods goods : gList){
+			GoodsDoc goodsDoc = new GoodsDoc() ;
+			goodsDoc.setBrandName(goods.getBrandName()) ;
+			goodsDoc.setCategoryName(goods.getCategoryName()) ;
+			goodsDoc.setFullName(goods.getFullName()) ;
+			goodsDoc.setId(goods.getId()) ;
+			if(!ObjectUtils.isEmpty(commonGoodsService.getFirstGoodsImg(goods.getId()))){
+				goodsDoc.setImgPath(commonGoodsService.getFirstGoodsImg(goods.getId())) ;
+			}
+			goodsDoc.setMainLand(goods.getIsDelivery()) ;
+			goodsDoc.setPrice(goods.getPrice().multiply(new BigDecimal(100)).intValue()) ;
+			goodsDoc.setSumComment(goods.getSumComment()) ;
+			goodsDoc.setSumDeal(goods.getSumDeal()) ;
+			goodsDoc.setDistrRange(0) ;
+			goodsDoc.setKeywords(goods.getKeyword().trim()) ;
+			//goodsDoc.setWordSeg(goods.get);
+			gdList.add(goodsDoc) ;
+		}*/
+		goodsDocRepository.save(listGoodsDoc) ; 
+		return 0 ;
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public int saveIndex(List<Long> ids) {
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		List<Object> idList = new ArrayList<>() ;
+		for(Long id : ids){
+			idList.add(id) ;
+		}
+		criteria.in("id",idList) ;
+		List<GoodsDoc> addList = elasticsearchExMapper.listGoodsDoc(parameter) ;
+		if(!CollectionExtUtils.isEmpty(addList)){
+			goodsDocRepository.save(addList) ;
+			return addList.size() ;
+		}
+		return 0 ;
+	}
+
+	/**
+	 * 更新索引
+	 * 
+	 * @param ids
+	 * @return
+	 */
+	@Transactional(rollbackFor=Exception.class)
+	public int updateIndex(List<Long> ids) {
+		List<Object> idList = new ArrayList<>() ;
+		for(Long id : ids){
+			idList.add(id) ;
+		}
+		CriteriaParameter parameter = new CriteriaParameter() ;
+		Criteria criteria = parameter.createCriteria() ;
+		criteria.in("id",idList) ;
+		int count = batchBulk(SearchOperation.UPDATE,parameter) ;
+		return count ;
+//		// 重构已上架的
+//		if (null != ids && !ids.isEmpty()) {
+//			CriteriaParameter parameter = new CriteriaParameter() ;
+//			Criteria criteria = parameter.createCriteria() ;
+//			criteria.equalTo("is_putway",SystemConstant.GoodsConstant.PUTWAY) ;
+//			int count = batchBulk(SearchOperation.SAVE,parameter) ;
+//			return count ;
+//		}
+//		return 0;
+	}
+
+	/**
+	 * 更新索引
+	 * 
+	 * @param ids
+	 * @return
+	 */
+	@Transactional(rollbackFor=Exception.class)
+	public int updateIndex(Long... ids) {
+		return this.updateIndex(Arrays.asList(ids)) ;
+//		// 重构已上架的
+//		if (null != ids && ids.length > 0) {
+//			return bulkUpdate(Lists.newArrayList(ids),SearchOperation.UPDATE) ;
+//		}
+//		return 0;
+	}
+
+	/**
+	 * 删除索引
+	 * 
+	 * @param ids
+	 * @return
+	 */
+	@Transactional(rollbackFor=Exception.class)
+	public int deleteIndex(List<Long> ids) {
+		int count = 0 ;
+		for(Long id : ids){
+			goodsDocRepository.delete(id) ;
+			count++ ;
+		}
+		return count ;
+//		// 重构已上架的
+//		if (!CollectionExtUtils.isEmpty(ids)) {
+//			int count = bulkUpdate(ids,SearchOperation.DELETE) ;
+//			return count ;
+//		}
+//		return 0;
+	}
+
+	/**
+	 * 删除索引
+	 * 
+	 * @param ids
+	 * @return
+	 */
+	@Transactional(rollbackFor=Exception.class)
+	public int deleteIndex(Long... ids) {
+		return this.deleteIndex(Arrays.asList(ids)) ;
+//		// 重构已上架的
+//		if (null != ids && ids.length > 0) {
+//			int count = bulkUpdate(Arrays.asList(ids),SearchOperation.DELETE) ;
+//			return count ;
+//		}
+//		return 0;
+	}
+
+	private int bulkUpdate(List<Long> ids,SearchOperation searchOperation) {
+		CriteriaParameter parameter = new CriteriaParameter();
+		Criteria criteria = parameter.createCriteria() ;
+		List<Object> idList = new ArrayList<>() ;
+		for(Long id : ids){
+			idList.add(id) ;
+		}
+		criteria.in("id",idList) ;
+		int count = batchBulk(searchOperation,parameter) ;
+		return count ;
+	}
+	
+	/**
+	 * 批量操作索引
+	 * @param searchOperation
+	 * @param parameter
+	 */
+	private int batchBulk(SearchOperation searchOperation,CriteriaParameter parameter){
+		List<GoodsDoc> goodsList = elasticsearchExMapper.listGoodsDoc(parameter) ;
+		int count = elasticsearchExMapper.countGoodsDoc(parameter) ;
+		
+		Client client = elasticsearchTemplate.getClient();
+		BulkRequestBuilder bulk = client.prepareBulk().setRefresh(true);
+		
+		if(!CollectionExtUtils.isEmpty(goodsList)){
+			int pageIndex = 0 ;
+			while (pageIndex * limit < count){
+				int len = (pageIndex + 1) * limit ;
+				len = len > count ? count : len ;
+				List<GoodsDoc> gdList = new ArrayList<>() ;
+				for (int i = pageIndex * limit ;i < len ;i++){
+					if (searchOperation == SearchOperation.DELETE) {
+						bulk.add(client.prepareDelete(XmyIndex.GOODS_INDEX_NAME,XmyIndex.GOODS_TYPE,goodsList.get(i) + "")) ;
+					} else if (searchOperation == SearchOperation.UPDATE) {
+						bulk.add(client.prepareUpdate(XmyIndex.GOODS_INDEX_NAME,XmyIndex.GOODS_TYPE,goodsList.get(i) + "")) ;
+					} else if (searchOperation == SearchOperation.SAVE) {
+						gdList.add(goodsList.get(i)) ;
+					}
+				}
+				if(searchOperation == SearchOperation.SAVE){
+					goodsDocRepository.save(gdList) ;
+					gdList.clear() ;
+				} else if (searchOperation == SearchOperation.DELETE || searchOperation == SearchOperation.UPDATE) {
+					bulk.execute().actionGet() ;
+				}
+				pageIndex++ ;
+			}
+		}
+		return count ;
+	}
+	
+	
+//	@Override
+//	@Transactional(rollbackFor=Exception.class)
+//	public void initTestData() {
+////		elasticsearchTemplate.getClient().admin().indices().create(new CreateIndexRequest(XmyIndex.GOODS_INDEX_NAME)).actionGet() ;
+//		List<Goods> gList = goodsMapper.selectByExample(null) ;
+//		List<GoodsDoc> gdList = new ArrayList<GoodsDoc>() ;
+//		for(Goods goods : gList){
+//			GoodsDoc goodsDoc = new GoodsDoc() ;
+//			goodsDoc.setBrandName(goods.getBrandName()) ;
+//			goodsDoc.setCategoryName(goods.getCategoryName()) ;
+//			goodsDoc.setFullName(goods.getFullName()) ;
+//			goodsDoc.setId(goods.getId()) ;
+//			goodsDoc.setImgPath(goods.getImgPath()) ;
+//			goodsDoc.setMainLand(1) ;
+//			goodsDoc.setPrice(goods.getPrice().multiply(new BigDecimal(100)).intValue()) ;
+//			goodsDoc.setSumComment(goods.getSumComment()) ;
+//			goodsDoc.setSumDeal(goods.getSumDeal()) ;
+//			goodsDoc.setDistrRange(0) ;
+//			goodsDoc.setKeywords(goods.getKeyword()) ;
+//			gdList.add(goodsDoc) ;
+//		}
+//		goodsDocRepository.save(gdList) ;
+//		
+//	}
+	
+	//传入实体类转换为map
+	public static Map<String, Object> beanToMap(Object obj) { 
+		Map<String, Object> params = new HashMap<String, Object>(0); 
+        try { 
+            PropertyUtilsBean propertyUtilsBean = new PropertyUtilsBean(); 
+            PropertyDescriptor[] descriptors = propertyUtilsBean.getPropertyDescriptors(obj); 
+            for (int i = 0; i < descriptors.length; i++) { 
+                String name = descriptors[i].getName(); 
+                if (!"class".equals(name)) { 
+                    if(!name.equals("publishTime")){
+                  	    params.put(name, propertyUtilsBean.getNestedProperty(obj, name)); 
+                    }
+                } 
+            } 
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        } 
+        return params; 
+	}
+	//增加数据  
+	@Override
+	public int addGoods(Long id) {
+		ReqData reqData = new ReqData();
+		reqData.putValue("g.id", id, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("g.is_search", SystemConstant.GoodsConstant.YES, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("g.is_recycle", SystemConstant.GoodsConstant.NOT_RECYCLE, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("g.is_putway", SystemConstant.GoodsConstant.PUTWAY, SystemConstant.REQ_PARAMETER_EQ);
+		List<GoodsDoc> listGoodsDoc = elasticsearchExMapper.listGoodsDoc(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		for (GoodsDoc goodsDoc : listGoodsDoc) {
+			String specId = "0";//分词 id
+			String termDataid = "0";//二级分类ID
+			String parentId = "0";//一级分类ID
+			goodsDoc.setPublishTime(null);
+			if(!ObjectUtils.isEmpty(goodsDoc.getKeywords())){
+				goodsDoc.setKeywords(goodsDoc.getKeywords().trim());
+			}
+			goodsDoc.setImgPath(commonGoodsService.getFirstGoodsImg(goodsDoc.getId()));
+			String worder="全部";
+			if(!ObjectUtils.isEmpty(goodsDoc.getCategoryName())){
+				String categoryName = goodsDoc.getCategoryName();
+				String[] split = categoryName.split(",");
+				for (String string : split) {
+					if(!ObjectUtils.isEmpty(string)){
+						String replaceAll = string.replaceAll("/", "");//斜杠替换
+						worder+=","+replaceAll;
+					}
+				}
+			}
+			//1.查询商品对应的分词id
+			reqData.putValue("goods_id", goodsDoc.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			List<GoodsSpecCategory> goodsCategory = categoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (GoodsSpecCategory goodsSpecCategory : goodsCategory) {
+				specId+=","+goodsSpecCategory.getSpecCategoryId();
+			}
+			//2.查询对应的分词名称并拼接
+			reqData.putValue("id", specId, SystemConstant.REQ_PARAMETER_IN);
+			List<CategoryWordSeg> cateGory = wordSegMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (CategoryWordSeg categoryWordSeg : cateGory) {
+				String replaceAll = categoryWordSeg.getWordSeg().replaceAll("/", "");
+				worder+=","+replaceAll;
+				termDataid += ","+categoryWordSeg.getCid();//二级分类id
+			}
+			//3.查询1级分类的id
+			reqData.putValue("id", termDataid, SystemConstant.REQ_PARAMETER_IN);
+			List<TermData> selectByExample = dataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (TermData termData : selectByExample) {
+				parentId += ","+termData.getParentId();
+			}
+			//4.查询1级分类名称
+			reqData.putValue("id", parentId, SystemConstant.REQ_PARAMETER_IN);
+			List<TermData> selectByExample2 = dataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (TermData termData : selectByExample2) {
+				String replaceAll = termData.getName().replaceAll("/", "");
+				worder+=","+replaceAll;
+			}
+			goodsDoc.setTopId(parentId);
+			goodsDoc.setTypeId(termDataid);
+			goodsDoc.setWordsId(specId);
+			goodsDoc.setWordSeg(worder);
+			
+		}
+		goodsDocRepository.save(listGoodsDoc) ; 
+		return 1;
+	}
+	
+	public static void main(String[] args) {
+		String str = ",果,啊啊,";
+		String[] split = str.split(",");
+		for (String string : split) {
+			if(ObjectUtils.isEmpty(string)){
+				System.out.println("000");
+			}
+			System.out.println(string+"----");
+		}
+	}
+	//删除指定数据
+	@Override
+	public int deleteGoods(Long id) {
+		ReqData reqData = new ReqData();
+		reqData.putValue("g.id", id, SystemConstant.REQ_PARAMETER_EQ);
+		List<GoodsDoc> listCategoryDoc = elasticsearchExMapper.listGoodsDoc(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		Client client = elasticsearchTemplate.getClient();
+		for (GoodsDoc categoryDoc : listCategoryDoc) {
+			client.prepareDelete(XmyIndex.GOODS_INDEX_NAME,XmyIndex.GOODS_TYPE,categoryDoc.getId() + "").get() ;
+		}
+		return 0;
+	}
+	
+	//修改商品信息
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public int updateGoods(Long id){
+		//先删除商品
+		ReqData reqData = new ReqData();
+		reqData.putValue("g.id", id, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("g.is_search", SystemConstant.GoodsConstant.YES, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("g.is_recycle", SystemConstant.GoodsConstant.NOT_RECYCLE, SystemConstant.REQ_PARAMETER_EQ);
+		List<GoodsDoc> listCategoryDoc = elasticsearchExMapper.listGoodsDoc(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		Client client = elasticsearchTemplate.getClient();
+		for (GoodsDoc categoryDoc : listCategoryDoc) {
+			client.prepareDelete(XmyIndex.GOODS_INDEX_NAME,XmyIndex.GOODS_TYPE,categoryDoc.getId() + "").get() ;
+		}
+		//在重新添加
+		for (GoodsDoc goodsDoc : listCategoryDoc) {
+			goodsDoc.setPublishTime(null);
+			if(!ObjectUtils.isEmpty(goodsDoc.getKeywords())){
+				goodsDoc.setKeywords(goodsDoc.getKeywords().trim());
+			}
+			goodsDoc.setImgPath(commonGoodsService.getFirstGoodsImg(goodsDoc.getId()));
+			String specId = "0";//分词 id
+			String termDataid = "0";//二级分类ID
+			String parentId = "0";//一级分类ID
+			goodsDoc.setPublishTime(null);
+			if(!ObjectUtils.isEmpty(goodsDoc.getKeywords())){
+				goodsDoc.setKeywords(goodsDoc.getKeywords().trim());
+			}
+			goodsDoc.setImgPath(commonGoodsService.getFirstGoodsImg(goodsDoc.getId()));
+			String worder="全部";
+			if(!ObjectUtils.isEmpty(goodsDoc.getCategoryName())){
+				String categoryName = goodsDoc.getCategoryName();
+				String[] split = categoryName.split(",");
+				for (String string : split) {
+					if(!ObjectUtils.isEmpty(string)){
+						String replaceAll = string.replaceAll("/", "");//斜杠替换
+						worder+=","+replaceAll;
+					}
+				}
+			}
+			//1.查询商品对应的分词id
+			reqData.putValue("goods_id", goodsDoc.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			List<GoodsSpecCategory> goodsCategory = categoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (GoodsSpecCategory goodsSpecCategory : goodsCategory) {
+				specId+=","+goodsSpecCategory.getSpecCategoryId();
+			}
+			//2.查询对应的分词名称并拼接
+			reqData.putValue("id", specId, SystemConstant.REQ_PARAMETER_IN);
+			List<CategoryWordSeg> cateGory = wordSegMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (CategoryWordSeg categoryWordSeg : cateGory) {
+				String replaceAll = categoryWordSeg.getWordSeg().replaceAll("/", "");
+				worder+=","+replaceAll;
+				termDataid += ","+categoryWordSeg.getCid();//二级分类id
+			}
+			//3.查询1级分类的id
+			reqData.putValue("id", termDataid, SystemConstant.REQ_PARAMETER_IN);
+			List<TermData> selectByExample = dataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (TermData termData : selectByExample) {
+				parentId += ","+termData.getParentId();
+			}
+			//4.查询1级分类名称
+			reqData.putValue("id", parentId, SystemConstant.REQ_PARAMETER_IN);
+			List<TermData> selectByExample2 = dataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (TermData termData : selectByExample2) {
+				String replaceAll = termData.getName().replaceAll("/", "");
+				worder+=","+replaceAll;
+			}
+			goodsDoc.setTopId(parentId);
+			goodsDoc.setTypeId(termDataid);
+			goodsDoc.setWordsId(specId);
+			goodsDoc.setWordSeg(worder);
+		}
+		goodsDocRepository.save(listCategoryDoc) ; 
+		return 0;
+	}
+
+	@Override
+	public int putwayGoods() {
+		ReqData reqData = new ReqData();
+		reqData.putValue("g.is_recycle", SystemConstant.GoodsConstant.NOT_RECYCLE, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("g.is_putway", SystemConstant.GoodsConstant.PUTWAY, SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("g.is_search", SystemConstant.GoodsConstant.YES, SystemConstant.REQ_PARAMETER_EQ);
+		List<GoodsDoc> listGoodsDoc = elasticsearchExMapper.listGoodsDoc(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		for (GoodsDoc goodsDoc : listGoodsDoc) {
+			String specId = "0";//分词 id
+			String termDataid = "0";//二级分类ID
+			String parentId = "0";//一级分类ID
+			//goodsDoc.setPublishTime(null);
+			if(!ObjectUtils.isEmpty(goodsDoc.getKeywords())){
+				goodsDoc.setKeywords(goodsDoc.getKeywords().trim());
+			}
+			goodsDoc.setImgPath(commonGoodsService.getFirstGoodsImg(goodsDoc.getId()));
+			String worder="全部";
+			if(!ObjectUtils.isEmpty(goodsDoc.getCategoryName())){
+				String categoryName = goodsDoc.getCategoryName();
+				String[] split = categoryName.split(",");
+				for (String string : split) {
+					if(!ObjectUtils.isEmpty(string)){
+						String replaceAll = string.replaceAll("/", "");//斜杠替换
+						worder+=","+replaceAll;
+					}
+				}
+			}
+			//1.查询商品对应的分词id
+			reqData.putValue("goods_id", goodsDoc.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			List<GoodsSpecCategory> goodsCategory = categoryMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (GoodsSpecCategory goodsSpecCategory : goodsCategory) {
+				specId+=","+goodsSpecCategory.getSpecCategoryId();
+			}
+			//2.查询对应的分词名称并拼接
+			reqData.putValue("id", specId, SystemConstant.REQ_PARAMETER_IN);
+			List<CategoryWordSeg> cateGory = wordSegMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (CategoryWordSeg categoryWordSeg : cateGory) {
+				String string = categoryWordSeg.getWordSeg().replaceAll("/", "");//斜杠替换
+				worder+=","+string;
+				termDataid += ","+categoryWordSeg.getCid();//二级分类id
+			}
+			//3.查询1级分类的id
+			reqData.putValue("id", termDataid, SystemConstant.REQ_PARAMETER_IN);
+			List<TermData> selectByExample = dataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (TermData termData : selectByExample) {
+				parentId += ","+termData.getParentId();
+			}
+			//4.查询1级分类名称
+			reqData.putValue("id", parentId, SystemConstant.REQ_PARAMETER_IN);
+			List<TermData> selectByExample2 = dataMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			for (TermData termData : selectByExample2) {
+				String replaceAll = termData.getName().replaceAll("/", "");//斜杠替换
+				worder+=","+replaceAll;
+			}
+			goodsDoc.setTopId(parentId);
+			goodsDoc.setTypeId(termDataid);
+			goodsDoc.setWordsId(specId);
+			goodsDoc.setWordSeg(worder);
+			
+		}
+		goodsDocRepository.save(listGoodsDoc) ; 
+		return 1;
+	}
+
+	@Override
+	public List<GoodsDoc> queryAllGoods() {
+		NativeSearchQueryParameter nativeSearchQueryParameter = new NativeSearchQueryParameter();
+		nativeSearchQueryParameter.setPageSize(5000);
+		NativeSearchQueryBuilder nqb = nativeSearchQueryParameter.getNativeSearchQueryBuilder() ;
+		QueryStringQueryBuilder queryStringQuery = QueryBuilders.queryStringQuery("fullName:* *");
+		nqb.withQuery(queryStringQuery);
+		List<GoodsDoc> list = elasticsearchTemplate.queryForList(nqb.build(), GoodsDoc.class);
+		return list;
+	}
+}

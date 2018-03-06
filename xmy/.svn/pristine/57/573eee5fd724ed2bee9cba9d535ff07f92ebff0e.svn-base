@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.common.persistence.dao.OrderGoodsMapper" >
+  <resultMap id="BaseResultMap" type="com.zfj.xmy.common.persistence.pojo.OrderGoods" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="order_id" property="orderId" jdbcType="BIGINT" />
+    <result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="sum_price" property="sumPrice" jdbcType="DECIMAL" />
+    <result column="points" property="points" jdbcType="INTEGER" />
+    <result column="sum_points" property="sumPoints" jdbcType="INTEGER" />
+    <result column="no" property="no" jdbcType="BIGINT" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="activity_type" property="activityType" jdbcType="INTEGER" />
+    <result column="activity_id" property="activityId" jdbcType="BIGINT" />
+    <result column="supplier" property="supplier" jdbcType="VARCHAR" />
+    <result column="present_goods_id" property="presentGoodsId" jdbcType="BIGINT" />
+    <result column="present_goods_name" property="presentGoodsName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_id, goods_id, `name`, num, price, sum_price, points, sum_points, `no`, 
+    type_name, activity_type, activity_id, supplier, present_goods_id, present_goods_name
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from order_goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExampleAndPage" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from order_goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.appdev.db.common.CriteriaParameter" >
+    delete from order_goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="countByExample" parameterType="com.appdev.db.common.CriteriaParameter" resultType="java.lang.Integer" >
+    select count(*) from order_goods
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update order_goods
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.orderId != null" >
+        order_id = #{record.orderId,jdbcType=BIGINT},
+      </if>
+      <if test="record.goodsId != null" >
+        goods_id = #{record.goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null" >
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.num != null" >
+        num = #{record.num,jdbcType=INTEGER},
+      </if>
+      <if test="record.price != null" >
+        price = #{record.price,jdbcType=DECIMAL},
+      </if>
+      <if test="record.sumPrice != null" >
+        sum_price = #{record.sumPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.points != null" >
+        points = #{record.points,jdbcType=INTEGER},
+      </if>
+      <if test="record.sumPoints != null" >
+        sum_points = #{record.sumPoints,jdbcType=INTEGER},
+      </if>
+      <if test="record.no != null" >
+        `no` = #{record.no,jdbcType=BIGINT},
+      </if>
+      <if test="record.typeName != null" >
+        type_name = #{record.typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.activityType != null" >
+        activity_type = #{record.activityType,jdbcType=INTEGER},
+      </if>
+      <if test="record.activityId != null" >
+        activity_id = #{record.activityId,jdbcType=BIGINT},
+      </if>
+      <if test="record.supplier != null" >
+        supplier = #{record.supplier,jdbcType=VARCHAR},
+      </if>
+      <if test="record.presentGoodsId != null" >
+        present_goods_id = #{record.presentGoodsId,jdbcType=BIGINT},
+      </if>
+      <if test="record.presentGoodsName != null" >
+        present_goods_name = #{record.presentGoodsName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update order_goods
+    set id = #{record.id,jdbcType=BIGINT},
+      order_id = #{record.orderId,jdbcType=BIGINT},
+      goods_id = #{record.goodsId,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      num = #{record.num,jdbcType=INTEGER},
+      price = #{record.price,jdbcType=DECIMAL},
+      sum_price = #{record.sumPrice,jdbcType=DECIMAL},
+      points = #{record.points,jdbcType=INTEGER},
+      sum_points = #{record.sumPoints,jdbcType=INTEGER},
+      `no` = #{record.no,jdbcType=BIGINT},
+      type_name = #{record.typeName,jdbcType=VARCHAR},
+      activity_type = #{record.activityType,jdbcType=INTEGER},
+      activity_id = #{record.activityId,jdbcType=BIGINT},
+      supplier = #{record.supplier,jdbcType=VARCHAR},
+      present_goods_id = #{record.presentGoodsId,jdbcType=BIGINT},
+      present_goods_name = #{record.presentGoodsName,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="sqlcriteria.util.Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from order_goods
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from order_goods
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.zfj.xmy.common.persistence.pojo.OrderGoods" useGeneratedKeys="true" keyProperty="id" >
+    insert into order_goods (order_id, goods_id, `name`, 
+      num, price, sum_price, 
+      points, sum_points, `no`, 
+      type_name, activity_type, activity_id, 
+      supplier, present_goods_id, present_goods_name
+      )
+    values (#{orderId,jdbcType=BIGINT}, #{goodsId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, 
+      #{num,jdbcType=INTEGER}, #{price,jdbcType=DECIMAL}, #{sumPrice,jdbcType=DECIMAL}, 
+      #{points,jdbcType=INTEGER}, #{sumPoints,jdbcType=INTEGER}, #{no,jdbcType=BIGINT}, 
+      #{typeName,jdbcType=VARCHAR}, #{activityType,jdbcType=INTEGER}, #{activityId,jdbcType=BIGINT}, 
+      #{supplier,jdbcType=VARCHAR}, #{presentGoodsId,jdbcType=BIGINT}, #{presentGoodsName,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.zfj.xmy.common.persistence.pojo.OrderGoods" useGeneratedKeys="true" keyProperty="id" >
+    insert into order_goods
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >
+        order_id,
+      </if>
+      <if test="goodsId != null" >
+        goods_id,
+      </if>
+      <if test="name != null" >
+        `name`,
+      </if>
+      <if test="num != null" >
+        num,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="sumPrice != null" >
+        sum_price,
+      </if>
+      <if test="points != null" >
+        points,
+      </if>
+      <if test="sumPoints != null" >
+        sum_points,
+      </if>
+      <if test="no != null" >
+        `no`,
+      </if>
+      <if test="typeName != null" >
+        type_name,
+      </if>
+      <if test="activityType != null" >
+        activity_type,
+      </if>
+      <if test="activityId != null" >
+        activity_id,
+      </if>
+      <if test="supplier != null" >
+        supplier,
+      </if>
+      <if test="presentGoodsId != null" >
+        present_goods_id,
+      </if>
+      <if test="presentGoodsName != null" >
+        present_goods_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >
+        #{orderId,jdbcType=BIGINT},
+      </if>
+      <if test="goodsId != null" >
+        #{goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="sumPrice != null" >
+        #{sumPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="points != null" >
+        #{points,jdbcType=INTEGER},
+      </if>
+      <if test="sumPoints != null" >
+        #{sumPoints,jdbcType=INTEGER},
+      </if>
+      <if test="no != null" >
+        #{no,jdbcType=BIGINT},
+      </if>
+      <if test="typeName != null" >
+        #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="activityType != null" >
+        #{activityType,jdbcType=INTEGER},
+      </if>
+      <if test="activityId != null" >
+        #{activityId,jdbcType=BIGINT},
+      </if>
+      <if test="supplier != null" >
+        #{supplier,jdbcType=VARCHAR},
+      </if>
+      <if test="presentGoodsId != null" >
+        #{presentGoodsId,jdbcType=BIGINT},
+      </if>
+      <if test="presentGoodsName != null" >
+        #{presentGoodsName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zfj.xmy.common.persistence.pojo.OrderGoods" >
+    update order_goods
+    <set >
+      <if test="orderId != null" >
+        order_id = #{orderId,jdbcType=BIGINT},
+      </if>
+      <if test="goodsId != null" >
+        goods_id = #{goodsId,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="sumPrice != null" >
+        sum_price = #{sumPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="points != null" >
+        points = #{points,jdbcType=INTEGER},
+      </if>
+      <if test="sumPoints != null" >
+        sum_points = #{sumPoints,jdbcType=INTEGER},
+      </if>
+      <if test="no != null" >
+        `no` = #{no,jdbcType=BIGINT},
+      </if>
+      <if test="typeName != null" >
+        type_name = #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="activityType != null" >
+        activity_type = #{activityType,jdbcType=INTEGER},
+      </if>
+      <if test="activityId != null" >
+        activity_id = #{activityId,jdbcType=BIGINT},
+      </if>
+      <if test="supplier != null" >
+        supplier = #{supplier,jdbcType=VARCHAR},
+      </if>
+      <if test="presentGoodsId != null" >
+        present_goods_id = #{presentGoodsId,jdbcType=BIGINT},
+      </if>
+      <if test="presentGoodsName != null" >
+        present_goods_name = #{presentGoodsName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zfj.xmy.common.persistence.pojo.OrderGoods" >
+    update order_goods
+    set order_id = #{orderId,jdbcType=BIGINT},
+      goods_id = #{goodsId,jdbcType=BIGINT},
+      `name` = #{name,jdbcType=VARCHAR},
+      num = #{num,jdbcType=INTEGER},
+      price = #{price,jdbcType=DECIMAL},
+      sum_price = #{sumPrice,jdbcType=DECIMAL},
+      points = #{points,jdbcType=INTEGER},
+      sum_points = #{sumPoints,jdbcType=INTEGER},
+      `no` = #{no,jdbcType=BIGINT},
+      type_name = #{typeName,jdbcType=VARCHAR},
+      activity_type = #{activityType,jdbcType=INTEGER},
+      activity_id = #{activityId,jdbcType=BIGINT},
+      supplier = #{supplier,jdbcType=VARCHAR},
+      present_goods_id = #{presentGoodsId,jdbcType=BIGINT},
+      present_goods_name = #{presentGoodsName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

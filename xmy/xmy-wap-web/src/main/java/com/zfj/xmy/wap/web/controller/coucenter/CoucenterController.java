@@ -1,0 +1,124 @@
+package com.zfj.xmy.wap.web.controller.coucenter;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.zfj.base.commons.mini.annotation.Exclusion;
+import com.zfj.base.commons.mini.bean.RespData;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.xmy.activity.persistence.app.pojo.dto.coupon.CouponCenterOutDto;
+import com.zfj.xmy.activity.service.cms.CouponService;
+import com.zfj.xmy.activity.service.pc.PcCouponService;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import com.zfj.xmy.common.persistence.pojo.app.AppCouponInDto;
+import com.zfj.xmy.common.persistence.pojo.common.couponReceiveByPhoneDto;
+import com.zfj.xmy.common.service.CommonCouponService;
+import com.zfj.xmy.wap.web.common.SessionInfo;
+
+/**
+ * 领卷中心
+ * @author cj
+ * @createDate 2017年10月31日
+ *
+ */
+@Controller
+@RequestMapping("/coucenter")
+public class CoucenterController {
+	
+	@Autowired
+	private CouponService couponService;
+	
+	@Autowired
+	private PcCouponService pcCouponService;
+	
+	
+	@Autowired
+	private CommonCouponService commonCouponService;
+	
+	/**领卷中心页面*/
+	private final static String COUCENTER = "coucenter/coucenter";
+	
+	/**
+	 * 领卷中心
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/coucenter")
+	public ModelAndView company(HttpServletRequest request, HttpServletResponse response){
+		
+		Long userId = SessionInfo.get().getUserId();
+		List<CouponCenterOutDto> couponList = couponService.couponCenter(userId);
+		request.setAttribute("findsAllUsableCoupon", couponList);
+		
+		return new ModelAndView(COUCENTER);
+	}
+	
+	/**
+	 * 领卷
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/getCoupon")
+	@ResponseBody
+	public RespData getCoupon(HttpServletRequest request, HttpServletResponse response, AppCouponInDto coupon,Long id){
+		
+		RespData respData = new RespData();
+		Map<String, Object> map=new HashMap<String, Object>();
+		Long userId = SessionInfo.get().getUserId();
+		coupon.setUserId(userId);
+		try {
+			commonCouponService.toReceiveCoupon(coupon, false);
+		} catch(BusinessException e) {
+			String message = e.getMessage();
+			RespData resp = RespData.getRespData(e, message);
+			return resp;
+		}
+		map.put("map", 1);
+		respData.setData(map);
+		//List<AppCouponOutDto> findsAllUsableCoupon = couponService.findsAllUsableCoupon(userId);
+		Coupon findCouponById = couponService.findCouponById(id);
+		Integer countByCouponId = couponService.countByCouponId(id);
+		Integer usePercent=(int) (countByCouponId*100/findCouponById.getCouponCount());
+		map.put("usePercent",usePercent);
+		return respData;
+	}
+	
+	/**
+	 * 使用任意手机号领取优惠券
+	 * (一个手机号只能领取一次)
+	 * @param couponReceiveByPhoneDto
+	 * @return
+	 * @Description 
+	 * @date 2018年1月5日  上午11:00:47
+	 * @author wy
+	 * 2018
+	 * @return RespData
+	 */
+	@RequestMapping("/receiveByPhone")
+	@ResponseBody
+	public RespData couponReceiveByPhone(couponReceiveByPhoneDto couponReceiveByPhoneDto){
+		RespData respData = new RespData();
+		try {
+			commonCouponService.couponReceiveByPhone(couponReceiveByPhoneDto);		
+		} catch(BusinessException e) {
+			String message = e.getMessage();
+			RespData resp = RespData.getRespData(e, message);
+			return resp;
+		}
+		return respData;
+	}
+}

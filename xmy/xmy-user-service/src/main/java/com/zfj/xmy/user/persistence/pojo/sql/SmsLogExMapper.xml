@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.user.persistence.dao.SmsLogExMapper" >
+<resultMap id="baseResultMap" type="com.zfj.xmy.user.persistence.pojo.dto.SmsLogDto" >
+  	<id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="mobile_phone" property="mobilePhone" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="message" property="message" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="create_timestamp" property="createTimestamp" jdbcType="TIMESTAMP" />
+</resultMap>
+
+<select id="checkCode" resultMap="baseResultMap">
+	SELECT * from sms_log where mobile_phone = #{mobilePhone} and `status`=0 and create_timestamp &gt;= #{time} order by create_timestamp desc limit 0,1
+</select>
+
+</mapper>

@@ -1,0 +1,69 @@
+#SERVER_PATH=http\://192.168.0.15:8080
+SERVER_PATH=http\://app.xmyb2b.com
+WAP_SERVER_PATH=http\://m.xmyb2b.com
+
+
+APP_NAME=\u9999\u6EE1\u56ED\u7BA1\u7406\u7CFB\u7EDF
+APP_VERSION=0.1
+APP_PATH=http\://127.0.0.1/xmy-cms
+#login redirect address
+APP_REDIRECT_PATH=/login
+#0:no limit
+IMAGE_MAX_SIZE=0
+
+
+#### jpush config start #
+
+JPUSH_APPKEY=99b64d40ce4fc95173aaf02b
+JPUSH_MASTERSECRET=e53b5eef89308127cd2e5635
+
+#### jpush config start #
+
+
+
+#### openim config start #
+
+OPENIM_APPKEY=24602319
+OPENIM_APPSECRET=d9cba3f4ea0ea63d1b1e88ce7297073a
+OPENIM_CUSTOMTAOBAOID=tzdsxl
+
+# xmy-b2c openim config
+
+#OPENIM_APPKEY=24750759
+#OPENIM_APPSECRET=16c91707083a81e6012dc9366b1f3397
+#OPENIM_CUSTOMTAOBAOID=\u9999\u6EE1\u5706\u7535\u5546
+
+
+#### openim config end #
+
+
+
+#### wechat login config start #
+
+WECHAT_LOGIN_APPID=wxcec9ed5337b3428e
+WECHAT_LOGIN_SECRET=804b982c8ab586669060d125fecb3b6c
+
+#### wechat login config end #
+
+#### qq login config start #
+
+QQ_LOGIN_CALLBACKURL=http://app.xmyb2b.com/user/qqlogincallback
+QQ_LOGIN_APPID=101368018
+QQ_LOGIN_APPKEY=382aab70aed68dd3f42301e6a42a7916
+
+#### qq login config end #
+
+#### baidu map config start #
+
+BAIDU_AK=KTAi0i0WrRCRcDMASMDPGlKz
+BAIDU_SK=smbN6jxqk1NEVKchXr0tmiyfpcaaTUml
+
+#### baidu map config end #
+
+#### kdniao config start #
+
+KDNIAO_EBUSINESSID=1309885
+KDNIAO_APPKEY=da4ebde1-ed68-4b4c-afee-d6b6d8847ab1
+
+#### kdniao config end #
+

@@ -1,0 +1,113 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+  	<title>订单支付</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/order/pay_order.css">
+  </head>
+  
+  <body>
+  	<%@include file="/WEB-INF/jsp/commons/nav/nav_payment.jsp" %>
+<!--内容部分-->
+<div class="content">
+    <div class="w-1250">
+        <div class="status">
+        	<input type="hidden" name="orderTotal" value="${payOrder.total }" >
+        	<input type="hidden" name="cardBalance" value="${not empty userInfo.balance ? userInfo.balance:0 }">
+		    <p class="state"><i class="iconfont">&#xe607;</i>订单提交成功，请尽快付款！订单号：<span>${payOrder.no }</span><span class="payment">应付金额<b>${payOrder.total }</b>元</span></p>
+            <p class="hint">请您在<span>24小时</span>内完成支付，否则订单会被自动取消（库存紧俏商品支付时限以订单详情页为准）。</p>
+        </div>
+        <div class="payment-choice">
+            <div class="account-balance">
+            <input class="select" type="checkbox" value="${payOrder.id }" id="check"/>
+           	个人账户：<span class="balance"><c:if test="${empty userInfo.balance || userInfo.balance==0 }">0.00</c:if><c:if test="${!empty userInfo.balance && userInfo.balance!=0}"><fmt:formatNumber value="${userInfo.balance }" pattern="#.00"/></c:if></span>元 
+           	<span class="pay">支付<input type="text" id="payMentyMoney"/>元</span>
+           	<span class="activate">激活购物卡</span>
+        	 <button id="pay" type="button">确认支付</button></div>
+            <div class="choice">
+                <ul class="choice-ul">
+                    <li class="active" id="wx">微信支付<div class="hx" style="display: block;"></div></li>
+                    <li>支付宝支付<div class="hx"></div></li>
+                    <li>银联支付<div class="hx"></div></li>
+                    <li>联付通支付<div class="hx"></div></li>
+                    <li>货到付款<div class="hx"></div></li>
+                </ul>
+            </div>
+            <input type="hidden" id="isCrossGodods" value="${isCrossGodods }">
+            <input type="hidden" id="address" value="${address }">
+            <div class="sum">
+                <div class="level">
+                    <p class="annunciate"><i class="iconfont">&#xe625;</i>首次下载香满圆APP，支付享受8折，最高可省38元！</p>
+                    <div class="options">
+                        <div class="options-left">
+                            <div class="img" id="ewms"></div>
+                            <div class="scan">
+                                <span class="ewm"><i class="iconfont">&#xe9ad;</i></span>
+                                <p>请使用手机微信</p>
+                                <p>扫描二维码完成支付</p>
+                            </div>
+                        </div>
+                        <div class="options-right">
+                            <div class="img"><img src="resource/commons/images/zhifubao.jpg"/></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="level">欢迎使用支付宝支付</div>
+                <div class="level">欢迎使用银联支付</div>
+                <div class="level">4</div>
+                <div class="level">
+                    <p class="annunciate"><i class="iconfont">&#xe625;</i>首次下载香满圆APP，支付享受8折，最高可省38元！</p>
+                    <div class="option">
+                        <form>
+                            <ul class="option-ul">
+                                <li><label><input type="radio" name="radio" /><div class="chunk chunk1 active"><i class="iconfont">&#xe732;</i><span>货到付款（现金）</span><div class="xz"></div></div></label></li>
+                                <li><label><input type="radio" name="radio" /><div class="chunk chunk2"><i class="iconfont">&#xe610;</i><span>货到付款（POS刷卡）</span></div></label></li>
+                                <li><label><input type="radio" name="radio" /><div class="chunk chunk3"><i class="iconfont">&#xe68b;</i><span>购物卡刷卡</span></div></label></li>
+                            </ul>
+                        </form>
+                        <div class="confirm"><button type="button">确定</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+<!--内容部分完-->
+<div class="popup blances-modal" id="activate-modal">
+    <div class="model">
+        <div class="modal-title clearfix">
+            <span>激活购物卡</span><span class="close"><i class="iconfont">&#xe676;</i></span>
+        </div>
+        <div class="modal-content">
+            <div class="orz-line">
+                <label class="yh-label">购物卡卡号 : </label><input type="text" id="cardNo" class="yh-input">
+            </div>
+            <div class="orz-line gutter-top">
+                <label class="yh-label">购物卡密码 : </label><input type="text" id="cardPwd" class="yh-input">
+            </div>
+            <div class="btn-this">
+                <button type="submit" class="action action-active">马上激活</button>
+                <button type="button" class="action close">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="display: none;">
+	<form action="order/pay" method="post" id="payOrder">
+		<input type="text" name="orderId" id="orderId" value="${payOrder.id }"/>
+		<input type="text" name="balancePay" id="balancePay"/>
+		<input type="text" name="payMethod" id="payMethod">
+	</form>
+</div>
+    <%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %>
+    <script type="text/javascript" src="resource/js/order/pay_order.js"></script>
+    <script type="text/javascript" src="resource/js/order/jquery.qrcode.min.js"></script>
+    <script type="text/javascript" src="resource/commons/js/js.cookie.js"></script>
+    <script type="text/javascript">
+    	var orderId = $("#orderId").val();
+    	Cookies.set('lastOrderId', orderId);
+    </script>
+</body>
+</html>

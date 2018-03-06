@@ -1,0 +1,344 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/common/common_tag.jsp"%>
+
+
+
+<!--首页-->
+<!DOCTYPE html>
+<html>
+<head>
+<title>首页</title>
+<!-- 公共css区域 -->
+<!-- 公共css区域 -->
+<%@ include file="/WEB-INF/jsp/common/common_css.jsp"%>
+<!-- 公共css完区域 -->
+<!-- 该页面应用css区域 -->
+<link href="resources/home/css/home.css" rel="stylesheet">
+<!-- 该页面应用css区域 -->
+</head>
+<body ontouchstart>
+	<header>
+		<div class="down-app clearfix">
+			<div class="down-app-left">
+				<div class="down-app-close">
+					<img src="resources/home/images/close-icon.png" />
+				</div>
+				<div class="down-app-logo">
+					<img src="resources/home/images/logo@2x.png" />
+				</div>
+				<div class="down-app-p">
+					<p>打开香满园App购物</p>
+					<p>新人领8.8元红包</p>
+				</div>
+			</div>
+			<div class="down-app-a">
+				<a href="javascript:;">立即打开</a>
+			</div>
+		</div>
+		<div class="header-top header-top2">
+			<div class="pull-left">
+				<img src="resources/common/images/index-logo.png" />
+			</div>
+			<div class="pull-center">
+				<div class="head-phone">
+					<img src="resources/common/images/ico-index-24@2x.png" alt="">
+					<p>400-822-3936(客服)</p>
+					<p>17723156790(夜间)</p>
+				</div>
+			</div>
+			<div class="pull-right">
+				<span class="search"><img
+					src="resources/common/images/btn-index-search@2x.png" alt=""></span>
+				<!--  <span class="share"><img src="resources/common/images/btn-index-share@2x.png"/></span> -->
+				<span class="shrink"><img
+					src="resources/common/images/btn-index-more@2x.png" />
+					<div class="modal-some"></div> </span>
+			</div>
+		</div>
+	</header>
+	<div class="content">
+	<div id="totop"><img src="resources/common/images/totop.png" /></div>
+		<div class="container">
+			<input type="hidden" id="nowTime" value="${data.nowTime }"> <input
+				type="hidden" id="endTime" value="${data.endTime }">
+			<div class="swiper-container" data-space-between='10'
+				data-pagination='.swiper-pagination' data-autoplay="1000">
+				<div class="swiper-wrapper">
+					<c:forEach items="${data.topAdInfo }" var="topAdInfo"
+						varStatus="status">
+						<div class="swiper-slide">
+							<img src="${topAdInfo.imgPath }" class="img-link"
+								data="${topAdInfo.data }" type="${topAdInfo.type }" />
+						</div>
+					</c:forEach>
+					<!-- <div class="swiper-slide"><img src="//gqianniu.alicdn.com/bao/uploaded/i4//tfscom/i1/TB1n3rZHFXXXXX9XFXXXXXXXXXX_!!0-item_pic.jpg_320x320q60.jpg" alt=""></div>
+			    <div class="swiper-slide"><img src="//gqianniu.alicdn.com/bao/uploaded/i4//tfscom/i4/TB10rkPGVXXXXXGapXXXXXXXXXX_!!0-item_pic.jpg_320x320q60.jpg" alt=""></div>
+			    <div class="swiper-slide"><img src="//gqianniu.alicdn.com/bao/uploaded/i4//tfscom/i1/TB1kQI3HpXXXXbSXFXXXXXXXXXX_!!0-item_pic.jpg_320x320q60.jpg" alt=""></div> -->
+				</div>
+				<!-- If we need pagination -->
+				<div class="swiper-pagination"></div>
+			</div>
+		</div>
+		<div class="self-flex2">
+			<div class="weui-flex__item activity">
+				<div class="img">
+					<img src="resources/common/images/qiang.jpg" />
+				</div>
+				<p>开抢啦</p>
+			</div>
+			<div class="weui-flex__item newGoods">
+				<div class="img">
+					<img src="resources/common/images/xian.jpg" />
+				</div>
+				<p>新品尝鲜</p>
+			</div>
+			<div class="weui-flex__item fruits">
+				<div class="img">
+					<img src="resources/common/images/guo.jpg" />
+				</div>
+				<p>精选水果</p>
+			</div>
+			<div class="weui-flex__item border">
+				<div class="img">
+					<img src="resources/common/images/kua.png" />
+				</div>
+				<p>跨境专区</p>
+			</div>
+			<div class="weui-flex__item vipcenter">
+				<div class="img">
+					<img src="resources/common/images/vipcenter.png" />
+				</div>
+				<p>积分商城</p>
+			</div>
+			<div class="weui-flex__item company">
+				<div class="img">
+					<img src="resources/common/images/company.png" />
+				</div>
+				<p>企业定制</p>
+			</div>
+			<div class="weui-flex__item coucenter">
+				<div class="img">
+					<img src="resources/common/images/coucenter.png" />
+				</div>
+				<p>领卷中心</p>
+			</div>
+			<div class="weui-flex__item allPost">
+				<div class="img">
+					<img src="resources/common/images/border.png" />
+				</div>
+				<p>全国配送</p>
+			</div>
+		</div>
+		<div class="container-wrap container-white">
+			<div class="row clearfix">
+				<div class="col-80">
+					<div class="inlin-block name">
+						<img src="resources/common/images/icon-index-bdj@2x.png" alt="">冰点价
+					</div>
+					<!-- <div class="inlin-block">12点场</div> -->
+					<div class="inlin-block time-esc"></div>
+				</div>
+				<div class="col-20 right-more activity">
+					更多 <img src="resources/common/images/btn-index-right@2x.png" alt=""
+						class="more-icon">
+				</div>
+			</div>
+			<div class="row2 clearfix">
+				<c:forEach items="${data.limitActivityDir[0].goodsList }" begin="0"
+					end="5" var="limitGoods">
+					<fmt:formatDate value="${limitGoods.beginTime }" var="beginDate"
+						pattern="M月d日" />
+					<c:choose>
+						<c:when
+							test="${((beginDate == curr && currMill >= 43200000) || (beginDate == yesterday && currMill < 43200000)) }">
+							<div class="col-33 goods-activity-div"
+								goods-id="${limitGoods.goodsId }"
+								activity-id="${data.limitActivityDir[0].id }">
+								<div class="half-circle">
+									<span class="date-time">${beginDate }</span>
+								</div>
+								<img src="${limitGoods.goodsImg }" alt="" class="shop-img">
+								<p class="shop-name">${limitGoods.name }</p>
+								<p class="price">¥ ${limitGoods.activityPrice }</p>
+							</div>
+						</c:when>
+						<c:otherwise>
+							<div class="col-33 goods-div-gray">
+								<div class="half-circle-gray">
+									<span class="date-time">${beginDate }</span>
+								</div>
+								<img src="${limitGoods.goodsImg }" alt="" class="shop-img">
+								<p class="shop-name">${limitGoods.name }</p>
+								<p class="price price1">¥ ${limitGoods.activityPrice }</p>
+							</div>
+						</c:otherwise>
+					</c:choose>
+				</c:forEach>
+			</div>
+		</div>
+		<div class="container-wrap gutter-top">
+			<c:forEach items="${data.firstAdInfo }" var="firstAd">
+				<div class="banner">
+					<img src="${firstAd.imgPath }" alt="" class="img-link"
+						data="${firstAd.data }" type="${firstAd.type }">
+				</div>
+			</c:forEach>
+		</div>
+
+		<!-- 货柜信息 -->
+		<c:forEach items="${data.containers }" var="container" 
+			varStatus="status">
+			<div class="list-wrap">
+				<div class="title-line">
+					<c:if test="${status.index == 0 }">
+						<span class="center-des center-des-g" style="color: #36A44E;"><img
+							src="resources/common/images/jinkoushuiguo.png" alt="" style="margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+					<c:if test="${status.index == 1 }">
+						<span class="center-des center-des-g" style="color: #ff8520;"><img
+							src="resources/common/images/guochanshuiguo.png" alt="" style="color: #ff8520; margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+					<c:if test="${status.index == 2 }">
+						<span class="center-des center-des-g" style="color: #007be9;"><img
+							src="resources/common/images/kuajingzhuanqu.png" alt="" style="color: #007be9; margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+					<c:if test="${status.index == 3 }">
+						<span class="center-des center-des-g" style="color: #d30c0e;"><img
+							src="resources/common/images/ganguoganfu.png" alt="" style="color: #d30c0e; margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+					<c:if test="${status.index == 4 }">
+						<span class="center-des center-des-g" style="color: #9FC91B;"><img
+							src="resources/common/images/xiuxianlingshi.png" alt="" style="color: #559424; margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+					<c:if test="${status.index == 5 }">
+						<span class="center-des center-des-g" style="color: orange;"><img
+							src="resources/common/images/jinkoushiping.png" alt="" style="color: #a1cd19; margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+					<c:if test="${status.index == 6 }">
+						<span class="center-des center-des-g" style="color: #00c9df;"><img
+							src="resources/common/images/liangyoufushi.png" alt="" style="color: #a1cd19; margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+					<c:if test="${status.index == 7 }">
+						<span class="center-des center-des-g" style="color: #1BCDAD;"><img
+							src="resources/common/images/shenghuoriyong.png" alt="" style="color: #f74461; margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+					<c:if test="${status.index == 8 }">
+						<span class="center-des center-des-g" style="color: #f74461;"><img
+							src="resources/common/images/jiushuiyinliao.png" alt="" style="color: #1eccad; margin-right: 0.3rem;">${container.name }</span>
+						<span class="more top" category_id="${container.categoryId }">更多<img
+							src="resources/common/images/btn-index-right2@2x.png" alt=""></span>
+					</c:if>
+				</div>
+				<div class="row2 clearfix row3">
+					<div class="img-lay clearfix">
+						<c:if test="${status.index%2 == 0 }">
+							<div class="col-55">
+								<img src="${container.containerAd[0].imgPath }" alt=""
+									class="img-right img-link"
+									data="${container.containerAd[0].data }"
+									type="${container.containerAd[0].type }"> <img
+									src="${container.containerAd[1].imgPath }" alt=""
+									class="img-right img-link"
+									data="${container.containerAd[1].data }"
+									type="${container.containerAd[1].type }">
+							</div>
+							<div class="col-45">
+								<img src="${container.containerAd[2].imgPath }" alt=""
+									class="img-left img-left-gutter-l img-link"
+									data="${container.containerAd[2].data }"
+									type="${container.containerAd[2].type }">
+							</div>
+						</c:if>
+						<c:if test="${status.index%2 == 1 }">
+							<div class="col-45">
+								<img src="${container.containerAd[2].imgPath }" alt=""
+									class="img-left img-left-gutter-l img-link"
+									data="${container.containerAd[2].data }"
+									type="${container.containerAd[2].type }">
+							</div>
+							<div class="col-55">
+								<img src="${container.containerAd[0].imgPath }" alt=""
+									class="img-right img-link"
+									data="${container.containerAd[0].data }"
+									type="${container.containerAd[0].type }"> <img
+									src="${container.containerAd[1].imgPath }" alt=""
+									class="img-right img-link"
+									data="${container.containerAd[1].data }"
+									type="${container.containerAd[1].type }">
+							</div>
+						</c:if>
+					</div>
+					<div class="clearfix shop-list row3">
+						<c:forEach items="${container.goods }" var="goods" begin="0"
+							end="5">
+							<div class="col-33 goods-div" goods-id="${goods.id }">
+								<img
+									src="${goods.imgPath }?x-oss-process=image/resize,m_fixed,h_123,w_123"
+									alt="" class="shop-img">
+								<p class="shop-name">${goods.fullName }</p>
+								<p class="price">¥ ${goods.phonePrice }</p>
+							</div>
+						</c:forEach>
+					</div>
+				</div>
+			</div>
+		</c:forEach>
+
+		<div class="banner">
+			<img src="resources/common/images/img-index-bt@2x.png" alt="">
+		</div>
+		<!-- <div class="weui-flex last-flex">
+			<div class="weui-flex__item">
+				<img src="resources/common/images/login-icon.png" alt="">
+				<p>登录</p>
+			</div>
+			<div class="weui-flex__item">
+				<img src="resources/common/images/reg-icon.png" alt="">
+				<p>注册</p>
+			</div>
+			<div class="weui-flex__item">
+				<img src="resources/common/images/pc-icon.png" alt="">
+				<p>电脑版</p>
+			</div>
+		</div> -->
+	</div>
+	<c:if test="${cookie.isBrowsedDownload == null }">
+		<div class="newcomer-packet">
+			<div class="packet-content">
+				<div class="packet-close">
+					<img src="resources/home/images/close-icon.png" />
+				</div>
+				<div class="packet-img">
+					<img src="resources/home/images/hb_01.png" />
+				</div>
+				<div class="packet-btn">
+					<a href="javascript:;" class="packet-down-btn"> <strong>点击下载领取</strong>
+					</a> <a href="javascript:;" class="packet-look-btn"> <strong>继续浏览</strong>
+					</a>
+				</div>
+			</div>
+		</div>
+	</c:if>
+	<%@include file="/WEB-INF/jsp/common/common_js.jsp"%>
+	<%@include file="/WEB-INF/jsp/common/common_footer.jsp"%>
+	<!-- 该页面应用js区域 -->
+	<script type="text/javascript" src="resources/home/js/home.js"></script>
+	<!-- 该页面应用js区域 -->
+</body>
+</html>

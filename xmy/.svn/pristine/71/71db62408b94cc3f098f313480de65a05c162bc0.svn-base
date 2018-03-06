@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper  namespace="com.zfj.xmy.goods.persistence.app.dao.AppGoodsExMapper">
+	<resultMap type="com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsDir" id="BaseResultMap">
+		<id column="id" property="goodsId" jdbcType="BIGINT" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="remark_num" property="remarkNum" jdbcType="VARCHAR" />
+		<result column="unit_name" property="unitName" jdbcType="VARCHAR" />
+		<result column="weight" property="weight" jdbcType="VARCHAR" />
+		<result column="standard" property="standard" jdbcType="VARCHAR" />
+		<result column="price" property="price" jdbcType="DECIMAL" />
+		<result column="vip_price" property="vipPrice" jdbcType="DECIMAL" />
+		<result column="supplier_name" property="supplierName" jdbcType="VARCHAR" />
+		<result column="default_buynum" property="defaultBuynum" jdbcType="INTEGER" />
+		<result column="num" property="num" jdbcType="INTEGER" />
+		<result column="sum_deal" property="sumDeal" jdbcType="INTEGER" />
+		<result column="points" property="points" jdbcType="INTEGER" />
+		<result column="isDelivery" property="isDelivery" jdbcType="INTEGER" />
+		<result column="area" property="area" jdbcType="VARCHAR" />
+		<result column="storeageMethod" property="storeageMethod" jdbcType="VARCHAR" />
+		<result column="packMethod" property="packMethod" jdbcType="VARCHAR" />
+		<result column="ph_introduced" property="phIntroduced" jdbcType="LONGVARCHAR" /> 
+	</resultMap>	
+	
+	<!-- @auther: hexw  查询商品详细信息 -->
+	<select id="selectGoods" resultMap="BaseResultMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+		select a.id , a.name, a.remark_num,a.code, a.unit_name ,a.weight,a.standard ,a.price price,a.vip_price,a.supplier_name,a.default_buynum,a.num,a.sum_deal,a.ph_introduced,a.points points,a.is_delivery isDelivery,a.storage_method storeageMethod,a.area
+	  ,a.pack_method  packMethod from goods a 
+	   <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+	   </if>
+	   <if test="orderByClause != null" >
+	     order by ${orderByClause}
+	  </if>
+	</select>
+	
+	
+<resultMap id="goodsImgMap" type="com.zfj.xmy.common.persistence.pojo.GoodsImage" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="path" property="path" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="goods_id" property="goodsId" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="seq" property="seq" jdbcType="INTEGER" />
+  </resultMap>
+	
+	<select id="selectGoodsImage" resultMap="goodsImgMap" parameterType="com.appdev.db.common.CriteriaParameter" >
+		select b.* from goods a 
+		left join goods_image b on a.id= b.goods_id
+		where a.code like '07%'
+	   <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+	   </if>
+	   <if test="orderByClause != null" >
+	     order by ${orderByClause}
+	  </if>
+	</select>
+	
+	<!-- 查询活动商品编码最大值 @author hexw -->
+   <select id="findActicityGoodsMaxCode" parameterType="com.appdev.db.common.CriteriaParameter" resultType="String">
+   		select max(`code`) from goods where code like '1501%'
+   </select>
+	
+	
+	
+</mapper>

@@ -1,0 +1,369 @@
+package com.zfj.xmy.pc.web.controller.goods;
+
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.ibatis.annotations.Param;
+import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.annotations.Parent;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.elasticsearch.document.CategoryDoc;
+import com.zfj.xmy.elasticsearch.document.GoodsDoc;
+import com.zfj.xmy.elasticsearch.persistence.pojo.NativeSearchQueryParameter;
+import com.zfj.xmy.elasticsearch.service.CategoryDocService;
+import com.zfj.xmy.elasticsearch.service.GoodsDocService;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcSearchDto;
+import com.zfj.xmy.goods.service.pc.PcElasticGoodsService;
+import com.zfj.xmy.goods.service.pc.PcSearchService;
+import com.zfj.xmy.util.DataPage;
+
+@RestController
+@RequestMapping("/elastic")
+public class ElasticSearchContrller {
+	
+	@Autowired
+	private PcElasticGoodsService elasticGoodsService;
+	
+	@Autowired
+	private PcSearchService pcSearchService;
+	/**
+	 * 跳转页面查询筛选条件
+	 * @param goodsName
+	 * @param searchName
+	 * @param typeName
+	 * @param mainLand
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年11月8日 下午2:07:25
+	 */
+	@RequestMapping("/goods")
+	public ModelAndView searchGoods(@Param("goodsName") String goodsName,@Param("searchName") String searchName,@Param("typeName") String typeName ,
+			@Param("mainLand") Integer mainLand, HttpServletRequest request){
+		
+		//DataPage<CategoryDoc> categoryList = categoryDocService.fullTextSearch(nbq);
+		List<Goods> findTopFiveGoods = pcSearchService.findTopFiveGoods();
+		/*List<PcSearchDto> findSearchDto = pcSearchService.testSearchDto(goodsName);*/
+		List<PcSearchDto> findSearchDto = pcSearchService.querySearchDto(goodsName,typeName,mainLand);
+		//request.setAttribute("categoryList", categoryList);
+		if(ObjectUtils.isEmpty(searchName)){
+			request.setAttribute("goodsName", goodsName);
+		}else{
+			request.setAttribute("goodsName", searchName);
+		}
+		request.setAttribute("mianLan", mainLand);
+		request.setAttribute("typeName", typeName);
+		request.setAttribute("topGoods", findTopFiveGoods);
+		request.setAttribute("searchList", findSearchDto);
+		return new ModelAndView("/search/test_search");
+	}
+	/**
+	 * 反查筛选条件
+	 * @param goodsName
+	 * @param searchName
+	 * @param typeName
+	 * @param mainLand
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年11月8日 上午10:18:56
+	 */
+	@RequestMapping("/goods/searchDto")
+	public Map<String, Object> findSearchDto(@Param("goodsName") String goodsName,@Param("searchName") String searchName,@Param("typeName") String typeName ,
+			@Param("mainLand") Integer mainLand, HttpServletRequest request){
+		String str = "";
+		if(ObjectUtils.isEmpty(mainLand) || mainLand < 0){
+			mainLand = null;
+		}
+		List<PcSearchDto> findSearchDto = pcSearchService.querySearchDto(goodsName,typeName,mainLand);
+		for (PcSearchDto pcSearchDto : findSearchDto) {
+			for (PcSearchDto childDto : pcSearchDto.getChildList()) {
+				str +=childDto.getSearchName()+",";
+			}
+		}
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("typeNames", str);
+		return map;
+	}
+	
+	/**
+	 * es搜索
+	 * @param pageIndex
+	 * @param goodsName
+	 * @param request
+	 * @param priceOrder
+	 * @param orderMethod
+	 * @param mianLand
+	 * @param wordSeg
+	 * @param beginPrice
+	 * @param endPrice
+	 * @param typeName
+	 * @return ModelAndView
+	 * @author lij
+	 * @throws UnsupportedEncodingException 
+	 * @date 2017年11月8日 下午2:07:10
+	 */
+	@RequestMapping("/goods/list/{pageIndex}/{orderMethod}")
+	public ModelAndView searchGoodsList(@PathVariable("pageIndex") Integer pageIndex,@Param("goodsName") String goodsName,HttpServletRequest request,
+			@Param("priceOrder") Boolean priceOrder,@PathVariable("orderMethod") Integer orderMethod,@Param("mianLand") Integer mianLand,@Param("wordSeg") String wordSeg,
+			@Param("beginPrice") Integer beginPrice,@Param("endPrice") Integer endPrice,@Param("typeName") String typeName) throws UnsupportedEncodingException{
+		if(",".equals(goodsName)){
+			goodsName = "";
+		}
+		if(ObjectUtils.isEmpty(priceOrder)){
+			priceOrder = true;
+		}
+		if(ObjectUtils.isEmpty(mianLand) || mianLand < 0){
+			mianLand = 1;
+		}
+		DataPage<GoodsDoc> goodsList = elasticGoodsService.searchGoods(orderMethod, goodsName, pageIndex, priceOrder,mianLand,wordSeg,beginPrice,endPrice,typeName);
+		request.setAttribute("goodsList", goodsList);
+		return new ModelAndView("/search/test_list");
+	}
+	/**
+	 * 查询 总页数
+	 * @param pageIndex
+	 * @param goodsName
+	 * @param request
+	 * @param priceOrder
+	 * @param orderMethod
+	 * @param mianLand
+	 * @param wordSeg
+	 * @param beginPrice
+	 * @param endPrice
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年10月23日 下午2:18:34
+	 */
+	@RequestMapping("goods/countPage/{pageIndex}/{orderMethod}")
+	public Integer searchGoodsCount(@PathVariable("pageIndex") Integer pageIndex,@Param("goodsName") String goodsName,HttpServletRequest request,
+			@Param("priceOrder") Boolean priceOrder,@PathVariable("orderMethod") Integer orderMethod,@Param("mianLand") Integer mianLand,@Param("wordSeg") String wordSeg,
+			@Param("beginPrice") Integer beginPrice,@Param("endPrice") Integer endPrice,@Param("typeName") String typeName){
+		if(",".equals(goodsName)){
+			goodsName = "";
+		}
+		if(ObjectUtils.isEmpty(priceOrder)){
+			priceOrder = true;
+		}
+		if(ObjectUtils.isEmpty(mianLand) || mianLand < 0){
+			mianLand = 1;
+		}
+		DataPage<GoodsDoc> goodsList = elasticGoodsService.searchGoods(orderMethod, goodsName, pageIndex, priceOrder,mianLand,wordSeg,beginPrice,endPrice,typeName);
+		request.setAttribute("goodsList", goodsList);
+		int pages = goodsList.getPages();
+		return pages;
+	}
+	
+	
+	/**
+	 * 根据二级分类查询商品信息
+	 * @param typeId
+	 * @param wordId
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年11月2日 下午8:35:30
+	 */
+	@RequestMapping("/typeGoods")
+	public ModelAndView searchType(@Param("typeId") Long typeId,@Param("wordId") Long wordId, HttpServletRequest request){
+		List<PcSearchDto> searchDto = new ArrayList<>();
+		if(ObjectUtils.isEmpty(wordId)){
+			searchDto = pcSearchService.findSearchDtoByTypeId(typeId);
+		}else{
+			searchDto = pcSearchService.findSearchDtoByWord(wordId);
+		}
+		List<Goods> findTopFiveGoods = pcSearchService.findTopFiveGoods();
+		request.setAttribute("topGoods", findTopFiveGoods);
+		request.setAttribute("searchList", searchDto);
+		request.setAttribute("typeId", typeId);
+		request.setAttribute("woid", wordId);
+		return new ModelAndView("/search/type_search");
+	}
+	/**
+	 * 查询筛选条件
+	 * @param typeId
+	 * @param wordId
+	 * @param request
+	 * @return ModelAndView
+	 * @author ***
+	 * @date 2017年11月8日 下午2:08:15
+	 */
+	@RequestMapping("/typeGoodsWords")
+	public Map<String, Object> searchTypeSearchDto(@Param("words") String words,@Param("typeId") Long typeId){
+		String str = pcSearchService.queryWordByTypeIdOrwordId(words,typeId);
+		Map<String, Object> map  = new HashMap<String,Object>();
+		map.put("typeNames", str);
+		return map;
+	}
+	
+	/**
+	 * 根据二级分类ID查询商品名称
+	 * @param pageIndex
+	 * @param orderMethod
+	 * @param typeId
+	 * @param priceOrder
+	 * @param search
+	 * @param isDivle
+	 * @param beginPrice
+	 * @param endPrice
+	 * @param wordId
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年11月2日 下午8:35:55
+	 */
+	@RequestMapping("typeSearch/{pageIndex}/{orderMethod}")
+	public ModelAndView searchTypeGoods(@PathVariable("pageIndex") Integer pageIndex,@PathVariable("orderMethod") Integer orderMethod,@Param("typeId") Long typeId,
+			@Param("priceOrder") boolean priceOrder,@Param("search") String search,@Param("isDivle") Integer isDivle,@Param("beginPrice") BigDecimal beginPrice,
+			@Param("endPrice") BigDecimal endPrice,@Param("wordId") Long wordId,  HttpServletRequest request){
+		List<Integer> page = new ArrayList<Integer>();
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(pageIndex);
+		List<Goods> goodsList = pcSearchService.findSearchGoodsByTypeId(typeId,wordId,orderMethod, pageBean, search, priceOrder,isDivle,beginPrice,endPrice);
+		int countPage = pcSearchService.countPage(goodsList.size());
+		for(int i = 1;i<=countPage;i++){
+			page.add(i);
+		}
+		request.setAttribute("page", page);
+		request.setAttribute("pageNum", pageIndex);
+		request.setAttribute("goodsList", goodsList);
+		
+		return new ModelAndView("/search/type_list");
+	}
+	/**
+	 * 二级分类查询总页数
+	 * @param pageIndex
+	 * @param orderMethod
+	 * @param typeId
+	 * @param priceOrder
+	 * @param search
+	 * @param isDivle
+	 * @param beginPrice
+	 * @param endPrice
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年10月23日 下午4:07:39
+	 */
+	@RequestMapping("typeSearch/countPage/{pageIndex}/{orderMethod}")
+	public Integer searchTypeCount(@PathVariable("pageIndex") Integer pageIndex,@PathVariable("orderMethod") Integer orderMethod,@Param("typeId") Long typeId,
+			@Param("priceOrder") boolean priceOrder,@Param("search") String search,@Param("isDivle") Integer isDivle,@Param("beginPrice") BigDecimal beginPrice,
+			@Param("endPrice") BigDecimal endPrice,@Param("wordId") Long wordId, HttpServletRequest request){
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(pageIndex);
+		List<Goods> goodsList = pcSearchService.findSearchGoodsByTypeId(typeId,wordId, orderMethod, pageBean, search, priceOrder,isDivle,beginPrice,endPrice);
+		return pageBean.getTotalPage();
+	}
+	
+	
+	/**
+	 * 根据一级分类ID查询筛选条件
+	 * @param topTypeId
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年11月2日 下午8:43:05
+	 */
+	@RequestMapping("/topGoods")
+	public ModelAndView searchGoodsByTopid(@Param("oneId") Long oneId,HttpServletRequest request){
+		List<PcSearchDto> searchDtoByoneId = pcSearchService.findSearchDtoByoneId(oneId);
+		List<Goods> findTopFiveGoods = pcSearchService.findTopFiveGoods();
+		request.setAttribute("oneId", oneId);
+		request.setAttribute("topGoods", findTopFiveGoods);
+		request.setAttribute("searchList", searchDtoByoneId);
+		return new ModelAndView("/search/top_search");
+	}
+	/**
+	 * 查询商品
+	 * @param pageIndex
+	 * @param orderMethod
+	 * @param oneId
+	 * @param priceOrder
+	 * @param search
+	 * @param isDivle
+	 * @param beginPrice
+	 * @param endPrice
+	 * @param wordId
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年11月2日 下午9:02:45
+	 */
+	@RequestMapping("topSearch/{pageIndex}/{orderMethod}")
+	public ModelAndView topSearch(@PathVariable("pageIndex") Integer pageIndex,@PathVariable("orderMethod") Integer orderMethod,@Param("oneId") Long oneId,
+			@Param("priceOrder") boolean priceOrder,@Param("search") String search,@Param("isDivle") Integer isDivle,@Param("beginPrice") BigDecimal beginPrice,
+			@Param("endPrice") BigDecimal endPrice,@Param("typeName") String typeName,  HttpServletRequest request){
+		List<Integer> page = new ArrayList<Integer>();
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(pageIndex);
+		List<Goods> goodsList = pcSearchService.findSearchGoodsByOneId(oneId, orderMethod, pageBean, typeName, search, priceOrder, isDivle, beginPrice, endPrice);
+		request.setAttribute("goodsList", goodsList);
+		return new ModelAndView("/search/top_list");
+	}
+	/**
+	 * 查询总页数
+	 * @param pageIndex
+	 * @param orderMethod
+	 * @param oneId
+	 * @param priceOrder
+	 * @param search
+	 * @param isDivle
+	 * @param beginPrice
+	 * @param endPrice
+	 * @param wordId
+	 * @param request
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年11月2日 下午9:03:27
+	 */
+	@RequestMapping("topSearchCountPage/{pageIndex}/{orderMethod}")
+	public Integer topSearchCountPage(@PathVariable("pageIndex") Integer pageIndex,@PathVariable("orderMethod") Integer orderMethod,@Param("oneId") Long oneId,
+			@Param("priceOrder") boolean priceOrder,@Param("search") String search,@Param("isDivle") Integer isDivle,@Param("beginPrice") BigDecimal beginPrice,
+			@Param("endPrice") BigDecimal endPrice,@Param("typeName") String typeName,  HttpServletRequest request){
+		List<Integer> page = new ArrayList<Integer>();
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(pageIndex);
+		List<Goods> goodsList = pcSearchService.findSearchGoodsByOneId(oneId, orderMethod, pageBean,typeName, search, priceOrder, isDivle, beginPrice, endPrice);
+		return pageBean.getTotalPage();
+	}
+	/**
+	 * 根据ID分辨具体数据那个id
+	 * @param id
+	 * @param request
+	 * @return ModelAndView
+	 * @author lij
+	 * @date 2017年11月4日 下午1:39:16
+	 */
+	@RequestMapping("searchTypeGoods")
+	public ModelAndView searchTypeGoods(@Param("id") Long id,HttpServletRequest request){
+		
+		Integer checkId = pcSearchService.checkId(id);
+		if(checkId == 1){//1级分类
+			
+			return new ModelAndView("redirect:/elastic/topGoods?oneId="+id);
+		}else{//二级分类
+			
+			return new ModelAndView("redirect:/elastic/typeGoods?typeId="+id);
+		}
+		
+	}
+	
+}

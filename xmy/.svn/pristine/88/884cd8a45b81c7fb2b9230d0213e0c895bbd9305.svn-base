@@ -1,0 +1,217 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="img"%>
+<%@ include file="/WEB-INF/jsp/commons/comm_cons_tag.jsp"%>
+<!DOCTYPE html>
+<html>
+  <head>
+  	<title>积分商城</title>
+	<%@include file="/WEB-INF/jsp/commons/comm_css.jsp" %>
+	<link rel="stylesheet" type="text/css" href="resource/css/pointStore/pointStore.css">
+	<link href="resource/commons/css/foundation-datepicker.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+  <%@include file="/WEB-INF/jsp/commons/nav/nav_homepage.jsp" %>
+
+	<!--全屏滚动-->
+<div class="ad" style="min-width: auto;">
+	<div class="b-img">
+	<c:forEach items="${topImg }" var="item">
+			<c:if test="${item.type==1 }"><a href="${item.data}" style="background:url(${item.imgPath }) center no-repeat;"></a></c:if>
+	     	<c:if test="${item.type==0 }"><a href="goods/${item.data }/0/0"><img src="${item.imgPath }" alt=""></a></c:if>
+	</c:forEach>
+	</div>
+	<div class="b-list" style="z-index:9999"></div>
+	<div class="banner-container clearfix">
+        <div class="banner-items item1">
+            <p class="title">我的权益</p>
+            <div class="inner-content">
+                <c:if test="${userInfo==null }">
+                	<div class="clearfix ">
+	                    <div class="col-40"><img src="resource/commons/images/head.jpg" alt=""></div>
+	                    <div class="col-60">
+	                        <p>HI欢迎</p>
+	                        <p>您还未登录哦</p>
+	                        <p>签到赢积分</p>
+	                    </div>
+	                </div>
+	                <div class="name text-center">积分俱乐部</div>
+                	<div class="btn-group"><button onclick="window.location='/user/login'" style="cursor: pointer;" type="button" class="btn btn-login ad-bg-o">登录</button></div>
+                </c:if>
+                <c:if test="${userInfo!=null }">
+                	<div class="clearfix ">
+	                    <div class="col-40"><img src="resource/commons/images/head.jpg" alt=""></div>
+	                    <div class="col-60">
+	                        <p>HI欢迎&nbsp;${userInfo.realName }</p>
+	                        <p>签到赢积分</p>
+	                    </div>
+	                </div>
+	                <div class="name text-center"><span id="accPoints">${userInfo.accPoints }</span></div>
+                	<div class="btn-group"><button style="cursor: pointer;" type="button" onclick="window.location='/center/centerIndex?set=1'" class="btn btn-login ad-bg-o">进入个人中心</button></div>
+                </c:if>
+            </div>
+            <div class="item-bottom">
+                <p class="ad-word-o">登录后将为您提供</p>
+                <p class="ad-word-g">1、签到免费赢积分</p>
+                <p class="ad-word-g">2、猜品牌赚积分</p>
+            </div>
+        </div>
+        <div class="banner-items item2">
+            <p class="item2-title"><i class="iconfont">&#xe64c;</i>签到赢积分</p>
+            <div id="R1"></div>
+            <button style="cursor: pointer;" id="sign" type="button" class="sign-in"><i class="iconfont">&#xe606;</i>签到<span class="exp">+5</span></button>
+            <div class="text-center item2-last-word">
+                <p>已经连续签到<span id="days" class="color-r"> 0 </span>天,再签<span id="day" class="color-r"> 7 </span>天</p>
+                <p>即可获赠 <span id="gain" class="color-r">140</span> 积分</p>
+            </div>
+        </div> 
+	
+    </div>
+	<!--<a class="bar-left" href="#"><em></em></a><a class="bar-right" href="#"><em></em></a>-->
+</div>
+<!--end 全屏滚动-->
+<!--内容部分-->
+<div class="container add-distance-top" style="margin-bottom:0px;background:#EFEFEF url('resource/commons/images/page-bg.png') 50.2% no-repeat fixed">
+    <c:forEach items="${pointStore}" var="map" >
+	    <div class="list-content">
+	        <div class="count-title ct1">
+        <span class="wrap-ct-word">
+	        <span class="ad-word-l title-name">${map.name }</span>
+        </span>
+       	 <div class="ct1-line"></div>
+        </div>
+	        <div class="inner-items">
+	        <ul class="clearfix">
+	        		<c:forEach items="${map.pcPointsGoodsDtos }" var="list">
+		                <li>
+		                <a href="point/${list.goodsId}/0/0?actId=${map.id}">
+		                    <div>
+		                        <div class="img-wrap">
+		                             <c:if test="${empty list.imgPath  }"><img src="resource/commons/images/defaultgoods.jpg" class="shop-img"></c:if>
+              <c:if test="${!empty list.imgPath  }"><img:imghandle w="262" imgurl="${list.imgPath }" h="262"  cl="shop-img"></img:imghandle></c:if>
+        
+		                        </div>
+		                        <div class="item-des clearfix">
+		                            <div class="col-70">
+		                                <p style="color: black;">${list.goodsName }</p>
+		                                <p class="ad-word-g"><span>价值 : ${list.price }</span><span class="pull-right">${list.completeNum }人兑换</span></p>
+		                            </div>
+		                            <div class="col-30 text-center robbin1"><p>积分</p><p class="num">${list.points }</p></div>
+		                        </div>
+		                    </div>
+		                    </a>
+		                </li>
+	        		</c:forEach>
+	        	</ul>
+	         </div>
+	    </div>
+    </c:forEach>
+    <%-- <div class="list-content">
+        <div class="count-title ct5"><span class="ad-word-l title-name">做任务换积分</span><span class="ad-word-g">Task</span></div>
+        <div class="inner-items clearfix">
+            <div class="col-33"><img src="resource/commons/images/task_07.jpg" alt=""></div>
+            <div class="col-33"><img src="resource/commons/images/task_07.jpg" alt=""></div>
+            <div class="col-33"><img src="resource/commons/images/task_07.jpg" alt=""></div>
+        </div>
+    </div> --%>
+    <%@include file="/WEB-INF/jsp/commons/comm_buttom.jsp" %>
+</div>
+
+<%@include file="/WEB-INF/jsp/commons/nav/search_float_top.jsp" %>
+<script type="text/javascript" src="resource/js/common/goods_search.js"></script>
+<script type="text/javascript" src="resource/commons/js/foundation-datepicker.js"></script>
+<script type="text/javascript" src="resource/js/pointStore/point-store.js"></script>
+<script src="resource/js/common/menu.js"></script>
+<script src="resource/commons/js/sli.js"></script>
+<script type="text/javascript">
+var isSign = "${status}";  //-1.未登录 0.没签过 1.签过
+$("#sign").click(function(){
+	if(isSign == 1){
+		warnPop("今天您已经签到过了请明天再来！");
+		return false;
+	}
+	$.ajax({
+        url: "point/sign",
+        type: "post",
+        dataType: "text",
+        contenttype :"application/x-www-form-urlencoded;charset=utf-8", 
+        error: function(jqXHR, textStatus, errorMsg){
+        	var btnFn = function(){
+				easyDialog.close();
+			  return false;
+			};
+        	easyDialog.open({
+				  container : {
+				    header : '提示',
+				    content : '请先登录！',
+				    yesFn : btnFn
+				  }
+				});
+        },
+        success: function (data,textStatus, jqXHR) {
+        	$("#days").html(data);
+        	$("#day").html(7-data);
+        	var num=0;
+        	var d=parseInt(data);
+        	for(var i=d+1;i<8;i++){
+        		num+=i*5;
+        	}
+        	$("#gain").html(num);
+        	getPoints();
+        	$("#sign").css({'background-color':'#666'});
+        	$(".exp").animate({"top":"-15px"},1000).css({"opacity":"1","display":"block"});
+        }
+    });
+})
+initSign();
+//初始化签到
+function initSign(){
+	if (isSign == 1) { //已签到过
+		$("#sign").css({'background-color':'#666'});
+		//$("#sign").unbind('click');
+	} else {
+		$.ajax({
+			url:"point/initSing",
+			type: "post",
+			success: function (data) {
+				$("#days").html(data);
+	        	$("#day").html(7-data);
+	        	var num=0;
+	        	var d=parseInt(data);
+	        	for(var i=d+1;i<8;i++){
+	        		num+=i*5;
+	        	}
+	        	$("#gain").html(num);
+	        	getPoints();
+	        	$(".exp").animate({"top":"-15px"},1000).css({"opacity":"1","display":"block"});
+	        }
+		})
+	}
+}
+function getPoints(){
+	$.ajax({
+        url: "point/points",
+        type: "post",
+        dataType: "text",
+        success: function (data,textStatus, jqXHR) {
+        	$("#accPoints").html(data);
+        }
+    });
+}
+
+
+function warnPop(text){
+	var btnFn = function(){
+		easyDialog.close();
+	  return false;
+	};
+	easyDialog.open({
+		  container : {
+		    header : '提示',
+		    content : text,
+		    yesFn : btnFn
+		  }
+		});
+}
+</script>
+</body>
+</html>

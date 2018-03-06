@@ -1,0 +1,71 @@
+package com.zfj.xmy.common.service.impl;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.RandomUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.xmy.common.persistence.dao.JiguangPushRecordMapper;
+import com.zfj.xmy.common.persistence.pojo.JiguangPushRecord;
+import com.zfj.xmy.common.service.CommonPushUtilService;
+import com.zfj.xmy.quartz.QuartzManager;
+import com.zfj.xmy.quartz.dto.PushReturnDto;
+import com.zfj.xmy.quartz.job.JiguangPushQuartz;
+import com.zfj.xmy.util.PushUtil;
+
+@Service
+public class CommonPushUtilServiceImpl extends BaseService implements CommonPushUtilService {
+
+	@Autowired
+	private JiguangPushRecordMapper jiguangPushRecordMapper;
+	
+	@Autowired
+	private QuartzManager quartzManager;
+	
+	@Override
+	public void testme() {
+		
+		//System.out.println("is test me .....");
+	}
+	
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+    public void Push(String msg) {
+		//推送
+		String result = PushUtil.sendBroadcasts(msg);
+		//记录
+		JiguangPushRecord jiguangPushRecord = new JiguangPushRecord();
+		jiguangPushRecord.setContent(msg);
+		jiguangPushRecord.setCreateTimestamp(DateUtil.date());
+		jiguangPushRecord.setResult(result);
+		jiguangPushRecordMapper.insertSelective(jiguangPushRecord);
+		//System.out.println("is test me .....");
+	}
+    
+	@Override
+	public void addPush(String msg,Date date) {
+		Map<String, Object> extData = new HashMap<String, Object>();
+		extData.put("msg", msg); //推送信息
+		quartzManager.addJob(RandomUtil.randomUUID(), "push", "push", "push", JiguangPushQuartz.class, date, extData);
+		//System.out.println("is test me .....");
+	}
+	
+	@Override
+	public void queryAllPush() {
+		List<PushReturnDto> pushReturns = quartzManager.queryAllPush();
+		for (PushReturnDto pushReturnDto : pushReturns) {
+			System.out.println(pushReturnDto.getJobName());
+			System.out.println(pushReturnDto.getExtData());
+			System.out.println(pushReturnDto.getTime());
+		}
+	}
+}

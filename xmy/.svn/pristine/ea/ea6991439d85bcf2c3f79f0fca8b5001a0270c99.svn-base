@@ -1,0 +1,285 @@
+package com.zfj.xmy.app.web.controller.goods;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.zfj.base.commons.mini.annotation.Exclusion;
+import com.zfj.base.util.web.WebUtil;
+import com.zfj.xmy.app.web.common.AppResp;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.elasticsearch.document.GoodsDoc;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsDto;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsInDto;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppGoodsOut;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppOrderMethod;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppScreenInDto;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppScreenOutDto;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcSearchDto;
+import com.zfj.xmy.goods.service.app.AppGoodsService;
+import com.zfj.xmy.goods.service.pc.PcElasticGoodsService;
+import com.zfj.xmy.goods.service.pc.PcSearchService;
+import com.zfj.xmy.util.DataPage;
+
+@RestController
+@RequestMapping(value="/screenGoods",params=SystemConstant.MOBILE_VERSION_V10)
+public class ScreenGoodsController {
+	
+	@Autowired
+	private AppGoodsService appGoodsService;
+	
+	@Autowired
+	private PcSearchService pcSearchService;
+
+	@Autowired
+	private PcElasticGoodsService elasticGoodsService;
+	
+	/**
+	 * @param goodsName
+	 * @param orderMethod
+	 * @return ResponseEntity<List<AppGoodsOut>>
+	 * @author lij
+	 * @date 2017年7月28日 上午11:04:53
+	 * 搜索商品列表
+	 */
+	@RequestMapping(value="/findGoodsByName",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> testAdd(@RequestBody AppGoodsInDto goodsInDto){
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(goodsInDto.getPageIndex());
+		//List<AppGoodsOut> goodsOutList = appGoodsService.findGoodsByGoodsName(goodsInDto.getGoodsName(), goodsInDto.getOrderMethod());
+		Integer beginPrice = null;
+		Integer endPrice = null;
+		if(!ObjectUtils.isEmpty(goodsInDto.getBeginPrice())){
+			BigInteger integer = goodsInDto.getBeginPrice().toBigInteger();
+			beginPrice = Integer.parseInt(integer.toString());
+		}
+		if(!ObjectUtils.isEmpty(goodsInDto.getEndPrice())){
+			BigInteger integer = goodsInDto.getEndPrice().toBigInteger();
+			endPrice = Integer.parseInt(integer.toString());
+		}
+		if(ObjectUtils.isEmpty(goodsInDto.getIsDelivery())){
+			goodsInDto.setIsDelivery(1);
+		}else{
+			if(goodsInDto.getIsDelivery() == 0){
+				goodsInDto.setIsDelivery(1);
+			}else{
+				goodsInDto.setIsDelivery(0);
+			}
+		}
+		if(!ObjectUtils.isEmpty(goodsInDto.getOrderMethod()) && goodsInDto.getOrderMethod()==4){
+			goodsInDto.setOrderMethod(goodsInDto.getOrderMethod()-1);
+		}
+		DataPage<GoodsDoc> searchGoods = elasticGoodsService.searchGoods(goodsInDto.getOrderMethod(), goodsInDto.getGoodsName(), goodsInDto.getPageIndex(),
+				goodsInDto.getPriceOrder(), goodsInDto.getIsDelivery(), goodsInDto.getTypeName(), beginPrice, endPrice,
+				null);
+		List<GoodsDoc> list = searchGoods.getList();
+		List<AppGoodsOut> newList = new ArrayList<AppGoodsOut>();
+		for (GoodsDoc goodsDoc : list) {
+			AppGoodsOut appGoodsDto = new AppGoodsOut();
+			appGoodsDto.setId(goodsDoc.getId());
+			appGoodsDto.setName(goodsDoc.getFullName());
+			appGoodsDto.setImgPath(goodsDoc.getImgPath()+"?x-oss-process=image/resize,m_fixed,h_200,w_200");
+			appGoodsDto.setStandard(goodsDoc.getStandard());
+			appGoodsDto.setSumComment(goodsDoc.getSumComment());
+			appGoodsDto.setSumDeal(goodsDoc.getSumDeal());
+			String newPrice = "";
+			Integer shi = goodsDoc.getPrice()/100;
+			Integer ge = goodsDoc.getPrice()%100;
+			newPrice = shi.toString()+"."+ge.toString();
+			appGoodsDto.setPrice(BigDecimal.valueOf(Double.parseDouble(newPrice)));
+			if(!ObjectUtils.isEmpty(goodsDoc.getActivityType())){
+				appGoodsDto.setActivityId(goodsDoc.getActivityId());
+				appGoodsDto.setActivityType(goodsDoc.getActivityType());
+				appGoodsDto.setActivityImgPath(goodsDoc.getActivityImg());
+			}
+			newList.add(appGoodsDto);
+		}
+		pageBean.setData(newList);
+		pageBean.setTotalCount((int)searchGoods.getTotal());
+		return AppResp.get(pageBean);
+	}
+	/**
+	 * @param goodsName
+	 * @param orderMethod
+	 * @return ResponseEntity<List<AppGoodsOut>>
+	 * @author lij
+	 * @date 2017年7月28日 上午11:04:53
+	 * 根据二级id搜索商品列表或一级
+	 */
+	@RequestMapping(value="/findGoodsByType",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findGoods(@RequestBody AppGoodsInDto goodsInDto){
+		Integer checkId = pcSearchService.checkId(goodsInDto.getTwoTypeId());
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(goodsInDto.getPageIndex());
+		if(checkId == 1){//1级分类
+			appGoodsService.findGoodsByOneId(goodsInDto.getTwoTypeId(), goodsInDto.getOrderMethod(),pageBean,goodsInDto.getPriceOrder());
+		}else{//二级分类
+			appGoodsService.findGoodsByTypeId(goodsInDto.getTwoTypeId(), goodsInDto.getOrderMethod(),pageBean,goodsInDto.getPriceOrder());
+		}
+		List<AppGoodsOut> goodsOutList = (List<AppGoodsOut>) pageBean.getData();
+		for (AppGoodsOut appGoodsOut : goodsOutList) {
+			appGoodsOut.setImgPath(appGoodsOut.getImgPath()+"?x-oss-process=image/resize,m_fixed,h_200,w_200");
+		}
+		pageBean.setData(goodsOutList);
+		return AppResp.get(pageBean);
+	}
+	
+	/**
+	 * @param goodsName
+	 * @param orderMethod
+	 * @return ResponseEntity<List<AppGoodsOut>>
+	 * @author lij
+	 * @date 2017年7月28日 上午11:04:53
+	 * 根据分词id搜索商品列表
+	 */
+	@RequestMapping(value="/findGoodsByParticiple",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findGoodsByParticiple(@RequestBody AppGoodsInDto goodsInDto){
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(goodsInDto.getPageIndex());
+		appGoodsService.findGoodsByParticipleId(goodsInDto.getParticipleId(), goodsInDto.getOrderMethod(),pageBean,goodsInDto.getPriceOrder());
+		
+		List<AppGoodsOut> goodsOutList = (List<AppGoodsOut>) pageBean.getData();
+		
+		for (AppGoodsOut appGoodsOut : goodsOutList) {
+			appGoodsOut.setImgPath(appGoodsOut.getImgPath()+"?x-oss-process=image/resize,m_fixed,h_200,w_200");
+		}
+		pageBean.setData(goodsOutList);
+		return AppResp.get(pageBean);
+	}
+	
+	
+	/**
+	 * @param goodsName
+	 * @return ResponseEntity<List<AppScreenOutDto>>
+	 * @author lij
+	 * @date 2017年7月28日 下午2:16:05
+	 * 根据商品名称查询筛选条件（右边的筛选条件）
+	 */
+	@RequestMapping(value="/findScreenListByName",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findScreenList(@RequestBody AppGoodsInDto goodsInDto){
+		//List<AppScreenOutDto> findScreenList = appGoodsService.findScreenListByName(goodsInDto.getGoodsName());
+		if(ObjectUtils.isEmpty(goodsInDto.getIsDelivery()) || goodsInDto.getIsDelivery() < 0){
+			goodsInDto.setIsDelivery(null);
+		}
+		List<PcSearchDto> searchDto = pcSearchService.querySearchDto(goodsInDto.getGoodsName(), goodsInDto.getTypeName(), goodsInDto.getIsDelivery());
+		return AppResp.get(searchDto);
+	}
+	
+	/**
+	 * @param goodsName
+	 * @return ResponseEntity<List<AppScreenOutDto>>
+	 * @author lij
+	 * @date 2017年7月28日 下午2:16:05
+	 * 根据二级分类查询筛选条件（右边的筛选条件）
+	 */
+	@RequestMapping(value="/findScreenListTwoType",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findScreenListByTwo(@RequestBody AppGoodsInDto goodsInDto){
+		Integer checkId = pcSearchService.checkId(goodsInDto.getTwoTypeId());
+		List<AppScreenOutDto> findScreenList = null;
+		if(checkId == 1){//1级分类
+			findScreenList = appGoodsService.findScreenListByOne(goodsInDto.getTwoTypeId());
+		}else{//二级分类
+			findScreenList = appGoodsService.findScreenListByTwo(goodsInDto.getTwoTypeId());
+		}
+		return AppResp.get(findScreenList);
+	}
+	
+	/**
+	 * @param goodsName
+	 * @return ResponseEntity<List<AppScreenOutDto>>
+	 * @author lij
+	 * @date 2017年7月28日 下午2:16:05
+	 * 根据分词查询筛选条件（右边的筛选条件）
+	 */
+	@RequestMapping(value="/findScreenListParticiple",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findScreenListParticiple(@RequestBody AppGoodsInDto goodsInDto){
+		List<AppScreenOutDto> findScreenList = appGoodsService.findScreenListByParticipleId(goodsInDto.getParticipleId());
+		return AppResp.get(findScreenList);
+	}
+	/**
+	 * @return ResponseEntity<AppResp>
+	 * @author lij
+	 * @date 2017年8月17日 下午7:59:01
+	 * 查询排序条件
+	 */
+	@RequestMapping(value="/findOrderMethod",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findOrderThod(){
+		List<AppOrderMethod> findOrderMethod = appGoodsService.findOrderMethod();
+		return AppResp.get(findOrderMethod);
+	}
+	
+	/**
+	 * @param appScreenInDto
+	 * @return ResponseEntity<List<AppGoodsOut>>
+	 * @author lij
+	 * @date 2017年7月28日 下午2:31:33
+	 * 根据筛选条件查询商品
+	 */
+	@RequestMapping(value="/findGoodsByScreen",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findGoodsByScreen(@RequestBody AppScreenInDto appScreenInDto){
+		PageBean pageBean = new PageBean();
+		pageBean.setPageSize(20);
+		pageBean.setPageIndex(appScreenInDto.getPageIndex());
+		if(ObjectUtils.isEmpty(appScreenInDto.getIsDelivery())){
+			appScreenInDto.setIsDelivery(1);
+		}else{
+			if(appScreenInDto.getIsDelivery() == 0){
+				appScreenInDto.setIsDelivery(1);
+			}else{
+				appScreenInDto.setIsDelivery(0);
+			}
+		}
+		appGoodsService.findGoodsByScreen(appScreenInDto,pageBean);
+		@SuppressWarnings("unchecked")
+		List<AppGoodsOut> goodsOutList = (List<AppGoodsOut>) pageBean.getData();
+		for (AppGoodsOut appGoodsOut : goodsOutList) {
+			appGoodsOut.setImgPath(appGoodsOut.getImgPath()+"?x-oss-process=image/resize,m_fixed,h_200,w_200");
+		}
+		pageBean.setData(goodsOutList);
+		return AppResp.get(pageBean);
+	}
+	/**
+	 * 查询筛选条件
+	 * @param appScreenInDto
+	 * @return
+	 */
+	@RequestMapping(value="/findTypeIdScreen",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> findTypeIdScreen(@RequestBody AppScreenInDto appScreenInDto){
+		List<AppScreenOutDto> outDto = pcSearchService.queryWrodsOutDto(appScreenInDto.getScreenName(),appScreenInDto.getTypeId(),appScreenInDto.getWordsId());
+		return AppResp.get(outDto);
+	}
+	
+/*	@RequestMapping(value="/test",method=RequestMethod.POST)
+	@Exclusion
+	public ResponseEntity<AppResp> testService(){
+		List<AppTestDto> findTestDto = testService.findTestDtos(51l);
+		return AppResp.get(findTestDto);
+	}*/
+}

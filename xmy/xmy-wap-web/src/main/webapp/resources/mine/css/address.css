@@ -1,0 +1,18 @@
+@CHARSET "UTF-8";
+ header .header-top{border-bottom: 1px solid #C3C3C3;}
+        .list .chunk{background-color: #fff;font-size: 0.7rem;color: #444;padding: 13px 0px;margin-bottom: 0.5rem;}
+        .list .chunk .chunk-title{padding: 0 10px;}
+        .list .chunk .chunk-title .phone{float: right;}
+        .list .chunk .address{margin-top: 0.2rem;padding: 0 10px 1rem 10px;border-bottom: 1px solid #f0f0f0;}
+        .list .chunk .sigin{padding: 13px 10px 0 10px;width: 6rem;}
+        .list .chunk .sigin .yuan{width: 1rem;height: 1rem;border:1px solid #444;border-radius: 50%;float: left;margin-right: 0.25rem;}
+        .list .chunk .sigin .yuan span{float: left;}
+        .list .chunk .sigin.active{color: #348811;}
+        .list .chunk .sigin.active .yuan{background:url(../../common/images/xz.png);background-size: 100% 100%;border:0;}
+        .list .chunk .handle{text-align: right;width: 7rem;position: absolute;top: 0rem;right: 10px;}
+        .list .chunk .handle img{width: 1.2rem;margin-right: 0.1rem;position: relative;top: 0.5rem;}
+        .list .chunk .handle .text{position: relative;top: 0.25rem;}
+        .list .chunk .handle .del{margin-left: 0.5rem;}
+        .list .chunk .lump{position: relative;}
+        .add-address{width: 100%;height: 100%;background-color: #348811;border:0;color: #fff;font-size: 0.8rem;}
+        

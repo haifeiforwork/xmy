@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.comment.persistence.app.pojo.dao.WapCommentExMapper" >
+
+	<resultMap id="commentList" type="com.zfj.xmy.comment.persistence.app.pojo.dto.CommentListOutDto" autoMapping="true" >
+		<id column="goods_id" property="goodsId" />
+	</resultMap>
+	
+	<select id="findCommentsByGoodsId" parameterType="java.lang.Long" resultMap="commentList" >
+		SELECT
+			m.comment_conten,
+			m.create_time,
+			u.real_name,
+			u.mobile_phone,
+			m.comment_star,
+			m.comment_rank,
+			m.goods_id
+		FROM
+			(
+				SELECT
+					m.comment_conten,
+					m.create_time,
+					m.comment_star,
+					m.goods_id,
+					m.comment_rank
+				FROM
+					`comment` m
+				WHERE
+		     		 goods_id = #{id}
+		    	AND
+					 comment_type = 1
+				AND 
+		     		 comment_status = 0
+			) m
+		JOIN user_info u
+	</select>
+	
+</mapper>

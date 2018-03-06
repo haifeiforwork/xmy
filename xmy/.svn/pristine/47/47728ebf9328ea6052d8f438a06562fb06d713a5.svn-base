@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.zfj.xmy.order.persistence.common.dao.OrderExMapper" >
+<resultMap id="BaseResultMap" type="com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="no" property="no" jdbcType="VARCHAR" />
+    <result column="serial_number" property="serialNumber" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="pay_type" property="payType" jdbcType="INTEGER" />
+    <result column="pay" property="pay" jdbcType="INTEGER" />
+    <result column="actual" property="actual" jdbcType="INTEGER" />
+    <result column="total" property="total" jdbcType="INTEGER" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="payment_name" property="paymentName" jdbcType="VARCHAR" />
+    <result column="consignee_name" property="consigneeName" jdbcType="VARCHAR" />
+    <result column="consignee_phone" property="consigneePhone" jdbcType="VARCHAR" />
+    <result column="consignee_address" property="consigneeAddress" jdbcType="VARCHAR" />
+    <result column="consignee_idcard" property="consigneeIdcard" jdbcType="VARCHAR" />
+    <result column="delivery_name" property="deliveryName" jdbcType="VARCHAR" />
+    <result column="delivery_phone" property="deliveryPhone" jdbcType="VARCHAR" />
+    <result column="delivery_method" property="deliveryMethod" jdbcType="INTEGER" />
+    <result column="payment_status" property="paymentStatus" jdbcType="INTEGER" />
+    <result column="ship_status" property="shipStatus" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="weight" property="weight" jdbcType="INTEGER" />
+    <result column="acc_points" property="accPoints" jdbcType="BIGINT" />
+    <result column="is_del" property="isDel" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="CHAR" />
+    <result column="pay_time" property="payTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="send_time" property="sendTime" jdbcType="TIMESTAMP" />
+    <result column="arrival_time" property="arrivalTime" jdbcType="TIMESTAMP" />
+    <result column="parset_time" property="parsetTime" jdbcType="TIMESTAMP" />
+    <result column="updator" property="updator" jdbcType="VARCHAR" />
+    <result column="order_remark" property="orderRemark" jdbcType="VARCHAR" />
+    <result column="business_remark" property="businessRemark" jdbcType="VARCHAR" />
+    <result column="return_status" property="returnStatus" jdbcType="INTEGER" />
+    <result column="return_reason" property="returnReason" jdbcType="VARCHAR" />
+    <result column="third_party_pay_type" property="thirdPartyPayType" jdbcType="INTEGER" />
+    <result column="invoice_type" property="invoiceType" jdbcType="INTEGER" />
+    <result column="invoice_content" property="invoiceContent" jdbcType="VARCHAR" />
+    <result column="taxpayer_num" property="taxpayerNum" jdbcType="VARCHAR" />
+    <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+    <result column="coupon_id" property="couponId" jdbcType="BIGINT" />
+    <result column="used_points" property="usedPoints" jdbcType="INTEGER" />
+    <result column="discount_price" property="discountPrice" jdbcType="DECIMAL" />
+    <result column="third_party_pay_type" property="thirdPartyPayType" jdbcType="INTEGER" />
+  </resultMap>
+  
+  <resultMap id="StatusCountMap" type="com.zfj.xmy.order.persistence.common.pojo.dto.app.OrderStatusCountDto" >
+    <result column="count" property="count" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+  </resultMap>
+  <!-- 根据条件查询订单并返回扩展订单的实体 -->
+	<select id="findOrderDto" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+		select * from `order` 
+		<if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		order by id desc
+	</select>
+	
+	<!-- @auther hex根据搜索条件查询我的订单  -->
+	<select id="findOrderDtoByCondition" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select  DISTINCT(o.id),o.* from `order` o
+		INNER JOIN order_goods og ON o.id = og.order_id 
+		INNER JOIN goods g on g.id = og.goods_id
+		where 
+		user_id = #{userid} AND 
+		( 
+		  og.`name` LIKE #{search} 
+		  OR o.`no` LIKE #{search} 
+		  or g.`code` LIKE #{search} 
+		 ) 
+		<if test="status != null">
+		 and o.status = #{status} 
+		</if>
+		order by o.id desc
+	</select>
+	
+  <!-- 根据状态分组获取订单数量 -->
+	<select id="findOrderStatusCount" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="StatusCountMap">
+		SELECT COUNT(*) as count,`status` FROM `order`  <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if> 
+		GROUP BY `status`
+	</select>
+	<!--PC 我的订单筛选在使用此查询 根据条件查询订单并返回扩展订单的实体 -->
+	<select id="findScreenOrderDto" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+		select distinct o.* from `order` o INNER JOIN order_goods og on o.id = og.order_id <if test="_parameter != null" >
+	     <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+	</select>
+	
+  <!-- 查询订单号最大值 -->
+   <select id="findMaxNum" parameterType="com.appdev.db.common.CriteriaParameter" resultType="String">
+   		select max(no+0) as code from `order` 
+   		<if test="_parameter != null" >
+		  <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null" >
+		  order by ${orderByClause}
+		</if>
+   </select>
+	
+	<!-- 查询订单是重庆主城区-->
+   <select id="findOrderIsCQ" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+   		select * from `order`
+   		<if test="_parameter != null" >
+		  <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		and 
+		(consignee_address LIKE '%重庆市江北区%' or consignee_address LIKE '%重庆市渝中区%' or consignee_address LIKE '%重庆市沙坪坝区%' or consignee_address LIKE '%重庆市大渡口区%' 
+		or consignee_address LIKE '%重庆市南岸区%' or consignee_address LIKE '%重庆市九龙坡区%' or consignee_address LIKE '%重庆市渝北区%' or consignee_address LIKE '%重庆市巴南区%'
+		 or consignee_address LIKE '%重庆市北碚区%')
+   </select>
+	<!-- 查询订单不是重庆主城区 -->
+	<select id="findOrderNoCQ" parameterType="com.appdev.db.common.CriteriaParameter" resultMap="BaseResultMap">
+   		select * from `order`
+   		<if test="_parameter != null" >
+		  <include refid="sqlcriteria.util.Example_Where_Clause" />
+		</if>
+		and 
+		(consignee_address NOT LIKE '%重庆市江北区%' AND consignee_address NOT LIKE '%重庆市渝中区%' AND consignee_address NOT LIKE '%重庆市沙坪坝区%' AND consignee_address NOT LIKE '%重庆市大渡口区%' 
+		AND consignee_address NOT LIKE '%重庆市南岸区%' AND consignee_address NOT LIKE '%重庆市九龙坡区%' AND consignee_address NOT LIKE '%重庆市渝北区%' AND consignee_address NOT LIKE '%重庆市巴南区%'
+		 AND consignee_address NOT LIKE '%重庆市北碚区%')
+   </select>
+	
+</mapper>

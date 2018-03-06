@@ -1,0 +1,264 @@
+package com.zfj.xmy.common.persistence.pojo;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+import javax.persistence.Column;
+
+public class Coupon implements Serializable {
+
+    /**
+     * coupon.id
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "id")
+    private Long id;
+
+
+    /**
+     * coupon.name (优惠券名称)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "name")
+    private String name;
+
+
+    /**
+     * coupon.coupon_count (优惠券数量)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "coupon_count")
+    private Long couponCount;
+
+
+    /**
+     * coupon.coupon_value (优惠券面值)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "coupon_value")
+    private BigDecimal couponValue;
+
+
+    /**
+     * coupon.quota (需要满足多少元此优惠券才生效)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "quota")
+    private Integer quota;
+
+
+    /**
+     * coupon.coupon_img (优惠券图片)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "coupon_img")
+    private String couponImg;
+
+
+    /**
+     * coupon.effective_start_time (优惠券使用开始时间)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "effective_start_time")
+    private Date effectiveStartTime;
+
+
+    /**
+     * coupon.effective_end_time (优惠券使用结束时间)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "effective_end_time")
+    private Date effectiveEndTime;
+
+
+    /**
+     * coupon.use_strategy (优惠券使用策略(1代表一笔交易仅使用一张优惠券，2代表一笔交易可使用多张优惠卷))
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "use_strategy")
+    private Integer useStrategy;
+
+
+    /**
+     * coupon.use_with_others (能否和其他优惠券一起使用（1代表不能和其他类型优惠券一起使用，2代表可以和其他类型优惠券一起使用）)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "use_with_others")
+    private Integer useWithOthers;
+
+
+    /**
+     * coupon.supplier_ids (供应商的ID集合)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "supplier_ids")
+    private String supplierIds;
+
+
+    /**
+     * coupon.use_range (使用范围（1：全场通用；2：分类使用；3：限定商品；4：排队商品）)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "use_range")
+    private Integer useRange;
+
+
+    /**
+     * coupon.use_range_ids (使用范围的集合)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "use_range_ids")
+    private String useRangeIds;
+
+
+    /**
+     * coupon.status (0代表启用,1代表禁用)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "status")
+    private Integer status;
+
+
+    /**
+     * coupon.use_num (已领取优惠券数)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "use_num")
+    private Long useNum;
+
+
+    /**
+     * coupon.des (优惠券介绍)
+     * @ibatorgenerated 2017-11-01 14:39:52
+     */
+    @Column(name = "des")
+    private String des;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Long getCouponCount() {
+        return couponCount;
+    }
+
+    public void setCouponCount(Long couponCount) {
+        this.couponCount = couponCount;
+    }
+
+    public BigDecimal getCouponValue() {
+        return couponValue;
+    }
+
+    public void setCouponValue(BigDecimal couponValue) {
+        this.couponValue = couponValue;
+    }
+
+    public Integer getQuota() {
+        return quota;
+    }
+
+    public void setQuota(Integer quota) {
+        this.quota = quota;
+    }
+
+    public String getCouponImg() {
+        return couponImg;
+    }
+
+    public void setCouponImg(String couponImg) {
+        this.couponImg = couponImg;
+    }
+
+    public Date getEffectiveStartTime() {
+        return effectiveStartTime;
+    }
+
+    public void setEffectiveStartTime(Date effectiveStartTime) {
+        this.effectiveStartTime = effectiveStartTime;
+    }
+
+    public Date getEffectiveEndTime() {
+        return effectiveEndTime;
+    }
+
+    public void setEffectiveEndTime(Date effectiveEndTime) {
+        this.effectiveEndTime = effectiveEndTime;
+    }
+
+    public Integer getUseStrategy() {
+        return useStrategy;
+    }
+
+    public void setUseStrategy(Integer useStrategy) {
+        this.useStrategy = useStrategy;
+    }
+
+    public Integer getUseWithOthers() {
+        return useWithOthers;
+    }
+
+    public void setUseWithOthers(Integer useWithOthers) {
+        this.useWithOthers = useWithOthers;
+    }
+
+    public String getSupplierIds() {
+        return supplierIds;
+    }
+
+    public void setSupplierIds(String supplierIds) {
+        this.supplierIds = supplierIds;
+    }
+
+    public Integer getUseRange() {
+        return useRange;
+    }
+
+    public void setUseRange(Integer useRange) {
+        this.useRange = useRange;
+    }
+
+    public String getUseRangeIds() {
+        return useRangeIds;
+    }
+
+    public void setUseRangeIds(String useRangeIds) {
+        this.useRangeIds = useRangeIds;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Long getUseNum() {
+        return useNum;
+    }
+
+    public void setUseNum(Long useNum) {
+        this.useNum = useNum;
+    }
+
+    public String getDes() {
+        return des;
+    }
+
+    public void setDes(String des) {
+        this.des = des;
+    }
+}

@@ -1,0 +1,170 @@
+package com.zfj.xmy.order.service.cms.impl;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import com.appdev.db.common.pojo.PageBean;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OrderGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OrderMapper;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.OrderGoods;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.order.persistence.common.dao.OrderGoodsExMapper;
+import com.zfj.xmy.order.persistence.common.pojo.dto.LableDto;
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderDto;
+import com.zfj.xmy.order.persistence.common.pojo.dto.OrderGoodsDto;
+import com.zfj.xmy.order.persistence.common.pojo.dto.ShoppingDto;
+import com.zfj.xmy.order.service.cms.OrderGoodsService;
+import com.zfj.xmy.order.service.cms.OrderService;
+@Service
+public class OrderGoodsServiceImpl extends BaseService implements OrderGoodsService{
+
+	@Autowired
+	private OrderGoodsMapper orderGoodsMapper;
+	
+	@Autowired
+	private OrderGoodsExMapper orderGoodsExMapper;
+	
+	@Autowired
+	private OrderService orderService;
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	@Override
+	public List<OrderGoods> findOrderGoodsByOrderId(ReqData reqData) {
+		
+		List<OrderGoods> list = orderGoodsMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		for (OrderGoods orderGoods : list) {
+			//commonGoodsService
+			orderGoods.setNo(Long.parseLong(commonGoodsService.findGoodsNo(orderGoods.getGoodsId())));
+		}
+		return list;
+	}
+	
+
+	@Override
+	public List<OrderGoodsDto> findShoppingList(ReqData reqData, PageBean pageBean,List<Object> ordersid) {
+		List<OrderGoodsDto> dto = orderGoodsExMapper.shoppingList(ReqUtil.reqParameterToCriteriaParameter(reqData)); //查询主商品的集合
+		List<OrderGoodsDto> presentGoods = orderGoodsExMapper.shoppingPresentList(ReqUtil.reqParameterToCriteriaParameter(reqData)); //需采购的赠品的清单
+		for (OrderGoodsDto orderGoodsDto : presentGoods) {
+			orderGoodsDto.setName(orderGoodsDto.getName()+"(赠品)");
+		}
+		reqData.clearValue();
+		for (OrderGoodsDto orderGoodsDto : dto) {  //订单编号 和 数量
+			reqData.putValue("og.order_id", ordersid, SystemConstant.REQ_PARAMETER_IN);
+			reqData.putValue("og.goods_id", orderGoodsDto.getId(), SystemConstant.REQ_PARAMETER_IN);
+			orderGoodsDto.setsDto(orderGoodsExMapper.shoppingDtoList(ReqUtil.reqParameterToCriteriaParameter(reqData)));
+			reqData.clearValue();
+		}
+		dto.addAll(presentGoods);
+		return dto;
+	}
+	
+
+	@Override
+	public int updateOrderGoods(long id,int goodnum) {
+		OrderGoods orderGoods = orderGoodsMapper.selectByPrimaryKey(id);
+		//改变订单商品
+		orderGoods.setNum(goodnum);
+		orderGoods.setSumPrice(orderGoods.getPrice().multiply(new BigDecimal(goodnum)));
+		orderGoodsMapper.updateByPrimaryKey(orderGoods);
+		return 1;
+	}
+
+	/**
+	 * 查询需要导出采购清单的数据
+	 */
+	@Override
+	public List<OrderGoodsDto> exleGoodsList(ReqData reqData, Integer type, String orderIds) {
+		reqData.putValue("og.order_id", orderIds, SystemConstant.REQ_PARAMETER_IN);
+		if(type<2){//指定导出某个商品
+			reqData.putValue("g.market", type, SystemConstant.REQ_PARAMETER_EQ);
+		}
+		List<OrderGoodsDto> shoppingList = orderGoodsExMapper.shoppingList(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		List<OrderGoodsDto> parentList = orderGoodsExMapper.shoppingPresentList(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		shoppingList.addAll(parentList);
+		reqData.clearValue();
+		if(type==2){
+			for (OrderGoodsDto orderGoodsDto : shoppingList) {
+				reqData.putValue("og.order_id", orderIds, SystemConstant.REQ_PARAMETER_IN);
+				reqData.putValue("og.goods_id", orderGoodsDto.getId(), SystemConstant.REQ_PARAMETER_IN);
+				orderGoodsDto.setsDto(orderGoodsExMapper.shoppingDtoList(ReqUtil.reqParameterToCriteriaParameter(reqData)));
+				reqData.clearValue();
+			}
+			//赠品
+			for (OrderGoodsDto orderGoodsDto : shoppingList) {
+				reqData.putValue("og.order_id", orderIds, SystemConstant.REQ_PARAMETER_IN);
+				reqData.putValue("og.present_goods_id", orderGoodsDto.getId(), SystemConstant.REQ_PARAMETER_IN);
+				List<ShoppingDto> shoppingDtoList = orderGoodsExMapper.shoppingDtoList(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				if(!ObjectUtils.isEmpty(shoppingDtoList)){
+					orderGoodsDto.setsDto(shoppingDtoList);
+				}
+				reqData.clearValue();
+			}
+		}
+		return shoppingList;
+	}
+	/**
+	 * @param reqData
+	 * @param orderIds
+	 * @param type
+	 * @return List<OrderDto>
+	 * @author 查询需要导出的订单集合
+	 * @date 2017年10月18日 上午10:04:28
+	 */
+	@Override
+	public List<OrderDto> exleOrderDto(ReqData reqData,String orderIds,Integer type){
+		reqData.putValue("id", orderIds, SystemConstant.REQ_PARAMETER_IN);
+		List<OrderDto> findOrderDto = orderService.findOrderDto(reqData);
+		reqData.clearValue();
+		for (OrderDto orderDto : findOrderDto) {
+			reqData.putValue("og.order_id", orderDto.getId(), SystemConstant.REQ_PARAMETER_EQ);
+			if(type<2){
+				reqData.putValue("g.market", type, SystemConstant.REQ_PARAMETER_EQ);
+			}
+			List<OrderGoodsDto> findOrderGoodsDtos = orderGoodsExMapper.findOrderGoodsDtos(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			List<OrderGoodsDto> goodsParent = orderGoodsExMapper.findOrderGoodsParent(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			findOrderGoodsDtos.addAll(goodsParent);
+			reqData.clearValue();
+			orderDto.setGoodsList(findOrderGoodsDtos);
+		}
+		
+		return findOrderDto;
+		
+	}
+
+	/**
+	 * 查询导出标签的实体
+	 */
+	@Override
+	public List<LableDto> excleLable(ReqData reqData, String orderIds, Integer type) {
+		reqData.putValue("og.order_id", orderIds, SystemConstant.REQ_PARAMETER_IN);
+		reqData.putValue("g.market", type, SystemConstant.REQ_PARAMETER_EQ);
+		List<LableDto> findLableDto = orderGoodsExMapper.findLableDto(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		List<LableDto> lableParentDto = orderGoodsExMapper.findLableParentDto(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		findLableDto.addAll(lableParentDto);
+		return findLableDto;
+	}
+
+
+	@Override
+	public int deleteOrderGoods(Long id) {
+		orderGoodsMapper.deleteByPrimaryKey(id);
+		return 1;
+	}
+
+}

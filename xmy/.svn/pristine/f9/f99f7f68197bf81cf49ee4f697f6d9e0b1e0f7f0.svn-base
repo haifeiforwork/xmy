@@ -1,0 +1,641 @@
+package com.zfj.xmy.common.service.impl;  
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import com.xiaoleilu.hutool.date.DateTime;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.util.ObjectUtil;
+import com.zfj.base.commons.mini.BaseService;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.base.util.common.StringUtil;
+import com.zfj.xmy.common.DateUtils;
+import com.zfj.xmy.common.FreightUtil;
+import com.zfj.xmy.common.ReqData;
+import com.zfj.xmy.common.ReqUtil;
+import com.zfj.xmy.common.SystemConstant;
+import com.zfj.xmy.common.persistence.dao.ActivityQuestionMapper;
+import com.zfj.xmy.common.persistence.dao.ActivityUserAnswerMapper;
+import com.zfj.xmy.common.persistence.dao.CouponMapper;
+import com.zfj.xmy.common.persistence.dao.CouponUserMapper;
+import com.zfj.xmy.common.persistence.dao.GoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OnlineActivityMapper;
+import com.zfj.xmy.common.persistence.dao.OrderGoodsMapper;
+import com.zfj.xmy.common.persistence.dao.OrderMapper;
+import com.zfj.xmy.common.persistence.dao.TermDataMapper;
+import com.zfj.xmy.common.persistence.dao.UserMapper;
+import com.zfj.xmy.common.persistence.pojo.ActivityQuestion;
+import com.zfj.xmy.common.persistence.pojo.ActivityUserAnswer;
+import com.zfj.xmy.common.persistence.pojo.Coupon;
+import com.zfj.xmy.common.persistence.pojo.CouponUser;
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.OnlineActivity;
+import com.zfj.xmy.common.persistence.pojo.Order;
+import com.zfj.xmy.common.persistence.pojo.OrderGoods;
+import com.zfj.xmy.common.persistence.pojo.TermData;
+import com.zfj.xmy.common.persistence.pojo.User;
+import com.zfj.xmy.common.persistence.pojo.app.AppCouponInDto;
+import com.zfj.xmy.common.persistence.pojo.app.DiscountActivityDto;
+import com.zfj.xmy.common.service.CommonCouponService;
+import com.zfj.xmy.common.service.CommonGoodsService;
+import com.zfj.xmy.common.service.CommonPushUtilService;
+import com.zfj.xmy.common.service.OnLineActivityService;
+import com.zfj.xmy.freight.vo.FreightGoods;
+import com.zfj.xmy.util.PushUtil;
+
+
+@Service
+public class OnLineServiceImpl extends BaseService implements OnLineActivityService {
+	
+	@Autowired
+	private GoodsMapper goodsMapper;
+	
+	@Autowired
+	private TermDataMapper dataMapper;
+	
+	@Autowired
+	private OrderMapper orderMapper;
+	
+	@Autowired
+	private OrderGoodsMapper orderGoodsMapper;
+	
+	@Autowired
+	private CouponMapper couponMapper;
+	
+	@Autowired
+	private CouponUserMapper couponUserMapper;
+	
+	@Autowired
+	private CommonGoodsService commonGoodsService;
+	
+	@Autowired
+	private UserMapper userMapper;
+
+	@Autowired
+	private CommonCouponService commonCouponService;
+	
+	@Autowired
+	private OnlineActivityMapper onlineActivityMapper;
+	
+	@Autowired
+	private CommonPushUtilService commonPushUtilService;
+/*
+	//开始时间
+	private static final String beginTime="2017-12-19";
+	//结束时间
+
+	private static final String endTime = "2017-12-23";
+
+	//重庆活动开始时间
+	private static final String cqBeginTime= "2017-12-19";
+	//重庆活动结束时间
+
+	private static final String cqEndTime = "2017-12-23";
+
+	//每个用户限购次数
+	private static final Integer limitOrder = 1 ;
+	//开业活动 app首次登录赠送优惠券 8.8折优惠券id
+	private static final Long couponId = 156l ;
+	
+	private static final Integer dayLimitOdrer = 1000;
+	*/
+	@Autowired
+	private ActivityQuestionMapper questionMapper;
+	
+	@Autowired
+	private ActivityUserAnswerMapper userAnswerMapper;
+
+	@Override
+	public DiscountActivityDto getDiscountPrice(BigDecimal goodsSumPrice,Long userId,String province){
+		DiscountActivityDto dto = new DiscountActivityDto();
+		DecimalFormat deicmalFormat =new DecimalFormat("#.0");
+		BigDecimal discountPrice = new BigDecimal("0");
+		Integer checkUserOrder = checkUserOrder(userId);
+		//1. 判断用户是否在活动范围内参与过活动优惠
+		if(checkUserOrder>0){//满足条件了
+			Integer checkDate = checkDate();
+			//2. 判断是否在活动范围内 
+			if(checkDate>0){
+				//获取活动信息
+				OnlineActivity onlineActivity = getOnlineActivity();
+				BigDecimal limitDiscountPrice = onlineActivity.getLimitDiscountPrice(); //最高优惠
+				BigDecimal CqDiscount = onlineActivity.getCqDiscount() ; //重庆折扣优惠
+				BigDecimal QgDiscount = onlineActivity.getQgDiscount() ; //全国折扣优惠
+				//3. 判断是否在重庆范围内
+				if (!StringUtil.isEmpty(province)) {
+					Integer checkCQDate = checkCQDate();
+					if (province.contains("重庆") && checkCQDate > 0 ) {
+						discountPrice = calculateDisCount(goodsSumPrice,CqDiscount,limitDiscountPrice);
+					} else {
+						discountPrice = calculateDisCount(goodsSumPrice,QgDiscount,limitDiscountPrice);
+					}
+					dto.setActivityRemark(onlineActivity.getActivityRemark());
+				}
+			}
+		}
+		dto.setDiscountPrice(new BigDecimal(deicmalFormat.format(discountPrice)));
+		return dto;
+	}
+	
+	
+	/**
+	 *  计算出折扣优惠
+	 * @param goodsSumPrice 商品总价格
+	 * @param discount 优惠折扣
+	 * @param limitDiscount 最多优惠价格
+	 * @return    
+	 * @return BigDecimal    
+	 * Date:2017年12月29日 上午10:04:03 
+	 * @author hexw
+	 */
+	public BigDecimal calculateDisCount(BigDecimal goodsSumPrice,BigDecimal discount,BigDecimal limitDiscountPrice){
+		//1. 计算出优惠的金额
+		BigDecimal discountPrice = goodsSumPrice.multiply(discount);
+		//2. 对比优惠价格是否超过限定价格
+		int compareTo = discountPrice.compareTo(limitDiscountPrice);
+		if (compareTo >= 0) {
+			discountPrice = limitDiscountPrice ;
+		}
+		return discountPrice;
+	}
+	
+	
+	
+	
+	/**
+	 * 判断当前时间是否属于活动时间
+	 * @return Integer 0：不在活动范围时间内 1.在活动范围时间内
+	 * @author lij
+	 * @date 2017年11月9日 下午2:47:53
+	 */
+	@Override
+	public Integer checkDate(){
+		Integer i = 0;
+		//开始时间
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			long begin = onlineActvivty.getBeginTime().getTime();
+			long end = onlineActvivty.getEndTime().getTime();
+			Date now = new Date();
+			long nowTime = now.getTime();
+			if(begin<nowTime){
+				if(nowTime<end){
+					i = 1;
+				}
+			}
+		}
+		return i;
+	}
+	/**
+	 * 判断是否在大重庆活动时间内
+	 * @return Integer 0:不在活动范围内 1：在范围内
+	 * @author lij
+	 * @date 2017年11月9日 下午3:07:11
+	 */
+	@Override
+	public Integer checkCQDate(){
+		Integer i = 0;
+		//开始时间
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			long begin = onlineActvivty.getCqBeginTime().getTime();
+			long end = onlineActvivty.getCqEndTime().getTime();
+			Date now = new Date();
+			long nowTime = now.getTime();
+			if(begin<nowTime){
+				if(nowTime<end){
+					i = 1;
+				}
+			}
+		}
+		return i;
+	}
+	/**
+	 * 判断用户在这个时间段是否买过商品，和订单优惠量是否达到了1000
+	 * @param userId
+	 * @return Integer
+	 * @author lij
+	 * @date 2017年11月9日 下午3:50:00
+	 */
+	@Override
+	public Integer checkUserOrder(Long userId){
+		int i = 0;//0：不满足 1：满足
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			ReqData reqData = new ReqData();
+			reqData.putValue("create_time",DateUtil.format(onlineActvivty.getBeginTime(),"yyyy-MM-dd HH:mm:ss") , SystemConstant.REQ_PARAMETER_GE);
+			reqData.putValue("create_time",DateUtil.format(onlineActvivty.getEndTime(),"yyyy-MM-dd HH:mm:ss") , SystemConstant.REQ_PARAMETER_LE);
+			reqData.putValue("discount_price", 0, SystemConstant.REQ_PARAMETER_GT);
+			reqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+			//1.判断该用户在此期间是否参与过活动
+			int coutOrder = orderMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			if(coutOrder<onlineActvivty.getUserLimitNum()){
+				//2.判断当天是否购买了1000单
+				DateTime date = DateUtil.date();//当天时间
+				DateTime beginOfDay = DateUtil.beginOfDay(date);//开始时间
+				DateTime endOfDay = DateUtil.endOfDay(date);//结束时间
+				reqData.putValue("create_time", beginOfDay, SystemConstant.REQ_PARAMETER_GE);
+				reqData.putValue("create_time", endOfDay, SystemConstant.REQ_PARAMETER_LE);
+				reqData.putValue("discount_price", 0, SystemConstant.REQ_PARAMETER_GT);
+				reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+				int countByExample = orderMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				if(countByExample<onlineActvivty.getDayLimitNum()){
+					i = 1;
+				}
+			}
+		}
+		return i;
+	}
+	
+	
+	@Override
+	public Integer checkUserOrders(Long userId) {
+		int i = 0;//0：不满足 1：满足
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			ReqData reqData = new ReqData();
+			reqData.putValue("create_time", DateUtil.format(onlineActvivty.getBeginTime(),"yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_GT);
+			reqData.putValue("create_time", DateUtil.format(onlineActvivty.getEndTime(),"yyyy-MM-dd HH:mm:ss"), SystemConstant.REQ_PARAMETER_LE);
+			reqData.putValue("discount_price", 0, SystemConstant.REQ_PARAMETER_GT);
+			reqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+			reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+			//1.判断该用户在此期间是否参与过活动
+			int coutOrder = orderMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+			reqData.clearValue();
+			if(coutOrder<onlineActvivty.getUserLimitNum()){
+				//2.判断当天是否购买了1000单
+				DateTime date = DateUtil.date();//当天时间
+				DateTime beginOfDay = DateUtil.beginOfDay(date);//开始时间
+				DateTime endOfDay = DateUtil.endOfDay(date);//结束时间
+				reqData.putValue("create_time", beginOfDay, SystemConstant.REQ_PARAMETER_GE);
+				reqData.putValue("create_time", endOfDay, SystemConstant.REQ_PARAMETER_LE);
+				reqData.putValue("discount_price", 0, SystemConstant.REQ_PARAMETER_GT);
+				reqData.putValue("is_del", SystemConstant.ORDER.IS_DEL_NOT_DELETE, SystemConstant.REQ_PARAMETER_EQ);
+				int countByExample = orderMapper.countByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+				if(countByExample<onlineActvivty.getDayLimitNum()){
+					i = 1;
+				}
+			}
+		}
+		return i;
+	}
+	/**
+	 * 全部活动
+	 */
+	@Override
+	public Integer chekActiviDate() {
+		Integer i = 0;
+		//开始时间
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			long begin = onlineActvivty.getBeginTime().getTime();
+			long end = onlineActvivty.getEndTime().getTime();
+			Date now = new Date();
+			long nowTime = now.getTime();
+			if(begin<nowTime){
+				if(nowTime<end){
+					i = 1;
+				}
+			}
+		}
+		return i;
+	}
+	/**
+	 * 重庆活动
+	 */
+	@Override
+	public Integer chekCqActiviDate() {
+		Integer i = 0;
+		//开始时间
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			long begin = onlineActvivty.getCqBeginTime().getTime();
+			long end = onlineActvivty.getCqEndTime().getTime();
+			Date now = new Date();
+			long nowTime = now.getTime();
+			if(begin<nowTime){
+				if(nowTime<end){
+					i = 1;
+				}
+			}
+		}
+		return i;
+	}
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public Coupon appPresentCoupon(Long userId){
+		// 检查用户
+		if (ObjectUtil.isNull(userId)) throw new BusinessException("用户未登录");
+		User user = userMapper.selectByPrimaryKey(userId);
+		if (ObjectUtil.isNull(user)) throw new BusinessException("未查询到用户");
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		if (ObjectUtil.isNull(onlineActvivty)) throw new BusinessException("活动不存在");
+		// 检查是否在活动范围内
+		if (checkPresentCouponDate(onlineActvivty) == 0) throw new BusinessException("没在活动范围类或已领取过了");
+		//领取优惠券
+		AppCouponInDto couponDto = new AppCouponInDto();
+		//查询优惠券
+		Coupon coupon = couponMapper.selectByPrimaryKey(onlineActvivty.getPresentCouponid());
+		if (ObjectUtil.isNull(coupon)) throw new BusinessException("优惠券不存在"); 
+		couponDto.setId(onlineActvivty.getPresentCouponid());
+		couponDto.setUserId(userId);
+		commonCouponService.toReceiveCoupon(couponDto, true);
+		commonPushUtilService.Push(user.getId(), onlineActvivty.getPresentCouponDes());
+		return coupon;
+	}
+	
+	
+	/**
+	 * 检查赠送优惠券活动是否开启
+	 * @param onlineActvivty
+	 * @return    
+	 * @return int    
+	 * Date:2018年1月17日 下午2:23:26 
+	 * @author hexw
+	 */
+	public int checkPresentCouponDate(OnlineActivity onlineActvivty){
+		int result= 0 ;
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			Long nowTime = new Date().getTime();
+			Long beginTime = onlineActvivty.getPresentCouponBeginTime().getTime();
+			Long endTime = onlineActvivty.getPresentCouponEndTime().getTime();
+			if (beginTime < nowTime && endTime > nowTime) {
+				result = 1; 
+			}	
+		}
+		return result;
+	}
+	
+	
+	
+	public OnlineActivity getOnlineActivity() {
+		ReqData reqData = new ReqData();
+		//reqData.putValue("activity_name", "6.8折开业活动", SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("status", 0, SystemConstant.REQ_PARAMETER_EQ);
+		List<OnlineActivity> list = onlineActivityMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		OnlineActivity onlineActivity = null;
+		if (list.size() > 0) {
+			onlineActivity =list.get(0); 
+		}
+		return onlineActivity;
+	}
+	/**
+	 * APP首单送礼
+	 * @return OnlineActivity
+	 * @author ***
+	 * @date 2018年1月6日 下午4:16:25
+	 */
+	public OnlineActivity getOnlineActivityApp() {
+		ReqData reqData = new ReqData();
+		reqData.putValue("activity_name", "APP首单送礼", SystemConstant.REQ_PARAMETER_EQ);
+		List<OnlineActivity> list = onlineActivityMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		OnlineActivity onlineActivity = null;
+		if (list.size() > 0) {
+			onlineActivity =list.get(0); 
+		}
+		return onlineActivity;
+	}
+	
+	@Override
+	public Map<String,Object> checkPresenCoupontDate(){
+		Map<String,Object> resultMap = new HashMap<String,Object>();
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		Integer result = 0;
+		String imgUrl = "";
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			if (ObjectUtil.isNotNull(onlineActvivty.getPresentCouponBeginTime()) && ObjectUtil.isNotNull(onlineActvivty.getPresentCouponEndTime())) {
+				long begin = onlineActvivty.getPresentCouponBeginTime().getTime();
+				long end = onlineActvivty.getPresentCouponEndTime().getTime();
+				long nowTime = new Date().getTime();
+				if (begin < nowTime && nowTime < end) {
+					result = 1;
+					imgUrl = onlineActvivty.getPresentCouponImage() ; //赠送优惠券活动图片
+				}
+			}
+		}
+		resultMap.put("status", result);
+		resultMap.put("imgUrl", imgUrl);
+		return resultMap;
+	}
+
+	/**
+	 * 判断APP首单活动时间
+	 */
+	@Override
+	public Integer checkAppDate(Long userId) {
+		Integer i = 0;
+		//开始时间
+		OnlineActivity onlineActvivty = getOnlineActivity();
+		if (ObjectUtil.isNotNull(onlineActvivty)) {
+			long begin = onlineActvivty.getBeginTime().getTime();
+			long end = onlineActvivty.getEndTime().getTime();
+			Long appNewUserid = onlineActvivty.getAppNewUserid();
+			Date now = new Date();
+			long nowTime = now.getTime();
+			if(begin<nowTime){
+				if(nowTime<end){
+					if(userId>appNewUserid){
+						i = 1;
+					}
+				}
+			}
+		}
+		return i;
+	}
+	
+	/**
+	 * 判断是否是活动商品
+	 * @return
+	 */
+	@Override
+	public boolean judgeLuckWap(Long goodsId){
+		/*Long[] newAcIds = SystemConstant.XMYWAP.LUCK_ID;
+		for (Long l : newAcIds) {
+			if(l.longValue() == goodsId.longValue()) return true;
+		}*/
+		if(SystemConstant.NEWACIVITY.LOTTERY_GOODS_ID.equals(goodsId)){//拼购商品
+			return true;
+		}
+//		Long[] smyGoods = SystemConstant.NEWACIVITY.BUY_THREE_FREE_ONE ; //三免一商品 
+//		for (Long id : smyGoods) {
+//			if(id.longValue() == goodsId.longValue()) return true;
+//		}
+		return false;
+	}
+
+	/**
+	 * 查询猜猜看活动
+	 */
+	@Override
+	public ActivityQuestion findOnlineActvity() {
+		ReqData reqData = new ReqData();
+		//1.查询活动是否开启
+		OnlineActivity onlineActivity = getOnlineActivity();
+		if(ObjectUtils.isEmpty(onlineActivity)){
+			throw new BusinessException(1,"现在没有开启该活动！");
+		}
+		reqData.putValue("activity_id", onlineActivity.getId(), SystemConstant.REQ_PARAMETER_EQ);
+		List<ActivityQuestion> activityquestionList = questionMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		if(ObjectUtils.isEmpty(activityquestionList)){
+			throw new BusinessException(2,"该活动不是猜猜看活动！");
+		}
+		if(ObjectUtils.isEmpty(onlineActivity.getPresentCaicaikanCouponid())){
+			throw new BusinessException(5,"该活动没有设置猜猜看送券的ID");
+		}
+		Random random = new Random();
+		//3.出题放置同一个用户遇到相同的问题
+		int nextInt = random.nextInt(activityquestionList.size());
+		ActivityQuestion activityQuestion = activityquestionList.get(nextInt);
+		if (!ObjectUtils.isEmpty(activityQuestion)) {
+			String answerA = activityQuestion.getAnswerA();
+			String[] split = answerA.split(",");
+			if(split.length<4){
+				throw new BusinessException(3,"答案太少了，请多设置几个不重复的答案！");
+			}
+			Map<String, Object> map = new HashMap<>();
+			for (String string : split) {
+				if(!map.containsKey(string)){
+					map.put(string, 1);
+				}
+			}
+			if(map.size()<4){
+				throw new BusinessException(4,"重复答案过多！");
+			}
+			int wz = random.nextInt(4);//正确答案位置 0：A 1：B 2：C 3：D
+			changeAnswer(split, activityQuestion, wz);
+		}else{
+			throw new BusinessException(3,"数据有问题！");
+		}
+		activityQuestion.setTrueAnswer("");
+		return activityQuestion;
+	}
+	
+	public void changeAnswer(String[] split,ActivityQuestion activityQuestion,int wz){
+		Random random = new Random();
+		String answer1 = split[random.nextInt(split.length)];
+		String answer2 = null;
+		while(true){
+			String answer = split[random.nextInt(split.length)];
+			if(!answer.equals(answer1) && !ObjectUtils.isEmpty(answer)){
+				answer2 = answer;
+				break;
+			}
+		}
+		String answer3 = null;
+		while(true){
+			String answer = split[random.nextInt(split.length)];
+			if(!answer.equals(answer1) && !ObjectUtils.isEmpty(answer) && !answer2.equals(answer)){
+				answer3 = answer;
+				break;
+			}
+		}
+		switch (wz) {
+			case 0:
+				activityQuestion.setAnswerA(activityQuestion.getTrueAnswer());
+				activityQuestion.setAnswerB(answer1);
+				activityQuestion.setAnswerC(answer2);
+				activityQuestion.setAnswerD(answer3);
+				break;
+			case 1:
+				activityQuestion.setAnswerA(answer1);
+				activityQuestion.setAnswerB(activityQuestion.getTrueAnswer());
+				activityQuestion.setAnswerC(answer2);
+				activityQuestion.setAnswerD(answer3);
+				break;
+			case 2:
+				activityQuestion.setAnswerA(answer1);
+				activityQuestion.setAnswerB(answer2);
+				activityQuestion.setAnswerC(activityQuestion.getTrueAnswer());
+				activityQuestion.setAnswerD(answer3);
+				break;
+			case 3:
+				activityQuestion.setAnswerA(answer1);
+				activityQuestion.setAnswerB(answer2);
+				activityQuestion.setAnswerC(answer3);
+				activityQuestion.setAnswerD(activityQuestion.getTrueAnswer());
+				break;
+			default:
+				break;
+		}
+	}
+	
+	public static void main(String[] args) {
+		Random random = new Random();
+		for(int i =0;i<20;i++){
+			System.out.println(random.nextInt(4));
+		}
+	}
+
+	/**
+	 * 提交答案的后续操作
+	 */
+	@Override
+	@Transactional
+	public int submitAnswer(String userAnswer, Long userId, Long questionId) {
+		int i = 0;
+		//1.判断用户提交的答案是否正确
+		ActivityUserAnswer activityUserAnswer = new ActivityUserAnswer();
+		ActivityQuestion activityQuestion = questionMapper.selectByPrimaryKey(questionId);
+		if(ObjectUtils.isEmpty(activityQuestion)){
+			throw new BusinessException(2,"数据库中不存在这个题目，请核实！");
+		}
+		ReqData reqData = new ReqData();
+		reqData.putValue("activity_id", activityQuestion.getActivityId(),SystemConstant.REQ_PARAMETER_EQ);
+		reqData.putValue("user_id", userId, SystemConstant.REQ_PARAMETER_EQ);
+		List<ActivityUserAnswer> answerList = userAnswerMapper.selectByExample(ReqUtil.reqParameterToCriteriaParameter(reqData));
+		reqData.clearValue();
+		if(!ObjectUtils.isEmpty(answerList)){
+			if(answerList.size()>=3){
+				throw new BusinessException(5,"该用户已经超过了这次活动的答题次数！");
+			}
+			for (ActivityUserAnswer answer : answerList) {
+				if(answer.getIsTrue()==0){//有一次正确答案
+					throw new BusinessException(6,"该用户已经参与了该活动，并已经获得了奖品无需再参加！");
+				}
+			}
+		}
+		if(activityQuestion.getTrueAnswer().equals(userAnswer)){//正确的情况下赠送优惠卷，插入用户记录表
+			activityUserAnswer.setIsTrue(0);//正确
+			OnlineActivity onlineActivity = onlineActivityMapper.selectByPrimaryKey(activityQuestion.getActivityId());
+			if(ObjectUtils.isEmpty(onlineActivity)){
+				throw new BusinessException(3,"活动不存在！");
+			}
+			//赠送优惠卷
+			Long couponid = onlineActivity.getPresentCaicaikanCouponid();
+			AppCouponInDto appCouponInDto = new AppCouponInDto();
+			appCouponInDto.setId(couponid);
+			appCouponInDto.setUserId(userId);
+			boolean receiveCouponLogin = commonCouponService.toReceiveCouponLogin(appCouponInDto, true);
+			if(!receiveCouponLogin){
+				throw new BusinessException(4,"优惠卷赠送失败，答案正确！");
+			}
+		}else{//不正确的情况插入用户答题记录表
+			activityUserAnswer.setIsTrue(1);//错误
+			i=1;
+		}
+		activityUserAnswer.setActivityId(activityQuestion.getActivityId());
+		activityUserAnswer.setCreateTime(new Date());
+		activityUserAnswer.setQuestionId(questionId);
+		activityUserAnswer.setUserId(userId);
+		activityUserAnswer.setUserAnswer(userAnswer);
+		userAnswerMapper.insert(activityUserAnswer);
+		return i;
+	}
+}
+  

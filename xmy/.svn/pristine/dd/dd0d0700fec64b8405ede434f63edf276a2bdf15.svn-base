@@ -1,0 +1,294 @@
+package com.zfj.xmy.util;
+
+import java.net.URLEncoder;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.google.gson.JsonObject;
+import com.xiaoleilu.hutool.date.DateUtil;
+import com.xiaoleilu.hutool.http.HttpUtil;
+import com.xiaoleilu.hutool.json.JSONArray;
+import com.xiaoleilu.hutool.json.JSONObject;
+import com.xiaoleilu.hutool.util.CollectionUtil;
+import com.zfj.base.encryption.Base64;
+import com.zfj.base.exception.BusinessException;
+import com.zfj.xmy.common.DateUtils;
+import com.zfj.xmy.util.logistics.GoodsVo;
+import com.zfj.xmy.util.logistics.LogisticsOrder;
+
+/**
+ * 物流 工具 类
+ * @author wy
+ *
+ */
+public class LogisticsUtil {
+
+//	private static String STATUS_ERROR = "-1" ; //未找到该订单或其它异常
+//	private static String STATUS_ERROR = "1" ;
+//	private static String STATUS_ERROR = "-1" ;
+//	private static String STATUS_ERROR = "-1" ;
+//	private static String STATUS_ERROR = "-1" ;
+//	private static String STATUS_ERROR = "-1" ;
+//	private static String STATUS_ERROR = "-1" ;
+//	-1 ; //未找到该订单或其它异常
+//	0：保存
+//	1：已受理
+//	2：仓库已备货（已分配）
+//	3：已发货（已交接）
+//	4：已装车
+//	5：派送中
+//	6：已完成
+
+	
+	/**
+	 * 请求地址
+	 */
+	//private static String url = "http://cqxygs.xicp.net:4028/ExtVersion/Data/Interface/StoreOrder.ashx";
+	private static String url = "http://56815681.com/ExtVersion/Data/Interface/StoreOrder.ashx"; //正式
+
+	private static String str_code = "XMYB2B"; //"平台代号"
+	private static String str_unitno =  "00006"; //物流公司编号
+	private static String str_customerno = "香满园";//客户编号(货主)
+	private static String consign_customerno = "00001" ;//托运客户编号
+	private static String consign_customername = "香满园" ;//托运客户
+	private static String consign_customeraddress = "菜园坝水果市场香满圆";//托运客户地址(装货地址)
+	
+	public static void main(String[] args) throws Exception {
+		
+		//String res = getOrderStatus("000000287599");
+		
+		//1.获取单号状态 demo
+		
+		String res = getOrderStatus("B2C20171031175126720");
+		
+//		String res = getOrderStatus("B2C20171101123034327");
+		System.out.println(res);
+		
+		
+		//2.物流订单提交 demo
+		
+		/*LogisticsOrder order = new LogisticsOrder();
+		order.setOrderNo(generatecsmNo()); //订单标号-客户单号
+		order.setOrderTime(new Date());
+		
+		List<GoodsVo> orderdetail = new ArrayList<GoodsVo>();
+		
+		for (int i = 0; i < 3; i++) {
+			GoodsVo goodsVo = new GoodsVo();
+			goodsVo.setGoodsCode("55"+i);
+			goodsVo.setGoodsName("试试"+i);
+			goodsVo.setGoodsNum(i+"");
+			goodsVo.setGoodsUnit("个");
+			orderdetail.add(goodsVo);
+		}
+		
+		order.setOrderdetail(orderdetail);
+		order.setConsigneePhone("12388886666");
+		order.setConsigneeName("王五");
+		order.setConsigneeAddress("某某街道某某小区");
+		
+		JSONObject pa = new JSONObject(order);
+		System.out.println("参数："+pa.toString());
+		String res = insertStoreOrder(order);*/
+		
+		
+		
+		
+	}
+	
+	/***
+	 * 物流订单提交接口
+	 * @param csno
+	 * @return
+	 * @throws Exception
+	 * @Description 
+	 * @date 2017年10月20日  上午11:36:26
+	 * @author wy
+	 * 2017
+	 * @return 
+	 * @return String
+	 */
+	public static String insertStoreOrder(LogisticsOrder order){
+		//添加单号
+		JSONObject jo = new JSONObject();
+		jo.put("action", "ExecInsertStoreOrder");
+		jo.put("str_code", str_code);
+		
+		JSONObject json_order = new JSONObject();
+		jo.put("json_order", json_order);
+//		json_order.put("TYPE", -1); //出库
+		json_order.put("WLGS", str_unitno);//物流公司编号
+		json_order.put("KHDH", order.getOrderNo());//客户单号
+		json_order.put("DDTYPE", 1);//订单类型 - 普通订单
+		json_order.put("DDRQ", DateUtil.now());//订单日期
+		json_order.put("TYKHBH", consign_customerno);//托运客户编号
+		json_order.put("TYKH", consign_customername);//托运客户
+		json_order.put("TYKHDZ", consign_customeraddress);//托运客户地址(装货地址)
+		
+		json_order.put("SHKHLXR", order.getConsigneeName());//收货客户联系人
+		json_order.put("SHKHLXDH", order.getConsigneePhone());//收货客户联系电话
+		json_order.put("SHXXDZ", order.getConsigneeAddress());//收货详细地址
+		
+		//金额
+		json_order.put("HKZE", order.getHKZE());//货款总额
+		json_order.put("DSHK", order.getDSHK());//应代收货款
+		
+		//仓配订单明细信息
+		JSONArray orderdetail = new JSONArray();
+//		JSONArray orderdetails = new JSONArray();
+		json_order.put("ORDERDETAIL", orderdetail);
+		
+		
+		List<GoodsVo> goodsVos = order.getOrderdetail();
+		if (CollectionUtil.isEmpty(goodsVos)) {
+			throw new BusinessException("物流订单提交商品不能为空");
+		}
+		for (GoodsVo goodsVo : goodsVos) {
+			JSONObject goods = new JSONObject();
+			goods.put("HPBH", goodsVo.getGoodsCode()) ;//货品编号
+			goods.put("HPMC", goodsVo.getGoodsName()) ;//货品名称
+			goods.put("HPDW", goodsVo.getGoodsUnit()) ;//货品单位
+			goods.put("DDSL", goodsVo.getGoodsNum()) ;//订单数量
+			orderdetail.add(goods);
+		}
+		String reqParam = jo.toString();
+		try {
+			String res = sendreq(reqParam);
+			System.out.println("物流订单提交返回:"+res);
+			JSONObject resJson = new JSONObject(res);
+			//错误处理
+			if (resJson.getInt("state").equals(0)) {
+				throw new BusinessException("物流订单提交失败 "+ resJson.getStr("msg"));
+			}
+			return res;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException("物流订单提交失败");
+		}
+	}
+	
+	
+	/**
+	 * 获取单号状态
+	 * @param csno 客户单号
+	 * @return
+	 * @Description 
+	 * @date 2017年9月5日  下午2:14:49
+	 * @author wy
+	 * 2017
+	 * @return String
+	 * @throws Exception 
+	 */
+	public static String getOrderStatus(String csno) throws Exception{
+		
+		JSONObject jo = new JSONObject();
+		jo.put("action", "GetStoreOrderState");
+		jo.put("str_unitno", str_unitno); //物流公司编号
+		jo.put("str_customername", str_customerno);//客户编号(货主)
+		jo.put("str_csno", csno);//客户单号
+		System.out.println(jo.toString());
+		return sendreq(jo.toString());
+	}
+	
+	/**
+	 * 加密并发请求
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 * @Description 
+	 * @date 2017年10月20日  下午1:56:59
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	private static String sendreq(String req) throws Exception{
+		System.out.println("发送数据:"+req);
+		String res = DESUtil.encryptDES(req);
+		Map<String, Object> form = new HashMap<>();
+		form.put("value", res);
+		System.out.println("value="+res);
+		
+		String resp = HttpUtil.post(url, form);
+		
+		//解密
+		String result = DESUtil.decryptDES(resp);
+		return result;
+	}
+	
+	/***
+	 * 生成客户单号
+	 * @return
+	 * @Description 
+	 * @date 2017年10月31日  下午2:08:13
+	 * @author wy
+	 * 2017
+	 * @return String
+	 */
+	public static String generatecsmNo(){
+		String dateStr = DateUtil.format(DateUtil.date(), "yyyyMMddHHmmssSSS");
+		return "B2C"+dateStr;
+	}
+	
+	/**
+	 * 加密方法
+	 * @author wy
+	 *
+	 */
+	public static class DESUtil {
+		
+		public static String DES_KEY = "GYPSYSH0" ;
+		
+		private static byte[] iv = { (byte) 0xEF, (byte) 0xAB, 0x56, 0x78, (byte) 0x90, 0x34, (byte) 0xCD, 0x12 };
+
+		public static String encryptDES(String encryptString,String charsetName) throws Exception {
+
+			IvParameterSpec zeroIv = new IvParameterSpec(iv);
+
+			SecretKeySpec key = new SecretKeySpec(DES_KEY.getBytes(charsetName), "DES");
+
+			Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+
+			cipher.init(Cipher.ENCRYPT_MODE, key, zeroIv);
+
+			byte[] encryptedData = cipher.doFinal(encryptString.getBytes(charsetName));
+
+			return Base64.encode(encryptedData).replace(" ", "");
+		}
+		
+		public static String encryptDES(String encryptString) throws Exception {
+			return encryptDES(encryptString,"utf-8") ;
+		}
+		
+		public static String decryptDES(String decryptString,String charsetName) throws Exception {
+
+			byte[] byteMi = Base64.decode(decryptString);
+
+			IvParameterSpec zeroIv = new IvParameterSpec(iv);
+
+			SecretKeySpec key = new SecretKeySpec(DES_KEY.getBytes(charsetName), "DES");
+
+			Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+
+			cipher.init(Cipher.DECRYPT_MODE, key, zeroIv);
+
+			byte decryptedData[] = cipher.doFinal(byteMi);
+
+			return new String(decryptedData,charsetName);
+		}
+		public static String decryptDES(String decryptString) throws Exception {
+			return decryptDES(decryptString,"utf-8") ;
+		}
+		
+	}
+}

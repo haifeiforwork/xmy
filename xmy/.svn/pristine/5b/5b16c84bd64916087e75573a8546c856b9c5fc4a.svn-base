@@ -1,0 +1,71 @@
+package com.zfj.xmy.wap.web.controller.company;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.zfj.xmy.common.persistence.pojo.TermData;
+import com.zfj.xmy.goods.persistence.app.pojo.dto.AppEnterpriseDir;
+import com.zfj.xmy.goods.persistence.pc.pojo.dto.PcGoodsDir;
+import com.zfj.xmy.goods.service.app.AppCategoryService;
+import com.zfj.xmy.goods.service.pc.PcGoodsService;
+import com.zfj.xmy.goods.service.wap.WapGoodsService;
+import com.zfj.xmy.wap.web.controller.common.CommonController;
+
+@Controller
+@RequestMapping("/company")
+public class CompanyController extends CommonController{
+	
+	@Autowired
+	private AppCategoryService appCategoryService ;
+	@Autowired
+	private PcGoodsService pcGoodsService;
+	@Autowired
+	private WapGoodsService wapGoodsService;
+	
+	private final static String CUSTOMIZATION="企业定制";
+	/**企业定制页面*/
+	private final static String COMPANY = "company/company";
+	
+	/**
+	 * 企业定制
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/company")
+	public ModelAndView company(HttpServletRequest request, HttpServletResponse response){
+		
+		/*List<AppEnterpriseDir> list = appCategoryService.findEnterprise();
+		String midImg = "https://xmyoss.oss-cn-hangzhou.aliyuncs.com/goods/watermark/20170912/card-banner1.jpg";
+		request.setAttribute("midImg", midImg);
+		request.setAttribute("list", list);*/
+		/*for(TermData name:category){
+			map.put(name.getName(),pcGoodsService.findBorderGoods(name.getName()));
+		}*/
+		/*List<PcGoodsDir> list = pcGoodsService.findBorderGoods(CUSTOMIZATION);
+		request.setAttribute("list", list);*/
+		
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		List<TermData> category=pcGoodsService.findBorder(CUSTOMIZATION);
+		for(TermData name:category){
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("list",wapGoodsService.findBorderGoods(name.getName()));
+			map.put("name",name.getName());
+			list.add(map);
+		}
+		request.setAttribute("list", list);
+		
+		return new ModelAndView(COMPANY);
+	}
+	
+}

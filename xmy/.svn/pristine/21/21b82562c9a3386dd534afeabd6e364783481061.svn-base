@@ -1,0 +1,39 @@
+package com.zfj.xmy.order.persistence.common.pojo.dto;
+
+import java.util.List;
+
+import com.zfj.xmy.common.persistence.pojo.Goods;
+import com.zfj.xmy.common.persistence.pojo.OrderGoods;
+/**
+ * 
+ * 
+ * @author ljie 6.16
+ *
+ */
+public class OrderGoodsDto extends Goods{
+	
+	
+	//根据商品编号分组后的总商品数量的名称
+	private Integer sumGoodsNum;
+	//订单编号
+	private List<ShoppingDto> sDto;
+	
+	public List<ShoppingDto> getsDto() {
+		return sDto;
+	}
+
+	public void setsDto(List<ShoppingDto> sDto) {
+		this.sDto = sDto;
+	}
+
+	public Integer getSumGoodsNum() {
+		return sumGoodsNum;
+	}
+
+	public void setSumGoodsNum(Integer sumGoodsNum) {
+		this.sumGoodsNum = sumGoodsNum;
+	}
+
+	
+
+}

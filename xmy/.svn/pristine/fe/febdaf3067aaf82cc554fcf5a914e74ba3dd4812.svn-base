@@ -1,0 +1,120 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsp/common/common_tag.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>充值中心</title>
+<%@ include file="/WEB-INF/jsp/common/common_css.jsp"%>
+<!-- 公共css完区域 -->
+<!-- 该页面应用css区域 -->
+<link rel="stylesheet" href="resources/mine/css/shoppingCard.css" />
+<!-- 该页面应用css区域 -->
+</head>
+<body ontouchstart>
+	<header>
+	<div class="header-top">
+		<div class="pull-left">
+			<img src="resources/common/images/btn-fenl-back@2x.png" />
+		</div>
+		<div class="pull-center">充值中心</div>
+		<div class="pull-right">
+			<!-- <span class="share"><img src="resources/common/images/btn-fenl-share@2x.png"/></span> -->
+			<span class="shrink"><img
+				src="resources/common/images/btn-fenl-more@2x.png" />
+				<div class="modal-some"></div> </span>
+		</div>
+	</div>
+	</header>
+	<div class="content">
+		<div class="banner">
+			<img src="resources/common/images/recharge-banner_02.jpg" alt="">
+		</div>
+		<div class="recharge-nav">
+			<ul>
+				<li class="item active">购物卡</li>
+				<li class="item">激活明细</li>
+			</ul>
+		</div>
+		<div class="container">
+			<div class="recharge-msg">
+				<div class="weui-cells self-cell recharge">
+					<div class="weui-cell">
+						<div class="weui-cell__hd"></div>
+						<div class="weui-cell__bd">
+							<input id="cardNum" type="text" class="weui-input"
+								placeholder="请输入卡号">
+						</div>
+					</div>
+					<div class="weui-cell">
+						<div class="weui-cell__hd"></div>
+						<div class="weui-cell__bd">
+							<input id="cardPassword" type="password" class="weui-input"
+								placeholder="请输入卡密码">
+						</div>
+					</div>
+				</div>
+				<div class="weui-msg__opr-area">
+					<p class="weui-btn-area self-btn-area">
+						<a href="javascript:;" class="weui-btn weui-btn_primary bind">立即充值</a>
+					</p>
+				</div>
+			</div>
+			<div class="recharge-msg">
+				<div class="weui-form-preview">
+					<c:if test="${empty activateDetail }">
+						<div style="text-align: center;">暂无相关激活明细！</div>
+				    </c:if>
+					<c:if test="${not empty activateDetail }">
+						<c:forEach items="${activateDetail }" var="detail">
+							<div class="weui-form-preview__bd">
+								<div class="weui-form-preview__item">
+									<label class="weui-form-preview__label">序号</label> <span
+										class="weui-form-preview__value">${detail.cardNum }</span>
+								</div>
+								<div class="weui-form-preview__item">
+									<label class="weui-form-preview__label">金额</label> <span
+										class="weui-form-preview__value"><fmt:formatNumber
+											maxFractionDigits="2" minFractionDigits="2">  ${detail.totalValue }</fmt:formatNumber></span>
+								</div>
+								<div class="weui-form-preview__item">
+									<label class="weui-form-preview__label">类型</label> <span
+										class="weui-form-preview__value">充值</span>
+								</div>
+								<div class="weui-form-preview__item">
+									<label class="weui-form-preview__label">状态</label>
+									<c:if test="${detail.status==1 }">
+										<span class="weui-form-preview__value">未激活</span>
+									</c:if>
+									<c:if test="${detail.status==2 }">
+										<span class="weui-form-preview__value">有效</span>
+									</c:if>
+									<c:if test="${detail.status==3 }">
+										<span class="weui-form-preview__value">无效</span>
+									</c:if>
+								</div>
+								<div class="weui-form-preview__item">
+									<label class="weui-form-preview__label">备注</label> <span
+										class="weui-form-preview__value">${detail.name }</span>
+								</div>
+								<div class="weui-form-preview__item">
+									<label class="weui-form-preview__label">创建时间</label> <span
+										class="weui-form-preview__value"><fmt:formatDate
+											value="${detail.createTime }" pattern="yyyy-MM-dd HH:mm:ss" />
+									</span>
+								</div>
+							</div>
+						</c:forEach>
+					</c:if>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 公共js区域 -->
+	<%@include file="/WEB-INF/jsp/common/common_js.jsp"%>
+	<!-- 公共js区域完 -->
+	<!-- 该页面应用js区域 -->
+	<script type="text/javascript" src="resources/mine/js/shoppingCard.js"></script>
+	<!-- 该页面应用js区域 -->
+</body>
+</html>
